@@ -1,4 +1,3 @@
-from fastai.layers import Flatten
 from torch import nn
 
 from mlmodule.contrib.resnet.base import BaseResNetModule
@@ -39,7 +38,7 @@ class ResNetReTrainClassifier(BaseTorchMLModule):
             # AdaptiveConcatPool2d(),
             # nn.AdaptiveAvgPool2d(output_size=1),
             # nn.AdaptiveMaxPool2d(output_size=1),
-            Flatten(),
+            nn.Flatten(),
             nn.BatchNorm1d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
             nn.Dropout(p=0.25),
             nn.Linear(in_features=512, out_features=512, bias=True),

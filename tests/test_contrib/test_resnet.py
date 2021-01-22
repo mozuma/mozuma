@@ -9,7 +9,7 @@ def test_resnet_features_inference():
     resnet = ResNetFeatures("resnet18")
     # Pretrained model
     resnet.load()
-    base_path = os.path.join("mlmodule", "tests", "fixtures", "cats_dogs")
+    base_path = os.path.join("tests", "fixtures", "cats_dogs")
     file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))[:50]
     dataset = ImageDataset(file_names)
 

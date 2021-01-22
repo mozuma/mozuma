@@ -40,7 +40,7 @@ def test_load_dump_model():
 
 
 def test_image_file_dataset():
-    base_path = os.path.join("mlmodule", "tests", "fixtures", "cats_dogs")
+    base_path = os.path.join("tests", "fixtures", "cats_dogs")
     file_objects = list_files_in_dir(base_path, allowed_extensions=('jpg',))
     dataset = ImageDataset(file_objects)
     # Trying to load an image
@@ -48,7 +48,7 @@ def test_image_file_dataset():
 
 
 def test_image_file_dataset_torchvision_transform():
-    base_path = os.path.join("mlmodule", "tests", "fixtures", "cats_dogs")
+    base_path = os.path.join("tests", "fixtures", "cats_dogs")
     file_objects = list_files_in_dir(base_path, allowed_extensions=('jpg',))
     dataset = ImageDataset(file_objects)
     dataset.add_transforms(TORCHVISION_STANDARD_IMAGE_TRANSFORMS)
