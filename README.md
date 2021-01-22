@@ -6,7 +6,7 @@ used in the AI Data platform.
 ## Installation
 
 ```bash
-pip install git+https://github.com/LSIR/mlmodule.git
+pip install git+ssh://git@github.com/LSIR/mlmodule.git
 ```
 
 ## Models
