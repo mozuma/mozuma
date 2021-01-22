@@ -3,7 +3,7 @@ import os
 import torch.nn as nn
 
 from mlmodule.torch import BaseTorchMLModule
-from mlmodule.torch.data.images import ImageFilesDatasets, TORCHVISION_STANDARD_IMAGE_TRANSFORMS
+from mlmodule.torch.data.images import ImageDataset, TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 from mlmodule.utils import list_files_in_dir
 
 
@@ -42,7 +42,7 @@ def test_load_dump_model():
 def test_image_file_dataset():
     base_path = os.path.join("mlmodule", "tests", "fixtures", "cats_dogs")
     file_objects = list_files_in_dir(base_path, allowed_extensions=('jpg',))
-    dataset = ImageFilesDatasets(file_objects)
+    dataset = ImageDataset(file_objects)
     # Trying to load an image
     assert len(dataset[10]) > 0
 
@@ -50,7 +50,7 @@ def test_image_file_dataset():
 def test_image_file_dataset_torchvision_transform():
     base_path = os.path.join("mlmodule", "tests", "fixtures", "cats_dogs")
     file_objects = list_files_in_dir(base_path, allowed_extensions=('jpg',))
-    dataset = ImageFilesDatasets(file_objects)
+    dataset = ImageDataset(file_objects)
     dataset.add_transforms(TORCHVISION_STANDARD_IMAGE_TRANSFORMS)
     # Trying to load an image
     assert len(dataset[10]) > 0

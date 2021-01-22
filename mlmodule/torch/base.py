@@ -1,5 +1,3 @@
-import multiprocessing
-
 from mlmodule.base import BaseMLModule
 import torch
 import torch.nn as nn
@@ -25,7 +23,7 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
         :param load_options:
         :return:
         """
-        load_options["map_location"] = load_options.get("map_location", self.device)
+        load_options.setdefault("map_location", self.device)
 
         # Getting state dict
         if fp:
@@ -44,13 +42,11 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
     def dump(self, fp):
         torch.save(self.state_dict(), fp)
 
-    def bulk_inference(self, data, **data_loader_options):
-        """Run the model against all elements in data
+    def get_data_loader(self, data, **data_loader_options):
+        """Configured data loader with applied transforms
 
-        :type data: Dataset, TorchDatasetTransformsMixin
-        :param batch_size:
-        :param num_workers:
         :param data:
+        :param data_loader_options:
         :return:
         """
         # Adding module transforms
@@ -60,13 +56,30 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
         data_loader_options.setdefault("drop_last", False)
         data_loader_options.setdefault("pin_memory", True)
         # Building data loader
-        loader = DataLoader(data, **data_loader_options)
-        # Running generic inference loop
-        return generic_inference(self, loader, self.__call__, zip)
+        return DataLoader(data, **data_loader_options)
+
+    @classmethod
+    def get_results_handler(cls):
+        """Runs after the forward pass at inference
+
+        :return:
+        """
+        return zip
+
+    def bulk_inference(self, data, **data_loader_options):
+        """Run the model against all elements in data
+
+        :type data: Dataset, TorchDatasetTransformsMixin
+        :param data:
+        :return:
+        """
+        loader = self.get_data_loader(data, **data_loader_options)
+        # Running inference batch loop
+        return generic_inference(self, loader, self.__call__, self.get_results_handler())
 
     def get_dataset_transforms(self):
         """Returns callable that transform the input data before the forward pass
 
         :return: List of transforms
         """
-        raise NotImplementedError()
+        return []

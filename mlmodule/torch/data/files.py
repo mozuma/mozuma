@@ -1,20 +1,16 @@
-from torch.utils.data.dataset import Dataset
-from mlmodule.torch.mixins import TorchDatasetTransformsMixin
+from mlmodule.torch.data.base import BaseIndexedDataset
 
 
-class FilesDataset(Dataset, TorchDatasetTransformsMixin):
+class FilesDataset(BaseIndexedDataset):
 
     def __init__(self, file_list, mode="rb"):
         """
         :param file_list: Must be a string
         """
-        self.file_list = file_list
+        super().__init__(file_list)
         self.mode = mode
-        self.transforms = []
+        self.add_transforms([self.open])
 
-    def __getitem__(self, item):
-        with open(self.file_list[item], mode=self.mode) as c_file:
-            return item, self.apply_transforms(c_file)
-
-    def __len__(self):
-        return len(self.file_list)
+    def open(self, item):
+        with open(item, mode=self.mode) as f:
+            return f

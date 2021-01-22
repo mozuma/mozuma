@@ -1,3 +1,6 @@
 .idea
 
 *.pyc
+
+# For the tutorial on creating modules
+mlmodule/contrib/example.py

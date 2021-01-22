@@ -1,9 +1,7 @@
-from torch import nn
 from torch.hub import load_state_dict_from_url
 import torchvision.models as m
 
 from mlmodule.torch import BaseTorchMLModule
-from mlmodule.torch.data.images import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 from mlmodule.torch.mixins import TorchPretrainedModuleMixin
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 
@@ -36,5 +34,3 @@ class BaseResNetModule(BaseTorchMLModule, TorchPretrainedModuleMixin):
         # Removing deleted layers from state dict and updating the other with pretrained data
         return torch_apply_state_to_partial_model(self, pretrained_state_dict)
 
-    def get_dataset_transforms(self):
-        return TORCHVISION_STANDARD_IMAGE_TRANSFORMS

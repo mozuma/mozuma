@@ -2,6 +2,7 @@ from fastai.layers import Flatten
 from torch import nn
 
 from mlmodule.contrib.resnet.base import BaseResNetModule
+from mlmodule.torch import BaseTorchMLModule
 
 
 class ResNetDefaultClassifier(BaseResNetModule):
@@ -10,28 +11,27 @@ class ResNetDefaultClassifier(BaseResNetModule):
     """
 
     def __init__(self, resnet_arch):
-        super().__init__()
-        # Disabling all but the fully connected layer
-        self.model.conv1 = None
-        self.model.bn1 = None
-        self.model.relu = None
-        self.model.maxpool = None
-        self.model.layer1 = None
-        self.model.layer2 = None
-        self.model.layer3 = None
-        self.model.layer4 = None
-        self.model.avgpool = None
+        super().__init__(resnet_arch)
+        base_resnet = self.get_resnet_module(resnet_arch)
+
+        # Getting only the fully connected layer
+        self.fc = base_resnet.fc
 
     def forward(self, x):
-        return self.model.fc(x)
+        """Forward pass
+
+        :param x: Should be the output of ResNetFeatures.forward
+        :return:
+        """
+        return self.fc(x)
 
 
-class ResNetReTrainClassifier(nn.Module):
+class ResNetReTrainClassifier(BaseTorchMLModule):
     """
     Custom classifier for retraining
     """
 
-    def __init__(self):
+    def __init__(self, num_class):
         super().__init__()
         self.classifier = nn.Sequential(
             # Tried to reproduce fastai's classifier head, But didn't see meaningful improvements from
@@ -50,4 +50,9 @@ class ResNetReTrainClassifier(nn.Module):
         )
 
     def forward(self, x):
+        """Forward pass
+
+        :param x: Should be the output of ResNetFeatures.forward
+        :return:
+        """
         return self.classifier(x)

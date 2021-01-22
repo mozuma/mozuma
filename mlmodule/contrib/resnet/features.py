@@ -1,8 +1,6 @@
 import torch
-from torch import nn
-from torch.hub import load_state_dict_from_url
-import torchvision.models as m
 
+from mlmodule.torch.data.images import ImageDataset, TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 from mlmodule.contrib.resnet.base import BaseResNetModule
 
 
@@ -43,3 +41,16 @@ class ResNetFeatures(BaseResNetModule):
         x = self.avgpool(x)
 
         return torch.flatten(x, 1)
+
+    def bulk_inference(self, data: ImageDataset, batch_size=256, **data_loader_options):
+        """Runs inference on all images in a ImageFilesDatasets
+
+        :param data: A dataset returning tuples of item_index, PIL.Image
+        :param batch_size:
+        :param data_loader_options:
+        :return:
+        """
+        return super().bulk_inference(data, batch_size=256, **data_loader_options)
+
+    def get_dataset_transforms(self):
+        return TORCHVISION_STANDARD_IMAGE_TRANSFORMS
