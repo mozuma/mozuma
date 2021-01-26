@@ -14,7 +14,7 @@ See `mlmodule.contrib` for examples.
 The first step is to create a new python module in `mlmodule.contrib`.
 For the example, let's create a python file `mlmodule/contrib/example.py`.
 
-### Pattern #1 - Re-use pretrained model
+### Re-use pretrained model
 
 In this example, will use a ResNet to create features for images.
 See explanations in the code below:

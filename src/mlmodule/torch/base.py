@@ -16,23 +16,22 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
     def _resolve_device(cls):
         return torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-    def load(self, fp=None, **load_options):
+    def load(self, fp=None):
         """Loads model from file or from a default pretrained model if `fp=None`
 
         :param fp:
         :param load_options:
         :return:
         """
-        load_options.setdefault("map_location", self.device)
 
         # Getting state dict
         if fp:
             fp.seek(0)
-            state = torch.load(fp, **load_options)
+            state = torch.load(fp)
         else:
             # Getting default pretrained state dict
             # Requires TorchPretrainedModuleMixin to be implemented
-            state = self.get_default_pretrained_state_dict(**load_options)
+            state = self.get_default_pretrained_state_dict()
 
         # Loading state
         self.load_state_dict(state)
