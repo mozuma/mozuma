@@ -12,6 +12,7 @@ pip install git+ssh://git@github.com/LSIR/mlmodule.git
 ## Models
 
 * [ResNet](docs/ResNet.md)
+* Face detection with [MTCNN](docs/MTCNN.md)
 
 
 ## Installation for development
