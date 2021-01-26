@@ -19,7 +19,7 @@ pip install git+ssh://git@github.com/LSIR/mlmodule.git
 Installing requirements
 
 ```bash
-pip install -r requirement.txt dev-requirements.txt
+pip install -r requirements.txt -r dev-requirements.txt
 ```
 
 Updating requirements should be done in `requirements.in` and `dev-requirements.in` files.
