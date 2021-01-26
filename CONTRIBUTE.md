@@ -14,7 +14,7 @@ See `mlmodule.contrib` for examples.
 The first step is to create a new python module in `mlmodule.contrib`.
 For the example, let's create a python file `mlmodule/contrib/example.py`.
 
-### Pattern #1 - Re-use pretrained model
+### Re-use pretrained model
 
 In this example, will use a ResNet to create features for images.
 See explanations in the code below:
@@ -71,9 +71,8 @@ class ExampleResNet18Module(BaseTorchMLModule, TorchPretrainedModuleMixin):
     # We need to provide a state dict for the current module
     # The idea is to download the pretrained model for resnet 
     # and filter out the parameters of the layer we have discarded
-    def get_default_pretrained_state_dict(self, **options):
+    def get_default_pretrained_state_dict(self):
         # Getting URL to download model
-        # See `mlmodule.contrib.resnet.base` for a better implementation
         pretrained_state_dict = models.resnet18(pretrained=True).state_dict()
         
         # This function allows to remove unnecessary parameters 
