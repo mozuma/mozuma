@@ -54,7 +54,8 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
         # Data loader default options
         data_loader_options.setdefault("shuffle", False)
         data_loader_options.setdefault("drop_last", False)
-        data_loader_options.setdefault("pin_memory", True)
+        # We send to pin memory only if using CUDA device
+        data_loader_options.setdefault("pin_memory", self.device != torch.device('cpu'))
         # Building data loader
         return DataLoader(data, **data_loader_options)
 
@@ -66,6 +67,9 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
         """
         return zip
 
+    def get_forward_func(self):
+        return self.__call__
+
     def bulk_inference(self, data, **data_loader_options):
         """Run the model against all elements in data
 
@@ -75,7 +79,7 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
         """
         loader = self.get_data_loader(data, **data_loader_options)
         # Running inference batch loop
-        return generic_inference(self, loader, self.__call__, self.get_results_handler())
+        return generic_inference(self, loader, self.get_forward_func(), self.get_results_handler(), self.device)
 
     def get_dataset_transforms(self):
         """Returns callable that transform the input data before the forward pass

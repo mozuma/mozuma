@@ -71,9 +71,8 @@ class ExampleResNet18Module(BaseTorchMLModule, TorchPretrainedModuleMixin):
     # We need to provide a state dict for the current module
     # The idea is to download the pretrained model for resnet 
     # and filter out the parameters of the layer we have discarded
-    def get_default_pretrained_state_dict(self, **options):
+    def get_default_pretrained_state_dict(self):
         # Getting URL to download model
-        # See `mlmodule.contrib.resnet.base` for a better implementation
         pretrained_state_dict = models.resnet18(pretrained=True).state_dict()
         
         # This function allows to remove unnecessary parameters 
