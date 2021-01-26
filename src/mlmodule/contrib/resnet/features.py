@@ -1,16 +1,16 @@
 import torch
 
 from mlmodule.torch.data.images import ImageDataset, TORCHVISION_STANDARD_IMAGE_TRANSFORMS
-from mlmodule.contrib.resnet.base import BaseResNetModule
+from mlmodule.contrib.resnet.base import BaseResNetImageNetModule
 
 
-class ResNetFeatures(BaseResNetModule):
+class BaseResNetImageNetFeatures(BaseResNetImageNetModule):
     """
     ResNet feature extraction for similarity search
     """
 
-    def __init__(self, resnet_arch):
-        super().__init__(resnet_arch)
+    def __init__(self, resnet_arch, device=None):
+        super().__init__(resnet_arch, device=device)
         base_resnet = self.get_resnet_module(resnet_arch)
 
         # Getting only the necessary steps
@@ -54,3 +54,9 @@ class ResNetFeatures(BaseResNetModule):
 
     def get_dataset_transforms(self):
         return TORCHVISION_STANDARD_IMAGE_TRANSFORMS
+
+
+class ResNet18ImageNetFeatures(BaseResNetImageNetFeatures):
+
+    def __init__(self, device=None):
+        super().__init__("resnet18", device=device)

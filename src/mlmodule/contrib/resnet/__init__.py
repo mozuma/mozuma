@@ -1,2 +1,2 @@
-from mlmodule.contrib.resnet.features import ResNetFeatures
-from mlmodule.contrib.resnet.classifiers import ResNetDefaultClassifier
+from mlmodule.contrib.resnet.features import ResNet18ImageNetFeatures
+from mlmodule.contrib.resnet.classifiers import ResNet18ImageNetClassifier

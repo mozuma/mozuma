@@ -1,12 +1,12 @@
 import os
 
-from mlmodule.contrib.resnet import ResNetFeatures
+from mlmodule.contrib.resnet import ResNet18ImageNetFeatures
 from mlmodule.torch.data.images import ImageDataset
 from mlmodule.utils import list_files_in_dir
 
 
 def test_resnet_features_inference():
-    resnet = ResNetFeatures("resnet18")
+    resnet = ResNet18ImageNetFeatures()
     # Pretrained model
     resnet.load()
     base_path = os.path.join("tests", "fixtures", "cats_dogs")

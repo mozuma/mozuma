@@ -6,10 +6,10 @@ from mlmodule.torch.mixins import TorchPretrainedModuleMixin
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 
 
-class BaseResNetModule(BaseTorchMLModule, TorchPretrainedModuleMixin):
+class BaseResNetImageNetModule(BaseTorchMLModule, TorchPretrainedModuleMixin):
 
-    def __init__(self, resnet_arch):
-        super().__init__()
+    def __init__(self, resnet_arch, device=None):
+        super().__init__(device=device)
         self.resnet_arch = resnet_arch
 
     @classmethod
@@ -17,20 +17,13 @@ class BaseResNetModule(BaseTorchMLModule, TorchPretrainedModuleMixin):
         # Getting the ResNet architecture https://pytorch.org/docs/stable/torchvision/models.html
         return getattr(m, resnet_arch)()
 
-    def get_default_pretrained_state_dict(self, map_location=None, cache_dir=None, **options):
+    def get_default_pretrained_state_dict(self):
         """Returns the state dict for a pretrained resnet model
-
-        :param map_location:
-        :param cache_dir:
-        :param options:
         :return:
         """
         # Getting URL to download model
         url = m.resnet.model_urls[self.resnet_arch]
         # Downloading state dictionary
-        pretrained_state_dict = load_state_dict_from_url(
-            url, model_dir=cache_dir, map_location=map_location, **options
-        )
+        pretrained_state_dict = load_state_dict_from_url(url)
         # Removing deleted layers from state dict and updating the other with pretrained data
         return torch_apply_state_to_partial_model(self, pretrained_state_dict)
-
