@@ -59,16 +59,32 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
         return DataLoader(data, **data_loader_options)
 
     @classmethod
-    def get_results_handler(cls):
-        """Runs after the forward pass at inference
-
-        :return:
+    def results_handler(cls, acc_results, new_indices, new_output: torch.Tensor):
         """
-        # Casting indices to int and zipping indices with results copied to CPU
-        return lambda ind, res: zip(map(int, ind), res.cpu())
 
-    def get_forward_func(self):
-        return self.__call__
+        :param acc_results: The results accumulated
+        :param new_indices: The new indices of data for the current batch
+        :param new_output: The new data for the current batch
+        :return: new accumulated results
+        """
+        res_output: torch.Tensor
+        res_indices, res_output = acc_results or ([], None)
+
+        # Adding indices
+        if hasattr(new_indices, "tolist"):  # This is a tensor
+            new_indices = new_indices.tolist()
+        res_indices += new_indices
+
+        # Adding data
+        new_output = new_output.cpu()
+        if res_output is None:
+            res_output = new_output
+        else:
+            res_output = torch.vstack((res_output, new_output))
+        return res_indices, res_output
+
+    def inference(self, x):
+        return self.__call__(x)
 
     def bulk_inference(self, data, **data_loader_options):
         """Run the model against all elements in data
@@ -79,7 +95,7 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
         """
         loader = self.get_data_loader(data, **data_loader_options)
         # Running inference batch loop
-        return generic_inference(self, loader, self.get_forward_func(), self.get_results_handler(), self.device)
+        return generic_inference(self, loader, self.inference, self.results_handler, self.device)
 
     def get_dataset_transforms(self):
         """Returns callable that transform the input data before the forward pass

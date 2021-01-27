@@ -24,7 +24,7 @@ def torch_apply_state_to_partial_model(partial_model, pretrained_state_dict):
     return model_dict
 
 
-def generic_inference(model, data_loader, forward_func, result_handler, device):
+def generic_inference(model, data_loader, inference_func, result_handler, device):
     # Setting model in eval mode
     model.eval()
 
@@ -32,7 +32,7 @@ def generic_inference(model, data_loader, forward_func, result_handler, device):
     model = model.to(device)
 
     # Disabling gradient computation
-    results = []
+    acc_results = None
     with torch.no_grad():
         # Looping through batches
         # Assume dataset is composed of tuples (item index, batch)
@@ -40,7 +40,7 @@ def generic_inference(model, data_loader, forward_func, result_handler, device):
             logger.debug(f"Sending batch number: {batch_n}")
             # Sending data on device
             batch = batch.to(device)
-            results += result_handler(indices, forward_func(batch).detach())
+            acc_results = result_handler(acc_results, indices, inference_func(batch))
 
-    # Sorting and returning predictions
-    return [x for x in sorted(results, key=lambda i: i[0])]
+    # Returning accumulated results
+    return acc_results
