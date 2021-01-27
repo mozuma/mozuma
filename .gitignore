@@ -6,4 +6,4 @@
 *.pyc
 
 # For the tutorial on creating modules
-mlmodule/contrib/example.py
+src/mlmodule/contrib/example.py

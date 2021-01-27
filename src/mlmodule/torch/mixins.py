@@ -3,7 +3,7 @@ from torchvision.transforms import Compose
 
 class TorchPretrainedModuleMixin(object):
 
-    def get_default_pretrained_state_dict(self, map_location=None, cache_dir=None, **options):
+    def get_default_pretrained_state_dict(self):
         """
         Returns the state dict to apply to the current module to get a pretrained model
         :return:
