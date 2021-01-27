@@ -43,4 +43,4 @@ def generic_inference(model, data_loader, forward_func, result_handler, device):
             results += result_handler(indices, forward_func(batch).detach())
 
     # Sorting and returning predictions
-    return [x[1] for x in sorted(results, key=lambda i: i[0])]
+    return [x for x in sorted(results, key=lambda i: i[0])]

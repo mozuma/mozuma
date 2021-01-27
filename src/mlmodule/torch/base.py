@@ -64,7 +64,8 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
 
         :return:
         """
-        return zip
+        # Casting indices to int and zipping indices with results copied to CPU
+        return lambda ind, res: zip(map(int, ind), res.cpu())
 
     def get_forward_func(self):
         return self.__call__

@@ -15,4 +15,6 @@ def test_resnet_features_inference():
 
     features = resnet.bulk_inference(dataset, batch_size=10)
     assert len(features) == 50
-    assert len(features[0]) == 512
+    assert len(features[0]) == 2
+    assert len(features[0][1]) == 512
+    assert type(features[0][0]) == int
