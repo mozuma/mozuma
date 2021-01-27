@@ -7,7 +7,7 @@ from mlmodule.utils import list_files_in_dir
 
 
 def test_mtcnn_detector_inference(device=torch.device('cpu')):
-    mtcnn = MTCNNDetector(device=device)
+    mtcnn = MTCNNDetector(device=device, image_size=720, min_face_size=20)
     # Pretrained model
     mtcnn.load()
     base_path = os.path.join("tests", "fixtures", "faces")
@@ -16,7 +16,7 @@ def test_mtcnn_detector_inference(device=torch.device('cpu')):
 
     outputs = mtcnn.bulk_inference(dataset)
     assert len(outputs) == 5
-    assert outputs[0].boxes.shape[0] == 11
+    assert outputs[0].boxes.shape[0] == 12
 
 
 def test_mtcnn_detector_inference_gpu():
