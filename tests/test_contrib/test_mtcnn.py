@@ -1,13 +1,13 @@
+from conftest import device_parametrize
 import os
-import pytest
-import torch
 
 from mlmodule.contrib.mtcnn import MTCNNDetector
 from mlmodule.torch.data.images import ImageDataset
 from mlmodule.utils import list_files_in_dir
 
 
-def test_mtcnn_detector_inference(device=torch.device('cpu')):
+@device_parametrize
+def test_mtcnn_detector_inference(device):
     mtcnn = MTCNNDetector(device=device, image_size=720, min_face_size=20)
     # Pretrained model
     mtcnn.load()
@@ -16,12 +16,8 @@ def test_mtcnn_detector_inference(device=torch.device('cpu')):
     dataset = ImageDataset(file_names)
 
     file_names, outputs = mtcnn.bulk_inference(dataset)
+    output_by_file = dict(zip(file_names, outputs))
     assert len(outputs) == 5
     # It should be a namedtuple of len 3
     assert len(outputs[0]) == 3
-    assert outputs[0].boxes.shape[0] == 12
-
-
-@pytest.mark.skipif(not torch.cuda.is_available(), reason="GPU not available")
-def test_mtcnn_detector_inference_gpu():
-    test_mtcnn_detector_inference(torch.device('cuda:0'))
+    assert output_by_file[os.path.join(base_path, 'office2.jpg')].boxes.shape[0] == 4
