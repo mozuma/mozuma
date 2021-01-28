@@ -18,5 +18,5 @@ file_list = list_files_in_dir('mlmodule/tests/fixtures/faces', allowed_extension
 mtcnn = MTCNNDetector(device=torch.device('cpu')).load()
 data = ImageDataset(file_list)
 
-detected_faces = mtcnn.bulk_inference(data)
+file_list, detected_faces = mtcnn.bulk_inference(data)
 ```
