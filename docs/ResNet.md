@@ -32,7 +32,7 @@ resnet_classifier = ResNet18ImageNetClassifier('resnet18').load()
 # We need features from the previous step
 data = IndexedDataset(file_names, features)
 
-pred = resnet_classifier.bulk_inference(data)
+file_names, pred = resnet_classifier.bulk_inference(data)
 ```
 
 # Retrain classifier
