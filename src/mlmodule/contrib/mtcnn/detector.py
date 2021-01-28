@@ -16,8 +16,11 @@ FacesDetected = namedtuple('FacesDetected', ['boxes', 'probas', 'landmarks'])
 
 class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin):
 
-    def __init__(self, thresholds=[0.6, 0.7, 0.7], image_size=720, min_face_size=20, device=torch.device('cpu')):
-        super().__init__()
+    __result_struct__ = FacesDetected
+
+    def __init__(self, thresholds=None, image_size=720, min_face_size=20, device=None):
+        super().__init__(device=device)
+        thresholds = thresholds or [0.6, 0.7, 0.7]
         self.image_size = image_size
         self.mtcnn = MTCNN(thresholds=thresholds,
                            device=device, min_face_size=min_face_size)
@@ -44,14 +47,14 @@ class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin):
         return self.mtcnn.detect(x, landmarks=True)
 
     @staticmethod
-    def rescale_coordinates(results, aspect_ratios):
+    def rescale_coordinates(indices, results, aspect_ratios):
         rescaled_results = []
-        for i, (boxes, probs, landmarks) in enumerate(results):
+        for i, (boxes, probs, landmarks) in zip(indices, results):
             rescaled_results.append(
                 FacesDetected(
                     boxes*(aspect_ratios[i]*2), probs, landmarks*aspect_ratios[i])
             )
-        return rescaled_results
+        return indices, rescaled_results
 
     def bulk_inference(self, data: ImageDataset, batch_size=256, **data_loader_options):
         """Runs inference on all images in a ImageFilesDatasets
@@ -61,10 +64,10 @@ class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin):
         :param data_loader_options:
         :return:
         """
-        aspect_ratios = [[x/self.image_size for x in img.size]
-                         for _, img in data]
-        results = super().bulk_inference(data, batch_size=256, **data_loader_options)
-        return self.rescale_coordinates(results, aspect_ratios)
+        aspect_ratios = {idx: [x/self.image_size for x in img.size]
+                         for idx, img in data}
+        indices, results = super().bulk_inference(data, batch_size=batch_size, **data_loader_options)
+        return self.rescale_coordinates(indices, results, aspect_ratios)
 
     def get_dataset_transforms(self):
         return [
@@ -74,9 +77,25 @@ class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin):
         ]
 
     @classmethod
-    def get_results_handler(cls):
+    def results_handler(cls, acc_results, new_indices, new_output: torch.Tensor):
         """Runs after the forward pass at inference
 
+        :param acc_results: Holds a tuple with indices, list of FacesDetected namedtuple
+        :param new_indices: New indices for the current batch
+        :param new_output: New inference output for the current batch
         :return:
         """
-        return lambda indices, outputs: zip(indices, [(outputs[0][i], outputs[1][i], outputs[2][i]) for i in range(len(outputs[0]))])
+        # Dealing for the first call where acc_results is None
+        indices, output = acc_results or ([], [])
+
+        # Appending new indices
+        indices += cls.tensor_to_python_list_safe(new_indices)
+
+        # Appending new output
+        new_boxes_list, new_probas_list, new_landmarks_list = new_output
+        output += [
+            FacesDetected(boxes, probas, landmarks)
+            for boxes, probas, landmarks in zip(new_boxes_list, new_probas_list, new_landmarks_list)
+        ]
+
+        return indices, output

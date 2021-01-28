@@ -29,7 +29,7 @@ class BaseImageDataset(IndexedDataset):
             self.add_transforms([convert_to_rgb])
 
 
-class ImageDataset(IndexedDataset):
+class ImageDataset(BaseImageDataset):
 
     def __init__(self, image_path, to_rgb=True):
         super().__init__(image_path, image_path, to_rgb=to_rgb)
