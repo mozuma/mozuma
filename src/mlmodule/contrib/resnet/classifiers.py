@@ -1,7 +1,8 @@
 from mlmodule.contrib.resnet.base import BaseResNetImageNetModule
+from mlmodule.labels import LabelsMixin, ImageNetLabels
 
 
-class BaseResNetImageNetClassifier(BaseResNetImageNetModule):
+class BaseResNetImageNetClassifier(BaseResNetImageNetModule, LabelsMixin):
     """
     Default fully connected layer for classification before retraining
     """
@@ -20,6 +21,9 @@ class BaseResNetImageNetClassifier(BaseResNetImageNetModule):
         :return:
         """
         return self.fc(x)
+
+    def get_labels(self):
+        return ImageNetLabels()
 
 
 class ResNet18ImageNetClassifier(BaseResNetImageNetClassifier):
