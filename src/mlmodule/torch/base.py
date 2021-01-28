@@ -59,6 +59,19 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
         return DataLoader(data, **data_loader_options)
 
     @classmethod
+    def tensor_to_python_list_safe(cls, tensor_or_list):
+        """Transforms a tensor into a Python list.
+
+        If the argument is a list, returns is without raising.
+
+        :param tensor_or_list:
+        :return:
+        """
+        if hasattr(tensor_or_list, "tolist"):  # This is a tensor
+            tensor_or_list = tensor_or_list.tolist()
+        return tensor_or_list
+
+    @classmethod
     def results_handler(cls, acc_results, new_indices, new_output: torch.Tensor):
         """
 
@@ -67,20 +80,13 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
         :param new_output: The new data for the current batch
         :return: new accumulated results
         """
-        res_output: torch.Tensor
-        res_indices, res_output = acc_results or ([], None)
+        res_indices, res_output = acc_results or ([], torch.Tensor())
 
         # Adding indices
-        if hasattr(new_indices, "tolist"):  # This is a tensor
-            new_indices = new_indices.tolist()
-        res_indices += new_indices
+        res_indices += cls.tensor_to_python_list_safe(new_indices)
 
         # Adding data
-        new_output = new_output.cpu()
-        if res_output is None:
-            res_output = new_output
-        else:
-            res_output = torch.vstack((res_output, new_output))
+        res_output = torch.cat((res_output, new_output.cpu()))
         return res_indices, res_output
 
     def inference(self, x):

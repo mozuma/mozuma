@@ -1,3 +1,4 @@
+from torch.hub import load_state_dict_from_url
 import torchvision.models as m
 
 from mlmodule.torch import BaseTorchMLModule
@@ -23,6 +24,6 @@ class BaseResNetImageNetModule(BaseTorchMLModule, TorchPretrainedModuleMixin):
         # Getting URL to download model
         url = m.resnet.model_urls[self.resnet_arch]
         # Downloading state dictionary
-        pretrained_state_dict = m.resnet.load_state_dict_from_url(url)
+        pretrained_state_dict = load_state_dict_from_url(url)
         # Removing deleted layers from state dict and updating the other with pretrained data
         return torch_apply_state_to_partial_model(self, pretrained_state_dict)
