@@ -25,6 +25,7 @@ iniconfig==1.1.1
 numpy==1.19.5
     # via
     #   facenet-pytorch
+    #   torch
     #   torchvision
 packaging==20.8
     # via pytest
@@ -48,11 +49,11 @@ six==1.15.0
     # via torchvision
 toml==0.10.2
     # via pytest
-torch==1.0.1.post2
+torch==1.2.0
     # via
     #   -r requirements.in
     #   torchvision
-torchvision==0.2.2.post3
+torchvision==0.4.0
     # via
     #   -r requirements.in
     #   facenet-pytorch
