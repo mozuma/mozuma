@@ -25,8 +25,11 @@ iniconfig==1.1.1
 numpy==1.19.5
     # via
     #   facenet-pytorch
+    #   opencv-python
     #   torch
     #   torchvision
+opencv-python==4.5.1.48
+    # via -r requirements.in
 packaging==20.8
     # via pytest
 pillow==8.1.0
@@ -45,20 +48,20 @@ pytest==6.2.2
     # via -r requirements.in
 requests==2.25.1
     # via facenet-pytorch
-six==1.15.0
-    # via torchvision
 toml==0.10.2
     # via pytest
-torch==1.2.0
+torch==1.7.1
     # via
     #   -r requirements.in
     #   torchvision
-torchvision==0.4.0
+torchvision==0.8.2
     # via
     #   -r requirements.in
     #   facenet-pytorch
 typing-extensions==3.7.4.3
-    # via importlib-metadata
+    # via
+    #   importlib-metadata
+    #   torch
 urllib3==1.26.3
     # via requests
 zipp==3.4.0

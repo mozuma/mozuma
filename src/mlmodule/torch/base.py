@@ -35,6 +35,7 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
 
         # Loading state
         self.load_state_dict(state)
+        self.to(self.device)
 
         return self
 
@@ -54,7 +55,8 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
         data_loader_options.setdefault("shuffle", False)
         data_loader_options.setdefault("drop_last", False)
         # We send to pin memory only if using CUDA device
-        data_loader_options.setdefault("pin_memory", self.device != torch.device('cpu'))
+        data_loader_options.setdefault(
+            "pin_memory", self.device != torch.device('cpu'))
         # Building data loader
         return DataLoader(data, **data_loader_options)
 

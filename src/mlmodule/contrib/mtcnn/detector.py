@@ -1,5 +1,3 @@
-from collections import namedtuple
-
 import torch
 from torch.hub import load_state_dict_from_url
 import numpy as np
@@ -9,14 +7,14 @@ from mlmodule.torch import BaseTorchMLModule
 from mlmodule.torch.mixins import TorchPretrainedModuleMixin
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 from mlmodule.torch.data.images import ImageDataset, transforms
+from mlmodule.torch.data.faces import FacesFeatures
 
 MTCNN_WEIGHTS_URL = ''
-FacesDetected = namedtuple('FacesDetected', ['boxes', 'probas', 'landmarks'])
 
 
 class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin):
 
-    __result_struct__ = FacesDetected
+    __result_struct__ = FacesFeatures
 
     def __init__(self, thresholds=None, image_size=720, min_face_size=20, device=None):
         super().__init__(device=device)
@@ -25,19 +23,10 @@ class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin):
         self.mtcnn = MTCNN(thresholds=thresholds,
                            device=device, min_face_size=min_face_size)
 
-    def get_default_pretrained_state_dict(self, map_location=None, cache_dir=None, **options):
-        """Returns the state dict for a pretrained resnet model
-
-        :param map_location:
-        :param cache_dir:
-        :param options:
-        :return:
-        """
+    def get_default_pretrained_state_dict(self):
         if MTCNN_WEIGHTS_URL:  # TODO: add state dict to S3
             # Downloading state dictionary
-            pretrained_state_dict = load_state_dict_from_url(
-                MTCNN_WEIGHTS_URL, model_dir=cache_dir, map_location=map_location, **options
-            )
+            pretrained_state_dict = load_state_dict_from_url(MTCNN_WEIGHTS_URL)
         else:
             pretrained_state_dict = self.mtcnn.state_dict()
         # Removing deleted layers from state dict and updating the other with pretrained data
@@ -49,10 +38,10 @@ class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin):
     @staticmethod
     def rescale_coordinates(indices, results, aspect_ratios):
         rescaled_results = []
-        for i, (boxes, probs, landmarks) in zip(indices, results):
+        for i, (boxes, probs, landmarks, features) in zip(indices, results):
             rescaled_results.append(
-                FacesDetected(
-                    boxes*(aspect_ratios[i]*2), probs, landmarks*aspect_ratios[i])
+                FacesFeatures(
+                    boxes*(aspect_ratios[i]*2), probs, landmarks*aspect_ratios[i], features)
             )
         return indices, rescaled_results
 
@@ -66,7 +55,8 @@ class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin):
         """
         aspect_ratios = {idx: [x/self.image_size for x in img.size]
                          for idx, img in data}
-        indices, results = super().bulk_inference(data, batch_size=batch_size, **data_loader_options)
+        indices, results = super().bulk_inference(
+            data, batch_size=batch_size, **data_loader_options)
         return self.rescale_coordinates(indices, results, aspect_ratios)
 
     def get_dataset_transforms(self):
@@ -80,7 +70,7 @@ class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin):
     def results_handler(cls, acc_results, new_indices, new_output: torch.Tensor):
         """Runs after the forward pass at inference
 
-        :param acc_results: Holds a tuple with indices, list of FacesDetected namedtuple
+        :param acc_results: Holds a tuple with indices, list of FacesFeatures namedtuple
         :param new_indices: New indices for the current batch
         :param new_output: New inference output for the current batch
         :return:
@@ -94,7 +84,7 @@ class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin):
         # Appending new output
         new_boxes_list, new_probas_list, new_landmarks_list = new_output
         output += [
-            FacesDetected(boxes, probas, landmarks)
+            FacesFeatures(boxes, probas, landmarks, None)
             for boxes, probas, landmarks in zip(new_boxes_list, new_probas_list, new_landmarks_list)
         ]
 

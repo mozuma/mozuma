@@ -1,6 +1,7 @@
-torch==1.2.0
-torchvision==0.4.0
+torch==1.7.1
+torchvision==0.8.2
 facenet-pytorch
+opencv-python
 
 # Development
 pytest

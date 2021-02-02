@@ -41,7 +41,14 @@ def generic_inference(model, data_loader, inference_func, result_handler, device
             logger.debug(f"Sending batch number: {batch_n}")
             # Sending data on device
             batch = batch.to(device)
-            acc_results = result_handler(acc_results, indices, inference_func(batch))
+            acc_results = result_handler(
+                acc_results, indices, inference_func(batch))
 
     # Returning accumulated results
     return acc_results
+
+
+def l2_norm(input, axis=1):
+    norm = torch.norm(input, 2, axis, True)
+    output = torch.div(input, norm)
+    return output
