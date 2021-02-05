@@ -1,4 +1,5 @@
 from mlmodule.labels.imagenet import IMAGENET_LABELS
+from mlmodule.labels.places import PLACES_LABELS
 
 
 class LabelSet(object):
@@ -20,6 +21,13 @@ class ImageNetLabels(LabelSet):
 
     def __init__(self):
         super().__init__([IMAGENET_LABELS[i] for i in range(len(IMAGENET_LABELS))])
+
+
+class PlacesLabels(LabelSet):
+    __label_set_name__ = 'places'
+
+    def __init__(self):
+        super().__init__([PLACES_LABELS[i] for i in range(len(PLACES_LABELS))])
 
 
 class LabelsMixin(object):
