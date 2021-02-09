@@ -25,11 +25,9 @@ def test_densenet_imagenet_features_inference(device):
     assert set(file_names_idx) == set(file_names)
 
 
-"""
 @device_parametrize
 def test_densenet_imagenet_features_inference(device):
     densenet = DenseNet161PlacesFeatures(device=device)
-    num_features = 2208
 
     # Pretrained model
     densenet.load()
@@ -39,10 +37,9 @@ def test_densenet_imagenet_features_inference(device):
 
     file_names_idx, features = densenet.bulk_inference(dataset, batch_size=10)
     assert len(features) == 50
-    assert len(features[0]) == num_features
+    assert len(features[0]) == 2208
     assert type(file_names[0]) == str
     assert set(file_names_idx) == set(file_names)
-"""
 
 
 @device_parametrize
@@ -85,7 +82,6 @@ def test_densenet_imagenet_classifier(device):
     assert file_class[os.path.join(base_path, "dog_900.jpg")] == 'Labrador retriever'
 
 
-"""
 @device_parametrize
 def test_densenet_places_classifier(device):
     densenet = DenseNet161PlacesFeatures(device=device)
@@ -122,6 +118,5 @@ def test_densenet_places_classifier(device):
     assert set(file_names) == set(file_names_idx)
 
     # Verifying a couple of output labels
-    assert 'cat' in file_class[os.path.join(base_path, "cat_90.jpg")].lower()
-    assert file_class[os.path.join(base_path, "dog_900.jpg")] == 'Labrador retriever'
-"""
+    assert 'veterinarians' in file_class[os.path.join(base_path, "cat_90.jpg")].lower()
+    assert 'veterinarians' in file_class[os.path.join(base_path, "dog_900.jpg")].lower()

@@ -9,8 +9,11 @@ class BaseDenseNetPretrainedClassifier(BaseDenseNetPretrainedModule, LabelsMixin
 
     def __init__(self, densenet_arch, dataset="imagenet", device=None):
         super().__init__(densenet_arch, dataset=dataset, device=device)
-        base_densenet = self.get_densenet_module(densenet_arch)
-
+        if dataset == "places":
+            base_densenet = self.get_densenet_module(densenet_arch, num_classes=365)
+        else:
+            base_densenet = self.get_densenet_module(densenet_arch, num_classes=1000)
+        
         # Getting only the fully connected layer
         self.classifier = base_densenet.classifier
 

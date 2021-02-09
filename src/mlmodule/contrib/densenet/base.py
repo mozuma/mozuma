@@ -1,3 +1,6 @@
+import pickle
+import torch
+from functools import partial
 from torch.hub import load_state_dict_from_url
 import torchvision.models as m
 
@@ -5,9 +8,6 @@ from mlmodule.torch import BaseTorchMLModule
 from mlmodule.torch.mixins import TorchPretrainedModuleMixin
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 
-
-DENSENET_ARCHS = ["densenet121", "densenet161", "densenet169", "densenet201"]
-DATASETS = ["imagenet", "places"]
 
 class BaseDenseNetPretrainedModule(BaseTorchMLModule, TorchPretrainedModuleMixin):
 
@@ -19,33 +19,34 @@ class BaseDenseNetPretrainedModule(BaseTorchMLModule, TorchPretrainedModuleMixin
             "densenet161".
         """
         super().__init__(device=device)
-        
-        # Do we want to force users to choose a "correct" model?
-        assert densenet_arch in DENSENET_ARCHS
-        assert dataset in DATASETS
-        if dataset == "places":
-            assert densenet_arch == "densenet161"
-
         self.densenet_arch = densenet_arch
         self.dataset = dataset
 
     @classmethod
-    def get_densenet_module(cls, densenet_arch):
+    def get_densenet_module(cls, densenet_arch, num_classes=1000):
         # Getting the DenseNet architecture https://pytorch.org/docs/stable/torchvision/models.html
-        return getattr(m, densenet_arch)()
+        return getattr(m, densenet_arch)(num_classes=num_classes)
 
     def get_default_pretrained_state_dict(self):
         """Returns the state dict for a pretrained densenet model
         :return:
         """
-
+        # Downloading state dictionary
         if self.dataset == "places":
-            url = "http://places2.csail.mit.edu/models_places365/densenet161_places365.pth.tar"
+            #url = "http://places2.csail.mit.edu/models_places365/densenet161_places365.pth.tar"
+            #pretrained_state_dict = load_state_dict_from_url(url, check_hash=False)
+            pickle.load = partial(pickle.load, encoding="latin1")
+            pickle.Unpickler = partial(pickle.Unpickler, encoding="latin1")
+
+            model_path = 'places_weights/densenet161_places365.pth.tar'
+            pretrained_state_dict = torch.load(model_path, map_location=lambda storage, loc: storage, pickle_module=pickle)
+
+            # Correct naming differences in the state dictionary
+            pretrained_state_dict = pretrained_state_dict['state_dict']
+            pretrained_state_dict = {str.replace(k, 'module.', ''): v for k, v in pretrained_state_dict.items()}
         else:
             url = m.densenet.model_urls[self.densenet_arch]
-
-        # Downloading state dictionary
-        pretrained_state_dict = load_state_dict_from_url(url)
+            pretrained_state_dict = load_state_dict_from_url(url)
 
         # Weird: there are some naming differences in between the m.densenet() layers and the
         # state dict loaded from the url
@@ -57,11 +58,6 @@ class BaseDenseNetPretrainedModule(BaseTorchMLModule, TorchPretrainedModuleMixin
             return s
         
         pretrained_state_dict = {replace_malformed_string(k): v for k, v in pretrained_state_dict.items()}
-
-        # For places, we also need to change th following
-        if self.dataset == "places":
-            pretrained_state_dict = pretrained_state_dict['state_dict']
-            pretrained_state_dict = {str.replace(k, 'module.', ''): v for k, v in pretrained_state_dict.items()}
 
         # Removing deleted layers from state dict and updating the other with pretrained data
         return torch_apply_state_to_partial_model(self, pretrained_state_dict)
