@@ -1,3 +1,4 @@
+import torch
 from mlmodule.contrib.resnet.base import BaseResNetImageNetModule
 from mlmodule.labels import LabelsMixin, ImageNetLabels
 
@@ -24,6 +25,11 @@ class BaseResNetImageNetClassifier(BaseResNetImageNetModule, LabelsMixin):
 
     def get_labels(self):
         return ImageNetLabels()
+
+    def get_dataset_transforms(self):
+        return [
+            torch.from_numpy
+        ]
 
 
 class ResNet18ImageNetClassifier(BaseResNetImageNetClassifier):
