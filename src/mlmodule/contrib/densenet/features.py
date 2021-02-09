@@ -30,15 +30,15 @@ class BaseDenseNetPretrainedFeatures(BaseDenseNetPretrainedModule):
         """
 
         self.features = base_densenet.features
-        self.avgpool = F.avg_pool2d
-        self.avgpool_kernel_size = 7
+        self.relu = F.relu
+        self.avgpool = F.adaptive_avg_pool2d
 
     def forward(self, x):
         # Forward without the last step to get features
-        x = self.features(x)
-        x = self.avgpool(x, self.avgpool_kernel_size)
-
-        return torch.flatten(x, 1)
+        fs = self.features(x)
+        out = self.relu(fs, inplace=True)
+        out = self.avgpool(out, (1, 1))
+        return torch.flatten(out, 1)
 
     def get_dataset_transforms(self):
         return TORCHVISION_STANDARD_IMAGE_TRANSFORMS

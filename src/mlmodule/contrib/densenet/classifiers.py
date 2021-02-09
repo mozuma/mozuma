@@ -1,4 +1,4 @@
-from mlmodule.contrib.resnet.base import BaseResNetImageNetModule
+from mlmodule.contrib.densenet.base import BaseDenseNetPretrainedModule
 from mlmodule.labels import LabelsMixin, ImageNetLabels, PlacesLabels
 
 
@@ -12,7 +12,7 @@ class BaseDenseNetPretrainedClassifier(BaseDenseNetPretrainedModule, LabelsMixin
         base_densenet = self.get_densenet_module(densenet_arch)
 
         # Getting only the fully connected layer
-        self.fc = base_densenet.classifier
+        self.classifier = base_densenet.classifier
 
     def forward(self, x):
         """Forward pass

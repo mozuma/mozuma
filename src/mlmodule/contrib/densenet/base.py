@@ -47,19 +47,21 @@ class BaseDenseNetPretrainedModule(BaseTorchMLModule, TorchPretrainedModuleMixin
         # Downloading state dictionary
         pretrained_state_dict = load_state_dict_from_url(url)
 
-        # Correct mislabled layers for places weights
+        # Weird: there are some naming differences in between the m.densenet() layers and the
+        # state dict loaded from the url
+        def replace_malformed_string(s):
+            s = str.replace(s, 'norm.1', 'norm1')
+            s = str.replace(s, 'norm.2', 'norm2')
+            s = str.replace(s, 'conv.1', 'conv1')
+            s = str.replace(s, 'conv.2', 'conv2')
+            return s
+        
+        pretrained_state_dict = {replace_malformed_string(k): v for k, v in pretrained_state_dict.items()}
+
+        # For places, we also need to change th following
         if self.dataset == "places":
             pretrained_state_dict = pretrained_state_dict['state_dict']
             pretrained_state_dict = {str.replace(k, 'module.', ''): v for k, v in pretrained_state_dict.items()}
-
-            def replace_malformed_string(s):
-                s = str.replace(s, 'norm.1', 'norm1')
-                s = str.replace(s, 'norm.2', 'norm2')
-                s = str.replace(s, 'conv.1', 'conv1')
-                s = str.replace(s, 'conv.2', 'conv2')
-                return s
-            
-            pretrained_state_dict = {replace_malformed_string(k): v for k, v in pretrained_state_dict.items()}
 
         # Removing deleted layers from state dict and updating the other with pretrained data
         return torch_apply_state_to_partial_model(self, pretrained_state_dict)
