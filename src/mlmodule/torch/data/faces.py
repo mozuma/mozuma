@@ -11,27 +11,14 @@ FacesFeatures = namedtuple(
     'FacesFeatures', ['boxes', 'probas', 'landmarks', 'features'])
 
 
-class ImageFromFile(object):
-
-    def __call__(self, sample):
-        image, faces = sample
-        return get_pil_image_from_file(image), faces
-
-
-class ToRGB(object):
-
-    def __call__(self, sample):
-        image, faces = sample
-        return convert_to_rgb(image), faces
-
-
 class FaceDataset(IndexedDataset):
 
     def __init__(self, image_path, face_detected, to_rgb=True):
         super().__init__(image_path, list(zip(image_path, face_detected)))
-        self.add_transforms([ImageFromFile()])
+        self.add_transforms([lambda x: (get_pil_image_from_file(x[0]), x[1])])
         if to_rgb:
-            self.add_transforms([ToRGB()])
+            self.add_transforms(
+                [lambda x: (convert_to_rgb(x[0]), x[1])])
 
 
 class FaceBatch(object):
