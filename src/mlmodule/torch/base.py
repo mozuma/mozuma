@@ -1,4 +1,5 @@
 from mlmodule.base import BaseMLModule
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data.dataloader import DataLoader
@@ -82,13 +83,20 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
         :param new_output: The new data for the current batch
         :return: new accumulated results
         """
-        res_indices, res_output = acc_results or ([], torch.Tensor())
+        # Transforming new_output to Numpy
+        new_output = new_output.cpu().numpy()
+
+        # Collecting accumulated results or default value
+        res_indices, res_output = acc_results or (
+            [],
+            np.empty((0, new_output.shape[1]), dtype=new_output.dtype)
+        )
 
         # Adding indices
         res_indices += cls.tensor_to_python_list_safe(new_indices)
 
         # Adding data
-        res_output = torch.cat((res_output, new_output.cpu()))
+        res_output = np.vstack((res_output, new_output))
         return res_indices, res_output
 
     def inference(self, x):
