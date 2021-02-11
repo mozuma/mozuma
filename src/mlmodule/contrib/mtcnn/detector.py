@@ -38,10 +38,10 @@ class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin):
     @staticmethod
     def rescale_coordinates(indices, results, aspect_ratios):
         rescaled_results = []
-        for i, (boxes, probs, landmarks, features) in zip(indices, results):
+        for i, (boxes, probs, landmarks) in zip(indices, results):
             rescaled_results.append(
                 FacesFeatures(
-                    boxes*(aspect_ratios[i]*2), probs, landmarks*aspect_ratios[i], features)
+                    boxes*(aspect_ratios[i]*2), probs, landmarks*aspect_ratios[i])
             )
         return indices, rescaled_results
 
@@ -84,7 +84,7 @@ class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin):
         # Appending new output
         new_boxes_list, new_probas_list, new_landmarks_list = new_output
         output += [
-            FacesFeatures(boxes, probas, landmarks, None)
+            FacesFeatures(boxes, probas, landmarks)
             for boxes, probas, landmarks in zip(new_boxes_list, new_probas_list, new_landmarks_list)
         ]
 

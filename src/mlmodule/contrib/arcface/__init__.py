@@ -1,1 +1,2 @@
-from mlmodule.contrib.arcface.features import ArcFaceFeatures, collate_wrapper
+from mlmodule.contrib.arcface.features import ArcFaceFeatures
+from mlmodule.contrib.arcface.transforms import ArcFaceAlignment

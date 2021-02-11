@@ -3,7 +3,7 @@ import os
 import torch
 
 from mlmodule.contrib.mtcnn import MTCNNDetector
-from mlmodule.contrib.arcface import ArcFaceFeatures
+from mlmodule.contrib.arcface import ArcFaceFeatures, ArcFaceAlignment
 from mlmodule.torch.data.images import ImageDataset
 from mlmodule.torch.data.faces import FaceDataset
 from mlmodule.utils import list_files_in_dir
@@ -24,22 +24,18 @@ def test_arcface_features_inference(device):
     file_names, outputs = mtcnn.bulk_inference(dataset)
 
     # Load dataset with face descriptors
-    face_dataset = FaceDataset(file_names, outputs)
+    face_dataset = FaceDataset(file_names, outputs, crop_fn=ArcFaceAlignment())
 
     # Get face features
-    file_names, new_outputs = arcface.bulk_inference(face_dataset)
-    output_by_file = dict(zip(file_names, new_outputs))
+    file_names, new_outputs = arcface.bulk_inference(
+        face_dataset, batch_size=3)
+    output_by_file = dict(zip([path + '_' + str(i)
+                               for path, i in file_names], new_outputs))
 
     # tests
-    assert torch.any(torch.matmul(
-        output_by_file[os.path.join(base_path, 'berset1.jpg')].features,
-        output_by_file[os.path.join(base_path, 'berset2.jpg')].features.t()
-    ) > .7).sum().item() > 0
-    assert torch.any(torch.matmul(
-        output_by_file[os.path.join(base_path, 'berset1.jpg')].features,
-        output_by_file[os.path.join(base_path, 'berset3.jpg')].features.t()
-    ) > .7).sum().item() > 0
-    assert torch.any(torch.matmul(
-        output_by_file[os.path.join(base_path, 'berset2.jpg')].features,
-        output_by_file[os.path.join(base_path, 'berset3.jpg')].features.t()
-    ) > .7).sum().item() > 0
+    assert output_by_file[os.path.join(base_path, 'berset1.jpg_0')].dot(
+        output_by_file[os.path.join(base_path, 'berset3.jpg_1')]) > .7
+    assert output_by_file[os.path.join(base_path, 'berset1.jpg_0')].dot(
+        output_by_file[os.path.join(base_path, 'berset2.jpg_1')]) > .7
+    assert output_by_file[os.path.join(base_path, 'berset2.jpg_1')].dot(
+        output_by_file[os.path.join(base_path, 'berset3.jpg_1')]) > .7
