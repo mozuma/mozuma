@@ -1,4 +1,3 @@
-from conftest import device_parametrize
 import os
 
 from mlmodule.contrib.resnet import ResNet18ImageNetFeatures, ResNet18ImageNetClassifier
@@ -7,9 +6,8 @@ from mlmodule.torch.data.images import ImageDataset
 from mlmodule.utils import list_files_in_dir
 
 
-@device_parametrize
-def test_resnet_features_inference(device):
-    resnet = ResNet18ImageNetFeatures(device=device)
+def test_resnet_features_inference(torch_device):
+    resnet = ResNet18ImageNetFeatures(device=torch_device)
     # Pretrained model
     resnet.load()
     base_path = os.path.join("tests", "fixtures", "cats_dogs")
@@ -23,9 +21,8 @@ def test_resnet_features_inference(device):
     assert set(file_names_idx) == set(file_names)
 
 
-@device_parametrize
-def test_resnet_classifier(device):
-    resnet = ResNet18ImageNetFeatures(device=device)
+def test_resnet_classifier(torch_device):
+    resnet = ResNet18ImageNetFeatures(device=torch_device)
     # Pretrained model
     resnet.load()
 
