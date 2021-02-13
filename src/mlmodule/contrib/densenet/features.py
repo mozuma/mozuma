@@ -1,8 +1,11 @@
 import torch
+import torchvision.models as m
 import torch.nn.functional as F
+from torch.hub import load_state_dict_from_url
 
 from mlmodule.torch.data.images import ImageDataset, TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 from mlmodule.contrib.densenet.base import BaseDenseNetPretrainedModule
+from mlmodule.torch.utils import torch_apply_state_to_partial_model
 
 
 class BaseDenseNetPretrainedFeatures(BaseDenseNetPretrainedModule):
@@ -42,6 +45,23 @@ class BaseDenseNetPretrainedFeatures(BaseDenseNetPretrainedModule):
 
     def get_dataset_transforms(self):
         return TORCHVISION_STANDARD_IMAGE_TRANSFORMS
+
+    def get_default_pretrained_state_dict(self):
+        """Returns the state dict for a pretrained densenet model
+        :return:
+        """
+        # Downloading state dictionary
+        if self.dataset == "places":
+            # URL: "http://places2.csail.mit.edu/models_places365/densenet161_places365.pth.tar"
+            model_path = 'densenet161_places_features.pth.tar'
+        else:
+            # URL: https://download.pytorch.org/models/densenet161-8d451a50.pth
+            model_path = 'densenet161_imagenet_features.pth.tar'
+        
+        pretrained_state_dict = torch.load(model_path, map_location=lambda storage, loc: storage)
+
+        # Removing deleted layers from state dict and updating the other with pretrained data
+        return torch_apply_state_to_partial_model(self, pretrained_state_dict)
 
     """
     TODO: Correct that I don't need to reimplement bulk_inference?
