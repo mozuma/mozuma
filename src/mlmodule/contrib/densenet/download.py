@@ -24,10 +24,8 @@ def download(model_name, url, fname):
     print("Downloading model")
     response = requests.get(url)
 
-    # If the response wasn't 200, return
-    if response.status_code != 200:
-        print(f"Error: received status code {response.status_code}")
-        return
+    # Check that the request returned a successful response
+    response.raise_for_status()
 
     # Extracting data from response
     print("Extracting data")
@@ -67,7 +65,7 @@ def download(model_name, url, fname):
         for k in surplus_keys:
             print(f'        {k}')
 
-        return
+        raise ValueError(f'State Dicts do not match. Missing: {missing_keys}. Surplus: {surplus_keys}')
 
     # Split into features and the classifier
     features_sd = {k: v for k, v in state_dict.items()
