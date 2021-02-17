@@ -8,7 +8,7 @@ class BaseDenseNetPretrainedClassifier(BaseDenseNetPretrainedModule, LabelsMixin
 
     def __init__(self, densenet_arch, dataset="imagenet", device=None):
         super().__init__(densenet_arch, dataset=dataset, device=device)
-        if dataset == "places":
+        if dataset == "places365":
             base_densenet = self.get_densenet_module(densenet_arch, num_classes=365)
         else:
             base_densenet = self.get_densenet_module(densenet_arch, num_classes=1000)
@@ -17,10 +17,7 @@ class BaseDenseNetPretrainedClassifier(BaseDenseNetPretrainedModule, LabelsMixin
         self.classifier = base_densenet.classifier
 
         # Set the state_dict_key
-        if dataset == "places":
-            self.state_dict_key = "pretrained-models/image-classification/places365/densenet161_classifier.pth.tar"
-        else:
-            self.state_dict_key = "pretrained-models/image-classification/imagenet/densenet161_classifier.pth.tar"
+        self.state_dict_key = f"pretrained-models/image-classification/{dataset}/{densenet_arch}_classifier.pth.tar"
 
     def forward(self, x):
         """Forward pass
@@ -31,7 +28,7 @@ class BaseDenseNetPretrainedClassifier(BaseDenseNetPretrainedModule, LabelsMixin
         return self.classifier(x)
 
     def get_labels(self):
-        return PlacesLabels() if self.dataset == "places" else ImageNetLabels()
+        return PlacesLabels() if self.dataset == "places365" else ImageNetLabels()
 
 
 class DenseNet161ImageNetClassifier(BaseDenseNetPretrainedClassifier):
@@ -43,4 +40,4 @@ class DenseNet161ImageNetClassifier(BaseDenseNetPretrainedClassifier):
 class DenseNet161PlacesClassifier(BaseDenseNetPretrainedClassifier):
 
     def __init__(self, device=None):
-        super().__init__("densenet161", dataset="places", device=device)
+        super().__init__("densenet161", dataset="places365", device=device)

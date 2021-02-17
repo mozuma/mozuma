@@ -7,7 +7,7 @@ from mlmodule.contrib.densenet.base import BaseDenseNetPretrainedModule
 
 class BaseDenseNetPretrainedFeatures(BaseDenseNetPretrainedModule):
     """
-    DenseNet feature extraction for similarity search
+    DenseNet feature extraction for similarity search.
     """
 
     def __init__(self, densenet_arch, dataset="imagenet", device=None):
@@ -15,10 +15,7 @@ class BaseDenseNetPretrainedFeatures(BaseDenseNetPretrainedModule):
         base_densenet = self.get_densenet_module(densenet_arch)
 
         # Set the state_dict_key
-        if dataset == "places":
-            self.state_dict_key = "pretrained-models/image-classification/places365/densenet161_features.pth.tar"
-        else:
-            self.state_dict_key = "pretrained-models/image-classification/imagenet/densenet161_features.pth.tar"
+        self.state_dict_key = f"pretrained-models/image-classification/{dataset}/{densenet_arch}_features.pth.tar"
 
         # TODO: Layer output selection
         """
@@ -63,4 +60,4 @@ class DenseNet161ImageNetFeatures(BaseDenseNetPretrainedFeatures):
 class DenseNet161PlacesFeatures(BaseDenseNetPretrainedFeatures):
 
     def __init__(self, device=None):
-        super().__init__("densenet161", dataset="places", device=device)
+        super().__init__("densenet161", dataset="places365", device=device)

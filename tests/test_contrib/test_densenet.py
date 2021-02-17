@@ -26,7 +26,7 @@ def test_densenet_imagenet_features_inference(device):
 
 
 @device_parametrize
-def test_densenet_imagenet_features_inference(device):
+def test_densenet_places365_features_inference(device):
     densenet = DenseNet161PlacesFeatures(device=device)
 
     # Pretrained model
@@ -83,7 +83,7 @@ def test_densenet_imagenet_classifier(device):
 
 
 @device_parametrize
-def test_densenet_places_classifier(device):
+def test_densenet_places365_classifier(device):
     densenet = DenseNet161PlacesFeatures(device=device)
         
     # Pretrained model

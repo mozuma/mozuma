@@ -11,10 +11,14 @@ class BaseDenseNetPretrainedModule(BaseTorchMLModule, TorchPretrainedModuleMixin
         """
         
         :param densenet_arch: One of {"densenet121", "densenet161", "densenet169", "densenet201"}
-        :param dataset: One of {"imageNet", "places"}. If "places", then densenet_arch must be
-            "densenet161".
+        :param dataset: One of {"imagenet", "places365"}.
         """
         super().__init__(device=device)
+
+        # Check input parameters
+        assert densenet_arch in ["densenet121", "densenet161", "densenet169", "densenet201"]
+        assert dataset in ["imagenet", "places365"]
+
         self.densenet_arch = densenet_arch
         self.dataset = dataset
         self.device = device
