@@ -20,7 +20,6 @@ class TorchPretrainedModuleMixin(object):
         :return:
         """
         # Set the profile so the correct keys are used
-        boto3.setup_default_session(profile_name='lsir-public-assets')
         s3 = boto3.resource('s3', endpoint_url="https://sos-ch-gva-2.exo.io")
         # Select lsir-public-assets bucket
         b = s3.Bucket('lsir-public-assets')
