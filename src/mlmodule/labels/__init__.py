@@ -1,1 +1,1 @@
-from mlmodule.labels.base import LabelsMixin, ImageNetLabels, PlacesLabels
+from mlmodule.labels.base import LabelsMixin, ImageNetLabels, PlacesLabels, PlacesIOLabels
