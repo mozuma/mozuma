@@ -1,9 +1,9 @@
-from mlmodule.base import BaseMLModule
 import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data.dataloader import DataLoader
 
+from mlmodule.base import BaseMLModule
 from mlmodule.torch.utils import generic_inference
 
 
@@ -21,7 +21,6 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
         """Loads model from file or from a default pretrained model if `fp=None`
 
         :param fp:
-        :param load_options:
         :return:
         """
 

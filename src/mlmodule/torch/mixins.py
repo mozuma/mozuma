@@ -1,4 +1,5 @@
 from io import BytesIO
+from typing import Dict, Optional, List, Callable, Any
 
 import boto3
 import torch
@@ -9,7 +10,13 @@ from mlmodule.torch.utils import torch_apply_state_to_partial_model
 
 class TorchPretrainedModuleMixin(object):
 
-    def get_default_pretrained_state_dict(self):
+    state_dict_key = None
+
+    def get_default_pretrained_state_dict(
+            self: torch.nn.Module,
+            aws_access_key_id: Optional[str] = None,
+            aws_secret_access_key: Optional[str] = None
+    ) -> Dict[str, torch.Tensor]:
         """
         Returns the state dict to apply to the current module to get a pretrained model.
 
@@ -35,7 +42,9 @@ class TorchPretrainedModuleMixin(object):
 
 class TorchDatasetTransformsMixin(object):
 
-    def add_transforms(self, transforms):
+    transforms = None
+
+    def add_transforms(self, transforms: List[Callable]) -> None:
         """Adding transforms to the list
 
         :param transforms:
@@ -43,7 +52,7 @@ class TorchDatasetTransformsMixin(object):
         """
         self.transforms += transforms
 
-    def apply_transforms(self, x):
+    def apply_transforms(self, x: Any) -> Any:
         """Applies the list of transforms to x
 
         :param x:
