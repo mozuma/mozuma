@@ -50,7 +50,7 @@ class BaseResNetImageNetFeatures(BaseResNetImageNetModule):
         :param data_loader_options:
         :return:
         """
-        return super().bulk_inference(data, batch_size=256, **data_loader_options)
+        return super().bulk_inference(data, batch_size=batch_size, **data_loader_options)
 
     def get_dataset_transforms(self):
         return TORCHVISION_STANDARD_IMAGE_TRANSFORMS

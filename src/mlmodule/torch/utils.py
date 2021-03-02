@@ -42,6 +42,7 @@ def generic_inference(model, data_loader, inference_func, result_handler, device
             # Sending data on device
             batch = batch.to(device)
             acc_results = result_handler(acc_results, indices, inference_func(batch))
+            logger.debug(f"Collecting results: {batch_n}")
 
     # Returning accumulated results
     return acc_results
