@@ -8,17 +8,10 @@ from mlmodule.labels.base import LabelSet, IndoorOutdoorLabels
 
 class PlacesIOClassifier(BaseMLModule, LabelsMixin):
 
-    def __init__(self, k=10):
+    def __init__(self, k=10, **_):
         super().__init__()
         self.labels_io = PlacesIOLabels()
         self.k = k
-
-    @classmethod
-    def load(cls, fp=None):
-        pass
-
-    def dump(self, fp):
-        pass
 
     def bulk_inference(self, data):
         """Performs inference for all the given data points

@@ -5,11 +5,11 @@ import torch
 import torch.nn as nn
 from torch.utils.data.dataloader import DataLoader
 
-from mlmodule.base import BaseMLModule
+from mlmodule.base import BaseMLModule, LoadDumpMixin
 from mlmodule.torch.utils import generic_inference
 
 
-class BaseTorchMLModule(BaseMLModule, nn.Module):
+class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin):
 
     def __init__(self, device=None):
         super().__init__()
