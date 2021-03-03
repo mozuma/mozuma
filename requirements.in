@@ -1,4 +1,5 @@
 boto3
+scipy
 torch
 torchvision
 facenet-pytorch

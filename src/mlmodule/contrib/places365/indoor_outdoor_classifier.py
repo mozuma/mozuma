@@ -1,13 +1,17 @@
 import numpy as np
+from scipy.special import softmax
 
 from mlmodule.base import BaseMLModule
-from mlmodule.labels import PlacesIOLabels
+from mlmodule.labels import PlacesIOLabels, LabelsMixin
+from mlmodule.labels.base import LabelSet, IndoorOutdoorLabels
 
-class PlacesIOClassifier(BaseMLModule):
 
-    def __init__(self):
+class PlacesIOClassifier(BaseMLModule, LabelsMixin):
+
+    def __init__(self, k=10):
         super().__init__()
         self.labels_io = PlacesIOLabels()
+        self.k = k
 
     @classmethod
     def load(cls, fp=None):
@@ -20,17 +24,16 @@ class PlacesIOClassifier(BaseMLModule):
         """Performs inference for all the given data points
 
         :param data: np.ndarray(n, 365). Output of classifier trained on Places365 for n images
-        :return: np.ndarray(n, ). Whether each image is predicted to be outdoors (0) or indoors (1)
+        :return: np.ndarray(n, 2). Each image is assigned a probability of
+         being indoor in position 0 and outdoor in position 1
         """
-        # TODO: should we set k as a method parameter
-        k = 10
 
         # As we don't care about the actual values (only which ones are the largest),
         # it doesn't matter if a softmax was computed on the output of the classifier
 
         # Numpy equivalent of _, idx = torch.topk(data)
         # Returns the k indices with the highest values for each row
-        topk_idx = np.argpartition(data, -k, axis=1)[:, -k:]
+        topk_idx = np.argpartition(softmax(data, axis=1), -self.k, axis=1)[:, -self.k:]
 
         # Map each class in each row to either indoor (0) or outdoor (1)
         def cls_to_io(arr):
@@ -41,7 +44,7 @@ class PlacesIOClassifier(BaseMLModule):
         # Compute the mean number for each row
         mean_io = np.apply_along_axis(np.mean, 1, topk_io)
 
-        # If more than half the labels indicate that the image is indoors, return indoors
-        indoors = (mean_io < 0.5).astype(int)
+        return np.vstack((1-mean_io, mean_io)).T
 
-        return indoors
+    def get_labels(self) -> LabelSet:
+        return IndoorOutdoorLabels()

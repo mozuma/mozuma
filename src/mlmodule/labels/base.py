@@ -1,14 +1,14 @@
+from typing import List
+
 from mlmodule.labels.imagenet import IMAGENET_LABELS
 from mlmodule.labels.places import PLACES_LABELS
-from mlmodule.labels.places_io import PLACES_IO_LABELS
+from mlmodule.labels.places_io import PLACES_IO_LABELS, PLACES_IN_OUT_DOOR
 
 
 class LabelSet(object):
     # Must uniquely define this label set
-    __label_set_name__ = None
-
-    def __init__(self, label_list: list):
-        self.label_list = label_list
+    __label_set_name__: str = None
+    label_list: List[str] = None
 
     def __getitem__(self, item):
         return self.label_list[item]
@@ -19,23 +19,22 @@ class LabelSet(object):
 
 class ImageNetLabels(LabelSet):
     __label_set_name__ = 'imagenet'
-
-    def __init__(self):
-        super().__init__([IMAGENET_LABELS[i] for i in range(len(IMAGENET_LABELS))])
+    label_list = IMAGENET_LABELS
 
 
 class PlacesLabels(LabelSet):
     __label_set_name__ = 'places'
-
-    def __init__(self):
-        super().__init__([PLACES_LABELS[i] for i in range(len(PLACES_LABELS))])
+    label_list = PLACES_LABELS
 
 
 class PlacesIOLabels(LabelSet):
     __label_set_name__ = 'places_io'
+    label_list = PLACES_IO_LABELS
 
-    def __init__(self):
-        super().__init__([PLACES_IO_LABELS[i] for i in range(len(PLACES_IO_LABELS))])
+
+class IndoorOutdoorLabels(LabelSet):
+    __label_set_name__ = "in_out_door"
+    label_list = PLACES_IN_OUT_DOOR
 
 
 class LabelsMixin(object):

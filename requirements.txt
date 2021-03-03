@@ -35,6 +35,7 @@ jmespath==0.10.0
 numpy==1.20.1
     # via
     #   facenet-pytorch
+    #   scipy
     #   torch
     #   torchvision
 packaging==20.9
@@ -59,6 +60,8 @@ requests==2.25.1
     # via facenet-pytorch
 s3transfer==0.3.4
     # via boto3
+scipy==1.6.1
+    # via -r requirements.in
 six==1.15.0
     # via python-dateutil
 toml==0.10.2
@@ -79,6 +82,8 @@ urllib3==1.26.3
     # via
     #   botocore
     #   requests
+wheel==0.36.2
+    # via -r requirements.in
 zipp==3.4.0
     # via importlib-metadata
 

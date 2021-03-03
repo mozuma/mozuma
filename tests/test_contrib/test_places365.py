@@ -1,6 +1,8 @@
-from conftest import device_parametrize
 import os
 
+import numpy as np
+
+from conftest import device_parametrize
 from mlmodule.contrib.densenet import DenseNet161PlacesFeatures, DenseNet161PlacesClassifier
 from mlmodule.contrib.places365 import PlacesIOClassifier
 from mlmodule.torch.data.base import IndexedDataset
@@ -33,20 +35,20 @@ def test_places365_50_images(device):
     # Loading the IO Classifier
     io_classifier = PlacesIOClassifier()
     # Evaluating for each image
-    indoors = io_classifier.bulk_inference(predictions)
+    probs = io_classifier.bulk_inference(predictions)
 
     # Collecting classes with filenames
-    file_class = dict(zip(file_names_idx, indoors))
+    file_class = dict(zip(file_names_idx, np.argmax(probs, axis=1)))
 
     # Making sure we have all input classified
     assert set(file_names) == set(file_names_idx)
 
-    # Verifying a couple of output labels
-    assert file_class[os.path.join(base_path, "cat_90.jpg")] == 1
-    assert file_class[os.path.join(base_path, "cat_951.jpg")] == 1
-    assert file_class[os.path.join(base_path, "cat_960.jpg")] == 1
-    assert file_class[os.path.join(base_path, "dog_941.jpg")] == 1
-    assert file_class[os.path.join(base_path, "dog_910.jpg")] == 0
-    assert file_class[os.path.join(base_path, "dog_921.jpg")] == 0
-    assert file_class[os.path.join(base_path, "dog_961.jpg")] == 0
-    assert file_class[os.path.join(base_path, "dog_970.jpg")] == 0
+    # Verifying a couple of output labels indoor=0 / outdoor=1
+    assert file_class[os.path.join(base_path, "cat_90.jpg")] == 0
+    assert file_class[os.path.join(base_path, "cat_951.jpg")] == 0
+    assert file_class[os.path.join(base_path, "cat_960.jpg")] == 0
+    assert file_class[os.path.join(base_path, "dog_941.jpg")] == 0
+    assert file_class[os.path.join(base_path, "dog_910.jpg")] == 1
+    assert file_class[os.path.join(base_path, "dog_921.jpg")] == 1
+    assert file_class[os.path.join(base_path, "dog_9001.jpg")] == 1
+    assert file_class[os.path.join(base_path, "dog_970.jpg")] == 1
