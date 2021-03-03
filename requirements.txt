@@ -6,6 +6,12 @@
 #
 attrs==20.3.0
     # via pytest
+boto3==1.17.18
+    # via -r requirements.in
+botocore==1.20.18
+    # via
+    #   boto3
+    #   s3transfer
 certifi==2020.12.5
     # via requests
 chardet==4.0.0
@@ -16,20 +22,25 @@ facenet-pytorch==2.5.1
     # via -r requirements.in
 idna==2.10
     # via requests
-importlib-metadata==3.4.0
+importlib-metadata==3.7.0
     # via
     #   pluggy
     #   pytest
 iniconfig==1.1.1
     # via pytest
-numpy==1.19.5
+jmespath==0.10.0
+    # via
+    #   boto3
+    #   botocore
+numpy==1.20.1
     # via
     #   facenet-pytorch
+    #   scipy
     #   torch
     #   torchvision
-packaging==20.8
+packaging==20.9
     # via pytest
-pillow==8.1.0
+pillow==8.1.1
     # via
     #   facenet-pytorch
     #   torchvision
@@ -43,24 +54,36 @@ pyparsing==2.4.7
     # via packaging
 pytest==6.2.2
     # via -r requirements.in
+python-dateutil==2.8.1
+    # via botocore
 requests==2.25.1
     # via facenet-pytorch
+s3transfer==0.3.4
+    # via boto3
+scipy==1.6.1
+    # via -r requirements.in
 six==1.15.0
-    # via torchvision
+    # via python-dateutil
 toml==0.10.2
     # via pytest
-torch==1.2.0
+torch==1.7.1
     # via
     #   -r requirements.in
     #   torchvision
-torchvision==0.4.0
+torchvision==0.8.2
     # via
     #   -r requirements.in
     #   facenet-pytorch
 typing-extensions==3.7.4.3
-    # via importlib-metadata
+    # via
+    #   importlib-metadata
+    #   torch
 urllib3==1.26.3
-    # via requests
+    # via
+    #   botocore
+    #   requests
+wheel==0.36.2
+    # via -r requirements.in
 zipp==3.4.0
     # via importlib-metadata
 

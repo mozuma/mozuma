@@ -17,7 +17,7 @@ class BaseResNetImageNetModule(BaseTorchMLModule, TorchPretrainedModuleMixin):
         # Getting the ResNet architecture https://pytorch.org/docs/stable/torchvision/models.html
         return getattr(m, resnet_arch)()
 
-    def get_default_pretrained_state_dict(self):
+    def get_default_pretrained_state_dict(self, **_opts):
         """Returns the state dict for a pretrained resnet model
         :return:
         """

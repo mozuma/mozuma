@@ -1,6 +1,9 @@
-torch==1.2.0
-torchvision==0.4.0
+boto3
+scipy
+torch
+torchvision
 facenet-pytorch
+wheel
 
 # Development
 pytest

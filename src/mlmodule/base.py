@@ -3,13 +3,7 @@ from io import BytesIO
 import numpy as np
 
 
-class BaseMLModule(object):
-    # Used for the to_binary / from_binary.
-    # If None, the objects returned by `bulk_inference` will be serialized with numpy.save without pickle
-    # Otherwise, it should contain a namedtuple definition, the bulk_inference returns a list of these namedtuple
-    # In order for `to_binary` to work, the elements of the namedtuple
-    # should be serializable with numpy.save without pickle
-    __result_struct__ = None
+class LoadDumpMixin(object):
 
     @classmethod
     def load(cls, fp=None):
@@ -27,6 +21,15 @@ class BaseMLModule(object):
         :return:
         """
         raise NotImplementedError()
+
+
+class BaseMLModule(object):
+    # Used for the to_binary / from_binary.
+    # If None, the objects returned by `bulk_inference` will be serialized with numpy.save without pickle
+    # Otherwise, it should contain a namedtuple definition, the bulk_inference returns a list of these namedtuple
+    # In order for `to_binary` to work, the elements of the namedtuple
+    # should be serializable with numpy.save without pickle
+    __result_struct__ = None
 
     def bulk_inference(self, data):
         """Performs inference for all the given data points
@@ -61,7 +64,6 @@ class BaseMLModule(object):
         """Used to store the result of bulk inference in binary format
 
         :param result_item:
-        :param result_struct: Optional structure of the result item
         :return:
         """
         if cls.__result_struct__ is not None:
