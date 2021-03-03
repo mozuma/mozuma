@@ -35,7 +35,7 @@ def test_places365_50_images(device):
     # Loading the IO Classifier
     io_classifier = PlacesIOClassifier()
     # Evaluating for each image
-    probs = io_classifier.bulk_inference(predictions)
+    file_names_idx, probs = io_classifier.bulk_inference(IndexedDataset(file_names_idx, predictions))
 
     # Collecting classes with filenames
     file_class = dict(zip(file_names_idx, np.argmax(probs, axis=1)))

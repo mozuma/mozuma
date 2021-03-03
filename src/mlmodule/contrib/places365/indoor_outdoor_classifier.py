@@ -13,7 +13,7 @@ class PlacesIOClassifier(BaseMLModule, LabelsMixin):
         self.labels_io = PlacesIOLabels()
         self.k = k
 
-    def bulk_inference(self, data):
+    def bulk_inference(self, data, **_):
         """Performs inference for all the given data points
 
         :param data: np.ndarray(n, 365). Output of classifier trained on Places365 for n images
@@ -26,7 +26,8 @@ class PlacesIOClassifier(BaseMLModule, LabelsMixin):
 
         # Numpy equivalent of _, idx = torch.topk(data)
         # Returns the k indices with the highest values for each row
-        topk_idx = np.argpartition(softmax(data, axis=1), -self.k, axis=1)[:, -self.k:]
+        idx, probs = list(zip(*data))
+        topk_idx = np.argpartition(softmax(np.array(probs), axis=1), -self.k, axis=1)[:, -self.k:]
 
         # Map each class in each row to either indoor (0) or outdoor (1)
         def cls_to_io(arr):
@@ -37,7 +38,7 @@ class PlacesIOClassifier(BaseMLModule, LabelsMixin):
         # Compute the mean number for each row
         mean_io = np.apply_along_axis(np.mean, 1, topk_io)
 
-        return np.vstack((1-mean_io, mean_io)).T
+        return idx, np.vstack((1-mean_io, mean_io)).T
 
     def get_labels(self) -> LabelSet:
         return IndoorOutdoorLabels()
