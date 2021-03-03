@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -17,9 +19,10 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
     def _resolve_device(cls):
         return torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-    def load(self, fp=None):
+    def load(self, fp=None, pretrained_getter_opts: Dict[str, Any] = None):
         """Loads model from file or from a default pretrained model if `fp=None`
 
+        :param pretrained_getter_opts: Passed to get_default_pretrained_dict
         :param fp:
         :return:
         """
@@ -31,7 +34,7 @@ class BaseTorchMLModule(BaseMLModule, nn.Module):
         else:
             # Getting default pretrained state dict
             # Requires TorchPretrainedModuleMixin to be implemented
-            state = self.get_default_pretrained_state_dict()
+            state = self.get_default_pretrained_state_dict(**(pretrained_getter_opts or {}))
 
         # Loading state
         self.load_state_dict(state)
