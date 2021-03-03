@@ -29,8 +29,6 @@ def test_places365_50_images(device):
     densenet_cls.load()
     # Running inference
     file_names_idx, predictions = densenet_cls.bulk_inference(features)
-    # Exporting the predictions to numpy
-    predictions = predictions.cpu().detach().numpy()
 
     # Loading the IO Classifier
     io_classifier = PlacesIOClassifier()

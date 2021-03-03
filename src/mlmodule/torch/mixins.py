@@ -26,7 +26,13 @@ class TorchPretrainedModuleMixin(object):
 
         :return:
         """
-        s3 = boto3.resource('s3', endpoint_url="https://sos-ch-gva-2.exo.io")
+        s3 = boto3.resource(
+            's3',
+            endpoint_url="https://sos-ch-gva-2.exo.io",
+            # Optionally using the provided credentials
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key
+        )
         # Select lsir-public-assets bucket
         b = s3.Bucket('lsir-public-assets')
 
