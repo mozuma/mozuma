@@ -1,11 +1,13 @@
 import logging
 import torch
-
+from typing import Dict
 
 logger = logging.getLogger(__name__)
 
 
-def torch_apply_state_to_partial_model(partial_model, pretrained_state_dict):
+def torch_apply_state_to_partial_model(
+        partial_model: torch.nn.Module,
+        pretrained_state_dict: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
     """Creates a new state dict by updating the partial_model state with matching parameters of pretrained_state_dict
 
     See https://discuss.pytorch.org/t/how-to-load-part-of-pre-trained-model/1113/3
