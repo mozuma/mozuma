@@ -1,4 +1,3 @@
-from conftest import device_parametrize
 import os
 
 from mlmodule.contrib.densenet import DenseNet161ImageNetFeatures, DenseNet161PlacesFeatures, \
@@ -8,9 +7,8 @@ from mlmodule.torch.data.images import ImageDataset
 from mlmodule.utils import list_files_in_dir
 
 
-@device_parametrize
-def test_densenet_imagenet_features_inference(device):
-    densenet = DenseNet161ImageNetFeatures(device=device)
+def test_densenet_imagenet_features_inference(torch_device):
+    densenet = DenseNet161ImageNetFeatures(device=torch_device)
 
     # Pretrained model
     densenet.load()
@@ -25,9 +23,8 @@ def test_densenet_imagenet_features_inference(device):
     assert set(file_names_idx) == set(file_names)
 
 
-@device_parametrize
-def test_densenet_places365_features_inference(device):
-    densenet = DenseNet161PlacesFeatures(device=device)
+def test_densenet_places365_features_inference(torch_device):
+    densenet = DenseNet161PlacesFeatures(device=torch_device)
 
     # Pretrained model
     densenet.load()
@@ -42,9 +39,8 @@ def test_densenet_places365_features_inference(device):
     assert set(file_names_idx) == set(file_names)
 
 
-@device_parametrize
-def test_densenet_imagenet_classifier(device):
-    densenet = DenseNet161ImageNetFeatures(device=device)
+def test_densenet_imagenet_classifier(torch_device):
+    densenet = DenseNet161ImageNetFeatures(device=torch_device)
         
     # Pretrained model
     densenet.load()
@@ -82,9 +78,8 @@ def test_densenet_imagenet_classifier(device):
     assert file_class[os.path.join(base_path, "dog_900.jpg")] == 'Labrador retriever'
 
 
-@device_parametrize
-def test_densenet_places365_classifier(device):
-    densenet = DenseNet161PlacesFeatures(device=device)
+def test_densenet_places365_classifier(torch_device):
+    densenet = DenseNet161PlacesFeatures(device=torch_device)
         
     # Pretrained model
     densenet.load()

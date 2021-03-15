@@ -2,7 +2,6 @@ import os
 
 import numpy as np
 
-from conftest import device_parametrize
 from mlmodule.contrib.densenet import DenseNet161PlacesFeatures, DenseNet161PlacesClassifier
 from mlmodule.contrib.places365 import PlacesIOClassifier
 from mlmodule.torch.data.base import IndexedDataset
@@ -10,10 +9,9 @@ from mlmodule.torch.data.images import ImageDataset
 from mlmodule.utils import list_files_in_dir
 
 
-@device_parametrize
-def test_places365_50_images(device):
+def test_places365_50_images(torch_device):
     # Load Pretrained model
-    densenet = DenseNet161PlacesFeatures(device=device)
+    densenet = DenseNet161PlacesFeatures(device=torch_device)
     densenet.load()
 
     # Getting data
