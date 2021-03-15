@@ -1,6 +1,8 @@
 import pytest
 import torch
 
+from mlmodule.contrib.densenet import DenseNet161ImageNetFeatures, DenseNet161ImageNetClassifier, \
+    DenseNet161PlacesFeatures, DenseNet161PlacesClassifier
 from mlmodule.contrib.resnet import ResNet18ImageNetFeatures, ResNet18ImageNetClassifier
 
 
@@ -18,7 +20,11 @@ def torch_device(request):
 
 @pytest.fixture(params=[
     ResNet18ImageNetFeatures,
-    ResNet18ImageNetClassifier
+    ResNet18ImageNetClassifier,
+    DenseNet161ImageNetFeatures,
+    DenseNet161ImageNetClassifier,
+    DenseNet161PlacesFeatures,
+    DenseNet161PlacesClassifier
 ])
 def data_platform_scanner(request):
     """Fixture for generic tests of Modules to be used in the data platform
