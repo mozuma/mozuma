@@ -53,7 +53,7 @@ def test_text_encoding(torch_device, clip_model_name):
 
     # Getting the encoded data from Clip
     model, preprocess = clip.load(clip_model_name, device=torch_device, jit=False)
-    text = clip.tokenize(data)
+    text = clip.tokenize(data).to(torch_device)
     with torch.no_grad():
         clip_output = model.encode_text(text).cpu().numpy()
 
@@ -74,7 +74,7 @@ def test_image_encoding(torch_device, clip_model_name):
     model, preprocess = clip.load(clip_model_name, device=torch_device, jit=False)
     image = preprocess(Image.open(file_names[0])).unsqueeze(0).to(torch_device)
     with torch.no_grad():
-        clip_output = model.encode_image(image)
+        clip_output = model.encode_image(image).cpu().numpy()
 
     # Getting the encoded data from MLModule CLIP
     ml_clip: BaseCLIPModule = CLIP_MODULE_MAP["image"][clip_model_name](device=torch_device)
