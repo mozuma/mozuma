@@ -1,4 +1,12 @@
 
+## Requirements
+
+This needs mlmodule with the clip and torch extra requirements:
+
+```
+pip install git+ssh://git@github.com/LSIR/mlmodule.git[torch,clip]
+```
+
 ## Download CLIP models on PC32
 
 ```bash
