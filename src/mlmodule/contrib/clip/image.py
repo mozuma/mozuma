@@ -35,8 +35,10 @@ class CLIPImageEncoder(BaseCLIPModule):
         # Populating image encoder attributes
         self.visual = clip_module.visual
 
+        self.convert_weights()
+
     def forward(self, images):
-        return self.visual(images)
+        return self.visual(images.type(self._dtype))
 
     def get_dataset_transforms(self):
         return [get_image_transform(self.visual.input_resolution)]
