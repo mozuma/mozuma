@@ -22,7 +22,8 @@ setup(
     install_requires=[
     ],
     extras_require={
-        'torch': ['torch', 'torchvision']
+        'torch': ['torch', 'torchvision'],
+        'clip': ['ftfy', 'regex', 'tqdm', 'clip @ git+https://github.com/openai/CLIP.git']
     },
     setup_requires=[
         'pytest-runner',

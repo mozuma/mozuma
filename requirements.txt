@@ -4,6 +4,8 @@
 #
 #    pip-compile
 #
+apipkg==1.5
+    # via execnet
 attrs==20.3.0
     # via pytest
 boto3==1.17.18
@@ -18,8 +20,16 @@ chardet==4.0.0
     # via requests
 click==7.1.2
     # via pip-tools
+git+https://github.com/openai/CLIP.git@beba48f35392a73c6c47ae67ddffced81ad1916d
+    # via -r requirements.in
+execnet==1.8.0
+    # via pytest-xdist
 facenet-pytorch==2.5.1
     # via -r requirements.in
+ftfy==5.9
+    # via
+    #   -r requirements.in
+    #   clip
 idna==2.10
     # via requests
 importlib-metadata==3.7.0
@@ -48,14 +58,29 @@ pip-tools==5.5.0
     # via -r requirements.in
 pluggy==0.13.1
     # via pytest
+psutil==5.8.0
+    # via pytest-xdist
 py==1.10.0
-    # via pytest
+    # via
+    #   pytest
+    #   pytest-forked
 pyparsing==2.4.7
     # via packaging
-pytest==6.2.2
+pytest-forked==1.3.0
+    # via pytest-xdist
+pytest-xdist[psutil]==2.2.1
     # via -r requirements.in
+pytest==6.2.2
+    # via
+    #   -r requirements.in
+    #   pytest-forked
+    #   pytest-xdist
 python-dateutil==2.8.1
     # via botocore
+regex==2020.11.13
+    # via
+    #   -r requirements.in
+    #   clip
 requests==2.25.1
     # via facenet-pytorch
 s3transfer==0.3.4
@@ -69,11 +94,17 @@ toml==0.10.2
 torch==1.7.1
     # via
     #   -r requirements.in
+    #   clip
     #   torchvision
 torchvision==0.8.2
     # via
     #   -r requirements.in
+    #   clip
     #   facenet-pytorch
+tqdm==4.59.0
+    # via
+    #   -r requirements.in
+    #   clip
 typing-extensions==3.7.4.3
     # via
     #   importlib-metadata
@@ -82,6 +113,8 @@ urllib3==1.26.3
     # via
     #   botocore
     #   requests
+wcwidth==0.2.5
+    # via ftfy
 wheel==0.36.2
     # via -r requirements.in
 zipp==3.4.0
