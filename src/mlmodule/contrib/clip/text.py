@@ -1,3 +1,4 @@
+"""CLIP text encoder"""
 __all__ = (
     'CLIPTextEncoder',
     'CLIPResNet50TextEncoder',
@@ -6,7 +7,7 @@ __all__ = (
     'CLIPViTB32TextEncoder'
 )
 
-from typing import Optional
+from typing import Optional, List, Callable
 
 import clip
 import torch
@@ -15,10 +16,13 @@ from mlmodule.contrib.clip.base import BaseCLIPModule
 
 
 def tokenize_single(text: str) -> torch.LongTensor:
+    """Takes a str and returns its tokenized version"""
     return clip.tokenize(text)[0]
 
 
 class CLIPTextEncoder(BaseCLIPModule):
+    """Text encoder of CLIP model"""
+    model_type = "text"
 
     def __init__(self, device: Optional[torch.device] = None):
         super().__init__(device=device)
@@ -36,7 +40,8 @@ class CLIPTextEncoder(BaseCLIPModule):
 
         self.convert_weights()
 
-    def forward(self, text):
+    def forward(self, text: torch.Tensor) -> torch.Tensor:
+        """Apply text encoder on tokens"""
         x = self.token_embedding(text).type(self._dtype)  # [batch_size, n_ctx, d_model]
 
         x = x + self.positional_embedding.type(self._dtype)
@@ -51,21 +56,26 @@ class CLIPTextEncoder(BaseCLIPModule):
 
         return x
 
-    def get_dataset_transforms(self):
+    def get_dataset_transforms(self) -> List[Callable]:
+        """Dataset transforms (tokenizer)"""
         return [tokenize_single]
 
 
 class CLIPResNet50TextEncoder(CLIPTextEncoder):
+    """CLIP text encoder - ResNet50"""
     clip_model_name = "RN50"
 
 
 class CLIPResNet101TextEncoder(CLIPTextEncoder):
+    """CLIP text encoder - ResNet101"""
     clip_model_name = "RN101"
 
 
 class CLIPResNet50x4TextEncoder(CLIPTextEncoder):
+    """CLIP text encoder - ResNet50x4"""
     clip_model_name = "RN50x4"
 
 
 class CLIPViTB32TextEncoder(CLIPTextEncoder):
+    """CLIP text encoder - ViT-B/32"""
     clip_model_name = "ViT-B/32"

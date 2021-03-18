@@ -1,3 +1,4 @@
+"""CLIP image encoders"""
 __all__ = (
     'CLIPImageEncoder',
     'CLIPResNet50ImageEncoder',
@@ -6,7 +7,7 @@ __all__ = (
     'CLIPViTB32ImageEncoder',
 )
 
-from typing import Optional
+from typing import Optional, List, Callable
 
 import torch
 from PIL import Image
@@ -15,7 +16,8 @@ from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normal
 from mlmodule.contrib.clip.base import BaseCLIPModule
 
 
-def get_image_transform(src_pixel_size):
+def get_image_transform(src_pixel_size: int):
+    """Image transforms for CLIP Image encoder"""
     return Compose([
         Resize(src_pixel_size, interpolation=Image.BICUBIC),
         CenterCrop(src_pixel_size),
@@ -26,6 +28,8 @@ def get_image_transform(src_pixel_size):
 
 
 class CLIPImageEncoder(BaseCLIPModule):
+    """Image encoder of the CLIP model"""
+    model_type = "image"
 
     def __init__(self, device: Optional[torch.device] = None):
         super().__init__(device=device)
@@ -37,24 +41,30 @@ class CLIPImageEncoder(BaseCLIPModule):
 
         self.convert_weights()
 
-    def forward(self, images):
+    def forward(self, images: torch.Tensor) -> torch.Tensor:
+        """Apply the image encoder"""
         return self.visual(images.type(self._dtype))
 
-    def get_dataset_transforms(self):
+    def get_dataset_transforms(self) -> List[Callable]:
+        """Dataset transform to resize and preprocess images"""
         return [get_image_transform(self.visual.input_resolution)]
 
 
 class CLIPResNet50ImageEncoder(CLIPImageEncoder):
+    """CLIP Image encoder - ResNet50"""
     clip_model_name = "RN50"
 
 
 class CLIPResNet101ImageEncoder(CLIPImageEncoder):
+    """CLIP Image encoder - ResNet101"""
     clip_model_name = "RN101"
 
 
 class CLIPResNet50x4ImageEncoder(CLIPImageEncoder):
+    """CLIP Image encoder - ResNet50x4"""
     clip_model_name = "RN50x4"
 
 
 class CLIPViTB32ImageEncoder(CLIPImageEncoder):
+    """CLIP Image encoder - ViT-B/32"""
     clip_model_name = "ViT-B/32"

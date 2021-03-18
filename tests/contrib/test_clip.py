@@ -5,6 +5,7 @@ import pytest
 import torch
 import clip
 from PIL import Image
+from _pytest.fixtures import SubRequest
 
 from mlmodule.contrib.clip import CLIPResNet50TextEncoder, CLIPResNet101TextEncoder, CLIPResNet50x4TextEncoder, \
     CLIPViTB32TextEncoder, CLIPViTB32ImageEncoder, CLIPResNet50x4ImageEncoder, CLIPResNet101ImageEncoder, \
@@ -29,12 +30,13 @@ CLIP_MODULE_MAP = {
 
 
 @pytest.fixture(params=clip.available_models())
-def clip_model_name(request):
+def clip_model_name(request: SubRequest):
+    """List all available CLIP model names"""
     return request.param
 
 
 @pytest.mark.parametrize('encoder_type', CLIP_MODULE_MAP.keys())
-def test_state_dict(torch_device, clip_model_name, encoder_type):
+def test_state_dict(torch_device: torch.device, clip_model_name: str, encoder_type: str):
     model: torch.nn.Module
     model, _ = clip.load(clip_model_name, device=torch_device, jit=False)
     ml_clip: BaseTorchMLModule = CLIP_MODULE_MAP[encoder_type][clip_model_name](device=torch_device)
@@ -49,7 +51,7 @@ def test_state_dict(torch_device, clip_model_name, encoder_type):
            {k: v.sum() for k, v in dict2.items()}
 
 
-def test_text_encoding(torch_device, clip_model_name):
+def test_text_encoding(torch_device: torch.device, clip_model_name: str):
     data = ["a dog", "a cat"]
 
     # Getting the encoded data from Clip
@@ -59,15 +61,13 @@ def test_text_encoding(torch_device, clip_model_name):
         clip_output = model.encode_text(text).cpu().numpy()
 
     # Getting encoded data from MLModule CLIP
-    ml_clip: BaseCLIPModule = CLIP_MODULE_MAP["text"][clip_model_name](device=torch_device)
-    # TODO: Change to normal load
-    ml_clip.load_state_dict(ml_clip.get_default_pretrained_state_dict_from_provider())
+    ml_clip: BaseCLIPModule = CLIP_MODULE_MAP["text"][clip_model_name](device=torch_device).load()
     idx, ml_clip_output = ml_clip.bulk_inference(IndexedDataset(list(range(len(data))), data))
 
     np.testing.assert_allclose(clip_output, ml_clip_output, rtol=1e-2)
 
 
-def test_image_encoding(torch_device, clip_model_name):
+def test_image_encoding(torch_device: torch.device, clip_model_name: str):
     file_names = [os.path.join("tests", "fixtures", "cats_dogs", "cat_0.jpg")]
     dataset = ImageDataset(file_names)
 
@@ -78,9 +78,7 @@ def test_image_encoding(torch_device, clip_model_name):
         clip_output = model.encode_image(image).cpu().numpy()
 
     # Getting the encoded data from MLModule CLIP
-    ml_clip: BaseCLIPModule = CLIP_MODULE_MAP["image"][clip_model_name](device=torch_device)
-    # TODO: Change to normal load
-    ml_clip.load_state_dict(ml_clip.get_default_pretrained_state_dict_from_provider())
+    ml_clip: BaseCLIPModule = CLIP_MODULE_MAP["image"][clip_model_name](device=torch_device).load()
     idx, ml_clip_output = ml_clip.bulk_inference(dataset)
 
     np.testing.assert_allclose(clip_output, ml_clip_output, rtol=1e-2)

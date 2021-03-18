@@ -1,3 +1,6 @@
+"""
+Base classes for CLIP implementation
+"""
 from typing import Dict
 
 import clip
@@ -12,14 +15,30 @@ from mlmodule.torch.utils import torch_apply_state_to_partial_model
 
 
 class BaseCLIPModule(BaseTorchMLModule, TorchPretrainedModuleMixin):
+    """
+    Base class for CLIP modules
+    """
     clip_model_name = None
+    model_type = None   # image or text
 
-    def __init__(self, device=None):
+    def __init__(self, device: torch.device = None):
         super().__init__(device=device)
         if self.device == torch.device("cpu"):
             self._dtype = torch.float32
         else:
             self._dtype = torch.float16
+
+    @property
+    def url_safe_clip_model_name(self) -> str:
+        """Clip model name used in lsir public assets"""
+        return self.clip_model_name.lower().replace("/", "")
+
+    @property
+    def state_dict_key(self) -> str:
+        """Key in LSIR public asset bucket to download model"""
+        return f"pretrained-models/" \
+               f"{self.model_type}-encoder/" \
+               f"clip-{self.url_safe_clip_model_name}-{self.model_type}.pt"
 
     def convert_weights(self: nn.Module):
         """
@@ -33,21 +52,23 @@ class BaseCLIPModule(BaseTorchMLModule, TorchPretrainedModuleMixin):
         """
 
         if self.device != torch.device('cpu'):
-            def _convert_weights_to_fp16(l):
-                if isinstance(l, (nn.Conv1d, nn.Conv2d, nn.Linear)):
-                    l.weight.data = l.weight.data.half()
-                    if l.bias is not None:
-                        l.bias.data = l.bias.data.half()
+            def _convert_weights_to_fp16(layer: nn.Module):
+                if isinstance(layer, (nn.Conv1d, nn.Conv2d, nn.Linear)):
+                    layer.weight.data = layer.weight.data.half()
+                    if layer.bias is not None:
+                        layer.bias.data = layer.bias.data.half()
 
-                if isinstance(l, nn.MultiheadAttention):
-                    for attr in [*[f"{s}_proj_weight" for s in ["in", "q", "k", "v"]], "in_proj_bias", "bias_k", "bias_v"]:
-                        tensor = getattr(l, attr)
+                if isinstance(layer, nn.MultiheadAttention):
+                    for attr in [
+                        *[f"{s}_proj_weight" for s in ["in", "q", "k", "v"]], "in_proj_bias", "bias_k", "bias_v"
+                    ]:
+                        tensor = getattr(layer, attr)
                         if tensor is not None:
                             tensor.data = tensor.data.half()
 
                 for name in ["text_projection", "proj"]:
-                    if hasattr(l, name):
-                        attr = getattr(l, name)
+                    if hasattr(layer, name):
+                        attr = getattr(layer, name)
                         if attr is not None:
                             attr.data = attr.data.half()
 
@@ -57,7 +78,6 @@ class BaseCLIPModule(BaseTorchMLModule, TorchPretrainedModuleMixin):
     def _get_clip_module(cls) -> CLIP:
         """Returns the CLIP architecture
 
-        :param model_name:
         :return:
         """
         return CLIP(*PARAMETERS[cls.clip_model_name].values())
