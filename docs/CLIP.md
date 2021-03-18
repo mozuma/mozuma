@@ -1,3 +1,6 @@
+# CLIP
+
+See https://github.com/openai/CLIP for the source code and original models.
 
 ## Requirements
 
