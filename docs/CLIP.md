@@ -3,8 +3,10 @@
 
 This needs mlmodule with the clip and torch extra requirements:
 
-```
-pip install git+ssh://git@github.com/LSIR/mlmodule.git[torch,clip]
+```bash
+pip install git+ssh://git@github.com/LSIR/mlmodule.git#egg=mlmodule[torch,clip]
+# or
+pip install mlmodule[torch,clip]
 ```
 
 ## Download CLIP models on PC32

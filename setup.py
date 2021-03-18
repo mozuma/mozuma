@@ -23,7 +23,7 @@ setup(
     ],
     extras_require={
         'torch': ['torch', 'torchvision'],
-        'clip': ['ftfy', 'regex', 'tqdm', 'git+https://github.com/openai/CLIP.git']
+        'clip': ['ftfy', 'regex', 'tqdm', 'clip @ git+https://github.com/openai/CLIP.git']
     },
     setup_requires=[
         'pytest-runner',
