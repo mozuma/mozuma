@@ -36,9 +36,10 @@ def clip_model_name(request):
 @pytest.mark.parametrize('encoder_type', CLIP_MODULE_MAP.keys())
 def test_state_dict(torch_device, clip_model_name, encoder_type):
     model: torch.nn.Module
-    model, _ = clip.load(clip_model_name, device=torch_device)
+    model, _ = clip.load(clip_model_name, device=torch_device, jit=False)
     ml_clip: BaseTorchMLModule = CLIP_MODULE_MAP[encoder_type][clip_model_name](device=torch_device)
     ml_clip.load_state_dict(ml_clip.get_default_pretrained_state_dict_from_provider())
+    ml_clip.to(torch_device)
 
     dict1 = model.state_dict()
     dict2 = ml_clip.state_dict()
