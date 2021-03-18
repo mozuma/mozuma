@@ -34,14 +34,16 @@ class CLIPTextEncoder(BaseCLIPModule):
         self.ln_final = clip_module.ln_final
         self.text_projection = clip_module.text_projection
 
-    def forward(self, text):
-        x = self.token_embedding(text)  # [batch_size, n_ctx, d_model]
+        self.convert_weights()
 
-        x = x + self.positional_embedding
+    def forward(self, text):
+        x = self.token_embedding(text).type(self._dtype)  # [batch_size, n_ctx, d_model]
+
+        x = x + self.positional_embedding.type(self._dtype)
         x = x.permute(1, 0, 2)  # NLD -> LND
         x = self.transformer(x)
         x = x.permute(1, 0, 2)  # LND -> NLD
-        x = self.ln_final(x)
+        x = self.ln_final(x).type(self._dtype)
 
         # x.shape = [batch_size, n_ctx, transformer.width]
         # take features from the eot embedding (eot_token is the highest number in each sequence)

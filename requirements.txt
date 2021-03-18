@@ -4,6 +4,8 @@
 #
 #    pip-compile
 #
+apipkg==1.5
+    # via execnet
 attrs==20.3.0
     # via pytest
 boto3==1.17.18
@@ -20,6 +22,8 @@ click==7.1.2
     # via pip-tools
 git+https://github.com/openai/CLIP.git@beba48f35392a73c6c47ae67ddffced81ad1916d
     # via -r requirements.in
+execnet==1.8.0
+    # via pytest-xdist
 facenet-pytorch==2.5.1
     # via -r requirements.in
 ftfy==5.9
@@ -54,12 +58,23 @@ pip-tools==5.5.0
     # via -r requirements.in
 pluggy==0.13.1
     # via pytest
+psutil==5.8.0
+    # via pytest-xdist
 py==1.10.0
-    # via pytest
+    # via
+    #   pytest
+    #   pytest-forked
 pyparsing==2.4.7
     # via packaging
-pytest==6.2.2
+pytest-forked==1.3.0
+    # via pytest-xdist
+pytest-xdist[psutil]==2.2.1
     # via -r requirements.in
+pytest==6.2.2
+    # via
+    #   -r requirements.in
+    #   pytest-forked
+    #   pytest-xdist
 python-dateutil==2.8.1
     # via botocore
 regex==2020.11.13

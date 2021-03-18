@@ -13,4 +13,5 @@ git+https://github.com/openai/CLIP.git@beba48f35392a73c6c47ae67ddffced81ad1916d
 
 # Development
 pytest
+pytest-xdist[psutil]
 pip-tools
