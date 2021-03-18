@@ -55,6 +55,12 @@ Run tests
 pytest
 ```
 
+## Publish a new version
+
+* Update the version number in `setup.py`
+* Push a new commit to the `master` branch with the new version
+* Add a tag on the branch with the format `vX.Y.Z`. For instance, `v0.1.1`.
+
 ## Contribute
 
 See [Contribute guide](CONTRIBUTE.md)
