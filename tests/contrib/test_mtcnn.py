@@ -1,4 +1,3 @@
-from conftest import device_parametrize
 import os
 
 from mlmodule.contrib.mtcnn import MTCNNDetector
@@ -6,9 +5,8 @@ from mlmodule.torch.data.images import ImageDataset
 from mlmodule.utils import list_files_in_dir
 
 
-@device_parametrize
-def test_mtcnn_detector_inference(device):
-    mtcnn = MTCNNDetector(device=device, image_size=720, min_face_size=20)
+def test_mtcnn_detector_inference(torch_device):
+    mtcnn = MTCNNDetector(device=torch_device, image_size=720, min_face_size=20)
     # Pretrained model
     mtcnn.load()
     base_path = os.path.join("tests", "fixtures", "faces")

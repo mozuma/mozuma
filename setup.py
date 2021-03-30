@@ -10,7 +10,7 @@ from setuptools import setup
 
 setup(
     name='mlmodule',
-    version='0.0.1',
+    version='0.1.1',
     description='Model repository for the data platform',
     url='https://github.com/LSIR/mlmodule',
     packages=find_packages('src'),
@@ -22,7 +22,8 @@ setup(
     install_requires=[
     ],
     extras_require={
-        'torch': ['torch', 'torchvision']
+        'torch': ['torch', 'torchvision'],
+        'clip': ['ftfy', 'regex', 'tqdm', 'clip @ git+https://github.com/openai/CLIP.git']
     },
     setup_requires=[
         'pytest-runner',

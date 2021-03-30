@@ -11,8 +11,15 @@ pip install git+ssh://git@github.com/LSIR/mlmodule.git
 
 ## Models
 
-* [ResNet](docs/ResNet.md)
+Using the pretrained models requires access to the `lsir-public-assets` S3 bucket.
+Follow the [dedicated guide](https://github.com/LSIR/dataplatform-infra/tree/main/lsir-public-assets#read-bucket-content)
+to get access to the pretrained models.
+
+Available models
+
+* [ResNet](docs/ResNet.md): ImageNet
 * Face detection with [MTCNN](docs/MTCNN.md)
+* [DenseNet](docs/DenseNet.md): ImageNet and Places365
 
 
 ## Installation for development
@@ -47,6 +54,12 @@ Run tests
 ```bash
 pytest
 ```
+
+## Publish a new version
+
+* Update the version number in `setup.py`
+* Push a new commit to the `master` branch with the new version
+* Add a tag on the branch with the format `vX.Y.Z`. For instance, `v0.1.1`.
 
 ## Contribute
 
