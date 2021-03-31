@@ -1,3 +1,6 @@
+import random
+
+import numpy as np
 import pytest
 import torch
 from _pytest.fixtures import SubRequest
@@ -8,7 +11,7 @@ from mlmodule.contrib.densenet import DenseNet161ImageNetFeatures, DenseNet161Im
 from mlmodule.contrib.resnet import ResNet18ImageNetFeatures, ResNet18ImageNetClassifier
 
 
-@pytest.fixture(params=["cpu", "cuda"])
+@pytest.fixture(scope='session', params=["cpu", "cuda"])
 def torch_device(request: SubRequest):
     """Fixture for the PyTorch device, run GPU only when CUDA is available
 
@@ -18,6 +21,18 @@ def torch_device(request: SubRequest):
     if request.param != 'cpu' and not torch.cuda.is_available():
         pytest.skip(f"Skipping device {request.param}, CUDA not available")
     return torch.device(request.param)
+
+
+@pytest.fixture(scope='session')
+def set_seeds():
+    def _set_seeds(val=123):
+        torch.manual_seed(val)
+        torch.cuda.manual_seed(val)
+        np.random.seed(val)
+        random.seed(val)
+        torch.backends.cudnn.enabled = False
+        torch.backends.cudnn.deterministic = True
+    return _set_seeds
 
 
 @pytest.fixture(params=[

@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import List, Callable
+from typing import Callable
 import numpy as np
 
 from mlmodule.torch.data.base import IndexedDataset

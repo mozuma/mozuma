@@ -1,18 +1,15 @@
-from typing import Dict
+from typing import Dict, Tuple, List
 
 import torch
-from torch.hub import load_state_dict_from_url
 import numpy as np
-from facenet_pytorch import MTCNN
 
 from mlmodule.contrib.mtcnn.mtcnn import MLModuleMTCNN
 from mlmodule.torch import BaseTorchMLModule
+from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.mixins import TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
-from mlmodule.torch.data.images import ImageDataset, transforms
+from mlmodule.torch.data.images import transforms
 from mlmodule.torch.data.faces import FacesFeatures
-
-MTCNN_WEIGHTS_URL = ''
 
 
 class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider):
@@ -47,7 +44,7 @@ class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin, DownloadPretr
             )
         return indices, rescaled_results
 
-    def bulk_inference(self, data: ImageDataset, batch_size=256, **data_loader_options):
+    def bulk_inference(self, data: IndexedDataset, batch_size=256, **data_loader_options):
         """Runs inference on all images in a ImageFilesDatasets
 
         :param data: A dataset returning tuples of item_index, PIL.Image
@@ -64,12 +61,11 @@ class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin, DownloadPretr
     def get_dataset_transforms(self):
         return [
             transforms.Resize((self.image_size, self.image_size)),
-            np.uint8,
-            lambda x: torch.as_tensor(x.copy())
+            np.uint8
         ]
 
     @classmethod
-    def results_handler(cls, acc_results, new_indices, new_output: torch.Tensor):
+    def results_handler(cls, acc_results: Tuple[List, List[FacesFeatures]], new_indices, new_output: torch.Tensor):
         """Runs after the forward pass at inference
 
         :param acc_results: Holds a tuple with indices, list of FacesFeatures namedtuple
