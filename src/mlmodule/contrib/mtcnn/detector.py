@@ -1,10 +1,13 @@
+from typing import Dict
+
 import torch
 from torch.hub import load_state_dict_from_url
 import numpy as np
 from facenet_pytorch import MTCNN
 
+from mlmodule.contrib.mtcnn.mtcnn import MLModuleMTCNN
 from mlmodule.torch import BaseTorchMLModule
-from mlmodule.torch.mixins import TorchPretrainedModuleMixin
+from mlmodule.torch.mixins import TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 from mlmodule.torch.data.images import ImageDataset, transforms
 from mlmodule.torch.data.faces import FacesFeatures
@@ -12,25 +15,24 @@ from mlmodule.torch.data.faces import FacesFeatures
 MTCNN_WEIGHTS_URL = ''
 
 
-class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin):
+class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider):
 
     __result_struct__ = FacesFeatures
+    state_dict_key = "pretrained-models/face-detection/mtcnn.pt"
 
     def __init__(self, thresholds=None, image_size=720, min_face_size=20, device=None):
         super().__init__(device=device)
         thresholds = thresholds or [0.6, 0.7, 0.7]
         self.image_size = image_size
-        self.mtcnn = MTCNN(thresholds=thresholds,
-                           device=device, min_face_size=min_face_size)
+        self.mtcnn = MLModuleMTCNN(thresholds=thresholds, device=device, min_face_size=min_face_size, pretrained=False)
 
-    def get_default_pretrained_state_dict(self):
-        if MTCNN_WEIGHTS_URL:  # TODO: add state dict to S3
-            # Downloading state dictionary
-            pretrained_state_dict = load_state_dict_from_url(MTCNN_WEIGHTS_URL)
-        else:
-            pretrained_state_dict = self.mtcnn.state_dict()
-        # Removing deleted layers from state dict and updating the other with pretrained data
-        return torch_apply_state_to_partial_model(self, pretrained_state_dict)
+    def get_default_pretrained_state_dict_from_provider(self) -> Dict[str, torch.Tensor]:
+        pretrained_mtcnn = MLModuleMTCNN(pretrained=True)
+        pretrained_dict = {
+            f'mtcnn.{key}': value for key, value in pretrained_mtcnn.state_dict().items()
+            if key.startswith('onet') or key.startswith('pnet') or key.startswith('rnet')
+        }
+        return torch_apply_state_to_partial_model(self, pretrained_dict)
 
     def forward(self, x):
         return self.mtcnn.detect(x, landmarks=True)

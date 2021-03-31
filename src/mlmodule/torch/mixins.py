@@ -65,3 +65,10 @@ class TorchDatasetTransformsMixin(object):
         :return:
         """
         return Compose(self.transforms)(x)
+
+
+class DownloadPretrainedStateFromProvider:
+
+    def get_default_pretrained_state_dict_from_provider(self) -> Dict[str, torch.Tensor]:
+        """Allows to download pretrained state dir from model provider directly (used in the cli download)"""
+        raise NotImplementedError()

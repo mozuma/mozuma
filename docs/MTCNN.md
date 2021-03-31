@@ -1,8 +1,19 @@
 # MTCNN
 
-We are using `facenet-pytorch` to load pretrained MTCNN model, see https://github.com/timesler/facenet-pytorch.
+We are using `facenet-pytorch` to load pretrained MTCNN model, see `https://github.com/timesler/facenet-pytorch`.
 
-# Face Detection
+## Requirements
+
+This needs mlmodule with the mtcnn and torch extra requirements:
+
+```bash
+pip install git+ssh://git@github.com/LSIR/mlmodule.git#egg=mlmodule[torch,mtcnn]
+# or
+pip install mlmodule[torch,mtcnn]
+```
+
+
+## Face Detection
 
 Usage:
 
@@ -19,4 +30,12 @@ mtcnn = MTCNNDetector(device=torch.device('cpu')).load()
 data = ImageDataset(file_list)
 
 file_list, detected_faces = mtcnn.bulk_inference(data)
+```
+
+## Download the model weights on PC32
+
+```bash
+export PUBLIC_ASSETS=/mnt/storage01/lsir-public-assets/pretrained-models
+# For text encoders
+python -m mlmodule.cli download mtcnn.MTCNNDetector "$PUBLIC_ASSETS/face-detection/mtcnn.pt"
 ```
