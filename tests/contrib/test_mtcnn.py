@@ -6,6 +6,7 @@ from facenet_pytorch.models.mtcnn import MTCNN
 from torchvision.transforms import Compose, Resize
 
 from mlmodule.contrib.mtcnn import MTCNNDetector
+from mlmodule.output import BBoxOutput, BBoxPoint
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.data.images import convert_to_rgb, get_pil_image_from_file
 from mlmodule.utils import list_files_in_dir
@@ -37,14 +38,20 @@ def mtcnn_inference_results(mtcnn_instance, resized_images):
     return mtcnn.bulk_inference(dataset)
 
 
+def assert_bbox_equals(first: BBoxOutput, second: BBoxOutput):
+    assert first.bounding_box == second.bounding_box
+    assert first.probability == second.probability
+    np.testing.assert_equal(first.features, second.features)
+
+
 def test_mtcnn_detector_inference(mtcnn_inference_results):
     file_names, outputs = mtcnn_inference_results
 
     output_by_file = dict(zip(file_names, outputs))
     assert len(outputs) == 5
     # It should be a namedtuple of len 3
-    assert len(outputs[0]) == 3
-    assert output_by_file[os.path.join("tests", "fixtures", "faces", 'office2.jpg')].boxes.shape[0] == 4
+    assert len(outputs[0][0]) == 3
+    assert len(output_by_file[os.path.join("tests", "fixtures", "faces", 'office2.jpg')]) == 4
 
 
 def test_mtcnn_detector_correctness(mtcnn_inference_results, mtcnn_instance, torch_device, resized_images):
@@ -54,20 +61,23 @@ def test_mtcnn_detector_correctness(mtcnn_inference_results, mtcnn_instance, tor
     # Testing first image
     _, images = resized_images
     transforms = Compose(mtcnn_instance.get_dataset_transforms())
-    o_boxes, o_probs, o_landmarks = mtcnn_orig.detect(
+    all_boxes, all_probs, all_landmarks = mtcnn_orig.detect(
         [transforms(i) for i in images], landmarks=True
     )
-    for features, o_features in zip(outputs, zip(o_boxes, o_probs, o_landmarks)):
-        for elem, o_elem in zip(features, o_features):
-            assert elem.shape == o_elem.shape
-            np.testing.assert_equal(elem, o_elem)
+    for bbox_col, (boxes, probs, landmarks) in zip(outputs, zip(all_boxes, all_probs, all_landmarks)):
+        for bbox, (box, prob, features) in zip(bbox_col, zip(boxes, probs, landmarks)):
+            assert_bbox_equals(bbox, BBoxOutput(
+                bounding_box=(BBoxPoint(*box[:2]), BBoxPoint(*box[2:])),
+                probability=prob,
+                features=features
+            ))
 
 
 def test_mtcnn_serialisation(mtcnn_inference_results, mtcnn_instance):
     file_names, outputs = mtcnn_inference_results
 
     # Checking we can recover the same data
-    for features in outputs:
-        s_features = mtcnn_instance.from_binary(mtcnn_instance.to_binary(features))
-        for elem, s_elem in zip(features, s_features):
-            np.testing.assert_equal(elem, s_elem)
+    for bounding_boxes in outputs:
+        for bbox in bounding_boxes:
+            s_features = mtcnn_instance.from_binary(mtcnn_instance.to_binary(bbox.features))
+            np.testing.assert_equal(bbox.features, s_features)

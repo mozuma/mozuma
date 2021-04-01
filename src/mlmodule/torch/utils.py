@@ -1,6 +1,10 @@
 import logging
+
 import torch
-from typing import Dict
+from typing import Dict, Callable
+
+from torch.utils.data.dataloader import DataLoader
+
 
 logger = logging.getLogger(__name__)
 
@@ -27,12 +31,18 @@ def torch_apply_state_to_partial_model(
     return model_dict
 
 
-def generic_inference(model, data_loader, inference_func, result_handler, device):
+def generic_inference(
+        model: torch.nn.Module, data_loader: DataLoader,
+        inference_func: Callable,
+        result_handler: Callable,
+        device: torch.device,
+        result_handler_options=None, inference_options=None
+):
     # Setting model in eval mode
     model.eval()
 
     # Sending model on device
-    model = model.to(device)
+    model.to(device)
 
     # Disabling gradient computation
     acc_results = None
@@ -43,14 +53,17 @@ def generic_inference(model, data_loader, inference_func, result_handler, device
             logger.debug(f"Sending batch number: {batch_n}")
             # Sending data on device
             batch = batch.to(device)
-            acc_results = result_handler(acc_results, indices, inference_func(batch))
+            acc_results = result_handler(
+                acc_results, indices, inference_func(batch, **(inference_options or {})),
+                **(result_handler_options or {})
+            )
             logger.debug(f"Collecting results: {batch_n}")
 
     # Returning accumulated results
     return acc_results
 
 
-def l2_norm(input, axis=1):
-    norm = torch.norm(input, 2, axis, True)
-    output = torch.div(input, norm)
+def l2_norm(x, axis=1):
+    norm = torch.norm(x, 2, axis, True)
+    output = torch.div(x, norm)
     return output

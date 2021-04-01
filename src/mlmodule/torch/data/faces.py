@@ -1,12 +1,8 @@
-from collections import namedtuple
 from typing import Callable
 import numpy as np
 
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.data.images import get_pil_image_from_file, convert_to_rgb
-
-FacesFeatures = namedtuple(
-    'FacesFeatures', ['boxes', 'probas', 'landmarks'])
 
 
 class FaceDataset(IndexedDataset):
