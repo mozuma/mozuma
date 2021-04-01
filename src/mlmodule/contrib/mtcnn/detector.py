@@ -1,7 +1,8 @@
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Union
 
 import torch
 import numpy as np
+from PIL.Image import Image
 
 from mlmodule.contrib.mtcnn.mtcnn import MLModuleMTCNN
 from mlmodule.output import BBoxOutput, BBoxPoint, BBoxCollection
@@ -34,7 +35,7 @@ class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin, DownloadPretr
         return self.mtcnn.detect(x, landmarks=True)
 
     def bulk_inference(
-            self, data: IndexedDataset, **data_loader_options) -> Tuple[List, List[BBoxCollection]]:
+            self, data: IndexedDataset[str, Union[Image, np.ndarray]], **data_loader_options) -> Tuple[List, List[BBoxCollection]]:
         """Runs inference on all images in a ImageFilesDatasets
 
         :param data: A dataset returning tuples of item_index, PIL.Image

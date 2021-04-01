@@ -1,4 +1,5 @@
 import os
+from typing import Tuple, List
 
 import numpy as np
 import pytest
@@ -18,7 +19,7 @@ def mtcnn_instance(torch_device):
 
 
 @pytest.fixture(scope='session')
-def resized_images():
+def resized_images() -> Tuple[List[str], List[np.ndarray]]:
     base_path = os.path.join("tests", "fixtures", "faces")
     file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))
     transforms = Compose([
@@ -34,7 +35,8 @@ def mtcnn_inference_results(mtcnn_instance, resized_images):
     mtcnn = mtcnn_instance
     # Pretrained model
     mtcnn.load()
-    dataset = IndexedDataset(*resized_images)
+    indices, images = resized_images
+    dataset = IndexedDataset(indices, images)
     return mtcnn.bulk_inference(dataset)
 
 
