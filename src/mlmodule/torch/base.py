@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Union, List, Tuple, Generic, TypeVar
 
 import numpy as np
 import torch
@@ -6,10 +6,14 @@ import torch.nn as nn
 from torch.utils.data.dataloader import DataLoader
 
 from mlmodule.base import BaseMLModule, LoadDumpMixin
+from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.utils import generic_inference
 
 
-class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin):
+InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset)
+
+
+class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDatasetType]):
 
     def __init__(self, device=None):
         super().__init__()
@@ -38,6 +42,7 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin):
 
         # Loading state
         self.load_state_dict(state)
+        self.to(self.device)
 
         return self
 
@@ -57,12 +62,13 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin):
         data_loader_options.setdefault("shuffle", False)
         data_loader_options.setdefault("drop_last", False)
         # We send to pin memory only if using CUDA device
-        data_loader_options.setdefault("pin_memory", self.device != torch.device('cpu'))
+        data_loader_options.setdefault(
+            "pin_memory", self.device != torch.device('cpu'))
         # Building data loader
         return DataLoader(data, **data_loader_options)
 
     @classmethod
-    def tensor_to_python_list_safe(cls, tensor_or_list):
+    def tensor_to_python_list_safe(cls, tensor_or_list: Union[torch.Tensor, List]) -> List:
         """Transforms a tensor into a Python list.
 
         If the argument is a list, returns is without raising.
@@ -102,16 +108,17 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin):
     def inference(self, x):
         return self.__call__(x)
 
-    def bulk_inference(self, data, **data_loader_options):
-        """Run the model against all elements in data
-
-        :type data: Dataset, TorchDatasetTransformsMixin
-        :param data:
-        :return:
-        """
-        loader = self.get_data_loader(data, **data_loader_options)
+    def bulk_inference(
+            self, data: InputDatasetType,
+            data_loader_options=None, result_handler_options=None, inference_options=None
+    ) -> Tuple[List, Union[List, np.ndarray]]:
+        """Run the model against all elements in data"""
+        loader = self.get_data_loader(data, **(data_loader_options or {}))
         # Running inference batch loop
-        return generic_inference(self, loader, self.inference, self.results_handler, self.device)
+        return generic_inference(
+            self, loader, self.inference, self.results_handler, self.device,
+            result_handler_options=result_handler_options, inference_options=inference_options
+        )
 
     def get_dataset_transforms(self):
         """Returns callable that transform the input data before the forward pass

@@ -1,5 +1,7 @@
 import tempfile
 import os
+
+import torch
 import torch.nn as nn
 
 from mlmodule.torch import BaseTorchMLModule
@@ -14,14 +16,16 @@ class MyTestModuleBase(BaseTorchMLModule):
         self.linear = nn.Linear(10, 2)
 
 
-def assert_weights_equal(model1: nn.Module, model2: nn.Module):
+def assert_weights_equal(device: torch.device, model1: nn.Module, model2: nn.Module):
+    model1.to(device)
+    model2.to(device)
     for p1, p2 in zip(model1.parameters(), model2.parameters()):
         if p1.data.ne(p2.data).sum() > 0:
             return False
     return True
 
 
-def test_load_dump_model():
+def test_load_dump_model(torch_device: torch.device):
     tml = MyTestModuleBase()
 
     with tempfile.TemporaryFile() as f:
@@ -36,7 +40,7 @@ def test_load_dump_model():
         tml_reload = MyTestModuleBase().load(f)
 
     # Testing if weights are equals
-    assert_weights_equal(tml, tml_reload)
+    assert_weights_equal(torch_device, tml, tml_reload)
 
 
 def test_image_file_dataset():

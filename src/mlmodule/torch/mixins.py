@@ -46,9 +46,9 @@ class TorchPretrainedModuleMixin(object):
         return torch_apply_state_to_partial_model(self, pretrained_state_dict)
 
 
-class TorchDatasetTransformsMixin(object):
+class TorchDatasetTransformsMixin:
 
-    transforms = None
+    transforms: List[Callable]
 
     def add_transforms(self, transforms: List[Callable]) -> None:
         """Adding transforms to the list
@@ -65,3 +65,10 @@ class TorchDatasetTransformsMixin(object):
         :return:
         """
         return Compose(self.transforms)(x)
+
+
+class DownloadPretrainedStateFromProvider:
+
+    def get_default_pretrained_state_dict_from_provider(self) -> Dict[str, torch.Tensor]:
+        """Allows to download pretrained state dir from model provider directly (used in the cli download)"""
+        raise NotImplementedError()

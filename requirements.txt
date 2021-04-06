@@ -45,9 +45,12 @@ jmespath==0.10.0
 numpy==1.20.1
     # via
     #   facenet-pytorch
+    #   opencv-python
     #   scipy
     #   torch
     #   torchvision
+opencv-python==4.5.1.48
+    # via -r requirements.in
 packaging==20.9
     # via pytest
 pillow==8.1.1

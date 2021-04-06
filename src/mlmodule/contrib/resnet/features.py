@@ -42,16 +42,6 @@ class BaseResNetImageNetFeatures(BaseResNetImageNetModule):
 
         return torch.flatten(x, 1)
 
-    def bulk_inference(self, data: ImageDataset, batch_size=256, **data_loader_options):
-        """Runs inference on all images in a ImageFilesDatasets
-
-        :param data: A dataset returning tuples of item_index, PIL.Image
-        :param batch_size:
-        :param data_loader_options:
-        :return:
-        """
-        return super().bulk_inference(data, batch_size=batch_size, **data_loader_options)
-
     def get_dataset_transforms(self):
         return TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 
