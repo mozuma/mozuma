@@ -55,5 +55,5 @@ def test_resnet_classifier(torch_device):
     assert set(file_names) == set(file_names_idx)
 
     # Verifying a couple of output labels
-    assert 'cat' in file_class[os.path.join(base_path, "cat_90.jpg")].lower()
+    assert 'cat' in file_class[os.path.join(base_path, "cat_921.jpg")].lower()
     assert file_class[os.path.join(base_path, "dog_900.jpg")] == 'Labrador retriever'

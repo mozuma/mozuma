@@ -10,6 +10,8 @@ from mlmodule.torch.data.box import BoundingBoxDataset
 from mlmodule.torch.data.images import ImageDataset
 from mlmodule.utils import list_files_in_dir
 
+FACE_DISTANCE_THRESHOLD = 0.5
+
 
 def test_arcface_features_inference(torch_device: torch.device):
     arcface = ArcFaceFeatures(device=torch_device)
@@ -43,12 +45,12 @@ def test_arcface_features_inference(torch_device: torch.device):
 
     # tests
     assert output_by_file[os.path.join(base_path, 'berset1.jpg_0')].dot(
-        output_by_file[os.path.join(base_path, 'berset3.jpg_1')]) > .7
+        output_by_file[os.path.join(base_path, 'berset3.jpg_1')]) > FACE_DISTANCE_THRESHOLD
     assert output_by_file[os.path.join(base_path, 'berset1.jpg_0')].dot(
-        output_by_file[os.path.join(base_path, 'berset2.jpg_1')]) > .7
+        output_by_file[os.path.join(base_path, 'berset2.jpg_1')]) > FACE_DISTANCE_THRESHOLD
     assert output_by_file[os.path.join(base_path, 'berset2.jpg_1')].dot(
-        output_by_file[os.path.join(base_path, 'berset3.jpg_1')]) > .7
+        output_by_file[os.path.join(base_path, 'berset3.jpg_1')]) > FACE_DISTANCE_THRESHOLD
 
     # different faces
     assert output_by_file[os.path.join(base_path, 'berset2.jpg_0')].dot(
-        output_by_file[os.path.join(base_path, 'berset3.jpg_1')]) < .7
+        output_by_file[os.path.join(base_path, 'berset3.jpg_1')]) < FACE_DISTANCE_THRESHOLD
