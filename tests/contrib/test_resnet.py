@@ -14,7 +14,7 @@ def test_resnet_features_inference(torch_device):
     file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))[:50]
     dataset = ImageDataset(file_names)
 
-    file_names_idx, features = resnet.bulk_inference(dataset, batch_size=10)
+    file_names_idx, features = resnet.bulk_inference(dataset, data_loader_options={'batch_size': 10})
     assert len(features) == 50
     assert len(features[0]) == 512
     assert type(file_names[0]) == str
@@ -32,7 +32,7 @@ def test_resnet_classifier(torch_device):
     dataset = ImageDataset(file_names)
 
     # Getting features
-    idx, features = resnet.bulk_inference(dataset, batch_size=10)
+    idx, features = resnet.bulk_inference(dataset, data_loader_options={'batch_size': 10})
 
     # Creating features dataset
     features = IndexedDataset(idx, features)   # Zipping indices and features

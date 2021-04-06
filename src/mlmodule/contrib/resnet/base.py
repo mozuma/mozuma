@@ -1,12 +1,18 @@
+from typing import Any, Union
+
+import numpy as np
+from PIL.Image import Image
 from torch.hub import load_state_dict_from_url
 import torchvision.models as m
 
 from mlmodule.torch import BaseTorchMLModule
+from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.mixins import TorchPretrainedModuleMixin
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 
 
-class BaseResNetImageNetModule(BaseTorchMLModule, TorchPretrainedModuleMixin):
+class BaseResNetImageNetModule(BaseTorchMLModule[IndexedDataset[Any, Any, Union[np.ndarray, Image]]],
+                               TorchPretrainedModuleMixin):
 
     def __init__(self, resnet_arch, device=None):
         super().__init__(device=device)
