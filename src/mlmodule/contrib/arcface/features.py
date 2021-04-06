@@ -23,6 +23,8 @@ class ArcFaceFeatures(BaseTorchMLModule[BoundingBoxDataset], TorchPretrainedModu
                       DownloadPretrainedStateFromProvider):
     """Creates face embeddings from MTCNN output"""
 
+    state_dict_key = 'pretrained-models/face-detection/model_ir_se50.pt'
+
     def __init__(self, device: torch.device = None, drop_ratio: float = 0.6):
         super().__init__(device=device)
         blocks = [

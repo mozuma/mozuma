@@ -13,7 +13,7 @@ from mlmodule.utils import list_files_in_dir
 
 def test_arcface_features_inference(torch_device: torch.device):
     arcface = ArcFaceFeatures(device=torch_device)
-    # arcface.load()
+    arcface.load()
     mtcnn = MTCNNDetector(device=torch_device, image_size=720,
                           min_face_size=20)
     mtcnn.load()
