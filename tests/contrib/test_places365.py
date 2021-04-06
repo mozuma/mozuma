@@ -20,7 +20,7 @@ def test_places365_50_images(torch_device):
     dataset = ImageDataset(file_names)
 
     # Getting features
-    idx, features = densenet.bulk_inference(dataset, batch_size=10)
+    idx, features = densenet.bulk_inference(dataset, data_loader_options={'batch_size': 10})
     # Creating features dataset
     features = IndexedDataset(idx, features)   # Zipping indices and features
 

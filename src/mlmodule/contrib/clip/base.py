@@ -10,11 +10,11 @@ from torch import nn
 
 from mlmodule.contrib.clip.parameters import PARAMETERS
 from mlmodule.torch import BaseTorchMLModule
-from mlmodule.torch.mixins import TorchPretrainedModuleMixin
+from mlmodule.torch.mixins import TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 
 
-class BaseCLIPModule(BaseTorchMLModule, TorchPretrainedModuleMixin):
+class BaseCLIPModule(BaseTorchMLModule, TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider):
     """
     Base class for CLIP modules
     """

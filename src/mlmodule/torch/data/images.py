@@ -1,8 +1,12 @@
+from pathlib import Path
+from typing import List, TypeVar, Union, IO
+
+import numpy as np
 from PIL import Image
 from torchvision import transforms
 
 from mlmodule.torch.data.base import IndexedDataset
-
+from mlmodule.torch.data.files import ReadablePathType
 
 TORCHVISION_STANDARD_IMAGE_TRANSFORMS = [
     transforms.Resize(256),
@@ -12,24 +16,31 @@ TORCHVISION_STANDARD_IMAGE_TRANSFORMS = [
 ]
 
 
-def get_pil_image_from_file(file):
+def get_pil_image_from_file(file: Union[str, Path, IO]) -> Image.Image:
+    """PIL read image from a file"""
     return Image.open(file)
 
 
-def convert_to_rgb(pil_image: Image.Image):
+def convert_to_rgb(pil_image: Image.Image) -> Image.Image:
+    """PIL convert to RGB function"""
     return pil_image.convert('RGB')
 
 
-class BaseImageDataset(IndexedDataset):
+IndicesType = TypeVar('IndicesType')
 
-    def __init__(self, indices, image_path, to_rgb=True):
+
+class BaseImageDataset(IndexedDataset[IndicesType, ReadablePathType, Union[Image.Image, np.ndarray]]):
+    """Dataset returning a tuple with an index and an image"""
+
+    def __init__(self, indices: List[IndicesType], image_path: List[str], to_rgb=True):
         super().__init__(indices, image_path)
         self.add_transforms([get_pil_image_from_file])
         if to_rgb:
             self.add_transforms([convert_to_rgb])
 
 
-class ImageDataset(BaseImageDataset):
+class ImageDataset(BaseImageDataset[str]):
+    """Same as base Image dataset but working with references to local paths"""
 
-    def __init__(self, image_path, to_rgb=True):
+    def __init__(self, image_path: List[str], to_rgb=True):
         super().__init__(image_path, image_path, to_rgb=to_rgb)
