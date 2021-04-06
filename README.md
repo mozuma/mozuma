@@ -18,7 +18,7 @@ to get access to the pretrained models.
 Available models
 
 * [ResNet](docs/ResNet.md): ImageNet
-* Face detection with [MTCNN](docs/MTCNN.md)
+* Face detection with [MTCNN](docs/MTCNN.md) and [ArcFace](docs/ArcFace.md)
 * [DenseNet](docs/DenseNet.md): ImageNet and Places365
 
 

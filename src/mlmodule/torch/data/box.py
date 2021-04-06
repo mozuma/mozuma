@@ -10,6 +10,9 @@ from mlmodule.torch.data.files import ReadablePathType
 from mlmodule.torch.data.images import get_pil_image_from_file, convert_to_rgb
 
 
+__all__ = ('BoundingBoxDataset',)
+
+
 @dataclass
 class ApplyFunctionToPosition:
     """Callable that applies a given function to the element in position `pos` of a tuple
