@@ -48,3 +48,7 @@ def test_arcface_features_inference(torch_device: torch.device):
         output_by_file[os.path.join(base_path, 'berset2.jpg_1')]) > .7
     assert output_by_file[os.path.join(base_path, 'berset2.jpg_1')].dot(
         output_by_file[os.path.join(base_path, 'berset3.jpg_1')]) > .7
+
+    # different faces
+    assert output_by_file[os.path.join(base_path, 'berset2.jpg_0')].dot(
+        output_by_file[os.path.join(base_path, 'berset3.jpg_1')]) < .7
