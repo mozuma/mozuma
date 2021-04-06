@@ -7,11 +7,13 @@ import numpy as np
 
 
 class BBoxPoint(NamedTuple):
+    """Bounding box point coordinates"""
     x: float
     y: float
 
 
 class BBoxOutput(NamedTuple):
+    """Bounding box model output"""
     bounding_box: Tuple[BBoxPoint, BBoxPoint]   # Point pair
     probability: float  # Confidence of the bounding box
     features: Optional[np.ndarray] = None

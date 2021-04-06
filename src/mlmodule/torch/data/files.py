@@ -1,4 +1,10 @@
+from pathlib import Path
+from typing import IO, Union
+
 from mlmodule.torch.data.base import IndexedDataset
+
+
+ReadablePathType = Union[str, Path, IO]
 
 
 class FilesDataset(IndexedDataset):

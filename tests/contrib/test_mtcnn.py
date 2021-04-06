@@ -7,7 +7,7 @@ from facenet_pytorch.models.mtcnn import MTCNN
 from torchvision.transforms import Compose, Resize
 
 from mlmodule.contrib.mtcnn import MTCNNDetector
-from mlmodule.output import BBoxOutput, BBoxPoint
+from mlmodule.box import BBoxOutput, BBoxPoint
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.data.images import convert_to_rgb, get_pil_image_from_file
 from mlmodule.utils import list_files_in_dir
@@ -36,7 +36,7 @@ def mtcnn_inference_results(mtcnn_instance, resized_images):
     # Pretrained model
     mtcnn.load()
     indices, images = resized_images
-    dataset = IndexedDataset(indices, images)
+    dataset = IndexedDataset[str, np.ndarray, np.ndarray](indices, images)
     return mtcnn.bulk_inference(dataset)
 
 

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union, List, Tuple
+from typing import Any, Dict, Union, List, Tuple, Generic, TypeVar
 
 import numpy as np
 import torch
@@ -10,7 +10,10 @@ from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.utils import generic_inference
 
 
-class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin):
+InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset)
+
+
+class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDatasetType]):
 
     def __init__(self, device=None):
         super().__init__()
@@ -106,7 +109,7 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin):
         return self.__call__(x)
 
     def bulk_inference(
-            self, data: IndexedDataset,
+            self, data: InputDatasetType,
             data_loader_options=None, result_handler_options=None, inference_options=None
     ) -> Tuple[List, Union[List, np.ndarray]]:
         """Run the model against all elements in data"""

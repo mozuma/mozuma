@@ -1,11 +1,11 @@
-from typing import Dict, Tuple, List, Union
+from typing import Dict, Tuple, List, Union, TypeVar, Any
 
 import torch
 import numpy as np
 from PIL.Image import Image
 
 from mlmodule.contrib.mtcnn.mtcnn import MLModuleMTCNN
-from mlmodule.output import BBoxOutput, BBoxPoint, BBoxCollection
+from mlmodule.box import BBoxOutput, BBoxPoint, BBoxCollection
 from mlmodule.torch import BaseTorchMLModule
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.mixins import TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider
@@ -13,7 +13,12 @@ from mlmodule.torch.utils import torch_apply_state_to_partial_model
 from mlmodule.torch.data.images import transforms
 
 
-class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider):
+InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Union[Image, np.ndarray]])
+
+
+class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
+                    TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider):
+    """Face detection module"""
 
     state_dict_key = "pretrained-models/face-detection/mtcnn.pt"
 
@@ -35,7 +40,8 @@ class MTCNNDetector(BaseTorchMLModule, TorchPretrainedModuleMixin, DownloadPretr
         return self.mtcnn.detect(x, landmarks=True)
 
     def bulk_inference(
-            self, data: IndexedDataset[str, Union[Image, np.ndarray]], **data_loader_options) -> Tuple[List, List[BBoxCollection]]:
+            self, data: InputDatasetType, **data_loader_options
+    ) -> Tuple[List, List[BBoxCollection]]:
         """Runs inference on all images in a ImageFilesDatasets
 
         :param data: A dataset returning tuples of item_index, PIL.Image
