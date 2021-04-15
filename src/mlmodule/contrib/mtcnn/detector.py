@@ -40,20 +40,25 @@ class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
         return self.mtcnn.detect(x, landmarks=True)
 
     def bulk_inference(
-            self, data: InputDatasetType, **data_loader_options
+            self, data: InputDatasetType, data_loader_options=None, **opts
     ) -> Tuple[List, List[BBoxCollection]]:
         """Runs inference on all images in a ImageFilesDatasets
 
+        :param data_loader_options:
         :param data: A dataset returning tuples of item_index, PIL.Image
         :return:
         """
         # Default batch size
+        data_loader_options = data_loader_options or {}
         data_loader_options.setdefault('batch_size', 256)
         # Aspect ratios of each image
         aspect_ratios = {idx: [x/self.image_size for x in img.size]
                          for idx, img in data}
         return super().bulk_inference(
-            data, data_loader_options=data_loader_options, result_handler_options={'aspect_ratios': aspect_ratios})
+            data, data_loader_options=data_loader_options,
+            result_handler_options={'aspect_ratios': aspect_ratios},
+            **opts
+        )
 
     def get_dataset_transforms(self):
         return [
@@ -84,7 +89,8 @@ class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
         indices, output = acc_results or ([], [])
 
         # Converting to list
-        indices += cls.tensor_to_python_list_safe(new_indices)
+        new_indices = cls.tensor_to_python_list_safe(new_indices)
+        indices += new_indices
 
         for ind, (boxes, probs, landmarks) in zip(new_indices, zip(*new_output)):
             # Iterating through output for each image
