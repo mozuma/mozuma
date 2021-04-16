@@ -10,7 +10,7 @@ from setuptools import setup
 
 setup(
     name='mlmodule',
-    version='0.1.2',
+    version='0.1.3',
     description='Model repository for the data platform',
     url='https://github.com/LSIR/mlmodule',
     packages=find_packages('src'),
