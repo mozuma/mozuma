@@ -60,9 +60,9 @@ def test_arcface_features_inference(torch_device: torch.device):
         output_by_file[os.path.join(base_path, 'berset3.jpg_1')]) < FACE_DISTANCE_THRESHOLD
 
 
-def test_bad_quality_face_filter(torch_device):
+def test_bad_quality_face_filter():
     (detect_i, detect_box), (indices, new_outputs) = _face_features_for_folder(
-        torch_device, os.path.join("tests", "fixtures", "faces")
+        torch.device('cpu'), os.path.join("tests", "fixtures", "faces")
     )
     # office_blur has 2 visible faces
     assert len([i for i in indices if 'office_blur' in i]) == 2
