@@ -1,5 +1,7 @@
-from typing import List, Callable, Dict
+from typing import List, Callable, Dict, Tuple, Union
+import os
 
+import numpy as np
 import requests
 import torch
 from torch.hub import load_state_dict_from_url
@@ -17,6 +19,9 @@ from mlmodule.torch.utils import torch_apply_state_to_partial_model, l2_norm
 # Discovered by looking at OneDrive network activity when downloading a file manually from the Browser
 ONE_DRIVE_API_CALL = 'https://api.onedrive.com/v1.0/drives/CEC0E1F8F0542A13/items/CEC0E1F8F0542A13!835?' \
                      'select=id,@content.downloadUrl&authkey=!AOw5TZL8cWlj10I'
+
+# See https://quip.com/blC4A0YmfhbQ/Approach-to-remove-face-embeddings-leading-to-false-positive
+ARCFACE_MEAN_DISTANCE_THRESHOLD = 0.87
 
 
 class ArcFaceFeatures(BaseTorchMLModule[BoundingBoxDataset], TorchPretrainedModuleMixin,
@@ -77,6 +82,26 @@ class ArcFaceFeatures(BaseTorchMLModule[BoundingBoxDataset], TorchPretrainedModu
 
         # Removing deleted layers from state dict and updating the other with pretrained data
         return torch_apply_state_to_partial_model(self, pretrained_state_dict)
+
+    def bulk_inference(
+            self, data: BoundingBoxDataset,
+            data_loader_options=None, result_handler_options=None, inference_options=None,
+            remove_bad_quality_faces=True
+    ) -> Tuple[List, Union[List, np.ndarray]]:
+        indices, features = super().bulk_inference(
+            data, data_loader_options=data_loader_options,
+            result_handler_options=result_handler_options,
+            inference_options=inference_options
+        )
+        if remove_bad_quality_faces:
+            # Getting normalised faces to filter bad quality faces
+            norm_faces = np.load(os.path.join(os.path.dirname(__file__), 'normalized_faces.npy'))
+
+            # Filter for faces with good quality
+            good_faces = (1 - (features @ norm_faces).mean(axis=1)) > ARCFACE_MEAN_DISTANCE_THRESHOLD
+            return np.array(indices)[good_faces].tolist(), features[good_faces]
+        else:
+            return indices, features
 
     def get_dataset_transforms(self) -> List[Callable]:
         """Returns transforms to be applied on bulk_inference input data"""
