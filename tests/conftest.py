@@ -14,7 +14,7 @@ from mlmodule.contrib.resnet import ResNet18ImageNetFeatures, ResNet18ImageNetCl
 
 
 @pytest.fixture(scope='session', params=["cpu", "cuda"])
-def torch_device(request: SubRequest):
+def torch_device(request: SubRequest) -> torch.device:
     """Fixture for the PyTorch device, run GPU only when CUDA is available
 
     :param request:
