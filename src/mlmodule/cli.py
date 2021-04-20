@@ -4,7 +4,7 @@ import logging
 from importlib import import_module
 
 from mlmodule.torch import BaseTorchMLModule
-from mlmodule.torch.data.images import BaseImageDataset
+from mlmodule.torch.data.images import ImageDataset
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +21,7 @@ def download_fun(args):
 
 def run_fun(args):
     model: BaseTorchMLModule = args.module()
-    file_names = [f.name for f in args.input_files]
-    dataset = BaseImageDataset(file_names, args.input_files)
+    dataset = ImageDataset(args.input_files)
     indices, features = model.bulk_inference(
         dataset, tqdm_enabled=True,
         data_loader_options={"batch_size": args.batch_size, "num_workers": args.num_workers}
@@ -63,7 +62,7 @@ def main():
                      help='Should be in the format <module>.<MLModuleClass> '
                           'where "module" is a module in mlmodule.contrib '
                           'and "MLModuleClass" is a nn.Module')
-    run.add_argument('input_files', nargs='+', type=argparse.FileType('rb'))
+    run.add_argument('input_files', nargs='+', help="Paths to images")
     run.set_defaults(func=run_fun)
 
     args = parser.parse_args()
