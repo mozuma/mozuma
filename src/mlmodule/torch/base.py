@@ -15,6 +15,8 @@ InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset)
 
 class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDatasetType]):
 
+    default_batch_size = 256
+
     def __init__(self, device=None):
         super().__init__()
         self.device = device or self._resolve_device()
@@ -61,6 +63,7 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDat
         # Data loader default options
         data_loader_options.setdefault("shuffle", False)
         data_loader_options.setdefault("drop_last", False)
+        data_loader_options["batch_size"] = data_loader_options.get("batch_size") or self.default_batch_size
         # We send to pin memory only if using CUDA device
         data_loader_options.setdefault(
             "pin_memory", self.device != torch.device('cpu'))

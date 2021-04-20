@@ -50,10 +50,9 @@ def generic_inference(
         # Looping through batches
         # Assume dataset is composed of tuples (item index, batch)
         n_batches = len(data_loader)
-        batches = enumerate(data_loader)
         if tqdm_enabled:
-            batches = tqdm(batches)
-        for batch_n, (indices, batch) in batches:
+            data_loader = tqdm(data_loader)
+        for batch_n, (indices, batch) in enumerate(data_loader):
             logger.debug(f"Sending batch number: {batch_n}/{n_batches}")
             # Sending data on device
             batch = batch.to(device)

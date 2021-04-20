@@ -22,6 +22,16 @@ Available models
 * [DenseNet](docs/DenseNet.md): ImageNet and Places365
 
 
+## Run a model from CLI
+
+This only works for models accepting images for now. 
+For instance, to run CLIP on all images in a folder:
+
+```bash
+python -m mlmodule.cli run clip.CLIPViTB32ImageEncoder folder/* --batch-size 256 --num-workers 12
+```
+
+
 ## Installation for development
 
 Installing requirements
