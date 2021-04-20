@@ -15,7 +15,7 @@ InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset)
 
 class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDatasetType]):
 
-    default_batch_size = 256
+    default_batch_size = 128
 
     def __init__(self, device=None):
         super().__init__()
