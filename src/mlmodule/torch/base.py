@@ -110,14 +110,16 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDat
 
     def bulk_inference(
             self, data: InputDatasetType,
-            data_loader_options=None, result_handler_options=None, inference_options=None
+            data_loader_options=None, result_handler_options=None, inference_options=None,
+            tqdm_enabled=False
     ) -> Tuple[List, Union[List, np.ndarray]]:
         """Run the model against all elements in data"""
         loader = self.get_data_loader(data, **(data_loader_options or {}))
         # Running inference batch loop
         return generic_inference(
             self, loader, self.inference, self.results_handler, self.device,
-            result_handler_options=result_handler_options, inference_options=inference_options
+            result_handler_options=result_handler_options, inference_options=inference_options,
+            tqdm_enabled=tqdm_enabled
         )
 
     def get_dataset_transforms(self):

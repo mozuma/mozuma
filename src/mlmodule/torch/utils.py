@@ -4,7 +4,7 @@ import torch
 from typing import Dict, Callable
 
 from torch.utils.data.dataloader import DataLoader
-
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ def generic_inference(
         inference_func: Callable,
         result_handler: Callable,
         device: torch.device,
-        result_handler_options=None, inference_options=None
+        result_handler_options=None, inference_options=None, tqdm_enabled=False
 ):
     # Setting model in eval mode
     model.eval()
@@ -49,15 +49,19 @@ def generic_inference(
     with torch.no_grad():
         # Looping through batches
         # Assume dataset is composed of tuples (item index, batch)
-        for batch_n, (indices, batch) in enumerate(data_loader):
-            logger.debug(f"Sending batch number: {batch_n}")
+        n_batches = len(data_loader)
+        batches = enumerate(data_loader)
+        if tqdm_enabled:
+            batches = tqdm(batches)
+        for batch_n, (indices, batch) in batches:
+            logger.debug(f"Sending batch number: {batch_n}/{n_batches}")
             # Sending data on device
             batch = batch.to(device)
             acc_results = result_handler(
                 acc_results, indices, inference_func(batch, **(inference_options or {})),
                 **(result_handler_options or {})
             )
-            logger.debug(f"Collecting results: {batch_n}")
+            logger.debug(f"Collecting results: {batch_n}/{n_batches}")
 
     # Returning accumulated results
     return acc_results

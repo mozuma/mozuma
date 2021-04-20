@@ -23,7 +23,7 @@ setup(
     install_requires=[
     ],
     extras_require={
-        'torch': ['torch', 'torchvision'],
+        'torch': ['torch', 'torchvision', 'tqdm'],
         'clip': ['ftfy', 'regex', 'tqdm', 'clip @ git+https://github.com/openai/CLIP.git'],
         'mtcnn': ['facenet-pytorch']
     },

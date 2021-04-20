@@ -95,18 +95,20 @@ class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
         for ind, (boxes, probs, landmarks) in zip(new_indices, zip(*new_output)):
             # Iterating through output for each image
             img_bbox = []
-            # Rescaling
-            boxes = boxes*(aspect_ratios[ind]*2)
-            landmarks = landmarks*aspect_ratios[ind]
-            for b, p, l in zip(boxes, probs, landmarks):
-                # Iterating through each bounding box
-                if b is not None:
-                    # We have detected a face
-                    img_bbox.append(BBoxOutput(
-                        bounding_box=(BBoxPoint(*b[:2]), BBoxPoint(*b[2:])),  # Extracting two points
-                        probability=p,
-                        features=l
-                    ))
+
+            if boxes is not None:
+                # Rescaling
+                boxes = boxes*(aspect_ratios[ind]*2)
+                landmarks = landmarks*aspect_ratios[ind]
+                for b, p, l in zip(boxes, probs, landmarks):
+                    # Iterating through each bounding box
+                    if b is not None:
+                        # We have detected a face
+                        img_bbox.append(BBoxOutput(
+                            bounding_box=(BBoxPoint(*b[:2]), BBoxPoint(*b[2:])),  # Extracting two points
+                            probability=p,
+                            features=l
+                        ))
             output.append(img_bbox)
 
         return indices, output

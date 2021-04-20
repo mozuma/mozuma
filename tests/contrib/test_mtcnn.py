@@ -56,6 +56,25 @@ def test_mtcnn_detector_inference(mtcnn_inference_results):
     assert len(output_by_file[os.path.join("tests", "fixtures", "faces", 'office2.jpg')]) == 4
 
 
+def test_mtcnn_detector_inference_no_faces(mtcnn_instance):
+    base_path = os.path.join("tests", "fixtures", "cats_dogs")
+    file_names = sorted(list_files_in_dir(base_path, allowed_extensions=('jpg',)))[:5]
+    transforms = Compose([
+        get_pil_image_from_file,
+        convert_to_rgb,
+        Resize((720, 720))
+    ])
+    data = [transforms(f) for f in file_names]
+    mtcnn = mtcnn_instance
+    # Pretrained model
+    mtcnn.load()
+    dataset = IndexedDataset[str, np.ndarray, np.ndarray](file_names, data)
+    file_names, bbox = mtcnn.bulk_inference(dataset)
+
+    for b in bbox:
+        assert len(b) == 0
+
+
 def test_mtcnn_detector_correctness(mtcnn_inference_results, mtcnn_instance, torch_device, resized_images):
     file_names, outputs = mtcnn_inference_results
     mtcnn_orig = MTCNN(device=torch_device, min_face_size=20)
