@@ -26,7 +26,9 @@ class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
         super().__init__(device=device)
         thresholds = thresholds or [0.6, 0.7, 0.7]
         self.image_size = image_size
-        self.mtcnn = MLModuleMTCNN(thresholds=thresholds, device=device, min_face_size=min_face_size, pretrained=False)
+        self.mtcnn = MLModuleMTCNN(
+            thresholds=thresholds, device=self.device, min_face_size=min_face_size, pretrained=False
+        )
 
     def get_default_pretrained_state_dict_from_provider(self) -> Dict[str, torch.Tensor]:
         pretrained_mtcnn = MLModuleMTCNN(pretrained=True)

@@ -3,6 +3,8 @@ import json
 import logging
 from importlib import import_module
 
+import torch
+
 from mlmodule.torch import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
 
@@ -20,7 +22,7 @@ def download_fun(args):
 
 
 def run_fun(args):
-    model: BaseTorchMLModule = args.module()
+    model: BaseTorchMLModule = args.module(device=args.device)
     dataset = ImageDataset(args.input_files)
     indices, features = model.bulk_inference(
         dataset, tqdm_enabled=True,
@@ -57,6 +59,7 @@ def main():
     run = subparsers.add_parser('run')
     run.add_argument('--batch-size', type=int, default=None, help='Batch size for inference')
     run.add_argument('--num-workers', type=int, default=0, help='Loader number of workers')
+    run.add_argument('--device', type=torch.device, default=None, help='Torch device')
     run.add_argument('module',
                      type=_contrib_module,
                      help='Should be in the format <module>.<MLModuleClass> '
