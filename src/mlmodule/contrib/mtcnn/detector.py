@@ -26,7 +26,9 @@ class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
         super().__init__(device=device)
         thresholds = thresholds or [0.6, 0.7, 0.7]
         self.image_size = image_size
-        self.mtcnn = MLModuleMTCNN(thresholds=thresholds, device=device, min_face_size=min_face_size, pretrained=False)
+        self.mtcnn = MLModuleMTCNN(
+            thresholds=thresholds, device=self.device, min_face_size=min_face_size, pretrained=False
+        )
 
     def get_default_pretrained_state_dict_from_provider(self) -> Dict[str, torch.Tensor]:
         pretrained_mtcnn = MLModuleMTCNN(pretrained=True)
@@ -95,18 +97,20 @@ class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
         for ind, (boxes, probs, landmarks) in zip(new_indices, zip(*new_output)):
             # Iterating through output for each image
             img_bbox = []
-            # Rescaling
-            boxes = boxes*(aspect_ratios[ind]*2)
-            landmarks = landmarks*aspect_ratios[ind]
-            for b, p, l in zip(boxes, probs, landmarks):
-                # Iterating through each bounding box
-                if b is not None:
-                    # We have detected a face
-                    img_bbox.append(BBoxOutput(
-                        bounding_box=(BBoxPoint(*b[:2]), BBoxPoint(*b[2:])),  # Extracting two points
-                        probability=p,
-                        features=l
-                    ))
+
+            if boxes is not None:
+                # Rescaling
+                boxes = boxes*(aspect_ratios[ind]*2)
+                landmarks = landmarks*aspect_ratios[ind]
+                for b, p, l in zip(boxes, probs, landmarks):
+                    # Iterating through each bounding box
+                    if b is not None:
+                        # We have detected a face
+                        img_bbox.append(BBoxOutput(
+                            bounding_box=(BBoxPoint(*b[:2]), BBoxPoint(*b[2:])),  # Extracting two points
+                            probability=p,
+                            features=l
+                        ))
             output.append(img_bbox)
 
         return indices, output

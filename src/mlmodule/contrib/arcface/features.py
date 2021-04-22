@@ -85,13 +85,11 @@ class ArcFaceFeatures(BaseTorchMLModule[BoundingBoxDataset], TorchPretrainedModu
 
     def bulk_inference(
             self, data: BoundingBoxDataset,
-            data_loader_options=None, result_handler_options=None, inference_options=None,
-            remove_bad_quality_faces=True
+            remove_bad_quality_faces=True,
+            **opts
     ) -> Tuple[List, Union[List, np.ndarray]]:
         indices, features = super().bulk_inference(
-            data, data_loader_options=data_loader_options,
-            result_handler_options=result_handler_options,
-            inference_options=inference_options
+            data, **opts
         )
         if remove_bad_quality_faces:
             # Getting normalised faces to filter bad quality faces

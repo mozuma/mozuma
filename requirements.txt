@@ -8,9 +8,9 @@ apipkg==1.5
     # via execnet
 attrs==20.3.0
     # via pytest
-boto3==1.17.18
+boto3==1.17.54
     # via -r requirements.in
-botocore==1.20.18
+botocore==1.20.54
     # via
     #   boto3
     #   s3transfer
@@ -24,16 +24,17 @@ git+https://github.com/openai/CLIP.git@beba48f35392a73c6c47ae67ddffced81ad1916d
     # via -r requirements.in
 execnet==1.8.0
     # via pytest-xdist
-facenet-pytorch==2.5.1
+facenet-pytorch==2.5.2
     # via -r requirements.in
-ftfy==5.9
+ftfy==6.0.1
     # via
     #   -r requirements.in
     #   clip
 idna==2.10
     # via requests
-importlib-metadata==3.7.0
+importlib-metadata==4.0.0
     # via
+    #   pep517
     #   pluggy
     #   pytest
 iniconfig==1.1.1
@@ -42,7 +43,7 @@ jmespath==0.10.0
     # via
     #   boto3
     #   botocore
-numpy==1.20.1
+numpy==1.20.2
     # via
     #   facenet-pytorch
     #   opencv-python
@@ -53,11 +54,13 @@ opencv-python==4.5.1.48
     # via -r requirements.in
 packaging==20.9
     # via pytest
-pillow==8.1.1
+pep517==0.10.0
+    # via pip-tools
+pillow==8.2.0
     # via
     #   facenet-pytorch
     #   torchvision
-pip-tools==5.5.0
+pip-tools==6.1.0
     # via -r requirements.in
 pluggy==0.13.1
     # via pytest
@@ -73,27 +76,29 @@ pytest-forked==1.3.0
     # via pytest-xdist
 pytest-xdist[psutil]==2.2.1
     # via -r requirements.in
-pytest==6.2.2
+pytest==6.2.3
     # via
     #   -r requirements.in
     #   pytest-forked
     #   pytest-xdist
 python-dateutil==2.8.1
     # via botocore
-regex==2020.11.13
+regex==2021.4.4
     # via
     #   -r requirements.in
     #   clip
 requests==2.25.1
     # via facenet-pytorch
-s3transfer==0.3.4
+s3transfer==0.4.0
     # via boto3
-scipy==1.6.1
+scipy==1.6.2
     # via -r requirements.in
 six==1.15.0
     # via python-dateutil
 toml==0.10.2
-    # via pytest
+    # via
+    #   pep517
+    #   pytest
 torch==1.7.1
     # via
     #   -r requirements.in
@@ -104,7 +109,7 @@ torchvision==0.8.2
     #   -r requirements.in
     #   clip
     #   facenet-pytorch
-tqdm==4.59.0
+tqdm==4.60.0
     # via
     #   -r requirements.in
     #   clip
@@ -112,7 +117,7 @@ typing-extensions==3.7.4.3
     # via
     #   importlib-metadata
     #   torch
-urllib3==1.26.3
+urllib3==1.26.4
     # via
     #   botocore
     #   requests
@@ -120,8 +125,10 @@ wcwidth==0.2.5
     # via ftfy
 wheel==0.36.2
     # via -r requirements.in
-zipp==3.4.0
-    # via importlib-metadata
+zipp==3.4.1
+    # via
+    #   importlib-metadata
+    #   pep517
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
