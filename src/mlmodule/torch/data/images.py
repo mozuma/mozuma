@@ -50,10 +50,16 @@ class BaseImageDataset(IndexedDataset[IndicesType, ReadablePathType, Union[Image
 
     def __init__(self, indices: List[IndicesType], image_path: List[str], to_rgb=True, shrink_img_size=None):
         super().__init__(indices, image_path)
-        self.add_transforms([LoadRGBPILImage(
-            shrink_image_size=shrink_img_size,
-            mode='RGB' if to_rgb else None
-        )])
+        self.add_transforms([
+            LoadRGBPILImage(
+                shrink_image_size=shrink_img_size,
+                mode='RGB' if to_rgb else None
+            )
+        ])
+        if to_rgb:
+            self.add_transforms([
+                convert_to_rgb
+            ])
 
 
 class ImageDataset(BaseImageDataset[str]):
