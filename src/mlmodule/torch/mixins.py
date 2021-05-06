@@ -1,11 +1,17 @@
 from io import BytesIO
-from typing import Dict, Optional, List, Callable, Any
+from typing import Dict, Optional, List, Callable, Any, Tuple
 
 import boto3
 import torch
 from torchvision.transforms import Compose
 
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
+
+
+class ResizableImageInputMixin:
+
+    def shrink_input_image_size(self) -> Tuple[int, int]:
+        raise NotImplementedError()
 
 
 class TorchPretrainedModuleMixin(object):
