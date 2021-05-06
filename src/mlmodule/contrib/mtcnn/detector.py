@@ -1,3 +1,4 @@
+import dataclasses
 from typing import Dict, Tuple, List, Union, TypeVar, Any
 
 import torch
@@ -14,6 +15,17 @@ from mlmodule.torch.data.images import transforms
 
 
 InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Union[Image, np.ndarray]])
+
+
+@dataclasses.dataclass
+class ResizeWithAspectRatios:
+    img_size: int
+
+    def __call__(self, img) -> Tuple[np.ndarray, np.ndarray]:
+        return (
+            np.uint8(transforms.Resize((self.img_size, self.img_size))(img)),
+            np.array([x/self.img_size for x in img.size])
+        )
 
 
 class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
@@ -38,8 +50,13 @@ class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
         }
         return torch_apply_state_to_partial_model(self, pretrained_dict)
 
-    def forward(self, x):
-        return self.mtcnn.detect(x, landmarks=True)
+    def forward(self, x, aspect_ratios):
+        boxes, prob, landmarks = self.mtcnn.detect(x, landmarks=True)
+        # Applying aspect ratios
+        aspect_ratios = aspect_ratios.numpy()
+        boxes = [b*np.hstack((a, a)) for b, a in zip(boxes, aspect_ratios)]
+        landmarks = [land*a for land, a in zip(landmarks, aspect_ratios)]
+        return boxes, prob, landmarks
 
     def bulk_inference(
             self, data: InputDatasetType, data_loader_options=None, **opts
@@ -53,19 +70,14 @@ class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
         # Default batch size
         data_loader_options = data_loader_options or {}
         data_loader_options.setdefault('batch_size', 256)
-        # Aspect ratios of each image
-        aspect_ratios = {idx: [x/self.image_size for x in img.size]
-                         for idx, img in data}
         return super().bulk_inference(
             data, data_loader_options=data_loader_options,
-            result_handler_options={'aspect_ratios': aspect_ratios},
             **opts
         )
 
     def get_dataset_transforms(self):
         return [
-            transforms.Resize((self.image_size, self.image_size)),
-            np.uint8
+            ResizeWithAspectRatios(self.image_size)
         ]
 
     @classmethod
@@ -73,18 +85,14 @@ class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
             cls, acc_results: Tuple[List, List[BBoxCollection]],
             new_indices: List,
             new_output: Tuple[torch.Tensor, torch.Tensor, torch.Tensor],
-            aspect_ratios: Dict = None
     ) -> Tuple[List, List[BBoxCollection]]:
         """Runs after the forward pass at inference
 
         :param acc_results: Holds a tuple with indices, list of FacesFeatures namedtuple
         :param new_indices: New indices for the current batch
         :param new_output: New inference output for the current batch
-        :param aspect_ratios: Used to rescale coordinated of bounding boxes and landmarks
         :return:
         """
-        if aspect_ratios is None:
-            raise ValueError('aspect_ratios parameter cannot be None')
 
         # Dealing for the first call where acc_results is None
         output: List[BBoxCollection]
@@ -100,8 +108,6 @@ class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
 
             if boxes is not None:
                 # Rescaling
-                boxes = boxes*(aspect_ratios[ind]*2)
-                landmarks = landmarks*aspect_ratios[ind]
                 for b, p, l in zip(boxes, probs, landmarks):
                     # Iterating through each bounding box
                     if b is not None:

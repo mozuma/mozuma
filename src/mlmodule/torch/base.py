@@ -108,8 +108,8 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDat
         res_output = np.vstack((res_output, new_output))
         return res_indices, res_output
 
-    def inference(self, x):
-        return self.__call__(x)
+    def inference(self, *args, **kwargs):
+        return self.__call__(*args, **kwargs)
 
     def bulk_inference(
             self, data: InputDatasetType,

@@ -20,12 +20,12 @@ def mtcnn_instance(torch_device):
 
 @pytest.fixture(scope='session')
 def resized_images() -> Tuple[List[str], List[np.ndarray]]:
-    base_path = os.path.join("tests", "fixtures", "faces")
+    base_path = os.path.join("tests", "fixtures", "berset")
     file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))
     transforms = Compose([
         get_pil_image_from_file,
         convert_to_rgb,
-        Resize((720, 720))
+        Resize((1440, 1440))
     ])
     return file_names, [transforms(f) for f in file_names]
 
@@ -80,18 +80,31 @@ def test_mtcnn_detector_correctness(mtcnn_inference_results, mtcnn_instance, tor
     mtcnn_orig = MTCNN(device=torch_device, min_face_size=20)
 
     # Testing first image
-    _, images = resized_images
+    f, images = resized_images
+    assert f == file_names
     transforms = Compose(mtcnn_instance.get_dataset_transforms())
     all_boxes, all_probs, all_landmarks = mtcnn_orig.detect(
-        [transforms(i) for i in images], landmarks=True
+        images, landmarks=True
     )
-    for bbox_col, (boxes, probs, landmarks) in zip(outputs, zip(all_boxes, all_probs, all_landmarks)):
-        for bbox, (box, prob, features) in zip(bbox_col, zip(boxes, probs, landmarks)):
-            assert_bbox_equals(bbox, BBoxOutput(
+    for f, bbox_col, (boxes, probs, landmarks) in zip(file_names, outputs, zip(all_boxes, all_probs, all_landmarks)):
+        # Ordering bounding boxes for comparison
+        for bbox, (box, prob, features) in zip(
+                sorted(bbox_col, key=lambda b: b.bounding_box[0][0]),
+                sorted(zip(boxes, probs, landmarks), key=lambda b: b[0][0])
+        ):
+            expected_bbox = BBoxOutput(
                 bounding_box=(BBoxPoint(*box[:2]), BBoxPoint(*box[2:])),
                 probability=prob,
                 features=features
-            ))
+            )
+            np.testing.assert_allclose(
+                np.array(bbox.bounding_box), np.array(expected_bbox.bounding_box),
+                rtol=0.5
+            )
+            np.testing.assert_allclose(
+                np.array(bbox.features), np.array(expected_bbox.features),
+                rtol=0.5
+            )
 
 
 def test_mtcnn_serialisation(mtcnn_inference_results, mtcnn_instance):
