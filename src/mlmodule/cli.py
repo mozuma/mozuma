@@ -23,7 +23,7 @@ def download_fun(args):
 
 def run_fun(args):
     model: BaseTorchMLModule = args.module(device=args.device)
-    dataset = ImageDataset(args.input_files)
+    dataset = ImageDataset(args.input_files, shrink_img_size=getattr(model, 'image_size'))
     indices, features = model.bulk_inference(
         dataset, tqdm_enabled=True,
         data_loader_options={"batch_size": args.batch_size, "num_workers": args.num_workers}

@@ -15,7 +15,7 @@ from mlmodule.utils import list_files_in_dir
 
 @pytest.fixture(scope='session')
 def mtcnn_instance(torch_device):
-    return MTCNNDetector(device=torch_device, image_size=720, min_face_size=20)
+    return MTCNNDetector(device=torch_device, min_face_size=20)
 
 
 @pytest.fixture(scope='session')
