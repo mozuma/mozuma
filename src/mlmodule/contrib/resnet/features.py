@@ -14,7 +14,7 @@ class BaseResNetImageNetFeatures(BaseResNetImageNetModule):
         base_resnet = self.get_resnet_module(resnet_arch)
 
         # Useful for the ImageDataset
-        self.image_size = 256
+        self.image_size = (256, 256)
 
         # Getting only the necessary steps
         self.conv1 = base_resnet.conv1
