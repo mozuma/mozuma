@@ -1,11 +1,14 @@
+from typing import Tuple
+
 import torch
 import torch.nn.functional as F
 
 from mlmodule.torch.data.images import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 from mlmodule.contrib.densenet.base import BaseDenseNetPretrainedModule
+from mlmodule.torch.mixins import ResizableImageInputMixin
 
 
-class BaseDenseNetPretrainedFeatures(BaseDenseNetPretrainedModule):
+class BaseDenseNetPretrainedFeatures(BaseDenseNetPretrainedModule, ResizableImageInputMixin):
     """
     DenseNet feature extraction for similarity search.
     """
@@ -35,6 +38,9 @@ class BaseDenseNetPretrainedFeatures(BaseDenseNetPretrainedModule):
         self.features = base_densenet.features
         self.relu = F.relu
         self.avgpool = F.adaptive_avg_pool2d
+
+    def shrink_input_image_size(self) -> Tuple[int, int]:
+        return 256, 256
 
     def forward(self, x):
         # Forward without the last step to get features

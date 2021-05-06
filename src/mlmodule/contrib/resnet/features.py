@@ -1,10 +1,13 @@
+from typing import Tuple
+
 import torch
 
 from mlmodule.torch.data.images import ImageDataset, TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 from mlmodule.contrib.resnet.base import BaseResNetImageNetModule
+from mlmodule.torch.mixins import ResizableImageInputMixin
 
 
-class BaseResNetImageNetFeatures(BaseResNetImageNetModule):
+class BaseResNetImageNetFeatures(BaseResNetImageNetModule, ResizableImageInputMixin):
     """
     ResNet feature extraction for similarity search
     """
@@ -25,6 +28,9 @@ class BaseResNetImageNetFeatures(BaseResNetImageNetModule):
         self.layer4 = base_resnet.layer4
 
         self.avgpool = base_resnet.avgpool
+
+    def shrink_input_image_size(self) -> Tuple[int, int]:
+        return 256, 256
 
     def forward(self, x):
         # Forward without the last step to get features

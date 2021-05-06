@@ -9,7 +9,8 @@ from mlmodule.contrib.mtcnn.mtcnn import MLModuleMTCNN
 from mlmodule.box import BBoxOutput, BBoxPoint, BBoxCollection
 from mlmodule.torch import BaseTorchMLModule
 from mlmodule.torch.data.base import IndexedDataset
-from mlmodule.torch.mixins import TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider
+from mlmodule.torch.mixins import TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider, \
+    ResizableImageInputMixin
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 from mlmodule.torch.data.images import transforms
 
@@ -19,28 +20,32 @@ InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Un
 
 @dataclasses.dataclass
 class ResizeWithAspectRatios:
-    img_size: int
+    img_size: Tuple[int, int]
 
     def __call__(self, img) -> Tuple[np.ndarray, np.ndarray]:
         return (
-            np.uint8(transforms.Resize((self.img_size, self.img_size))(img)),
-            np.array([x/self.img_size for x in img.size])
+            np.uint8(transforms.Resize(self.img_size)(img)),
+            np.array([x/target for x, target in zip(img.size, self.img_size)])
         )
 
 
 class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
-                    TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider):
+                    TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider,
+                    ResizableImageInputMixin):
     """Face detection module"""
 
     state_dict_key = "pretrained-models/face-detection/mtcnn.pt"
 
-    def __init__(self, thresholds=None, image_size=720, min_face_size=20, device=None):
+    def __init__(self, thresholds=None, image_size: Tuple[int, int] = (720, 720), min_face_size=20, device=None):
         super().__init__(device=device)
         thresholds = thresholds or [0.6, 0.7, 0.7]
         self.image_size = image_size
         self.mtcnn = MLModuleMTCNN(
             thresholds=thresholds, device=self.device, min_face_size=min_face_size, pretrained=False
         )
+
+    def shrink_input_image_size(self) -> Tuple[int, int]:
+        return self.image_size
 
     def get_default_pretrained_state_dict_from_provider(self) -> Dict[str, torch.Tensor]:
         pretrained_mtcnn = MLModuleMTCNN(pretrained=True)
