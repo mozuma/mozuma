@@ -52,12 +52,12 @@ def generic_inference(
         n_batches = len(data_loader)
         if tqdm_enabled:
             data_loader = tqdm(data_loader)
-        for batch_n, (indices, batch) in enumerate(data_loader):
+        for batch_n, (indices, batch, *batch_params) in enumerate(data_loader):
             logger.debug(f"Sending batch number: {batch_n}/{n_batches}")
             # Sending data on device
             batch = batch.to(device)
             acc_results = result_handler(
-                acc_results, indices, inference_func(batch, **(inference_options or {})),
+                acc_results, indices, inference_func(batch, *batch_params, **(inference_options or {})),
                 **(result_handler_options or {})
             )
             logger.debug(f"Collecting results: {batch_n}/{n_batches}")

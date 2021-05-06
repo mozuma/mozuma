@@ -33,7 +33,11 @@ class IndexedDataset(Dataset, TorchDatasetTransformsMixin, Generic[IndicesType, 
         value = self.items[item_num]
         logger.debug(f"Reading item {item_num}, index: {index}")
 
-        return index, self.apply_transforms(value)
+        value = self.apply_transforms(value)
+        if type(value) == tuple:
+            return (index, *value)
+        else:
+            return index, value
 
     def __len__(self) -> int:
         return len(self.indices)
