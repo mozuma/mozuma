@@ -13,6 +13,9 @@ class BaseResNetImageNetFeatures(BaseResNetImageNetModule):
         super().__init__(resnet_arch, device=device)
         base_resnet = self.get_resnet_module(resnet_arch)
 
+        # Useful for the ImageDataset
+        self.image_size = 256
+
         # Getting only the necessary steps
         self.conv1 = base_resnet.conv1
         self.bn1 = base_resnet.bn1
