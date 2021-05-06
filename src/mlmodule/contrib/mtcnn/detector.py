@@ -54,8 +54,8 @@ class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
         boxes, prob, landmarks = self.mtcnn.detect(x, landmarks=True)
         # Applying aspect ratios
         aspect_ratios = aspect_ratios.numpy()
-        boxes = [b*np.hstack((a, a)) if b else b for b, a in zip(boxes, aspect_ratios)]
-        landmarks = [land*a if land else land for land, a in zip(landmarks, aspect_ratios)]
+        boxes = [b*np.hstack((a, a)) if b is not None else b for b, a in zip(boxes, aspect_ratios)]
+        landmarks = [land*a if land is not None else land for land, a in zip(landmarks, aspect_ratios)]
         return boxes, prob, landmarks
 
     def bulk_inference(
