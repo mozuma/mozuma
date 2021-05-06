@@ -9,7 +9,7 @@ from torchvision.transforms import Compose, Resize
 from mlmodule.contrib.mtcnn import MTCNNDetector
 from mlmodule.box import BBoxOutput, BBoxPoint
 from mlmodule.torch.data.base import IndexedDataset
-from mlmodule.torch.data.images import convert_to_rgb, get_pil_image_from_file
+from mlmodule.torch.data.images import convert_to_rgb, get_pil_image_from_file, LoadRGBPILImage
 from mlmodule.utils import list_files_in_dir
 
 
@@ -23,8 +23,7 @@ def resized_images() -> Tuple[List[str], List[np.ndarray]]:
     base_path = os.path.join("tests", "fixtures", "berset")
     file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))
     transforms = Compose([
-        get_pil_image_from_file,
-        convert_to_rgb,
+        LoadRGBPILImage(shrink_image_size=(1440, 1440)),
         Resize((1440, 1440))
     ])
     return file_names, [transforms(f) for f in file_names]
