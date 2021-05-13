@@ -4,6 +4,8 @@
 #
 #    pip-compile
 #
+addict==2.4.0
+    # via mmcv-full
 apipkg==1.5
     # via execnet
 attrs==20.3.0
@@ -22,6 +24,10 @@ click==7.1.2
     # via pip-tools
 git+https://github.com/openai/CLIP.git@beba48f35392a73c6c47ae67ddffced81ad1916d
     # via -r requirements.in
+cycler==0.10.0
+    # via matplotlib
+cython==0.29.23
+    # via mmpycocotools
 execnet==1.8.0
     # via pytest-xdist
 facenet-pytorch==2.5.2
@@ -43,15 +49,32 @@ jmespath==0.10.0
     # via
     #   boto3
     #   botocore
+kiwisolver==1.3.1
+    # via matplotlib
+matplotlib==3.4.1
+    # via
+    #   mmdet
+    #   mmpycocotools
+mmcv-full==1.3.1
+    # via -r requirements.in
+git+https://github.com/open-mmlab/mmdetection.git@2894516bacf9ff82c3bc6d6970019d0890a993aa
+    # via -r requirements.in
+mmpycocotools==12.0.3
+    # via mmdet
 numpy==1.20.2
     # via
     #   facenet-pytorch
+    #   matplotlib
+    #   mmcv-full
+    #   mmdet
     #   opencv-python
     #   scipy
     #   torch
     #   torchvision
 opencv-python==4.5.1.48
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   mmcv-full
 packaging==20.9
     # via pytest
 pep517==0.10.0
@@ -59,6 +82,8 @@ pep517==0.10.0
 pillow==8.2.0
     # via
     #   facenet-pytorch
+    #   matplotlib
+    #   mmcv-full
     #   torchvision
 pip-tools==6.1.0
     # via -r requirements.in
@@ -71,7 +96,9 @@ py==1.10.0
     #   pytest
     #   pytest-forked
 pyparsing==2.4.7
-    # via packaging
+    # via
+    #   matplotlib
+    #   packaging
 pytest-forked==1.3.0
     # via pytest-xdist
 pytest-xdist[psutil]==2.2.1
@@ -82,7 +109,11 @@ pytest==6.2.3
     #   pytest-forked
     #   pytest-xdist
 python-dateutil==2.8.1
-    # via botocore
+    # via
+    #   botocore
+    #   matplotlib
+pyyaml==5.4.1
+    # via mmcv-full
 regex==2021.4.4
     # via
     #   -r requirements.in
@@ -94,7 +125,12 @@ s3transfer==0.4.0
 scipy==1.6.2
     # via -r requirements.in
 six==1.15.0
-    # via python-dateutil
+    # via
+    #   cycler
+    #   mmdet
+    #   python-dateutil
+terminaltables==3.1.0
+    # via mmdet
 toml==0.10.2
     # via
     #   pep517
@@ -125,6 +161,8 @@ wcwidth==0.2.5
     # via ftfy
 wheel==0.36.2
     # via -r requirements.in
+yapf==0.31.0
+    # via mmcv-full
 zipp==3.4.1
     # via
     #   importlib-metadata
@@ -132,3 +170,4 @@ zipp==3.4.1
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
+# setuptools
