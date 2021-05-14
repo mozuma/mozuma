@@ -46,6 +46,11 @@ class RPN(BaseTorchMLModule, TorchPretrainedModuleMixin):
         # TODO: Place GA model in pretrained-models. Set the state_dict_key
         self.state_dict_key = f"pretrained-models/.../..."
 
+    def eval(self):
+        """ Sets the model to eval mode """
+        super().eval()
+        self.model.eval()
+
     def get_default_pretrained_state_dict(self: torch.nn.Module, aws_access_key_id: Optional[str] = None,
                                           aws_secret_access_key: Optional[str] = None) -> Dict[str, torch.Tensor]:
         s3 = boto3.resource(
@@ -105,10 +110,9 @@ class RPN(BaseTorchMLModule, TorchPretrainedModuleMixin):
         ]
 
     def forward(self, data):
-        with torch.no_grad():
-            results = self.model(return_loss=False, rescale=True, **data)
-            boxes = [img_results[:, :4] for img_results in results]
-            scores = [img_results[:, 4:] for img_results in results]
+        results = self.model(return_loss=False, rescale=True, **data)
+        boxes = [img_results[:, :4] for img_results in results]
+        scores = [img_results[:, 4:] for img_results in results]
         return boxes, scores
 
     def bulk_inference(self, data: InputDatasetType, data_loader_options=None,
