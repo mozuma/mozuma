@@ -70,9 +70,9 @@ def test_region_encoding(rpn, region_encoder, images):
                                               regions_per_image=num_regions, min_score=0.0)
     assert len(indices) == len(indices_out) == len(imgs) == len(regions)
 
-    box_dataset = RegionEncoder.prep_encoding(indices, imgs, regions)
-    indices_out, regions_encodings = region_encoder.bulk_inference(box_dataset)
-    assert len(indices_out) == len(regions_encodings)
+    box_dataset = RegionEncoder.prep_encodings(indices, imgs, regions)
+    img_reg_indices, img_reg_encodings = region_encoder.bulk_inference(box_dataset)
+    assert len(img_reg_indices) == len(img_reg_encodings)
 
-    for enc in regions_encodings:
-        assert len(enc) == 2208
+    indices, box_collections = RegionEncoder.parse_encodings(img_reg_indices, img_reg_encodings)
+    assert len(indices) == len(box_collections)

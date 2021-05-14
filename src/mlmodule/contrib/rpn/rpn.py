@@ -168,7 +168,7 @@ class RPN(BaseTorchMLModule, TorchPretrainedModuleMixin):
                     if s >= min_score:
                         img_bbox.append(BBoxOutput(
                             bounding_box=(BBoxPoint(*b[:2]), BBoxPoint(*b[2:])),  # Extracting two points
-                            probability=s,
+                            probability=s.item(),
                             features=None
                         ))
             output.append(img_bbox)
