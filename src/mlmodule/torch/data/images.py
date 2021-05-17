@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List, TypeVar, Union, IO, Tuple, Optional
 
 import numpy as np
+import requests
 from PIL import Image
 from torchvision import transforms
 
@@ -30,6 +31,13 @@ class LoadRGBPILImage:
         im.draft(self.mode, self.shrink_image_size)
 
         return im
+
+
+def load_path_or_url_file(img_path: Union[str, Path, IO]) -> Union[str, Path, IO]:
+    if type(img_path) == str and (img_path.startswith('http://') or img_path.startswith('https://')):
+        return requests.get(img_path, stream=True).raw
+    else:
+        return img_path
 
 
 def get_pil_image_from_file(file: Union[str, Path, IO]) -> Image.Image:
@@ -63,7 +71,10 @@ class BaseImageDataset(IndexedDataset[IndicesType, ReadablePathType, Union[Image
 
 
 class ImageDataset(BaseImageDataset[str]):
-    """Same as base Image dataset but working with references to local paths"""
+    """Same as base Image dataset but working with references to local paths or URLS"""
 
     def __init__(self, image_path: List[str], to_rgb=True, shrink_img_size=None):
         super().__init__(image_path, image_path, to_rgb=to_rgb, shrink_img_size=shrink_img_size)
+        self.transforms = [
+            load_path_or_url_file
+        ] + self.transforms

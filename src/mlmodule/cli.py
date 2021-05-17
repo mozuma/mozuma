@@ -47,7 +47,7 @@ def _contrib_module(module_str):
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
 
     subparsers = parser.add_subparsers(dest='cmd', required=True)
 
