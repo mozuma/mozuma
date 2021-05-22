@@ -11,7 +11,8 @@ from torchvision.transforms import Compose
 
 from mlmodule.box import BBoxPoint, BBoxOutput, BBoxCollection
 from mlmodule.contrib.densenet import DenseNet161ImageNetFeatures
-from mlmodule.contrib.rpn import RPN, CosineSimilarityRegionSelector, RegionEncoder, DenseNet161ImageNetEncoder
+from mlmodule.contrib.rpn import RegionFeatures, RPN, CosineSimilarityRegionSelector, RegionEncoder, \
+    DenseNet161ImageNetEncoder
 from mlmodule.contrib.rpn.transforms import RegionCrop, StandardTorchvisionRegionTransforms
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.data.images import convert_to_rgb, get_pil_image_from_file
@@ -95,7 +96,7 @@ def max_box_distance(box1, box2):
 
 def test_region_inference(rpn, images, default_mmdet_encodings):
     indices, imgs = images
-    dataset = IndexedDataset[str, np.ndarray, np.ndarray](indices, imgs)
+    dataset = IndexedDataset[str, Image, Image](indices, imgs)
 
     num_regions = 10
     indices_out, regions = rpn.bulk_inference(dataset, data_loader_options={'batch_size': 1},
@@ -156,10 +157,13 @@ def test_region_encoding(rpn, region_encoder, images):
     num_regions = 10
     indices_out, regions = rpn.bulk_inference(dataset, data_loader_options={'batch_size': 1},
                                               regions_per_image=num_regions, min_score=0.0)
+
+    dataset.transforms = []
+
     assert len(indices) == len(indices_out) == len(imgs) == len(regions)
 
     # Compute features for regions
-    box_dataset = RegionEncoder.prep_encodings(indices, imgs, regions)
+    box_dataset = RegionEncoder.prep_encodings(dataset, regions)
     img_reg_indices, img_reg_encodings = region_encoder.bulk_inference(box_dataset)
     indices, box_collections = RegionEncoder.parse_encodings(img_reg_indices, img_reg_encodings)
     assert len(img_reg_indices) == len(img_reg_encodings)
@@ -182,3 +186,45 @@ def test_region_encoding(rpn, region_encoder, images):
                 assert features.shape == r_with_features.features.shape
                 sim = F.cosine_similarity(features, torch.Tensor(r_with_features.features).to('cuda:0'), dim=0)
                 assert sim.item() > 0.99
+
+
+def test_bbox_selector(rpn, region_encoder, region_selector, images):
+    indices, imgs = images
+    dataset = IndexedDataset[str, np.ndarray, np.ndarray](indices, imgs)
+
+    # Extract proposed regions from image
+    num_regions = 10
+    indices_out, regions = rpn.bulk_inference(dataset, data_loader_options={'batch_size': 1},
+                                              regions_per_image=num_regions, min_score=0.0)
+
+    dataset.transforms = []
+
+    # Compute features for regions
+    box_dataset = RegionEncoder.prep_encodings(dataset, regions)
+    img_reg_indices, img_reg_encodings = region_encoder.bulk_inference(box_dataset)
+    indices, box_collections = RegionEncoder.parse_encodings(img_reg_indices, img_reg_encodings)
+
+    # Select regions based on cosine similarity
+    box_dataset_w_features = IndexedDataset[str, BBoxCollection, BBoxCollection](indices, box_collections)
+    box_dataset_w_features_selected = region_selector.bulk_inference(box_dataset_w_features)
+
+    assert len(box_dataset_w_features) == len(box_dataset_w_features_selected)
+    for i in range(len(box_dataset_w_features)):
+        original_idx, original_collection = box_dataset_w_features[i]
+        new_idx, new_collection = box_dataset_w_features[i]
+        assert original_idx == new_idx
+        assert len(original_collection) == len(new_collection)
+
+
+def test_base(rpn, region_encoder, region_selector, images):
+    indices, imgs = images
+    dataset = IndexedDataset[str, np.ndarray, np.ndarray](indices, imgs)
+
+    region_features = RegionFeatures(rpn, region_encoder, region_selector)
+    regions_with_features = region_features.bulk_inference(
+        dataset,
+        regions_per_image=30,
+        min_region_score=0.7
+    )
+
+    assert len(regions_with_features) == len(dataset)

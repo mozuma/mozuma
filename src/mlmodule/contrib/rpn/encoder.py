@@ -1,10 +1,10 @@
-from typing import Tuple, List, Union, TypeVar, Any
+from typing import Tuple, List, TypeVar, Any, Union
 
 import numpy as np
 import torch
 from PIL.Image import Image
 
-from mlmodule.box import BBoxPoint, BBoxOutput, BBoxCollection
+from mlmodule.box import BBoxOutput, BBoxCollection
 from mlmodule.contrib.rpn.transforms import RegionCrop, StandardTorchvisionRegionTransforms
 from mlmodule.contrib.densenet.features import BaseDenseNetPretrainedFeatures
 from mlmodule.torch.data.base import IndexedDataset
@@ -16,6 +16,8 @@ from mlmodule.torch.data.base import IndexedDataset
 InputDatasetType = TypeVar('InputDatasetType',
                            bound=IndexedDataset[Tuple[Any, int], Any, Tuple[Image, BBoxOutput]])
 
+ImageDatasetType = TypeVar('ImageDatasetType', bound=IndexedDataset[Any, Any, Union[Image, np.ndarray]])
+
 
 class RegionEncoder(BaseDenseNetPretrainedFeatures):
     """ Computes encodings for regions using a pretrained DenseNet """
@@ -24,11 +26,11 @@ class RegionEncoder(BaseDenseNetPretrainedFeatures):
         super().__init__(densenet_arch, dataset=dataset, device=device)
 
     @classmethod
-    def prep_encodings(cls, indices: List, images: List[Image], regions: List[BBoxCollection]) -> InputDatasetType:
-        assert len(indices) == len(images) == len(regions)
+    def prep_encodings(cls, image_dataset: ImageDatasetType, regions: List[BBoxCollection]) -> InputDatasetType:
+        assert len(image_dataset) == len(regions)
         new_idx = []
         new_data = []
-        for index, img, boxes in zip(indices, images, regions):
+        for (index, img), boxes in zip(image_dataset, regions):
             for box_num, box in enumerate(boxes):
                 new_idx.append((index, box_num))
                 new_data.append((img, box))
