@@ -1,5 +1,6 @@
-from io import BytesIO
+import os
 import re
+from io import BytesIO
 from typing import Dict, Tuple, List, Union, TypeVar, Any, Optional
 
 import boto3
@@ -20,15 +21,25 @@ from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.mixins import TorchPretrainedModuleMixin
 
 
-InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Union[Image, np.ndarray]]) 
+InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Union[Image, np.ndarray]])
 
 
 class RPN(BaseTorchMLModule, TorchPretrainedModuleMixin):
     """  mmdetection Region Proposal Network wrapper """
 
-    def __init__(self, config: str, device=None):
+    def __init__(self, config: Optional[str] = None, device=None):
         super().__init__(device=device)
         # Mirroring the mmdet.aps.inference.init_detector method
+
+        # If no config was passed, load the default config: Guided Anchoring
+        if config is None:
+            # Get the current directory for this file
+            curr_dir = os.path.dirname(__file__)
+            config = os.path.join(curr_dir, 'configs', 'guided_anchoring', 'ga_rpn_x101_32x4d_fpn_1x_coco.py')
+
+        # The default state dict to load
+        self.state_dict_key = f"pretrained-models/rpn/ga_rpn_x101_32x4d_fpn_1x_coco_20200220-c28d1b18.pth"
+
         self.model_config = mmcv.Config.fromfile(config)
         self.model_config.model.pretrained = None
         self.model_config.model.train_cfg = None
@@ -43,9 +54,6 @@ class RPN(BaseTorchMLModule, TorchPretrainedModuleMixin):
         self.cfg.data.test.pipeline = replace_ImageToTensor(self.cfg.data.test.pipeline)
         #   -> setting up the `test_pipeline`
         self.pipeline = Compose(self.cfg.data.test.pipeline)
-
-        # TODO: Place GA model in pretrained-models. Set the state_dict_key
-        self.state_dict_key = f"pretrained-models/.../..."
 
     def eval(self):
         """ Sets the model to eval mode """
@@ -72,8 +80,14 @@ class RPN(BaseTorchMLModule, TorchPretrainedModuleMixin):
         f.seek(0)
         checkpoint = torch.load(f, map_location=lambda storage, loc: storage)
 
+        state_dict = checkpoint['state_dict']
+        # Revise keys
+        revise_keys = [(r'^module\.', '')]
+        for p, r in revise_keys:
+            state_dict = {re.sub(p, r, k): v for k, v in state_dict.items()}
+
         # Don't apply the state_dict to the model, as this is done by mmcv_load_state_dict
-        return checkpoint
+        return state_dict
 
     def load(self, fp=None, pretrained_getter_opts: Dict[str, Any] = None):
         """Loads model from file or from a default pretrained model if `fp=None`
@@ -94,7 +108,6 @@ class RPN(BaseTorchMLModule, TorchPretrainedModuleMixin):
                 state = {re.sub(p, r, k): v for k, v in state.items()}
         else:
             # Getting default pretrained state dict
-            # Requires TorchPretrainedModuleMixin to be implemented
             state = self.get_default_pretrained_state_dict(**(pretrained_getter_opts or {}))
 
         # Loading state, as in mmdet.apis.inference.init_detector
