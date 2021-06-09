@@ -14,6 +14,7 @@ from mmdet.models import build_detector
 from PIL.Image import Image
 
 from mlmodule.box import BBoxPoint, BBoxOutput, BBoxCollection
+from mlmodule.contrib.rpn.transforms import RGBToBGR
 from mlmodule.torch import BaseTorchMLModule
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.mixins import TorchPretrainedModuleMixin
@@ -105,6 +106,7 @@ class RPN(BaseTorchMLModule, TorchPretrainedModuleMixin):
     def get_dataset_transforms(self):
         return [
             np.uint8,
+            RGBToBGR(),
             lambda x: dict(img=x),
             self.pipeline
         ]

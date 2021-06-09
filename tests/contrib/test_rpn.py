@@ -117,8 +117,10 @@ def test_region_inference(rpn, images, default_mmdet_encodings):
 
     # Iterate over images
     for mmdet_box_col, box_col in zip(mmdet_boxes, regions):
-        max_dist = 40
-        max_proba_dist = 0.1
+        # Max euclidean distance difference: 1 pixel
+        max_dist = 1
+        # Max probability difference: 1%
+        max_proba_dist = 0.01
         unmatched_boxes = 0
         unmatched = []
 
@@ -137,7 +139,7 @@ def test_region_inference(rpn, images, default_mmdet_encodings):
                 unmatched.append((round(closest_dist), round(proba_dist, 2), box))
                 unmatched_boxes += 1
 
-        if unmatched_boxes > 2:
+        if unmatched_boxes > 0:
             for box in box_col:
                 print(box)
             print('\nUnmatched')

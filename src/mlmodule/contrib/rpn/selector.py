@@ -1,7 +1,6 @@
 import logging
 from typing import Any, List, TypeVar
 
-import numpy as np
 import torch
 from torch.nn.functional import cosine_similarity
 from torch.utils.data.dataloader import DataLoader
@@ -62,7 +61,6 @@ class CosineSimilarityRegionSelector(BaseMLModule):
 
                 # img_index: List containing one index
                 # img_boxes: BBoxCollection
-
                 # Collect the features for each box
                 box_features = [box.features for box in img_boxes]
 
@@ -96,9 +94,3 @@ class CosineSimilarityRegionSelector(BaseMLModule):
 
             # Returning accumulated results
         return IndexedDataset[Any, BBoxCollection, BBoxCollection](indices, bbox_collections)
-
-
-    @classmethod
-    def results_handler(cls, acc_results, new_indices, new_output):
-        # TODO
-        raise NotImplementedError()

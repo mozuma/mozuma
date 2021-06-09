@@ -9,12 +9,19 @@ from mlmodule.box import BBoxOutput
 from mlmodule.torch.data.images import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 
 
+class RGBToBGR(object):
+    """Converts RGB images """
+
+    def __call__(self, data: np.ndarray) -> np.ndarray:
+        """ Transforms an RGB image to a BGR image """
+        return data[:, :, [2, 1, 0]]
+
+
 class RegionCrop(object):
     """Region Extraction preprocessing"""
 
     def __call__(self, data: Tuple[Image, BBoxOutput]) -> Image:
         """ Crops a region from an image """
-        # NOTE: I am 99% sure the crop isn't done in place and copies the image first
         image, box = data
 
         x0, y0 = int(box.bounding_box[0].x), int(box.bounding_box[0].y)

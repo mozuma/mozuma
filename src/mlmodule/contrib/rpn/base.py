@@ -33,7 +33,6 @@ class RegionFeatures(BaseMLModule):
             regions_per_image=regions_per_image, min_score=min_region_score
         )
 
-        # TODO: Ask if there is a better way to do this
         data.transforms = []
 
         # Compute features for regions
