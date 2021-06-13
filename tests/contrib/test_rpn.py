@@ -1,11 +1,13 @@
 import os
 from typing import Tuple, List
 
+import mmcv.runner
 import numpy as np
 import pytest
 import torch
 import torch.nn.functional as F
 from mmdet.apis import init_detector, inference_detector
+from mmdet.core import get_classes
 from PIL.Image import Image
 from torchvision.transforms import Compose
 
@@ -19,22 +21,22 @@ from mlmodule.torch.data.images import convert_to_rgb, get_pil_image_from_file
 from mlmodule.utils import list_files_in_dir
 
 
+CONFIG_PATH = f'src/mlmodule/contrib/rpn/configs/guided_anchoring/ga_rpn_x101_32x4d_fpn_1x_coco.py'
+
+
 @pytest.fixture(scope='session')
 def rpn():
-    base_path = 'src/mlmodule/contrib/rpn'
-    config = f'{base_path}/configs/guided_anchoring/ga_rpn_x101_32x4d_fpn_1x_coco.py'
-    checkpoint = f'{base_path}/checkpoints/ga_rpn_x101_32x4d_fpn_1x_coco_20200220-c28d1b18.pth'
-
+    """ Load mlmodule RPN """
     # Initialize RPN
-    model = RPN(config, device='cuda:0')
+    model = RPN(device='cuda:0')
     # Load checkpoint
-    with open(checkpoint, 'rb') as f:
-        model.load(f)
+    model.load()
     return model
 
 
 @pytest.fixture(scope='session')
 def region_encoder():
+    """ Load mlmodule region encoder """
     densenet = DenseNet161ImageNetEncoder(device='cuda:0')
     densenet.load()
     return densenet
@@ -42,7 +44,23 @@ def region_encoder():
 
 @pytest.fixture(scope='session')
 def region_selector():
+    """ Load mlmodule region selector """
     return CosineSimilarityRegionSelector(device='cuda:0')
+
+
+@pytest.fixture(scope='session')
+def mmdet_model(rpn):
+    """ Load mmdetection model """
+    # Initialize the model
+    model = init_detector(CONFIG_PATH, device='cuda:0')
+
+    # Load the state dictionary from s3
+    state_dict = rpn.get_default_pretrained_state_dict()
+
+    # Apply the state dictionary to the model
+    mmcv.runner.load_state_dict(model, state_dict, strict=False)
+    model.CLASSES = get_classes('coco')
+    return model
 
 
 @pytest.fixture(scope='session')
@@ -57,18 +75,13 @@ def images() -> Tuple[List[str], List[Image]]:
 
 
 @pytest.fixture(scope='session')
-def default_mmdet_encodings(images) -> Tuple[List[str], List[BBoxCollection]]:
-    base = 'src/mlmodule/contrib/rpn'
-    ga_rpn = init_detector(f'{base}/configs/guided_anchoring/ga_rpn_x101_32x4d_fpn_1x_coco.py',
-                           f'{base}/checkpoints/ga_rpn_x101_32x4d_fpn_1x_coco_20200220-c28d1b18.pth',
-                           device='cuda:0')
-
+def default_mmdet_encodings(mmdet_model, images) -> Tuple[List[str], List[BBoxCollection]]:
     num_regions = 20
     min_score = 0.0
     urls, _ = images
     boxes = []
     for url in urls:
-        results = inference_detector(ga_rpn, url)
+        results = inference_detector(mmdet_model, url)
         regions = results[:num_regions, :4]
         region_scores = results[:num_regions, 4:]
 
