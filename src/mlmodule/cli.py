@@ -5,6 +5,7 @@ from importlib import import_module
 from typing import Dict, List, Tuple, Union
 
 import torch
+from mlmodule.serializers import Serializer
 
 from mlmodule.torch import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
@@ -24,6 +25,8 @@ def download_fun(args):
 
 def run_fun(args):
     model: BaseTorchMLModule = args.module(device=args.device)
+    # Loading pretrained model
+    model.load()
     shrink_input = None
     if hasattr(model, 'shrink_input_image_size'):
         shrink_input = model.shrink_input_image_size()
@@ -36,9 +39,8 @@ def run_fun(args):
         data_loader_options={"batch_size": args.batch_size, "num_workers": args.num_workers},
         **dict(args.extra_kwargs or [])
     )
-    if hasattr(features, "tolist"):
-        features = features.tolist()
-    print(json.dumps(dict(zip(indices, features))))
+    safe_object = dict(zip(indices, Serializer(features).safe_json_types()))
+    print(json.dumps(safe_object))
 
 
 def _contrib_module(module_str):
@@ -61,7 +63,7 @@ def parse_key_value_arg(cmd_values: List[str]) -> Tuple[str, Union[str, int]]:
     try:
         (key, value) = cmd_values.split("=", 1)
     except ValueError as ex:
-        raise argparse.ArgumentError(f"Argument \"{s}\" is not in k=v format")
+        raise argparse.ArgumentError(f"Argument \"{cmd_values}\" is not in k=v format")
     else:
         # Trying to parse a int otherwise leaving it as string
         try:

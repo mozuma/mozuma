@@ -183,7 +183,7 @@ class RPN(BaseTorchMLModule, TorchPretrainedModuleMixin):
             img_bbox = []
 
             if boxes is not None:
-                for b, s in zip(boxes[:num_regions], scores[:num_regions]):
+                for b, s in zip(boxes[:num_regions].tolist(), scores[:num_regions]):
                     if s >= min_score:
                         img_bbox.append(BBoxOutput(
                             bounding_box=(BBoxPoint(*b[:2]), BBoxPoint(*b[2:])),  # Extracting two points
