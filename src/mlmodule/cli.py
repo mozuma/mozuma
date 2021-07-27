@@ -25,8 +25,9 @@ def download_fun(args):
 
 def run_fun(args):
     model: BaseTorchMLModule = args.module(device=args.device)
-    # Loading pretrained model
-    model.load()
+    if hasattr(model, 'load'):
+        # Loading pretrained model
+        model.load()
     shrink_input = None
     if hasattr(model, 'shrink_input_image_size'):
         shrink_input = model.shrink_input_image_size()

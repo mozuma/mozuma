@@ -1,9 +1,10 @@
 import logging
 from typing import Any, List, TypeVar
+import numpy as np
 
 import torch
-from torch.nn.functional import cosine_similarity
 from torch.utils.data.dataloader import DataLoader
+from torchvision.transforms.transforms import ToTensor
 from tqdm import tqdm
 
 from mlmodule.base import BaseMLModule
@@ -30,6 +31,10 @@ class CosineSimilarityRegionSelector(BaseMLModule):
     def _resolve_device(cls):
         return torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
+    @classmethod
+    def similarity(cls, x: np.ndarray, y: np.ndarray) -> np.ndarray:
+        return np.dot(x/x.sum(), y/y.sum())
+
     def get_data_loader(self, data):
         """Configured data loader with applied transforms
 
@@ -42,7 +47,8 @@ class CosineSimilarityRegionSelector(BaseMLModule):
             "shuffle": False,
             "drop_last": False,
             "batch_size": 1,
-            "pin_memory": self.device != torch.device('cpu')
+            "pin_memory": self.device != torch.device('cpu'),
+            "collate_fn": lambda x: ([x[0][0]], x[0][1])
         }
         # Building data loader
         return DataLoader(data, **data_loader_options)
@@ -64,14 +70,11 @@ class CosineSimilarityRegionSelector(BaseMLModule):
                 # Collect the features for each box
                 box_features = [box.features for box in img_boxes]
 
-                # Collect the encodings as tensors, send them to device:
-                region_encodings = [box.to(self.device) for box in box_features]
-
-                for i1 in range(len(region_encodings) - 1):
+                for i1 in range(len(box_features) - 1):
                     # if the box is still valid, compute the cosine
                     if box_features[i1] is not None:
-                        for i2 in range(i1 + 1, len(region_encodings)):
-                            similarity = cosine_similarity(region_encodings[i1], region_encodings[i2])
+                        for i2 in range(i1 + 1, len(box_features)):
+                            similarity = self.similarity(box_features[i1], box_features[i2])
                             # if the 2 boxes are too similar, set the features for the worst box to None
                             if similarity > max_similarity:
                                 box_features[i2] = None
@@ -93,4 +96,4 @@ class CosineSimilarityRegionSelector(BaseMLModule):
                 logger.debug(f"Collecting results: {batch_n}/{n_batches}")
 
             # Returning accumulated results
-        return IndexedDataset[Any, BBoxCollection, BBoxCollection](indices, bbox_collections)
+        return indices, bbox_collections

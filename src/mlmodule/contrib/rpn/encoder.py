@@ -3,11 +3,13 @@ from typing import Tuple, List, TypeVar, Any, Union
 import numpy as np
 import torch
 from PIL.Image import Image
+from torchvision.transforms.transforms import Compose
 
 from mlmodule.box import BBoxOutput, BBoxCollection
 from mlmodule.contrib.rpn.transforms import RegionCrop, StandardTorchvisionRegionTransforms
 from mlmodule.contrib.densenet.features import BaseDenseNetPretrainedFeatures
 from mlmodule.torch.data.base import IndexedDataset
+from mlmodule.torch.data.box import ApplyFunctionToPosition
 
 
 """ Creates encodings for regions extracted from an image """
@@ -30,12 +32,16 @@ class RegionEncoder(BaseDenseNetPretrainedFeatures):
         assert len(image_dataset) == len(regions)
         new_idx = []
         new_data = []
-        for (index, img), boxes in zip(image_dataset, regions):
+        for (index, img), boxes in zip(zip(image_dataset.indices, image_dataset.items), regions):
             for box_num, box in enumerate(boxes):
                 new_idx.append((index, box_num))
                 new_data.append((img, box))
 
-        return IndexedDataset[Tuple[Any, int], Tuple[Image, BBoxOutput], Tuple[Image, BBoxOutput]](new_idx, new_data)
+        dataset = IndexedDataset[Tuple[Any, int], Tuple[Image, BBoxOutput], Tuple[Image, BBoxOutput]](new_idx, new_data)
+        dataset.transforms = [
+            ApplyFunctionToPosition(Compose(image_dataset.transforms), pos=0)
+        ] + dataset.transforms
+        return dataset
 
     @classmethod
     def parse_encodings(cls, indices: List[Tuple[Any, int]],
