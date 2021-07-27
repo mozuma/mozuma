@@ -2,6 +2,7 @@ import argparse
 import json
 import logging
 from importlib import import_module
+from typing import Dict, List, Tuple, Union
 
 import torch
 
@@ -26,7 +27,8 @@ def run_fun(args):
     dataset = ImageDataset(args.input_files)
     indices, features = model.bulk_inference(
         dataset, tqdm_enabled=True,
-        data_loader_options={"batch_size": args.batch_size, "num_workers": args.num_workers}
+        data_loader_options={"batch_size": args.batch_size, "num_workers": args.num_workers},
+        **dict(args.extra_kwargs or [])
     )
     if hasattr(features, "tolist"):
         features = features.tolist()
@@ -38,6 +40,30 @@ def _contrib_module(module_str):
     if len(elements) != 2:
         raise ValueError('Format should be <module>.<MLModuleClass>')
     return getattr(import_module(f'mlmodule.contrib.{elements[0]}'), elements[1])
+
+
+def parse_key_value_arg(cmd_values: List[str]) -> Tuple[str, Union[str, int]]:
+    """
+    Parse a key, value pair, separated by '='
+    That's the reverse of ShellArgs.
+
+    On the command line (argparse) a declaration will typically look like:
+        foo=hello
+    or
+        foo="hello world"
+    """
+    try:
+        (key, value) = cmd_values.split("=", 1)
+    except ValueError as ex:
+        raise argparse.ArgumentError(f"Argument \"{s}\" is not in k=v format")
+    else:
+        # Trying to parse a int otherwise leaving it as string
+        try:
+            value = int(value)
+        except TypeError as _:
+            pass
+    
+    return key, value
 
 
 def main():
@@ -60,6 +86,7 @@ def main():
     run.add_argument('--batch-size', type=int, default=None, help='Batch size for inference')
     run.add_argument('--num-workers', type=int, default=0, help='Loader number of workers')
     run.add_argument('--device', type=torch.device, default=None, help='Torch device')
+    run.add_argument('--extra-kwargs', metavar='KEY=VALUE', nargs='+', type=parse_key_value_arg)
     run.add_argument('module',
                      type=_contrib_module,
                      help='Should be in the format <module>.<MLModuleClass> '
