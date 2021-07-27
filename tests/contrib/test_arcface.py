@@ -16,8 +16,7 @@ FACE_DISTANCE_THRESHOLD = 0.5
 def _face_features_for_folder(torch_device: torch.device, folder, **opts):
     arcface = ArcFaceFeatures(device=torch_device)
     arcface.load()
-    mtcnn = MTCNNDetector(device=torch_device, image_size=720,
-                          min_face_size=20)
+    mtcnn = MTCNNDetector(device=torch_device, min_face_size=20)
     mtcnn.load()
     file_names = list_files_in_dir(folder, allowed_extensions=('jpg', 'png'))
 

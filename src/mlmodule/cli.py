@@ -24,7 +24,13 @@ def download_fun(args):
 
 def run_fun(args):
     model: BaseTorchMLModule = args.module(device=args.device)
-    dataset = ImageDataset(args.input_files)
+    shrink_input = None
+    if hasattr(model, 'shrink_input_image_size'):
+        shrink_input = model.shrink_input_image_size()
+    dataset = ImageDataset(
+        args.input_files,
+        shrink_img_size=shrink_input
+    )
     indices, features = model.bulk_inference(
         dataset, tqdm_enabled=True,
         data_loader_options={"batch_size": args.batch_size, "num_workers": args.num_workers},
@@ -67,7 +73,7 @@ def parse_key_value_arg(cmd_values: List[str]) -> Tuple[str, Union[str, int]]:
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
 
     subparsers = parser.add_subparsers(dest='cmd', required=True)
 

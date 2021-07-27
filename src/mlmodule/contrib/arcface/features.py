@@ -94,9 +94,12 @@ class ArcFaceFeatures(BaseTorchMLModule[BoundingBoxDataset], TorchPretrainedModu
         if remove_bad_quality_faces:
             # Getting normalised faces to filter bad quality faces
             norm_faces = np.load(os.path.join(os.path.dirname(__file__), 'normalized_faces.npy'))
+            # Multiplying with a matrix that takes to mean value for each feature
+            # This greatly reduces the size of the dot product with features
+            norm_faces = norm_faces @ np.ones((norm_faces.shape[1], 1))/norm_faces.shape[1]
 
             # Filter for faces with good quality
-            good_faces = (1 - (features @ norm_faces).mean(axis=1)) > ARCFACE_MEAN_DISTANCE_THRESHOLD
+            good_faces = (1 - (features @ norm_faces)[:, 0]) > ARCFACE_MEAN_DISTANCE_THRESHOLD
             return np.array(indices)[good_faces].tolist(), features[good_faces]
         else:
             return indices, features
