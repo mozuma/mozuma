@@ -26,6 +26,14 @@ def torch_device(request: SubRequest) -> torch.device:
 
 
 @pytest.fixture(scope='session')
+def gpu_torch_device() -> torch.device:
+    """Fixture to get a GPU torch device. The test will be skipped if not GPU is available"""
+    if not torch.cuda.is_available():
+        pytest.skip(f"Skipping test as is CUDA not available")
+    return torch.device('cuda')
+
+
+@pytest.fixture(scope='session')
 def set_seeds():
     def _set_seeds(val=123):
         torch.manual_seed(val)

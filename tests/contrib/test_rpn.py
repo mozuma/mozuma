@@ -25,34 +25,34 @@ CONFIG_PATH = f'src/mlmodule/contrib/rpn/configs/guided_anchoring/ga_rpn_x101_32
 
 
 @pytest.fixture(scope='session')
-def rpn():
+def rpn(gpu_torch_device):
     """ Load mlmodule RPN """
     # Initialize RPN
-    model = RPN(device='cuda:0')
+    model = RPN(device=gpu_torch_device)
     # Load checkpoint
     model.load()
     return model
 
 
 @pytest.fixture(scope='session')
-def region_encoder():
+def region_encoder(gpu_torch_device):
     """ Load mlmodule region encoder """
-    densenet = DenseNet161ImageNetEncoder(device='cuda:0')
+    densenet = DenseNet161ImageNetEncoder(device=gpu_torch_device)
     densenet.load()
     return densenet
 
 
 @pytest.fixture(scope='session')
-def region_selector():
+def region_selector(gpu_torch_device):
     """ Load mlmodule region selector """
-    return CosineSimilarityRegionSelector(device='cuda:0')
+    return CosineSimilarityRegionSelector(device=gpu_torch_device)
 
 
 @pytest.fixture(scope='session')
-def mmdet_model(rpn):
+def mmdet_model(rpn, gpu_torch_device):
     """ Load mmdetection model """
     # Initialize the model
-    model = init_detector(CONFIG_PATH, device='cuda:0')
+    model = init_detector(CONFIG_PATH, device=gpu_torch_device)
 
     # Load the state dictionary from s3
     state_dict = rpn.get_default_pretrained_state_dict()
@@ -164,7 +164,7 @@ def test_region_inference(rpn, images, default_mmdet_encodings):
         assert unmatched_boxes <= 2
 
 
-def test_region_encoding(rpn, region_encoder, images):
+def test_region_encoding(rpn, region_encoder, images, gpu_torch_device):
     indices, imgs = images
     dataset = IndexedDataset[str, np.ndarray, np.ndarray](indices, imgs)
 
@@ -185,7 +185,7 @@ def test_region_encoding(rpn, region_encoder, images):
     assert len(indices) == len(box_collections)
 
     # Check that the regions have very similar features than when re-extracting them with a densenet
-    densenet = DenseNet161ImageNetFeatures(device='cuda:0')
+    densenet = DenseNet161ImageNetFeatures(device=gpu_torch_device)
     densenet.load()
     densenet.eval()
     cropper = RegionCrop()
@@ -196,10 +196,10 @@ def test_region_encoding(rpn, region_encoder, images):
             assert r.probability == r_with_features.probability
 
             with torch.no_grad():
-                region_img = torchvision_transforms(cropper((img, r))).unsqueeze(dim=0).to('cuda:0')
+                region_img = torchvision_transforms(cropper((img, r))).unsqueeze(dim=0).to(gpu_torch_device)
                 features = densenet(region_img).detach().squeeze()
                 assert features.shape == r_with_features.features.shape
-                sim = F.cosine_similarity(features, torch.Tensor(r_with_features.features).to('cuda:0'), dim=0)
+                sim = F.cosine_similarity(features, torch.Tensor(r_with_features.features).to(gpu_torch_device), dim=0)
                 assert sim.item() > 0.99
 
 

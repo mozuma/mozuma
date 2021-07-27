@@ -6,40 +6,39 @@
 #
 addict==2.4.0
     # via mmcv-full
-apipkg==1.5
-    # via execnet
-attrs==20.3.0
+attrs==21.2.0
     # via pytest
-boto3==1.17.54
+boto3==1.18.7
     # via -r requirements.in
-botocore==1.20.54
+botocore==1.21.7
     # via
     #   boto3
     #   s3transfer
-certifi==2020.12.5
+certifi==2021.5.30
     # via requests
-chardet==4.0.0
+charset-normalizer==2.0.3
     # via requests
-click==7.1.2
+click==8.0.1
     # via pip-tools
 git+https://github.com/openai/CLIP.git@beba48f35392a73c6c47ae67ddffced81ad1916d
     # via -r requirements.in
 cycler==0.10.0
     # via matplotlib
-cython==0.29.23
+cython==0.29.24
     # via mmpycocotools
-execnet==1.8.0
+execnet==1.9.0
     # via pytest-xdist
 facenet-pytorch==2.5.2
     # via -r requirements.in
-ftfy==6.0.1
+ftfy==6.0.3
     # via
     #   -r requirements.in
     #   clip
-idna==2.10
+idna==3.2
     # via requests
-importlib-metadata==4.0.0
+importlib-metadata==4.6.1
     # via
+    #   click
     #   pep517
     #   pluggy
     #   pytest
@@ -51,7 +50,7 @@ jmespath==0.10.0
     #   botocore
 kiwisolver==1.3.1
     # via matplotlib
-matplotlib==3.4.1
+matplotlib==3.4.2
     # via
     #   mmdet
     #   mmpycocotools
@@ -61,7 +60,7 @@ git+https://github.com/open-mmlab/mmdetection.git@2894516bacf9ff82c3bc6d6970019d
     # via -r requirements.in
 mmpycocotools==12.0.3
     # via mmdet
-numpy==1.20.2
+numpy==1.21.1
     # via
     #   facenet-pytorch
     #   matplotlib
@@ -71,21 +70,19 @@ numpy==1.20.2
     #   scipy
     #   torch
     #   torchvision
-opencv-python==4.5.1.48
-    # via
-    #   -r requirements.in
-    #   mmcv-full
-packaging==20.9
+opencv-python==4.5.3.56
+    # via -r requirements.in
+packaging==21.0
     # via pytest
-pep517==0.10.0
+pep517==0.11.0
     # via pip-tools
-pillow==8.2.0
+pillow==8.3.1
     # via
     #   facenet-pytorch
     #   matplotlib
     #   mmcv-full
     #   torchvision
-pip-tools==6.1.0
+pip-tools==6.2.0
     # via -r requirements.in
 pluggy==0.13.1
     # via pytest
@@ -101,30 +98,30 @@ pyparsing==2.4.7
     #   packaging
 pytest-forked==1.3.0
     # via pytest-xdist
-pytest-xdist[psutil]==2.2.1
+pytest-xdist[psutil]==2.3.0
     # via -r requirements.in
-pytest==6.2.3
+pytest==6.2.4
     # via
     #   -r requirements.in
     #   pytest-forked
     #   pytest-xdist
-python-dateutil==2.8.1
+python-dateutil==2.8.2
     # via
     #   botocore
     #   matplotlib
 pyyaml==5.4.1
     # via mmcv-full
-regex==2021.4.4
+regex==2021.7.6
     # via
     #   -r requirements.in
     #   clip
-requests==2.25.1
+requests==2.26.0
     # via facenet-pytorch
-s3transfer==0.4.0
+s3transfer==0.5.0
     # via boto3
-scipy==1.6.2
+scipy==1.7.0
     # via -r requirements.in
-six==1.15.0
+six==1.16.0
     # via
     #   cycler
     #   mmdet
@@ -132,9 +129,9 @@ six==1.15.0
 terminaltables==3.1.0
     # via mmdet
 toml==0.10.2
-    # via
-    #   pep517
-    #   pytest
+    # via pytest
+tomli==1.1.0
+    # via pep517
 torch==1.7.1
     # via
     #   -r requirements.in
@@ -145,25 +142,27 @@ torchvision==0.8.2
     #   -r requirements.in
     #   clip
     #   facenet-pytorch
-tqdm==4.60.0
+tqdm==4.61.2
     # via
     #   -r requirements.in
     #   clip
-typing-extensions==3.7.4.3
+typing-extensions==3.10.0.0
     # via
     #   importlib-metadata
     #   torch
-urllib3==1.26.4
+urllib3==1.26.6
     # via
     #   botocore
     #   requests
 wcwidth==0.2.5
     # via ftfy
 wheel==0.36.2
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   pip-tools
 yapf==0.31.0
     # via mmcv-full
-zipp==3.4.1
+zipp==3.5.0
     # via
     #   importlib-metadata
     #   pep517
