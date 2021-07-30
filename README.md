@@ -5,8 +5,16 @@ used in the AI Data platform.
 
 ## Installation
 
+From the git repository:
+
 ```bash
 pip install git+ssh://git@github.com/LSIR/mlmodule.git
+```
+
+As a docker image:
+
+```shell
+docker pull lsirepfl/mlmodule:<version>
 ```
 
 ## Models
@@ -34,21 +42,41 @@ python -m mlmodule.cli run clip.CLIPViTB32ImageEncoder folder/* --batch-size 256
 
 ## Installation for development
 
-Installing requirements
 
 ```bash
-# With pip
-pip install -r requirements.txt
-# Or with pip-tools to install only the required dependencies
-pip-sync
+# For an installation with all model dependencies
+make install
+
+# For a minimal installation with just MLModule dependencies
+make install-minimal
+
+# For development
+make develop
 ```
 
-Updating requirements should be done in `requirements.in` and `dev-requirements.in` files.
-The actual requirements files should be updated with 
-(see [pip-tools](https://github.com/jazzband/pip-tools) for more documentation):
+## Build the Docker image
+
+The image can be built tested and pushed with one command
+
+```shell
+export MLMODULE_BUILD_VERSION=x.y.z
+make release-docker-image
+```
+
+
+## Requirements management
+
+Updating requirements should be done in `setup.cfg`. 
+The update the `requirement.txt` file run:
 
 ```bash
-pip-compile
+make requirements
+```
+
+To install the requirements
+
+```bash
+make env-install
 ```
 
 ## Tests
@@ -56,19 +84,18 @@ pip-compile
 Install package for development
 
 ```bash
-pip install -e .
+make develop
 ```
 
 Run tests
 
 ```bash
-pytest
+make test
 ```
 
 ## Publish a new version
 
-* Update the version number in `setup.py`
-* Push a new commit to the `master` branch with the new version
+* Push the new version to the `master` branch
 * Add a tag on the branch with the format `vX.Y.Z`. For instance, `v0.1.1`.
 
 ## Contribute
