@@ -1,11 +1,15 @@
+BASE_IMAGE ?= lsirepfl/pytorch:v1.7.1-py3.7.10-cu110
 IMAGE_NAME ?= lsirepfl/mlmodule
 MLMODULE_BUILD_VERSION ?= 0.0.dev0
-IMAGE_TAG ?= ${MLMODULE_BUILD_VERSION}
+IMAGE_TAG ?= v${MLMODULE_BUILD_VERSION}
 
 .PHONY: build
 
 docker-image: build
-	@docker build --build-arg MLMODULE_BUILD_VERSION=${MLMODULE_BUILD_VERSION} -t ${IMAGE_NAME}:${IMAGE_TAG} .
+	@docker build \
+		--build-arg MLMODULE_BUILD_VERSION=${MLMODULE_BUILD_VERSION} \
+		--build-arg BASE_IMAGE=${BASE_IMAGE} \
+		-t ${IMAGE_NAME}:${IMAGE_TAG} .
 
 test-docker-image: docker-image
 	@docker build --build-arg MLMODULE_BUILD_VERSION=${MLMODULE_BUILD_VERSION} \
@@ -28,7 +32,7 @@ else
 endif
 
 build:
-	@rm dist/*
+	@rm -r dist
 	@python -m build --wheel
 
 install:

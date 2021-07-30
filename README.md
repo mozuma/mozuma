@@ -59,8 +59,7 @@ make develop
 The image can be built tested and pushed with one command
 
 ```shell
-export MLMODULE_BUILD_VERSION=x.y.z
-make release-docker-image
+make release-docker-image MLMODULE_BUILD_VERSION=x.y.z
 ```
 
 
