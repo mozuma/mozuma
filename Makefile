@@ -1,12 +1,19 @@
 BASE_IMAGE ?= lsirepfl/pytorch:v1.7.1-py3.7.10-cu110
 IMAGE_NAME ?= lsirepfl/mlmodule
 MLMODULE_BUILD_VERSION ?= 0.0.dev0
-IMAGE_TAG ?= v${MLMODULE_BUILD_VERSION}
+MLMODULE_WHEEL_NAME := mlmodule-$(MLMODULE_BUILD_VERSION)-py3-none-any.whl
+IMAGE_TAG_PREFIX ?= v
+IMAGE_TAG ?= ${IMAGE_TAG_PREFIX}${MLMODULE_BUILD_VERSION}
 CPU_ONLY_TESTS ?= n
+
+ifeq ($(MLMODULE_BUILD_VERSION), 0.0.dev0)
+.PHONY: dist
+endif
 
 docker-image: dist
 	@docker build \
 		--build-arg MLMODULE_BUILD_VERSION=${MLMODULE_BUILD_VERSION} \
+		--build-arg MLMODULE_WHEEL_NAME=${MLMODULE_WHEEL_NAME} \
 		--build-arg BASE_IMAGE=${BASE_IMAGE} \
 		-t ${IMAGE_NAME}:${IMAGE_TAG} .
 
@@ -31,10 +38,10 @@ else
 	@docker push ${IMAGE_NAME}:${IMAGE_TAG}
 endif
 
-dist: $(shell find src/mlmodule/ -name "*.py" -print)
-	@mkdir -p dist
-	@rm -r dist
-	@python -m build --wheel
+dist: dist/$(MLMODULE_WHEEL_NAME)
+
+dist/$(MLMODULE_WHEEL_NAME): $(shell find src/mlmodule/ -name "*.py" -print)
+	@MLMODULE_BUILD_VERSION=$(MLMODULE_BUILD_VERSION) python -m build --wheel
 
 install:
 	@pip install .[full]

@@ -5,9 +5,9 @@ CUDA_VERSION ?= 11.0
 TORCH_VERSION ?= 1.7.1
 TORCHVISION_VERSION ?= 0.8.2
 
-IMAGE_TAG_PREFIX ?=
+IMAGE_TAG_PREFIX ?= v
 CUDA_MAGMA_VERSION := $(subst .,,${CUDA_VERSION})
-IMAGE_TAG := ${IMAGE_TAG_PREFIX}v1.7.1-py${PYTHON_VERSION}-cu${CUDA_MAGMA_VERSION}
+IMAGE_TAG := ${IMAGE_TAG_PREFIX}${TORCH_VERSION}-py${PYTHON_VERSION}-cu${CUDA_MAGMA_VERSION}
 
 # Access to LSIR public assets bucket. See https://github.com/LSIR/dataplatform-infra/tree/main/lsir-public-assets#read-bucket-content
 AWS_ACCESS_KEY_ID ?=

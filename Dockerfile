@@ -8,5 +8,6 @@ RUN pip install -r /app/build/requirements.txt
 
 # Install app
 ARG MLMODULE_BUILD_VERSION
-ADD dist /app/build/dist
+ARG MLMODULE_WHEEL_NAME
+ADD dist/${MLMODULE_WHEEL_NAME} /app/build/dist/${MLMODULE_WHEEL_NAME}
 RUN pip install -f /app/build/dist/ mlmodule==${MLMODULE_BUILD_VERSION}
