@@ -41,6 +41,7 @@ endif
 dist: dist/$(MLMODULE_WHEEL_NAME)
 
 dist/$(MLMODULE_WHEEL_NAME): $(shell find src/mlmodule/ -name "*.py" -print)
+	@python -m pip install build
 	@MLMODULE_BUILD_VERSION=$(MLMODULE_BUILD_VERSION) python -m build --wheel
 
 install:

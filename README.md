@@ -59,13 +59,13 @@ make develop
 The image can be built tested and pushed with one command
 
 ```shell
-make release-docker-image
+make release-docker-image MLMODULE_BUILD_VERSION=x.y.z
 ```
 
 Alternatively, the image can be build from a different base image (here to add support for PC32):
 
 ```shell
-make release-docker-image IMAGE_TAG_PREFIX=pc32-v BASE_IMAGE=lsirepfl/pytorch:pc32-v1.7.1-py3.7.10-cu110
+make release-docker-image MLMODULE_BUILD_VERSION=x.y.z IMAGE_TAG_PREFIX=pc32-v BASE_IMAGE=lsirepfl/pytorch:pc32-v1.7.1-py3.7.10-cu110
 ```
 
 ## Requirements management
