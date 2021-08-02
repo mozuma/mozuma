@@ -1,0 +1,17 @@
+FROM continuumio/miniconda3:4.10.3
+
+RUN apt-get update -y && apt-get install -y build-essential libgl1-mesa-dev && apt-get clean
+
+# Creating and making the environment usable by the data platform group
+ARG PYTHON_VERSION=3.7.10
+ARG CUDA_VERSION=11.0
+ARG TORCH_VERSION=1.7.1
+ARG TORCHVISION_VERSION=0.8.2
+RUN conda create -n app python=$PYTHON_VERSION cudatoolkit=$CUDA_VERSION \
+      pytorch==${TORCH_VERSION} torchvision==${TORCHVISION_VERSION} -c pytorch
+
+# Make sure the shell commands run inside the environment
+SHELL ["conda", "run", "-n", "app", "--no-capture-output", "/bin/bash", "-c"]
+
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
+ENV NVIDIA_VISIBLE_DEVICES=all
