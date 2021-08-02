@@ -1,7 +1,7 @@
 BASE_IMAGE ?= lsirepfl/pytorch:v1.7.1-py3.7.10-cu110
 IMAGE_NAME ?= lsirepfl/mlmodule
 MLMODULE_BUILD_VERSION ?= 0.0.dev0
-MLMODULE_WHEEL_NAME := mlmodule-$(MLMODULE_BUILD_VERSION)-py3-none-any.whl
+MLMODULE_WHEEL_NAME := mlmodule-$(subst -,_,${MLMODULE_BUILD_VERSION})-py3-none-any.whl
 IMAGE_TAG_PREFIX ?= v
 IMAGE_TAG ?= ${IMAGE_TAG_PREFIX}${MLMODULE_BUILD_VERSION}
 CPU_ONLY_TESTS ?= n
