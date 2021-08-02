@@ -13,6 +13,9 @@ IMAGE_TAG := ${IMAGE_TAG_PREFIX}v1.7.1-py${PYTHON_VERSION}-cu${CUDA_MAGMA_VERSIO
 AWS_ACCESS_KEY_ID ?=
 AWS_SECRET_ACCESS_KEY ?=
 
+login:
+	@docker login 
+
 build:
 	@docker build . -f Dockerfile.from-binary \
 		--build-arg PYTHON_VERSION=${PYTHON_VERSION} \
@@ -20,6 +23,9 @@ build:
 		--build-arg TORCH_VERSION=${TORCH_VERSION} \
 		--build-arg TORCHVISION_VERSION=${TORCHVISION_VERSION} \
 		-t ${IMAGE_NAME}:${IMAGE_TAG}
+
+release: login build
+	@docker push ${IMAGE_NAME}:${IMAGE_TAG}
 
 wheel-build:
 ifeq ($(IMAGE_TAG_PREFIX),)
@@ -32,6 +38,14 @@ else
 		--build-arg TORCHVISION_VERSION=${TORCHVISION_VERSION} \
 		-t ${IMAGE_NAME}:${IMAGE_TAG}
 endif
+
+wheel-release: login wheel-build
+ifeq ($(IMAGE_TAG_PREFIX),)
+	@echo "The variable IMAGE_TAG_PREFIX must be set to install PyTorch from wheels"
+else
+	@docker push ${IMAGE_NAME}:${IMAGE_TAG}
+endif
+
 
 download-wheels:
 	@pip install wheel awscli

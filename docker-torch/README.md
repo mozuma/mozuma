@@ -32,12 +32,22 @@ Compiled PyTorch for LSIRPC32 GPU.
 There are two different Dockerfiles:
 
 * `Dockerfile.from-binary` builds an image with official binaries distributed by PyTorch.
-* `Dockerfile.from-source` builds PyTorch from source.
+* `Dockerfile.from-wheek` builds an image from PyTorch wheels.
 
 These images accept the build arguments:
 
 * `PYTHON_VERSION` (default=`3.7.10`)
 * `CUDA_VERSION` (default=`11.0`)
-* `CUDA_MAGMA_VERSION` (default=`110`, only used in `Dockerfile.from-source`)
 * `TORCH_VERSION` (default=`1.7.1`)
 * `TORCHVISION_VERSION` (default=`0.8.2`)
+* `IMAGE_TAG_PREFIX` required to build an image from wheels
+
+Building images is done with `make`:
+
+```bash
+# For PC32 with wheels
+make wheel-release IMAGE_TAG_PREFIX=pc32
+
+# For official Pytorch wheels
+make release
+```
