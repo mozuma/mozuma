@@ -2,10 +2,9 @@ BASE_IMAGE ?= lsirepfl/pytorch:v1.7.1-py3.7.10-cu110
 IMAGE_NAME ?= lsirepfl/mlmodule
 MLMODULE_BUILD_VERSION ?= 0.0.dev0
 IMAGE_TAG ?= v${MLMODULE_BUILD_VERSION}
+CPU_ONLY_TESTS ?= n
 
-.PHONY: build
-
-docker-image: build
+docker-image: dist
 	@docker build \
 		--build-arg MLMODULE_BUILD_VERSION=${MLMODULE_BUILD_VERSION} \
 		--build-arg BASE_IMAGE=${BASE_IMAGE} \
@@ -20,6 +19,7 @@ test-docker-image: docker-image
 	@docker run --rm \
 		-e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
 		-e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+		-e CPU_ONLY_TESTS=${CPU_ONLY_TESTS} \
 		${IMAGE_NAME}:test-${IMAGE_TAG} \
 		conda run -n app --no-capture-output pytest /app/tests
 
@@ -31,7 +31,8 @@ else
 	@docker push ${IMAGE_NAME}:${IMAGE_TAG}
 endif
 
-build:
+dist: $(shell find src/mlmodule/ -name "*.py" -print)
+	@mkdir -p dist
 	@rm -r dist
 	@python -m build --wheel
 
