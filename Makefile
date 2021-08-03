@@ -6,9 +6,8 @@ IMAGE_TAG_PREFIX ?= v
 IMAGE_TAG ?= ${IMAGE_TAG_PREFIX}${MLMODULE_BUILD_VERSION}
 CPU_ONLY_TESTS ?= n
 
-ifeq ($(MLMODULE_BUILD_VERSION), 0.0.dev0)
-.PHONY: dist
-endif
+.PHONY: docker-image test-docker-image release-docker-image dist install install-minimal develop env-install \
+	env-sync requirements.txt test help
 
 docker-image: dist
 	@docker build \
@@ -17,7 +16,7 @@ docker-image: dist
 		--build-arg BASE_IMAGE=${BASE_IMAGE} \
 		-t ${IMAGE_NAME}:${IMAGE_TAG} .
 
-test-docker-image: docker-image
+test-docker-image: docker-image	##@Release Test MLModule in the PyTorch base image
 	@docker build --build-arg MLMODULE_BUILD_VERSION=${MLMODULE_BUILD_VERSION} \
 		--build-arg IMAGE_NAME=${IMAGE_NAME} \
 		--build-arg IMAGE_TAG=${IMAGE_TAG} \
@@ -38,29 +37,54 @@ else
 	@docker push ${IMAGE_NAME}:${IMAGE_TAG}
 endif
 
-dist: dist/$(MLMODULE_WHEEL_NAME)
+dist: dist/$(MLMODULE_WHEEL_NAME)	##@Release Builds MLModule wheel in dist/ folder
 
 dist/$(MLMODULE_WHEEL_NAME): $(shell find src/mlmodule/ -name "*.py" -print)
 	@python -m pip install build
 	@MLMODULE_BUILD_VERSION=$(MLMODULE_BUILD_VERSION) python -m build --wheel
 
-install:
+install:	##@Release full installation of MLModule with all dependencies to run any model in mlmodule.contrib
 	@pip install .[full]
 
-install-minimal:
+install-minimal:	##@Release Minimal installation of MLModule with no dependencies to run models in mlmodule.contrib
 	@pip install .
 
-develop: env-install
-	@pip install .[test]
+develop: env-install	##@Development Install mlmodule as an editable module (pip install -e ...)
+	@pip install -e .[test]
 
-env-install:
+env-install:	##@Development Install requirements.txt into current environment
 	@pip install -r requirements.txt
 
-env-sync:
+env-sync:	##@Development Synchronize current Python environment with requirements.txt (removes dependencies)
 	@pip-sync
 
-requirements:
+requirements.txt:	##@Development Update requirements.txt
 	@pip-compile --extra full --upgrade
 
-test:
+test:	##@Development Run tests
 	@pytest tests
+
+
+#COLORS
+GREEN  := $(shell tput -Txterm setaf 2)
+WHITE  := $(shell tput -Txterm setaf 7)
+YELLOW := $(shell tput -Txterm setaf 3)
+RESET  := $(shell tput -Txterm sgr0)
+
+# Add the following 'help' target to your Makefile
+# And add help text after each target name starting with '\#\#'
+# A category can be added with @category
+HELP_FUN = \
+    %help; \
+    while(<>) { push @{$$help{$$2 // 'options'}}, [$$1, $$3] if /^([a-zA-Z\-\.]+)\s*:.*\#\#(?:@([a-zA-Z\-]+))?\s(.*)$$/ }; \
+    print "usage: make [target]\n\n"; \
+    for (sort keys %help) { \
+    print "$$_:\n"; \
+    for (@{$$help{$$_}}) { \
+    $$sep = " " x (32 - length $$_->[0]); \
+    print "  $$_->[0]$$sep$$_->[1]\n"; \
+    }; \
+    print "\n"; }
+
+help: ##@Help Show this help.
+	@perl -e '$(HELP_FUN)' $(MAKEFILE_LIST)
