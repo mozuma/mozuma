@@ -1,3 +1,4 @@
+import os
 import random
 
 import numpy as np
@@ -22,6 +23,8 @@ def torch_device(request: SubRequest) -> torch.device:
     """
     if request.param != 'cpu' and not torch.cuda.is_available():
         pytest.skip(f"Skipping device {request.param}, CUDA not available")
+    if request.param != 'cpu' and os.environ.get('CPU_ONLY_TESTS') == 'y':
+        pytest.skip(f"Skipping device {request.param}, tests are running for CPU only")
     return torch.device(request.param)
 
 

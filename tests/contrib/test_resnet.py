@@ -38,7 +38,7 @@ def test_resnet_classifier(torch_device):
     features = IndexedDataset(idx, features)   # Zipping indices and features
 
     # Getting classifier
-    resnet_cls = ResNet18ImageNetClassifier()
+    resnet_cls = ResNet18ImageNetClassifier(device=torch_device)
     resnet_cls.load()
 
     # Running inference

@@ -32,7 +32,9 @@ CLIP_MODULE_MAP = {
 @pytest.fixture(params=clip.available_models())
 def clip_model_name(request: SubRequest):
     """List all available CLIP model names"""
-    return request.param
+    if request.param in CLIP_MODULE_MAP['text']:
+        return request.param
+    pytest.skip(f"Skipping CLIP model {request.param} as it is not implemented in MLModule")
 
 
 @pytest.mark.parametrize('encoder_type', CLIP_MODULE_MAP.keys())
