@@ -1,2 +1,2 @@
-recursive-include src/mlmodule/*.py
+recursive-include src/mlmodule/contrib/rpn/configs *.yml *.py
 include src/mlmodule/contrib/arcface/normalized_faces.npy
