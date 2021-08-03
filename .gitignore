@@ -9,5 +9,7 @@ build
 *.pyc
 .tox
 
+venv
+
 # For the tutorial on creating modules
 src/mlmodule/contrib/example.py
