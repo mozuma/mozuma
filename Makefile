@@ -6,64 +6,29 @@ IMAGE_TAG_PREFIX ?= v
 IMAGE_TAG ?= ${IMAGE_TAG_PREFIX}${MLMODULE_BUILD_VERSION}
 CPU_ONLY_TESTS ?= n
 
-.PHONY: docker-image test-docker-image release-docker-image dist install install-minimal develop env-install \
-	env-sync requirements.txt test help
+.PHONY: test-docker-image dist help
 
-docker-image: dist
+test-docker-image: dist	##@Release Test MLModule in the PyTorch base image
 	@docker build \
 		--build-arg MLMODULE_BUILD_VERSION=${MLMODULE_BUILD_VERSION} \
 		--build-arg MLMODULE_WHEEL_NAME=${MLMODULE_WHEEL_NAME} \
 		--build-arg BASE_IMAGE=${BASE_IMAGE} \
-		-t ${IMAGE_NAME}:${IMAGE_TAG} .
-
-test-docker-image: docker-image	##@Release Test MLModule in the PyTorch base image
-	@docker build --build-arg MLMODULE_BUILD_VERSION=${MLMODULE_BUILD_VERSION} \
-		--build-arg IMAGE_NAME=${IMAGE_NAME} \
-		--build-arg IMAGE_TAG=${IMAGE_TAG} \
-		-f Dockerfile.test \
+		-f tests/Dockerfile.test \
 		-t ${IMAGE_NAME}:test-${IMAGE_TAG} .
 	@docker run --rm \
 		-e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
 		-e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
 		-e CPU_ONLY_TESTS=${CPU_ONLY_TESTS} \
 		${IMAGE_NAME}:test-${IMAGE_TAG} \
-		conda run -n app --no-capture-output pytest /app/tests
+		conda run -n app --no-capture-output pytest /app/tests || docker rm ${IMAGE_NAME}:test-${IMAGE_TAG}
+	@docker rm ${IMAGE_NAME}:test-${IMAGE_TAG}
 
-release-docker-image: test-docker-image
-ifeq (${IMAGE_TAG},0.0.dev0)
-# Cannot push a default dev version
-	@echo "Set the MLMODULE_BUILD_VERSION to a valid PEP 440 version before pushing an image (see https://www.python.org/dev/peps/pep-0440/)"
-else
-	@docker push ${IMAGE_NAME}:${IMAGE_TAG}
-endif
 
 dist: dist/$(MLMODULE_WHEEL_NAME)	##@Release Builds MLModule wheel in dist/ folder
 
 dist/$(MLMODULE_WHEEL_NAME): $(shell find src/mlmodule/ -name "*.py" -print)
 	@python -m pip install build
 	@MLMODULE_BUILD_VERSION=$(MLMODULE_BUILD_VERSION) python -m build --wheel
-
-install:	##@Release full installation of MLModule with all dependencies to run any model in mlmodule.contrib
-	@pip install .[full]
-
-install-minimal:	##@Release Minimal installation of MLModule with no dependencies to run models in mlmodule.contrib
-	@pip install .
-
-develop: env-install	##@Development Install mlmodule as an editable module (pip install -e ...)
-	@pip install -e .[test]
-
-env-install:	##@Development Install requirements.txt into current environment
-	@pip install -r requirements.txt
-
-env-sync:	##@Development Synchronize current Python environment with requirements.txt (removes dependencies)
-	@pip-sync
-
-requirements.txt:	##@Development Update requirements.txt
-	@pip-compile --extra full --upgrade
-
-test:	##@Development Run tests
-	@pytest tests
-
 
 #COLORS
 GREEN  := $(shell tput -Txterm setaf 2)

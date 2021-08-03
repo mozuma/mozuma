@@ -13,6 +13,23 @@ class BBoxPoint:
     x: float
     y: float
 
+    def __getitem__(self, item: int) -> float:
+        """Makes the BBoxPoint behave as a tuple with self[0] = x and self[1] = y
+
+        Raises:
+            IndexError: if `item` > 1
+        """
+        if item == 0:
+            return self.x
+        elif item == 1:
+            return self.y
+        else:
+            raise IndexError(f'Index {item} is out of range for BBoxPoint')
+
+    def __len__(self) -> int:
+        """The length of a BBoxPoint is fixed"""
+        return 2
+
 
 @dataclasses.dataclass
 class BBoxOutput:

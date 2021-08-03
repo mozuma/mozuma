@@ -1,0 +1,17 @@
+ARG BASE_IMAGE
+
+FROM ${BASE_IMAGE}
+
+# Install requirements
+ADD ../requirements.txt /app/build/requirements.txt
+RUN pip install -r /app/build/requirements.txt
+
+# Install MLModule and test dependencies
+ARG MLMODULE_WHEEL_NAME
+ARG MLMODULE_BUILD_VERSION
+ADD dist/${MLMODULE_WHEEL_NAME} /app/dist/${MLMODULE_WHEEL_NAME}
+RUN pip install  -f /app/dist/ mlmodule[test]==${MLMODULE_BUILD_VERSION:-0.0.dev0}
+
+# Add tests
+WORKDIR /app
+ADD tests /app/tests

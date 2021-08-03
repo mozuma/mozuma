@@ -50,8 +50,8 @@ def test_mtcnn_detector_inference(mtcnn_inference_results):
 
     output_by_file = dict(zip(file_names, outputs))
     assert len(outputs) == 3
-    # It should be a namedtuple of len 3
-    assert len(outputs[0][0]) == 3
+    # It should be a BBoxOutput
+    assert type(outputs[0][0]) == BBoxOutput
     assert len(output_by_file[os.path.join("tests", "fixtures", "berset", 'berset2.jpg')]) == 8
 
 
