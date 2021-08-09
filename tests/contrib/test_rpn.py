@@ -221,7 +221,7 @@ def test_bbox_selector(rpn, region_encoder, region_selector, images):
 
     # Select regions based on cosine similarity
     box_dataset_w_features = IndexedDataset[str, BBoxCollection, BBoxCollection](indices, box_collections)
-    box_dataset_w_features_selected = region_selector.bulk_inference(box_dataset_w_features)
+    _, box_dataset_w_features_selected = region_selector.bulk_inference(box_dataset_w_features)
 
     assert len(box_dataset_w_features) == len(box_dataset_w_features_selected)
     for i in range(len(box_dataset_w_features)):
@@ -236,7 +236,7 @@ def test_base(rpn, region_encoder, region_selector, images):
     dataset = IndexedDataset[str, np.ndarray, np.ndarray](indices, imgs)
 
     region_features = RegionFeatures(rpn, region_encoder, region_selector)
-    regions_with_features = region_features.bulk_inference(
+    _, regions_with_features = region_features.bulk_inference(
         dataset,
         regions_per_image=30,
         min_region_score=0.7

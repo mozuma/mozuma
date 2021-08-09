@@ -56,7 +56,7 @@ numpy==1.21.1
     #   scipy
     #   torch
     #   torchvision
-opencv-python==4.5.3.56
+opencv-python-headless==4.5.3.56
     # via mlmodule (setup.py)
 pillow==8.3.1
     # via

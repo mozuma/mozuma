@@ -33,6 +33,8 @@ def gpu_torch_device() -> torch.device:
     """Fixture to get a GPU torch device. The test will be skipped if not GPU is available"""
     if not torch.cuda.is_available():
         pytest.skip(f"Skipping test as is CUDA not available")
+    if os.environ.get('CPU_ONLY_TESTS') == 'y':
+        pytest.skip(f"Skipping as tests are running for CPU only")
     return torch.device('cuda')
 
 

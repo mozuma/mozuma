@@ -9,7 +9,7 @@ RUN pip install -r /app/build/requirements.txt
 # Install MLModule and test dependencies
 ARG MLMODULE_BUILD_VERSION
 ADD dist/ /app/dist/
-RUN pip install  -f /app/dist/ mlmodule[test]==${MLMODULE_BUILD_VERSION:-0.0.dev0}
+RUN pip install -f /app/dist/ mlmodule[test]==${MLMODULE_BUILD_VERSION:-0.0.dev0}
 
 # Add tests
 WORKDIR /app
