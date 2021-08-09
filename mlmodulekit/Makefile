@@ -6,7 +6,7 @@ build:
 	@docker build . -t lsirepfl/mlmodulekit:${MLMODULEKIT_VERSION} -f Dockerfile.binaries
 	@docker build . -t lsirepfl/mlmodulekit:${MLMODULEKIT_VERSION}-ca35 -f Dockerfile.sources
 
-release: build
+release: build login
 	@docker push lsirepfl/mlmodulekit:${MLMODULEKIT_VERSION}
 	@docker push lsirepfl/mlmodulekit:${MLMODULEKIT_VERSION}-ca35
 
