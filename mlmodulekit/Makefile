@@ -9,3 +9,6 @@ build:
 release: build
 	@docker push lsirepfl/mlmodulekit:${MLMODULEKIT_VERSION}
 	@docker push lsirepfl/mlmodulekit:${MLMODULEKIT_VERSION}-ca35
+
+login:
+	@docker login
