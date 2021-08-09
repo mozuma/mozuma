@@ -14,14 +14,14 @@ from torchvision.transforms import Compose
 from mlmodule.box import BBoxPoint, BBoxOutput, BBoxCollection
 from mlmodule.contrib.densenet import DenseNet161ImageNetFeatures
 from mlmodule.contrib.rpn import RegionFeatures, RPN, CosineSimilarityRegionSelector, RegionEncoder, \
-    DenseNet161ImageNetEncoder
+    DenseNet161ImageNetEncoder, get_absolute_config_path
 from mlmodule.contrib.rpn.transforms import RegionCrop, StandardTorchvisionRegionTransforms
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.data.images import convert_to_rgb, get_pil_image_from_file
 from mlmodule.utils import list_files_in_dir
 
 
-CONFIG_PATH = f'src/mlmodule/contrib/rpn/configs/guided_anchoring/ga_rpn_x101_32x4d_fpn_1x_coco.py'
+CONFIG_PATH = get_absolute_config_path('configs/guided_anchoring/ga_rpn_x101_32x4d_fpn_1x_coco.py')
 
 
 @pytest.fixture(scope='session')
