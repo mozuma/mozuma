@@ -1,6 +1,6 @@
 from io import BytesIO
 
-from typing import Callable, Dict, Union
+from typing import Callable, Union
 
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider

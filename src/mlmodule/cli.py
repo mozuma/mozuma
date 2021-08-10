@@ -3,7 +3,7 @@ import json
 import logging
 from importlib import import_module
 import os
-from typing import Dict, List, Tuple, Union
+from typing import List, Tuple, Union
 
 import torch
 from mlmodule.serializers import Serializer
@@ -66,15 +66,15 @@ def parse_key_value_arg(cmd_values: List[str]) -> Tuple[str, Union[str, int]]:
     """
     try:
         (key, value) = cmd_values.split("=", 1)
-    except ValueError as ex:
+    except ValueError:
         raise argparse.ArgumentError(f"Argument \"{cmd_values}\" is not in k=v format")
     else:
         # Trying to parse a int otherwise leaving it as string
         try:
             value = int(value)
-        except TypeError as _:
+        except TypeError:
             pass
-    
+
     return key, value
 
 

@@ -14,8 +14,10 @@ from torchvision.transforms import Compose
 
 from mlmodule.box import BBoxPoint, BBoxOutput, BBoxCollection
 from mlmodule.contrib.densenet import DenseNet161ImageNetFeatures
-from mlmodule.contrib.rpn import RegionFeatures, RPN, CosineSimilarityRegionSelector, RegionEncoder, \
-    DenseNet161ImageNetEncoder, get_absolute_config_path
+from mlmodule.contrib.rpn import RegionFeatures, get_absolute_config_path
+from mlmodule.contrib.rpn.encoder import DenseNet161ImageNetEncoder, RegionEncoder
+from mlmodule.contrib.rpn.rpn import RPN
+from mlmodule.contrib.rpn.selector import CosineSimilarityRegionSelector
 from mlmodule.contrib.rpn.transforms import RegionCrop, StandardTorchvisionRegionTransforms
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.data.images import convert_to_rgb, get_pil_image_from_file

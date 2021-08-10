@@ -1,9 +1,6 @@
 import os
-import re
-from io import BytesIO
-from typing import Dict, Tuple, List, Union, TypeVar, Any, Optional
+from typing import Dict, Tuple, List, Union, TypeVar, Any
 
-import boto3
 import mmcv
 import mmcv.parallel as mmcv_parallel
 import numpy as np
@@ -19,9 +16,7 @@ from mlmodule.box import BBoxPoint, BBoxOutput, BBoxCollection
 from mlmodule.contrib.rpn.transforms import RGBToBGR
 from mlmodule.torch import BaseTorchMLModule
 from mlmodule.torch.data.base import IndexedDataset
-from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider, TorchPretrainedModuleMixin
-from mlmodule.torch.utils import torch_apply_state_to_partial_model
-from mlmodule.types import StateDict
+from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 
 
 InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Union[Image, np.ndarray]])
@@ -29,19 +24,19 @@ InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Un
 
 class RPN(BaseTorchMLModule, DownloadPretrainedStateFromProvider):
     """mmdetection Region Proposal Network wrapper
-    
-    This module implemements the GA-RPN X-101-32x4d-FPN model 
+
+    This module implemements the GA-RPN X-101-32x4d-FPN model
     described in https://github.com/open-mmlab/mmdetection/tree/master/configs/guided_anchoring.
 
     Is it not intended to be used directly, you should use mlmodule.contrib.rpn.RegionFeatures instead.
     """
 
-    MMDET_DOWNLOAD_URL = "https://download.openmmlab.com/mmdetection/v2.0/guided_anchoring/ga_rpn_x101_32x4d_fpn_1x_coco/ga_rpn_x101_32x4d_fpn_1x_coco_20200220-c28d1b18.pth"
+    MMDET_DOWNLOAD_URL = "https://download.openmmlab.com/mmdetection/v2.0/"\
+        "guided_anchoring/ga_rpn_x101_32x4d_fpn_1x_coco/ga_rpn_x101_32x4d_fpn_1x_coco_20200220-c28d1b18.pth"
 
     state_dict_key = "pretrained-models/rpn/ga_rpn_x101_32x4d_fpn_1x_coco_20200220-c28d1b18.pth"
 
-
-    def __init__(self, device: torch.device=None):
+    def __init__(self, device: torch.device = None):
         super().__init__(device=device)
         # Mirroring the mmdet.aps.inference.init_detector method
 

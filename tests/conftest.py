@@ -37,9 +37,9 @@ def torch_device(request: SubRequest) -> torch.device:
 def gpu_torch_device() -> torch.device:
     """Fixture to get a GPU torch device. The test will be skipped if not GPU is available"""
     if not torch.cuda.is_available():
-        pytest.skip(f"Skipping test as is CUDA not available")
+        pytest.skip("Skipping test as is CUDA not available")
     if os.environ.get('CPU_ONLY_TESTS') == 'y':
-        pytest.skip(f"Skipping as tests are running for CPU only")
+        pytest.skip("Skipping as tests are running for CPU only")
     return torch.device('cuda')
 
 
@@ -88,7 +88,7 @@ def provider_pretrained_module(request: SubRequest) -> DownloadPretrainedStateFr
     return request.param
 
 
-@pytest.fixture 
+@pytest.fixture
 def assert_state_dict_equals() -> Callable[[StateDict, StateDict], None]:
     def _assert_state_dict_equals(sd1: StateDict, sd2: StateDict) -> None:
         for key in sd1:

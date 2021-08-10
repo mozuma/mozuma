@@ -4,7 +4,6 @@ import numpy as np
 
 import torch
 from torch.utils.data.dataloader import DataLoader
-from torchvision.transforms.transforms import ToTensor
 from tqdm import tqdm
 
 from mlmodule.base import BaseMLModule
@@ -52,7 +51,7 @@ class CosineSimilarityRegionSelector(BaseMLModule):
         }
         # Building data loader
         return DataLoader(data, **data_loader_options)
-    
+
     def bulk_inference(self, data: InputDatasetType, max_similarity=0.75, tqdm_enabled=False) -> InputDatasetType:
         indices: List[Any] = []
         bbox_collections: List[BBoxCollection] = []

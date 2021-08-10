@@ -26,7 +26,7 @@ class TorchPretrainedModuleMixin(object):
         """
         Returns the state dict to apply to the current module to get a pretrained model.
 
-        The class implementing this mixin must inherit the BaseTorchMLModule class and 
+        The class implementing this mixin must inherit the BaseTorchMLModule class and
         have a state_dict_key attribute, containing the key for the state dict in the
         lsir-public-assets bucket.
 

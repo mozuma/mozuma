@@ -1,8 +1,5 @@
-from typing import Callable, Dict, Union
+from typing import Callable, Union
 from urllib3.packages.six import BytesIO
-
-import numpy as np
-from torch.tensor import Tensor
 
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.mixins import TorchPretrainedModuleMixin

@@ -81,7 +81,7 @@ def test_mtcnn_detector_correctness(mtcnn_inference_results, mtcnn_instance, tor
     # Testing first image
     f, images = resized_images
     assert f == file_names
-    transforms = Compose(mtcnn_instance.get_dataset_transforms())
+
     all_boxes, all_probs, all_landmarks = mtcnn_orig.detect(
         images, landmarks=True
     )

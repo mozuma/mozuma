@@ -41,7 +41,7 @@ def test_densenet_places365_features_inference(torch_device):
 
 def test_densenet_imagenet_classifier(torch_device):
     densenet = DenseNet161ImageNetFeatures(device=torch_device)
-        
+
     # Pretrained model
     densenet.load()
 
@@ -80,7 +80,7 @@ def test_densenet_imagenet_classifier(torch_device):
 
 def test_densenet_places365_classifier(torch_device):
     densenet = DenseNet161PlacesFeatures(device=torch_device)
-        
+
     # Pretrained model
     densenet.load()
 

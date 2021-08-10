@@ -25,7 +25,7 @@ class Serializer:
     def safe_json_types(self) -> list:
         """Returns the data attribute as a dictionnary"""
         if type(self.data) == list and len(self.data) > 0 and \
-            type(self.data[0]) == list and len(self.data[0]) > 0 and type(self.data[0][0]) == BBoxOutput:
+                type(self.data[0]) == list and len(self.data[0]) > 0 and type(self.data[0][0]) == BBoxOutput:
             # This is a list of BoudingBox collection
             return [[self.safe_json_bbox(bbox) for bbox in col] for col in self.data]
         else:

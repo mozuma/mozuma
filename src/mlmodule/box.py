@@ -2,7 +2,7 @@
 This file contains classes to help organise complex model outputs such as bounding boxes
 """
 import dataclasses
-from typing import Tuple, NamedTuple, Optional, List
+from typing import Tuple, Optional, List
 
 import numpy as np
 

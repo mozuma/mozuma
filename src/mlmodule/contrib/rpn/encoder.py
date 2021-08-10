@@ -37,7 +37,9 @@ class RegionEncoder(BaseDenseNetPretrainedFeatures):
                 new_idx.append((index, box_num))
                 new_data.append((img, box))
 
-        dataset = IndexedDataset[Tuple[Any, int], Tuple[Image, BBoxOutput], Tuple[Image, BBoxOutput]](new_idx, new_data)
+        dataset = IndexedDataset[
+            Tuple[Any, int], Tuple[Image, BBoxOutput], Tuple[Image, BBoxOutput]
+        ](new_idx, new_data)
         dataset.transforms = [
             ApplyFunctionToPosition(Compose(image_dataset.transforms), pos=0)
         ] + dataset.transforms
@@ -98,7 +100,8 @@ class RegionEncoder(BaseDenseNetPretrainedFeatures):
     ) -> Tuple[List[Tuple[Any, int]], List[BBoxOutput]]:
         """ Runs after the forward pass at inference
 
-        :param acc_results: Holds a tuple with indices of image regions, which is a tuple containing the image index and
+        :param acc_results: Holds a tuple with indices of image regions,
+            which is a tuple containing the image index and
             the region index, and a list of region encodings
         :param new_indices: New indices for the current batch
         :param new_output: New inference output for the current batch

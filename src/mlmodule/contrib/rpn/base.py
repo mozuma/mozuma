@@ -38,12 +38,15 @@ class RegionFeatures(BaseTorchMLModule, TorchPretrainedModuleMixin, DownloadPret
 
         # Getting region encoder
         state_dict.update({
-            f"region_encoder.{key}": value for key, value in self.region_encoder.get_default_pretrained_state_dict().items()
+            f"region_encoder.{key}": value
+            for key, value in self.region_encoder.get_default_pretrained_state_dict().items()
         })
 
         return state_dict
 
-    def bulk_inference(self, data: InputDatasetType, regions_per_image=30, min_region_score=0.7, **_kwargs) -> OutputDatasetType:
+    def bulk_inference(
+        self, data: InputDatasetType, regions_per_image=30, min_region_score=0.7, **_kwargs
+    ) -> OutputDatasetType:
         """Performs inference for all the given data points
 
         :param data:
