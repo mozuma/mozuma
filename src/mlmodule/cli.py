@@ -3,7 +3,7 @@ import json
 import logging
 from importlib import import_module
 import os
-from typing import List, Tuple, Union
+from typing import Tuple, Union
 
 import torch
 from mlmodule.serializers import Serializer
@@ -54,7 +54,7 @@ def _contrib_module(module_str):
     return getattr(import_module(f'mlmodule.contrib.{elements[0]}'), elements[1])
 
 
-def parse_key_value_arg(cmd_values: List[str]) -> Tuple[str, Union[str, int]]:
+def parse_key_value_arg(cmd_values: str) -> Tuple[str, Union[str, int]]:
     """
     Parse a key, value pair, separated by '='
     That's the reverse of ShellArgs.
@@ -64,10 +64,11 @@ def parse_key_value_arg(cmd_values: List[str]) -> Tuple[str, Union[str, int]]:
     or
         foo="hello world"
     """
+    value: Union[str, int]
     try:
         (key, value) = cmd_values.split("=", 1)
     except ValueError:
-        raise argparse.ArgumentError(f"Argument \"{cmd_values}\" is not in k=v format")
+        raise ValueError(f"Argument \"{cmd_values}\" is not in k=v format")
     else:
         # Trying to parse a int otherwise leaving it as string
         try:

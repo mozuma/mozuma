@@ -57,7 +57,7 @@ def test_densenet_imagenet_classifier(torch_device):
     features = IndexedDataset(idx, features)   # Zipping indices and features
 
     # Getting classifier
-    densenet_cls = DenseNet161ImageNetClassifier()
+    densenet_cls = DenseNet161ImageNetClassifier(device=torch_device)
     densenet_cls.load()
 
     # Running inference
@@ -96,7 +96,7 @@ def test_densenet_places365_classifier(torch_device):
     features = IndexedDataset(idx, features)   # Zipping indices and features
 
     # Getting classifier
-    densenet_cls = DenseNet161PlacesClassifier()
+    densenet_cls = DenseNet161PlacesClassifier(device=torch_device)
     densenet_cls.load()
 
     # Running inference
