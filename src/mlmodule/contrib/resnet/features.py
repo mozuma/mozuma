@@ -2,7 +2,7 @@ from typing import Tuple
 
 import torch
 
-from mlmodule.torch.data.images import ImageDataset, TORCHVISION_STANDARD_IMAGE_TRANSFORMS
+from mlmodule.torch.data.images import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 from mlmodule.contrib.resnet.base import BaseResNetImageNetModule
 from mlmodule.torch.mixins import ResizableImageInputMixin
 

@@ -50,7 +50,7 @@ def download(model_name, url, fname):
     for k, _ in model_state_dict.items():
         if k not in state_dict and 'num_batches_tracked' not in k:
             missing_keys.append(k)
-    
+
     for k, _ in state_dict.items():
         if k not in model_state_dict:
             surplus_keys.append(k)
@@ -70,7 +70,7 @@ def download(model_name, url, fname):
     # Split into features and the classifier
     features_sd = {k: v for k, v in state_dict.items()
                    if k.startswith('features')}
-                
+
     classifier_sd = {k: v for k, v in state_dict.items()
                      if k.startswith('classifier')}
 
@@ -79,13 +79,14 @@ def download(model_name, url, fname):
 
     torch.save(features_sd, fname_features)
     torch.save(classifier_sd, fname_classifier)
-    print(f'Files saved successfully')
+    print('Files saved successfully')
     return
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Download the state dictionary for a ' + \
-        'pre-trained DenseNet model, and save its feature and classifier weights.')
+    parser = argparse.ArgumentParser(
+        description='Download the state dictionary for a '
+                    'pre-trained DenseNet model, and save its feature and classifier weights.')
 
     parser.add_argument('fname', help='the prefix for the file names of the created files')
     parser.add_argument('url', help='the URL of the state dictionary to download')

@@ -1,12 +1,18 @@
 .idea
 .vscode
 
+.env
+
+.mypy_cache
 dist
 .eggs
 *.egg-info
 build
 .pytest_cache
 *.pyc
+.tox
+
+venv
 
 # For the tutorial on creating modules
 src/mlmodule/contrib/example.py

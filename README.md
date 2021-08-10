@@ -25,9 +25,10 @@ to get access to the pretrained models.
 
 Available models
 
-* [ResNet](docs/ResNet.md): ImageNet
-* Face detection with [MTCNN](docs/MTCNN.md) and [ArcFace](docs/ArcFace.md)
-* [DenseNet](docs/DenseNet.md): ImageNet and Places365
+* [ResNet](docs/models/ResNet.md): ImageNet
+* Face detection with [MTCNN](docs/models/MTCNN.md) and [ArcFace](docs/models/ArcFace.md)
+* [DenseNet](docs/models/DenseNet.md): ImageNet and Places365
+* [RPN](docs/models/RPN.md): Object detection with [`mdetection`](https://github.com/open-mmlab/mmdetection).
 
 
 ## Run a model from CLI
@@ -39,69 +40,7 @@ For instance, to run CLIP on all images in a folder:
 python -m mlmodule.cli run clip.CLIPViTB32ImageEncoder folder/* --batch-size 256 --num-workers 12
 ```
 
+## Development
 
-## Installation for development
-
-
-```bash
-# For an installation with all model dependencies
-make install
-
-# For a minimal installation with just MLModule dependencies
-make install-minimal
-
-# For development
-make develop
-```
-
-## Build the Docker image
-
-The image can be built tested and pushed with one command
-
-```shell
-make release-docker-image MLMODULE_BUILD_VERSION=x.y.z
-```
-
-Alternatively, the image can be build from a different base image (here to add support for PC32):
-
-```shell
-make release-docker-image MLMODULE_BUILD_VERSION=x.y.z IMAGE_TAG_PREFIX=pc32-v BASE_IMAGE=lsirepfl/pytorch:pc32-v1.7.1-py3.7.10-cu110
-```
-
-## Requirements management
-
-Updating requirements should be done in `setup.cfg`. 
-The update the `requirement.txt` file run:
-
-```bash
-make requirements
-```
-
-To install the requirements
-
-```bash
-make env-install
-```
-
-## Tests
-
-Install package for development
-
-```bash
-make develop
-```
-
-Run tests
-
-```bash
-make test
-```
-
-## Publish a new version
-
-* Push the new version to the `master` branch
-* Add a tag on the branch with the format `vX.Y.Z`. For instance, `v0.1.1`.
-
-## Contribute
-
-See [Contribute guide](CONTRIBUTE.md)
+See the [development guide](docs/DEVELOP.md) and the 
+[model contribution guide](docs/CONTRIBUTE.md).

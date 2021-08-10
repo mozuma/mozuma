@@ -113,7 +113,7 @@ class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
 
             if boxes is not None:
                 # Rescaling
-                for b, p, l in zip(boxes, probs, landmarks):
+                for b, p, l in zip(boxes.tolist(), probs.tolist(), landmarks):
                     # Iterating through each bounding box
                     if b is not None:
                         # We have detected a face

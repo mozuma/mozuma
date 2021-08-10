@@ -318,7 +318,8 @@ IMAGENET_LABELS = [
      'cicada, cicala',
      'leafhopper',
      'lacewing, lacewing fly',
-     "dragonfly, darning needle, devil's darning needle, sewing needle, snake feeder, snake doctor, mosquito hawk, skeeter hawk",
+     "dragonfly, darning needle, devil's darning needle, sewing needle, snake feeder, snake doctor, mosquito hawk, "
+     "skeeter hawk",
      'damselfly',
      'admiral',
      'ringlet, ringlet butterfly',
@@ -479,7 +480,8 @@ IMAGENET_LABELS = [
      "carpenter's kit, tool kit",
      'carton',
      'car wheel',
-     'cash machine, cash dispenser, automated teller machine, automatic teller machine, automated teller, automatic teller, ATM',
+     'cash machine, cash dispenser, automated teller machine, automatic teller machine, automated teller, automatic '
+     'teller, ATM',
      'cassette',
      'cassette player',
      'castle',

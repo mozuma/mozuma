@@ -1,6 +1,7 @@
 from mlmodule.contrib.densenet.base import BaseDenseNetPretrainedModule
 from mlmodule.labels import LabelsMixin, ImageNetLabels, PlacesLabels
 
+
 class BaseDenseNetPretrainedClassifier(BaseDenseNetPretrainedModule, LabelsMixin):
     """
     Default fully connected layer for classification before retraining
@@ -12,7 +13,7 @@ class BaseDenseNetPretrainedClassifier(BaseDenseNetPretrainedModule, LabelsMixin
             base_densenet = self.get_densenet_module(densenet_arch, num_classes=365)
         else:
             base_densenet = self.get_densenet_module(densenet_arch, num_classes=1000)
-        
+
         # Getting only the fully connected layer
         self.classifier = base_densenet.classifier
 

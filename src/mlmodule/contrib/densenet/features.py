@@ -52,10 +52,6 @@ class BaseDenseNetPretrainedFeatures(BaseDenseNetPretrainedModule, ResizableImag
     def get_dataset_transforms(self):
         return TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 
-    """
-    TODO: Correct that I don't need to reimplement bulk_inference?
-    """
-
 
 class DenseNet161ImageNetFeatures(BaseDenseNetPretrainedFeatures):
 

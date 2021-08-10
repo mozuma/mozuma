@@ -25,7 +25,7 @@ def test_places365_50_images(torch_device):
     features = IndexedDataset(idx, features)   # Zipping indices and features
 
     # Getting classifier
-    densenet_cls = DenseNet161PlacesClassifier()
+    densenet_cls = DenseNet161PlacesClassifier(device=torch_device)
     densenet_cls.load()
     # Running inference
     file_names_idx, predictions = densenet_cls.bulk_inference(features)

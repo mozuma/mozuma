@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from pathlib import Path
-from typing import List, IO, Callable, Union, TypeVar, Tuple
+from typing import List, Callable, TypeVar, Tuple
 
 from PIL.Image import Image
 
