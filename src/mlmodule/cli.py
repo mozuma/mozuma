@@ -2,6 +2,7 @@ import argparse
 import json
 import logging
 from importlib import import_module
+import os
 from typing import Dict, List, Tuple, Union
 
 import torch
@@ -16,10 +17,12 @@ logger = logging.getLogger(__name__)
 def download_fun(args):
     model: BaseTorchMLModule = args.module()
     state_dict = model.get_default_pretrained_state_dict_from_provider()
+    if not hasattr(model, 'state_dict_key'):
+        raise ValueError('The given model should have a state_dict_key attribute')
     model.load_state_dict(state_dict)
 
     logger.info(f"Writing keys {model.state_dict().keys()}")
-    with args.outfile as f:
+    with open(os.path.join(args.outdir, os.path.basename(model.state_dict_key)), mode='wb') as f:
         model.dump(f)
 
 
@@ -88,7 +91,7 @@ def main():
                                'and "MLModuleClass" is a class that implements '
                                'the method '
                                'get_default_pretrained_state_dict_from_provider()')
-    download.add_argument('outfile', type=argparse.FileType('wb'), help='Output file')
+    download.add_argument('--outdir', type=str, help='Output directory', default='.')
     download.set_defaults(func=download_fun)
 
     run = subparsers.add_parser('run')

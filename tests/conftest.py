@@ -80,7 +80,8 @@ def data_platform_scanner(request: SubRequest):
     CLIPViTB32ImageEncoder,
     MTCNNDetector,
     ArcFaceFeatures,
-    RPN
+    RPN,
+    RegionFeatures
 ])
 def provider_pretrained_module(request: SubRequest) -> DownloadPretrainedStateFromProvider:
     """Returns a module that implements DownloadPretrainedStateFromProvider"""

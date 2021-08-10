@@ -4,30 +4,44 @@ import numpy as np
 from PIL.Image import Image
 import torch
 
-from mlmodule.base import BaseMLModule
 from mlmodule.box import BBoxCollection
 from mlmodule.contrib.rpn.encoder import DenseNet161ImageNetEncoder, RegionEncoder
 from mlmodule.contrib.rpn.rpn import RPN
 from mlmodule.contrib.rpn.selector import CosineSimilarityRegionSelector
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.base import IndexedDataset
+from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider, TorchPretrainedModuleMixin
+from mlmodule.types import StateDict
 
 
 InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Union[Image, np.ndarray]])
 OutputDatasetType = TypeVar('OutputDatasetType', bound=IndexedDataset[Any, Any, BBoxCollection])
 
 
-class RegionFeatures(BaseMLModule):
+class RegionFeatures(BaseTorchMLModule, TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider):
 
-    def __init__(self, 
-            rpn: Optional[BaseTorchMLModule] = None, 
-            region_encoder: Optional[BaseTorchMLModule] = None, 
-            region_selector: Optional[BaseMLModule] = None,
-            device: Optional[torch.device] = None
-    ):
-        self.rpn = rpn or RPN(device=device).load()
-        self.region_encoder = region_encoder or DenseNet161ImageNetEncoder(device=device).load()
-        self.region_selector = region_selector or CosineSimilarityRegionSelector(device=device)
+    state_dict_key = "pretrained-models/rpn/rf_dnim161_ga_rpn_x101_32x4d_fpn_1x_coco_20200220-c28d1b18.pth"
+
+    def __init__(self, device: Optional[torch.device] = None):
+        super().__init__(device=device)
+        self.rpn = RPN(device=device)
+        self.region_encoder = DenseNet161ImageNetEncoder(device=device)
+        self.region_selector = CosineSimilarityRegionSelector(device=device)
+
+    def get_default_pretrained_state_dict_from_provider(self) -> StateDict:
+        state_dict = {}
+
+        # Getting RPN
+        state_dict.update({
+            f"rpn.{key}": value for key, value in self.rpn.get_default_pretrained_state_dict_from_provider().items()
+        })
+
+        # Getting region encoder
+        state_dict.update({
+            f"region_encoder.{key}": value for key, value in self.region_encoder.get_default_pretrained_state_dict().items()
+        })
+
+        return state_dict
 
     def bulk_inference(self, data: InputDatasetType, regions_per_image=30, min_region_score=0.7, **_kwargs) -> OutputDatasetType:
         """Performs inference for all the given data points
