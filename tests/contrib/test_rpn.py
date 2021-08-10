@@ -5,6 +5,7 @@ import mmcv.runner
 import numpy as np
 import pytest
 import torch
+from torch.hub import load_state_dict_from_url
 import torch.nn.functional as F
 from mmdet.apis import init_detector, inference_detector
 from mmdet.core import get_classes
@@ -30,7 +31,7 @@ def rpn(gpu_torch_device):
     # Initialize RPN
     model = RPN(device=gpu_torch_device)
     # Load checkpoint
-    model.load()
+    model.load_state_dict(model.get_default_pretrained_state_dict_from_provider())
     return model
 
 
@@ -49,13 +50,13 @@ def region_selector(gpu_torch_device):
 
 
 @pytest.fixture(scope='session')
-def mmdet_model(rpn, gpu_torch_device):
+def mmdet_model(rpn: RPN, gpu_torch_device):
     """ Load mmdetection model """
     # Initialize the model
     model = init_detector(CONFIG_PATH, device=gpu_torch_device)
 
     # Load the state dictionary from s3
-    state_dict = rpn.get_default_pretrained_state_dict()
+    state_dict = load_state_dict_from_url(rpn.MMDET_DOWNLOAD_URL)['state_dict']
 
     # Apply the state dictionary to the model
     mmcv.runner.load_state_dict(model, state_dict, strict=False)

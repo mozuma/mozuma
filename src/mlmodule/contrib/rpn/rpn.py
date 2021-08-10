@@ -13,32 +13,42 @@ from mmdet.datasets import replace_ImageToTensor
 from mmdet.datasets.pipelines import Compose
 from mmdet.models import build_detector
 from PIL.Image import Image
+from torch.hub import load_state_dict_from_url
 
 from mlmodule.box import BBoxPoint, BBoxOutput, BBoxCollection
 from mlmodule.contrib.rpn.transforms import RGBToBGR
 from mlmodule.torch import BaseTorchMLModule
 from mlmodule.torch.data.base import IndexedDataset
-from mlmodule.torch.mixins import TorchPretrainedModuleMixin
+from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider, TorchPretrainedModuleMixin
+from mlmodule.torch.utils import torch_apply_state_to_partial_model
+from mlmodule.types import StateDict
 
 
 InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Union[Image, np.ndarray]])
 
 
-class RPN(BaseTorchMLModule, TorchPretrainedModuleMixin):
-    """  mmdetection Region Proposal Network wrapper """
+class RPN(BaseTorchMLModule, DownloadPretrainedStateFromProvider):
+    """mmdetection Region Proposal Network wrapper
+    
+    This module implemements the GA-RPN X-101-32x4d-FPN model 
+    described in https://github.com/open-mmlab/mmdetection/tree/master/configs/guided_anchoring.
 
-    def __init__(self, config: Optional[str] = None, device=None):
+    Is it not intended to be used directly, you should use mlmodule.contrib.rpn.RegionFeatures instead.
+    """
+
+    MMDET_DOWNLOAD_URL = "https://download.openmmlab.com/mmdetection/v2.0/guided_anchoring/ga_rpn_x101_32x4d_fpn_1x_coco/ga_rpn_x101_32x4d_fpn_1x_coco_20200220-c28d1b18.pth"
+
+    state_dict_key = "pretrained-models/rpn/ga_rpn_x101_32x4d_fpn_1x_coco_20200220-c28d1b18.pth"
+
+
+    def __init__(self, device: torch.device=None):
         super().__init__(device=device)
         # Mirroring the mmdet.aps.inference.init_detector method
 
-        # If no config was passed, load the default config: Guided Anchoring
-        if config is None:
-            # Get the current directory for this file
-            curr_dir = os.path.dirname(__file__)
-            config = os.path.join(curr_dir, 'configs', 'guided_anchoring', 'ga_rpn_x101_32x4d_fpn_1x_coco.py')
-
-        # The default state dict to load
-        self.state_dict_key = f"pretrained-models/rpn/ga_rpn_x101_32x4d_fpn_1x_coco_20200220-c28d1b18.pth"
+        # Load the default config: Guided Anchoring
+        # Get the current directory for this file
+        curr_dir = os.path.dirname(__file__)
+        config = os.path.join(curr_dir, 'configs', 'guided_anchoring', 'ga_rpn_x101_32x4d_fpn_1x_coco.py')
 
         self.model_config = mmcv.Config.fromfile(config)
         self.model_config.model.pretrained = None
@@ -60,61 +70,13 @@ class RPN(BaseTorchMLModule, TorchPretrainedModuleMixin):
         super().eval()
         self.model.eval()
 
-    def get_default_pretrained_state_dict(self: torch.nn.Module, aws_access_key_id: Optional[str] = None,
-                                          aws_secret_access_key: Optional[str] = None) -> Dict[str, torch.Tensor]:
-        s3 = boto3.resource(
-            's3',
-            endpoint_url="https://sos-ch-gva-2.exo.io",
-            # Optionally using the provided credentials
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key
-        )
-        # Select lsir-public-assets bucket
-        b = s3.Bucket('lsir-public-assets')
-
-        # Download state dict into BytesIO file
-        f = BytesIO()
-        b.Object(self.state_dict_key).download_fileobj(f)
-
-        # Load the state dict
-        f.seek(0)
-        checkpoint = torch.load(f, map_location=lambda storage, loc: storage)
-
+    def get_default_pretrained_state_dict_from_provider(self) -> Dict[str, torch.Tensor]:
+        """Gets the default state dictionnary from MMCV"""
+        # Downloading from mmdetection
+        checkpoint = load_state_dict_from_url(self.MMDET_DOWNLOAD_URL)
         state_dict = checkpoint['state_dict']
-        # Revise keys
-        revise_keys = [(r'^module\.', '')]
-        for p, r in revise_keys:
-            state_dict = {re.sub(p, r, k): v for k, v in state_dict.items()}
-
-        # Don't apply the state_dict to the model, as this is done by mmcv_load_state_dict
-        return state_dict
-
-    def load(self, fp=None, pretrained_getter_opts: Dict[str, Any] = None):
-        """Loads model from file or from a default pretrained model if `fp=None`
-
-        :param pretrained_getter_opts: Passed to get_default_pretrained_dict
-        :param fp:
-        :return:
-        """
-        # Getting state dict
-        if fp:
-            fp.seek(0)
-            state = torch.load(fp)
-
-            state = state['state_dict'] if ('state_dict' in state) else state
-            # Revise keys
-            revise_keys = [(r'^module\.', '')]
-            for p, r in revise_keys:
-                state = {re.sub(p, r, k): v for k, v in state.items()}
-        else:
-            # Getting default pretrained state dict
-            state = self.get_default_pretrained_state_dict(**(pretrained_getter_opts or {}))
-
-        # Loading state, as in mmdet.apis.inference.init_detector
-        mmcv_load_state_dict(self.model, state, strict=False)
-        self.model = self.model.to(self.device)
-
-        return self
+        mmcv_load_state_dict(self.model, state_dict)
+        return self.state_dict()
 
     def get_dataset_transforms(self):
         return [

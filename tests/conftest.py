@@ -1,5 +1,6 @@
 import os
 import random
+from typing import Callable
 
 import numpy as np
 import pytest
@@ -12,6 +13,10 @@ from mlmodule.contrib.densenet import DenseNet161ImageNetFeatures, DenseNet161Im
     DenseNet161PlacesFeatures, DenseNet161PlacesClassifier
 from mlmodule.contrib.mtcnn import MTCNNDetector
 from mlmodule.contrib.resnet import ResNet18ImageNetFeatures, ResNet18ImageNetClassifier
+from mlmodule.contrib.rpn import RegionFeatures
+from mlmodule.contrib.rpn.rpn import RPN
+from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
+from mlmodule.types import StateDict
 
 
 @pytest.fixture(scope='session', params=["cpu", "cuda"])
@@ -59,7 +64,8 @@ def set_seeds():
     DenseNet161PlacesClassifier,
     CLIPViTB32ImageEncoder,
     MTCNNDetector,
-    ArcFaceFeatures
+    ArcFaceFeatures,
+    RegionFeatures
 ])
 def data_platform_scanner(request: SubRequest):
     """Fixture for generic tests of Modules to be used in the data platform
@@ -68,3 +74,22 @@ def data_platform_scanner(request: SubRequest):
     :return:
     """
     return request.param
+
+
+@pytest.fixture(params=[
+    CLIPViTB32ImageEncoder,
+    MTCNNDetector,
+    ArcFaceFeatures,
+    RPN
+])
+def provider_pretrained_module(request: SubRequest) -> DownloadPretrainedStateFromProvider:
+    """Returns a module that implements DownloadPretrainedStateFromProvider"""
+    return request.param
+
+
+@pytest.fixture 
+def assert_state_dict_equals() -> Callable[[StateDict, StateDict], None]:
+    def _assert_state_dict_equals(sd1: StateDict, sd2: StateDict) -> None:
+        for key in sd1:
+            np.testing.assert_array_equal(sd1[key], sd2[key])
+    return _assert_state_dict_equals

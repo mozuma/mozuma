@@ -12,3 +12,22 @@ The RPN module is implemented in 4 main files:
 * `encoder.py`: Contains the `BaseTorchMLModule` used to compute the encodings for images
 * `selector.py`: Contains a `BaseMlModule` that can be used to filter regions inside of a single that are very similar,
 which reduces the amount of region encodings that need to be stored.
+
+## Usage
+
+```python
+from mlmodule.contrib.rpn import RegionFeatures
+
+# We need a list of files
+file_list = list_files_in_dir('tests/fixtures/cats_dogs', allowed_extensions='jpg')
+dataset = ImageDataset(file_list)
+
+# We instantiate the RegionFeatures model
+region_features = RegionFeatures().load()
+_, regions_with_features = region_features.bulk_inference(
+    dataset,
+    regions_per_image=30,
+    min_region_score=0.7
+)
+
+```
