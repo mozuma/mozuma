@@ -17,6 +17,8 @@ which reduces the amount of region encodings that need to be stored.
 
 ```python
 from mlmodule.contrib.rpn import RegionFeatures
+from mlmodule.torch.data.images import ImageDataset
+from mlmodule.utils import list_files_in_dir
 
 # We need a list of files
 file_list = list_files_in_dir('tests/fixtures/cats_dogs', allowed_extensions='jpg')
@@ -29,5 +31,4 @@ _, regions_with_features = region_features.bulk_inference(
     regions_per_image=30,
     min_region_score=0.7
 )
-
 ```

@@ -19,7 +19,6 @@ class BaseDenseNetPretrainedModule(BaseTorchMLModule, TorchPretrainedModuleMixin
 
         self.densenet_arch = densenet_arch
         self.dataset = dataset
-        self.device = device
 
     @classmethod
     def get_densenet_module(cls, densenet_arch, num_classes=1000):
