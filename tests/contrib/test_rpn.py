@@ -232,11 +232,11 @@ def test_bbox_selector(rpn, region_encoder, region_selector, images):
         assert len(original_collection) == len(new_collection)
 
 
-def test_base(rpn, region_encoder, region_selector, images):
+def test_base(gpu_torch_device: torch.device, images):
     indices, imgs = images
     dataset = IndexedDataset[str, np.ndarray, np.ndarray](indices, imgs)
 
-    region_features = RegionFeatures(rpn, region_encoder, region_selector)
+    region_features = RegionFeatures(device=gpu_torch_device).load()
     _, regions_with_features = region_features.bulk_inference(
         dataset,
         regions_per_image=30,
