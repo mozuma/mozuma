@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union, List, Tuple, Generic, TypeVar
+from typing import Any, Dict, Optional, Union, List, Tuple, Generic, TypeVar
 
 import numpy as np
 import torch
@@ -115,7 +115,7 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDat
             self, data: InputDatasetType,
             data_loader_options=None, result_handler_options=None, inference_options=None,
             tqdm_enabled=False
-    ) -> Tuple[List, Union[List, np.ndarray]]:
+    ) -> Optional[Tuple[List, Union[List, np.ndarray]]]:    # Returns None is dataset length = 0
         """Run the model against all elements in data"""
         loader = self.get_data_loader(data, **(data_loader_options or {}))
         # Running inference batch loop

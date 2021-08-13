@@ -1,6 +1,6 @@
 import os
 import random
-from typing import Callable
+from typing import Callable, Set, Type
 
 import numpy as np
 import pytest
@@ -15,8 +15,11 @@ from mlmodule.contrib.mtcnn import MTCNNDetector
 from mlmodule.contrib.resnet import ResNet18ImageNetFeatures, ResNet18ImageNetClassifier
 from mlmodule.contrib.rpn import RegionFeatures
 from mlmodule.contrib.rpn.rpn import RPN
+from mlmodule.torch.base import BaseTorchMLModule
+from mlmodule.torch.data.images import ImageDataset
 from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.types import StateDict
+from mlmodule.utils import list_files_in_dir
 
 
 @pytest.fixture(scope='session', params=["cpu", "cuda"])
@@ -77,6 +80,27 @@ def data_platform_scanner(request: SubRequest):
 
 
 @pytest.fixture(params=[
+    ResNet18ImageNetFeatures,
+    DenseNet161ImageNetFeatures,
+    DenseNet161PlacesFeatures,
+    CLIPViTB32ImageEncoder,
+    MTCNNDetector,
+    RegionFeatures
+])
+def image_module(request: SubRequest) -> Type[BaseTorchMLModule]:
+    """MLModules operating on images"""
+    return request.param
+
+
+@pytest.fixture(scope='session')
+def gpu_only_modules() -> Set[Type[BaseTorchMLModule]]:
+    """MLModules operating on images"""
+    return {
+        RegionFeatures
+    }
+
+
+@pytest.fixture(params=[
     CLIPViTB32ImageEncoder,
     MTCNNDetector,
     ArcFaceFeatures,
@@ -94,3 +118,11 @@ def assert_state_dict_equals() -> Callable[[StateDict, StateDict], None]:
         for key in sd1:
             np.testing.assert_array_equal(sd1[key], sd2[key])
     return _assert_state_dict_equals
+
+
+@pytest.fixture(scope='session')
+def image_dataset() -> ImageDataset:
+    """Sample image dataset"""
+    base_path = os.path.join("tests", "fixtures", "faces")
+    file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))
+    return ImageDataset(file_names)

@@ -1,4 +1,4 @@
-from typing import Tuple, List, TypeVar, Any, Union
+from typing import Optional, Tuple, List, TypeVar, Any, Union
 
 import numpy as np
 import torch
@@ -77,7 +77,9 @@ class RegionEncoder(BaseDenseNetPretrainedFeatures):
             StandardTorchvisionRegionTransforms(),
         ]
 
-    def bulk_inference(self, data: InputDatasetType, data_loader_options=None, **opts):
+    def bulk_inference(
+            self, data: InputDatasetType, data_loader_options=None, **opts
+    ) -> Optional[Tuple[List[Tuple[Any, int]], List[BBoxOutput]]]:
         # Don't shuffle data as it will make it more complicated to regroup the boxes for images into a collection!
         # Force shuffle off
         data_loader_options = data_loader_options or {}
