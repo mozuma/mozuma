@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List, TypeVar
+from typing import Any, List, Tuple, TypeVar
 import numpy as np
 
 import torch
@@ -52,7 +52,9 @@ class CosineSimilarityRegionSelector(BaseMLModule):
         # Building data loader
         return DataLoader(data, **data_loader_options)
 
-    def bulk_inference(self, data: InputDatasetType, max_similarity=0.75, tqdm_enabled=False) -> InputDatasetType:
+    def bulk_inference(
+            self, data: InputDatasetType, max_similarity=0.75, tqdm_enabled=False
+    ) -> Tuple[list, List[BBoxCollection]]:
         indices: List[Any] = []
         bbox_collections: List[BBoxCollection] = []
         data_loader = self.get_data_loader(data)

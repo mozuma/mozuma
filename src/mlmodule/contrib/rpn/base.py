@@ -1,4 +1,4 @@
-from typing import Any, Optional, TypeVar, Union
+from typing import Any, List, Optional, Tuple, TypeVar, Union
 
 import numpy as np
 from PIL.Image import Image
@@ -46,7 +46,7 @@ class RegionFeatures(BaseTorchMLModule, TorchPretrainedModuleMixin, DownloadPret
 
     def bulk_inference(
         self, data: InputDatasetType, regions_per_image=30, min_region_score=0.7, **_kwargs
-    ) -> OutputDatasetType:
+    ) -> Tuple[list, List[BBoxCollection]]:
         """Performs inference for all the given data points
 
         :param data:
@@ -58,17 +58,20 @@ class RegionFeatures(BaseTorchMLModule, TorchPretrainedModuleMixin, DownloadPret
         indices, regions = self.rpn.bulk_inference(
             data, data_loader_options={'batch_size': 1},
             regions_per_image=regions_per_image, min_score=min_region_score
-        )
+        ) or ([], [])
 
         data.transforms = saved_transforms
 
         # Compute features for regions
         box_dataset = RegionEncoder.prep_encodings(data, regions)
-        img_reg_indices, img_reg_encodings = self.region_encoder.bulk_inference(box_dataset)
+        img_reg_indices, img_reg_encodings = self.region_encoder.bulk_inference(box_dataset) or ([], [])
         indices, box_collections = RegionEncoder.parse_encodings(img_reg_indices, img_reg_encodings)
 
         # Select regions based on cosine similarity
         box_dataset_w_features = IndexedDataset[str, BBoxCollection, BBoxCollection](indices, box_collections)
-        box_dataset_w_features_selected = self.region_selector.bulk_inference(box_dataset_w_features)
+        image_indices, region_features = self.region_selector.bulk_inference(box_dataset_w_features)
 
-        return box_dataset_w_features_selected
+        # Ordering results by indices in a dictionary
+        indexed_results = dict(list(zip(image_indices, region_features)))
+        # Reconstructing the full list of indices passed in the input
+        return data.indices, [indexed_results.get(i, []) for i in data.indices]
