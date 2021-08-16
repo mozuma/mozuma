@@ -1,0 +1,7 @@
+.tox
+!.tox/dist
+
+.eggs
+.idea
+.vscode
+build
