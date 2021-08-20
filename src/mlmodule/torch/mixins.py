@@ -16,10 +16,10 @@ class ResizableImageInputMixin:
 
 class TorchPretrainedModuleMixin(object):
 
-    state_dict_key = None
+    state_dict_key: Optional[str] = None
 
     def get_default_pretrained_state_dict(
-            self: torch.nn.Module,
+            self,
             aws_access_key_id: Optional[str] = None,
             aws_secret_access_key: Optional[str] = None
     ) -> Dict[str, torch.Tensor]:

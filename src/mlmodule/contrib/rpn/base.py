@@ -8,6 +8,7 @@ from mlmodule.box import BBoxCollection
 from mlmodule.contrib.rpn.encoder import DenseNet161ImageNetEncoder, RegionEncoder
 from mlmodule.contrib.rpn.rpn import RPN
 from mlmodule.contrib.rpn.selector import CosineSimilarityRegionSelector
+from mlmodule.metrics import MetricsCollector
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider, TorchPretrainedModuleMixin
@@ -27,6 +28,14 @@ class RegionFeatures(BaseTorchMLModule, TorchPretrainedModuleMixin, DownloadPret
         self.rpn = RPN(device=device)
         self.region_encoder = DenseNet161ImageNetEncoder(device=device)
         self.region_selector = CosineSimilarityRegionSelector(device=device)
+
+    @property
+    def metrics(self) -> MetricsCollector:
+        m = super().metrics
+        m.add_submetrics('rpn', self.rpn.metrics)
+        m.add_submetrics('region_encoder', self.region_encoder.metrics)
+        m.add_submetrics('region_selector', self.region_selector.metrics)
+        return m
 
     def get_default_pretrained_state_dict_from_provider(self) -> StateDict:
         state_dict = {}
@@ -54,22 +63,28 @@ class RegionFeatures(BaseTorchMLModule, TorchPretrainedModuleMixin, DownloadPret
         :param min_region_score:
         :return:
         """
+        self.metrics.add('dataset_size', len(data))
+
         saved_transforms = data.transforms.copy()
-        indices, regions = self.rpn.bulk_inference(
-            data, data_loader_options={'batch_size': 1},
-            regions_per_image=regions_per_image, min_score=min_region_score
-        ) or ([], [])
+
+        with self.metrics.measure('time_region_proposal'):
+            indices, regions = self.rpn.bulk_inference(
+                data, data_loader_options={'batch_size': 1},
+                regions_per_image=regions_per_image, min_score=min_region_score
+            ) or ([], [])
 
         data.transforms = saved_transforms
 
-        # Compute features for regions
-        box_dataset = RegionEncoder.prep_encodings(data, regions)
-        img_reg_indices, img_reg_encodings = self.region_encoder.bulk_inference(box_dataset) or ([], [])
-        indices, box_collections = RegionEncoder.parse_encodings(img_reg_indices, img_reg_encodings)
+        with self.metrics.measure('time_region_encoder'):
+            # Compute features for regions
+            box_dataset = RegionEncoder.prep_encodings(data, regions)
+            img_reg_indices, img_reg_encodings = self.region_encoder.bulk_inference(box_dataset) or ([], [])
+            indices, box_collections = RegionEncoder.parse_encodings(img_reg_indices, img_reg_encodings)
 
-        # Select regions based on cosine similarity
-        box_dataset_w_features = IndexedDataset[str, BBoxCollection, BBoxCollection](indices, box_collections)
-        image_indices, region_features = self.region_selector.bulk_inference(box_dataset_w_features)
+        with self.metrics.measure('time_region_selector'):
+            # Select regions based on cosine similarity
+            box_dataset_w_features = IndexedDataset[str, BBoxCollection, BBoxCollection](indices, box_collections)
+            image_indices, region_features = self.region_selector.bulk_inference(box_dataset_w_features)
 
         # Ordering results by indices in a dictionary
         indexed_results = dict(list(zip(image_indices, region_features)))
