@@ -3,9 +3,10 @@ import json
 import logging
 from importlib import import_module
 import os
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 import torch
+from mlmodule.metrics import MetricsCollector
 from mlmodule.serializers import Serializer
 
 from mlmodule.torch import BaseTorchMLModule
@@ -14,7 +15,7 @@ from mlmodule.torch.data.images import ImageDataset
 logger = logging.getLogger(__name__)
 
 
-def download_fun(args):
+def download_fun(args: argparse.Namespace, metrics: Optional[dict] = None):
     model: BaseTorchMLModule = args.module()
     state_dict = model.get_default_pretrained_state_dict_from_provider()
     if not hasattr(model, 'state_dict_key'):
@@ -26,25 +27,41 @@ def download_fun(args):
         model.dump(f)
 
 
-def run_fun(args):
-    model: BaseTorchMLModule = args.module(device=args.device)
-    if hasattr(model, 'load'):
-        # Loading pretrained model
-        model.load()
-    shrink_input = None
-    if hasattr(model, 'shrink_input_image_size'):
-        shrink_input = model.shrink_input_image_size()
-    dataset = ImageDataset(
-        args.input_files,
-        shrink_img_size=shrink_input
-    )
-    indices, features = model.bulk_inference(
-        dataset, tqdm_enabled=True,
-        data_loader_options={"batch_size": args.batch_size, "num_workers": args.num_workers},
-        **dict(args.extra_kwargs or [])
-    )
+def run_fun(args: argparse.Namespace, metrics: Optional[MetricsCollector] = None) -> None:
+    """Runs a MLModule from CLI"""
+    metrics = metrics or MetricsCollector()
+
+    with metrics.measure('time_run_module'):
+        # Getting module
+        model: BaseTorchMLModule = args.module(device=args.device)
+        if hasattr(model, 'load'):
+            # Loading pretrained model
+            model.load()
+        shrink_input = None
+        if hasattr(model, 'shrink_input_image_size'):
+            shrink_input = model.shrink_input_image_size()
+        dataset = ImageDataset(
+            args.input_files,
+            shrink_img_size=shrink_input
+        )
+        indices, features = model.bulk_inference(
+            dataset, tqdm_enabled=True,
+            data_loader_options={"batch_size": args.batch_size, "num_workers": args.num_workers},
+            **dict(args.extra_kwargs or [])
+        )
+
+    # Saving metrics
+    metrics.add_submetrics('module', model.metrics)
+
+    # Preparing the output
     safe_object = dict(zip(indices, Serializer(features).safe_json_types()))
-    print(json.dumps(safe_object))
+    payload = {
+        "metrics": metrics.metrics
+    }
+    if not args.metrics:
+        payload['data'] = safe_object
+
+    print(json.dumps(payload))
 
 
 def _contrib_module(module_str):
@@ -100,6 +117,7 @@ def main():
     run.add_argument('--num-workers', type=int, default=0, help='Loader number of workers')
     run.add_argument('--device', type=torch.device, default=None, help='Torch device')
     run.add_argument('--extra-kwargs', metavar='KEY=VALUE', nargs='+', type=parse_key_value_arg)
+    run.add_argument('--metrics', action='store_true', help='Returns only metrics data in output')
     run.add_argument('module',
                      type=_contrib_module,
                      help='Should be in the format <module>.<MLModuleClass> '
@@ -108,9 +126,10 @@ def main():
     run.add_argument('input_files', nargs='+', help="Paths to images")
     run.set_defaults(func=run_fun)
 
-    args = parser.parse_args()
+    metrics = MetricsCollector()
+    args = metrics.track('time_parse_args', parser.parse_args)
 
-    return args.func(args)
+    return args.func(args, metrics=metrics)
 
 
 if __name__ == '__main__':

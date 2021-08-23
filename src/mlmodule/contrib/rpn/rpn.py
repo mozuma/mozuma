@@ -6,9 +6,6 @@ import mmcv.parallel as mmcv_parallel
 import numpy as np
 import torch
 from mmcv.runner import load_state_dict as mmcv_load_state_dict
-from mmdet.datasets import replace_ImageToTensor
-from mmdet.datasets.pipelines import Compose
-from mmdet.models import build_detector
 from PIL.Image import Image
 from torch.hub import load_state_dict_from_url
 
@@ -37,6 +34,11 @@ class RPN(BaseTorchMLModule, DownloadPretrainedStateFromProvider):
     state_dict_key = "pretrained-models/rpn/ga_rpn_x101_32x4d_fpn_1x_coco_20200220-c28d1b18.pth"
 
     def __init__(self, device: torch.device = None):
+        # This import is slow and we don't want to execute it if not needed
+        from mmdet.models import build_detector
+        from mmdet.datasets import replace_ImageToTensor
+        from mmdet.datasets.pipelines import Compose
+
         super().__init__(device=device)
         # Mirroring the mmdet.aps.inference.init_detector method
 

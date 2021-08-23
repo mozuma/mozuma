@@ -1,6 +1,9 @@
 from io import BytesIO
+from typing import Optional
 
 import numpy as np
+
+from mlmodule.metrics import MetricsCollector
 
 
 class LoadDumpMixin(object):
@@ -24,6 +27,12 @@ class LoadDumpMixin(object):
 
 
 class BaseMLModule(object):
+
+    @property
+    def metrics(self) -> MetricsCollector:
+        if not hasattr(self, "_metrics"):
+            self._metrics = MetricsCollector()
+        return self._metrics
 
     def bulk_inference(self, data):
         """Performs inference for all the given data points

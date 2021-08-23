@@ -17,7 +17,7 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDat
 
     default_batch_size = 128
 
-    def __init__(self, device=None):
+    def __init__(self, device: torch.device = None):
         super().__init__()
         self.device = device or self._resolve_device()
 
@@ -32,24 +32,25 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDat
         :param fp:
         :return:
         """
+        with self.metrics.measure('time_load_weigths'):
+            # Getting state dict
+            if fp:
+                fp.seek(0)
+                state = torch.load(fp)
+            else:
+                # Getting default pretrained state dict
+                # Requires TorchPretrainedModuleMixin to be implemented
+                state = self.get_default_pretrained_state_dict(**(pretrained_getter_opts or {}))
 
-        # Getting state dict
-        if fp:
-            fp.seek(0)
-            state = torch.load(fp)
-        else:
-            # Getting default pretrained state dict
-            # Requires TorchPretrainedModuleMixin to be implemented
-            state = self.get_default_pretrained_state_dict(**(pretrained_getter_opts or {}))
-
-        # Loading state
-        self.load_state_dict(state)
-        self.to(self.device)
+            # Loading state
+            self.load_state_dict(state)
+            self.to(self.device)
 
         return self
 
     def dump(self, fp):
-        torch.save(self.state_dict(), fp)
+        with self.metrics.measure('time_dump_weights'):
+            torch.save(self.state_dict(), fp)
 
     def get_data_loader(self, data, **data_loader_options):
         """Configured data loader with applied transforms
@@ -117,13 +118,16 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDat
             tqdm_enabled=False
     ) -> Optional[Tuple[List, Union[List, np.ndarray]]]:    # Returns None is dataset length = 0
         """Run the model against all elements in data"""
+        self.metrics.add('dataset_size', len(data))
         loader = self.get_data_loader(data, **(data_loader_options or {}))
-        # Running inference batch loop
-        return generic_inference(
-            self, loader, self.inference, self.results_handler, self.device,
-            result_handler_options=result_handler_options, inference_options=inference_options,
-            tqdm_enabled=tqdm_enabled
-        )
+
+        with self.metrics.measure('time_generic_inference'):
+            # Running inference batch loop
+            return generic_inference(
+                self, loader, self.inference, self.results_handler, self.device,
+                result_handler_options=result_handler_options, inference_options=inference_options,
+                tqdm_enabled=tqdm_enabled
+            )
 
     def get_dataset_transforms(self):
         """Returns callable that transform the input data before the forward pass
