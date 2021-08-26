@@ -5,13 +5,14 @@ from PIL.Image import Image
 import torch
 
 from mlmodule.box import BBoxCollection
-from mlmodule.contrib.rpn.encoder import DenseNet161ImageNetEncoder, RegionEncoder
+from mlmodule.contrib.resnet.features import ResNet18ImageNetFeatures
+from mlmodule.contrib.rpn.encoder import RegionEncoder
 from mlmodule.contrib.rpn.rpn import RPN
 from mlmodule.contrib.rpn.selector import CosineSimilarityRegionSelector
 from mlmodule.metrics import MetricsCollector
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.base import IndexedDataset
-from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider, TorchPretrainedModuleMixin
+from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.types import StateDict
 
 
@@ -19,14 +20,14 @@ InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Un
 OutputDatasetType = TypeVar('OutputDatasetType', bound=IndexedDataset[Any, Any, BBoxCollection])
 
 
-class RegionFeatures(BaseTorchMLModule, TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider):
+class RegionFeatures(BaseTorchMLModule, DownloadPretrainedStateFromProvider):
 
     state_dict_key = "pretrained-models/rpn/rf_dnim161_ga_rpn_x101_32x4d_fpn_1x_coco_20200220-c28d1b18.pth"
 
     def __init__(self, device: Optional[torch.device] = None):
         super().__init__(device=device)
         self.rpn = RPN(device=device)
-        self.region_encoder = DenseNet161ImageNetEncoder(device=device)
+        self.region_encoder = RegionEncoder(encoder=ResNet18ImageNetFeatures(device=device), device=device)
         self.region_selector = CosineSimilarityRegionSelector(device=device)
 
     @property
