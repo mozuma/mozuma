@@ -22,7 +22,7 @@ OutputDatasetType = TypeVar('OutputDatasetType', bound=IndexedDataset[Any, Any, 
 
 class RegionFeatures(BaseTorchMLModule, DownloadPretrainedStateFromProvider):
 
-    state_dict_key = "pretrained-models/rpn/rf_dnim161_ga_rpn_x101_32x4d_fpn_1x_coco_20200220-c28d1b18.pth"
+    state_dict_key = "pretrained-models/rpn/rf_rnim18_ga_rpn_x101_32x4d_fpn_1x_coco_20200220-c28d1b18.pth"
 
     def __init__(self, device: Optional[torch.device] = None):
         super().__init__(device=device)
