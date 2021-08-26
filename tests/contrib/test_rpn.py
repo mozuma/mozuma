@@ -5,6 +5,7 @@ import mmcv.runner
 import numpy as np
 import pytest
 import torch
+from torch._C import device
 from torch.hub import load_state_dict_from_url
 import torch.nn.functional as F
 from mmdet.apis import init_detector, inference_detector
@@ -13,9 +14,9 @@ from PIL.Image import Image
 from torchvision.transforms import Compose
 
 from mlmodule.box import BBoxPoint, BBoxOutput, BBoxCollection
-from mlmodule.contrib.densenet import DenseNet161ImageNetFeatures
+from mlmodule.contrib.resnet.features import ResNet18ImageNetFeatures
 from mlmodule.contrib.rpn import RegionFeatures, get_absolute_config_path
-from mlmodule.contrib.rpn.encoder import DenseNet161ImageNetEncoder, RegionEncoder
+from mlmodule.contrib.rpn.encoder import RegionEncoder
 from mlmodule.contrib.rpn.rpn import RPN
 from mlmodule.contrib.rpn.selector import CosineSimilarityRegionSelector
 from mlmodule.contrib.rpn.transforms import RegionCrop, StandardTorchvisionRegionTransforms
@@ -40,7 +41,7 @@ def rpn(gpu_torch_device):
 @pytest.fixture(scope='session')
 def region_encoder(gpu_torch_device):
     """ Load mlmodule region encoder """
-    densenet = DenseNet161ImageNetEncoder(device=gpu_torch_device)
+    densenet = RegionEncoder(encoder=ResNet18ImageNetFeatures(device=device), device=gpu_torch_device)
     densenet.load()
     return densenet
 
@@ -188,7 +189,7 @@ def test_region_encoding(rpn, region_encoder, images, gpu_torch_device):
     assert len(indices) == len(box_collections)
 
     # Check that the regions have very similar features than when re-extracting them with a densenet
-    densenet = DenseNet161ImageNetFeatures(device=gpu_torch_device)
+    densenet = ResNet18ImageNetFeatures(device=gpu_torch_device)
     densenet.load()
     densenet.eval()
     cropper = RegionCrop()
