@@ -1,3 +1,5 @@
+import dataclasses
+import itertools
 import logging
 from typing import Any, List, Tuple, TypeVar
 import numpy as np
@@ -32,7 +34,7 @@ class CosineSimilarityRegionSelector(BaseMLModule):
 
     @classmethod
     def similarity(cls, x: np.ndarray, y: np.ndarray) -> np.ndarray:
-        return np.dot(x/x.sum(), y/y.sum())
+        return np.dot(x/np.linalg.norm((x)), y/np.linalg.norm(y))
 
     def get_data_loader(self, data):
         """Configured data loader with applied transforms
@@ -63,36 +65,24 @@ class CosineSimilarityRegionSelector(BaseMLModule):
             n_batches = len(data_loader)
             if tqdm_enabled:
                 data_loader = tqdm(data_loader)
+
+            img_boxes: BBoxCollection
+            # img_index: List containing one index
             for batch_n, (img_index, img_boxes) in enumerate(data_loader):
                 logger.debug(f"Sending batch number: {batch_n}/{n_batches}")
 
-                # img_index: List containing one index
-                # img_boxes: BBoxCollection
-                # Collect the features for each box
-                box_features = [box.features for box in img_boxes]
+                # Making a copy of the Bounding Boxes
+                img_boxes = [dataclasses.replace(box) for box in img_boxes]
 
-                for i1 in range(len(box_features) - 1):
-                    # if the box is still valid, compute the cosine
-                    if box_features[i1] is not None:
-                        for i2 in range(i1 + 1, len(box_features)):
-                            similarity = self.similarity(box_features[i1], box_features[i2])
-                            # if the 2 boxes are too similar, set the features for the worst box to None
-                            if similarity > max_similarity:
-                                box_features[i2] = None
-
-                # Reconstruct the BBoxCollection
-                new_img_boxes = []
-                for i, box in enumerate(img_boxes):
-                    new_img_boxes.append(
-                        BBoxOutput(
-                            bounding_box=(box.bounding_box[0], box.bounding_box[1]),
-                            probability=box.probability,
-                            features=box_features[i],
-                        )
-                    )
+                for box_l, box_r in itertools.combinations(img_boxes, 2):
+                    if box_l.features is not None and box_r.features is not None:
+                        similarity = self.similarity(box_l.features, box_r.features)
+                        # if the 2 boxes are too similar, set the features for the worst box to None
+                        if similarity > max_similarity:
+                            box_r.features = None
 
                 indices.append(img_index[0])
-                bbox_collections.append(new_img_boxes)
+                bbox_collections.append(img_boxes)
 
                 logger.debug(f"Collecting results: {batch_n}/{n_batches}")
 

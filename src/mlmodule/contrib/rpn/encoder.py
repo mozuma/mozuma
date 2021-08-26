@@ -6,10 +6,11 @@ from PIL.Image import Image
 from torchvision.transforms.transforms import Compose
 
 from mlmodule.box import BBoxOutput, BBoxCollection
-from mlmodule.contrib.rpn.transforms import RegionCrop, StandardTorchvisionRegionTransforms
-from mlmodule.contrib.densenet.features import BaseDenseNetPretrainedFeatures
+from mlmodule.contrib.rpn.transforms import RegionCrop
+from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.data.box import ApplyFunctionToPosition
+from mlmodule.types import StateDict
 
 
 """ Creates encodings for regions extracted from an image """
@@ -21,11 +22,24 @@ InputDatasetType = TypeVar('InputDatasetType',
 ImageDatasetType = TypeVar('ImageDatasetType', bound=IndexedDataset[Any, Any, Union[Image, np.ndarray]])
 
 
-class RegionEncoder(BaseDenseNetPretrainedFeatures):
-    """ Computes encodings for regions using a pretrained DenseNet """
+class RegionEncoder(BaseTorchMLModule):
+    """ Applies an encoder to regions """
 
-    def __init__(self, densenet_arch, dataset="imagenet", device=None):
-        super().__init__(densenet_arch, dataset=dataset, device=device)
+    def __init__(self, encoder: BaseTorchMLModule, device=None):
+        super().__init__(device=device)
+        self.encoder = encoder
+
+    def get_default_pretrained_state_dict(
+            self,
+            aws_access_key_id: Optional[str] = None,
+            aws_secret_access_key: Optional[str] = None
+    ) -> StateDict:
+        return {
+            f"encoder.{k}": v for k, v in self.encoder.get_default_pretrained_state_dict(
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key
+            ).items()
+        }
 
     @classmethod
     def prep_encodings(cls, image_dataset: ImageDatasetType, regions: List[BBoxCollection]) -> InputDatasetType:
@@ -42,7 +56,7 @@ class RegionEncoder(BaseDenseNetPretrainedFeatures):
         ](new_idx, new_data)
         dataset.transforms = [
             ApplyFunctionToPosition(Compose(image_dataset.transforms), pos=0)
-        ] + dataset.transforms
+        ]
         return dataset
 
     @classmethod
@@ -74,8 +88,14 @@ class RegionEncoder(BaseDenseNetPretrainedFeatures):
     def get_dataset_transforms(self):
         return [
             RegionCrop(),
-            StandardTorchvisionRegionTransforms(),
-        ]
+        ] + self.encoder.get_dataset_transforms()
+
+    def eval(self):
+        self.encoder.eval()
+        return super().eval()
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.encoder(x)
 
     def bulk_inference(
             self, data: InputDatasetType, data_loader_options=None, **opts
@@ -135,9 +155,3 @@ class RegionEncoder(BaseDenseNetPretrainedFeatures):
             ))
 
         return indices, output
-
-
-class DenseNet161ImageNetEncoder(RegionEncoder):
-
-    def __init__(self, device=None):
-        super().__init__("densenet161", dataset="imagenet", device=device)
