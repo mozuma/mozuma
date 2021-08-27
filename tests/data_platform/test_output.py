@@ -5,11 +5,10 @@ import torch
 
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
-from mlmodule.torch.mixins import TorchPretrainedModuleMixin
 
 
 def test_output_indices(
-        image_module: Union[BaseTorchMLModule, TorchPretrainedModuleMixin],
+        image_module: Union[BaseTorchMLModule],
         image_dataset: ImageDataset,
         torch_device: torch.device,
         gpu_only_modules: Set[Type[BaseTorchMLModule]]

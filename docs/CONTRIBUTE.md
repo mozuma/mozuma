@@ -25,8 +25,6 @@ from torchvision import models
 
 # Import the base NN Module for AI Data platform
 from mlmodule.torch import BaseTorchMLModule
-# Import the mixin for pretrained models
-from mlmodule.torch.mixins import TorchPretrainedModuleMixin
 # Utility to manipulate torch state dictionary
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 # Dataset and transforms for image processing
@@ -34,7 +32,7 @@ from mlmodule.torch.data.images import ImageDataset, TORCHVISION_STANDARD_IMAGE_
 
 
 # Class definition for an AI Data Platform module that can be pretrained
-class ExampleResNet18Module(BaseTorchMLModule, TorchPretrainedModuleMixin):
+class ExampleResNet18Module(BaseTorchMLModule):
 
     def __init__(self, device=None):
         # Need to pass arguments to the parent class

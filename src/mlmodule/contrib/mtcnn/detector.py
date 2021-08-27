@@ -9,7 +9,7 @@ from mlmodule.contrib.mtcnn.mtcnn import MLModuleMTCNN
 from mlmodule.box import BBoxOutput, BBoxPoint, BBoxCollection
 from mlmodule.torch import BaseTorchMLModule
 from mlmodule.torch.data.base import IndexedDataset
-from mlmodule.torch.mixins import TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider, \
+from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider, \
     ResizableImageInputMixin
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 from mlmodule.torch.data.images import transforms
@@ -30,7 +30,7 @@ class ResizeWithAspectRatios:
 
 
 class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
-                    TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider,
+                    DownloadPretrainedStateFromProvider,
                     ResizableImageInputMixin):
     """Face detection module"""
 

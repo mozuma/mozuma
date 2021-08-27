@@ -7,12 +7,10 @@ import torchvision.models as m
 
 from mlmodule.torch import BaseTorchMLModule
 from mlmodule.torch.data.base import IndexedDataset
-from mlmodule.torch.mixins import TorchPretrainedModuleMixin
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 
 
-class BaseResNetImageNetModule(BaseTorchMLModule[IndexedDataset[Any, Any, Union[np.ndarray, Image]]],
-                               TorchPretrainedModuleMixin):
+class BaseResNetImageNetModule(BaseTorchMLModule[IndexedDataset[Any, Any, Union[np.ndarray, Image]]]):
 
     def __init__(self, resnet_arch, device=None):
         super().__init__(device=device)

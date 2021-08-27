@@ -11,7 +11,7 @@ from mlmodule.contrib.arcface.transforms import ArcFaceAlignment
 from mlmodule.torch import BaseTorchMLModule
 from mlmodule.torch.data.box import BoundingBoxDataset
 from mlmodule.torch.data.images import transforms
-from mlmodule.torch.mixins import TorchPretrainedModuleMixin, DownloadPretrainedStateFromProvider
+from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.torch.modules import Bottleneck_IR_SE, get_block
 from mlmodule.torch.utils import torch_apply_state_to_partial_model, l2_norm
 
@@ -24,7 +24,7 @@ ONE_DRIVE_API_CALL = 'https://api.onedrive.com/v1.0/drives/CEC0E1F8F0542A13/item
 ARCFACE_MEAN_DISTANCE_THRESHOLD = 0.87
 
 
-class ArcFaceFeatures(BaseTorchMLModule[BoundingBoxDataset], TorchPretrainedModuleMixin,
+class ArcFaceFeatures(BaseTorchMLModule[BoundingBoxDataset],
                       DownloadPretrainedStateFromProvider):
     """Creates face embeddings from MTCNN output"""
 

@@ -1,3 +1,4 @@
+import pickle
 from typing import Any, Dict, Optional, Union, List, Tuple, Generic, TypeVar
 
 import boto3
@@ -25,6 +26,11 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDat
         super().__init__()
         self.device = device or self._resolve_device()
 
+    def _torch_load(self, f, map_location=None, pickle_module=pickle, **pickle_load_args) -> Any:
+        """Safe method to load the state dict directly on the right device"""
+        map_location = map_location or self.device
+        return torch.load(f, map_location=map_location, pickle_module=pickle_module, **pickle_load_args)
+
     @classmethod
     def _resolve_device(cls):
         return torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -40,10 +46,9 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDat
             # Getting state dict
             if fp:
                 fp.seek(0)
-                state = torch.load(fp)
+                state = self._torch_load(fp)
             else:
                 # Getting default pretrained state dict
-                # Requires TorchPretrainedModuleMixin to be implemented
                 state = self.get_default_pretrained_state_dict(**(pretrained_getter_opts or {}))
 
             # Loading state
@@ -86,7 +91,7 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDat
 
         # Load the state dict
         f.seek(0)
-        pretrained_state_dict = torch.load(f, map_location=lambda storage, loc: storage)
+        pretrained_state_dict = self._torch_load(f, map_location=lambda storage, loc: storage)
         return torch_apply_state_to_partial_model(self, pretrained_state_dict)
 
     def get_data_loader(self, data, **data_loader_options):

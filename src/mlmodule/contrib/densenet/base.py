@@ -1,10 +1,9 @@
 import torchvision.models as m
 
 from mlmodule.torch import BaseTorchMLModule
-from mlmodule.torch.mixins import TorchPretrainedModuleMixin
 
 
-class BaseDenseNetPretrainedModule(BaseTorchMLModule, TorchPretrainedModuleMixin):
+class BaseDenseNetPretrainedModule(BaseTorchMLModule):
 
     def __init__(self, densenet_arch, dataset="imagenet", device=None):
         """

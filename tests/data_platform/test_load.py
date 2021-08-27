@@ -2,12 +2,11 @@ from typing import Callable, Union
 from urllib3.packages.six import BytesIO
 
 from mlmodule.torch.base import BaseTorchMLModule
-from mlmodule.torch.mixins import TorchPretrainedModuleMixin
 from mlmodule.types import StateDict
 
 
 def test_load(
-    data_platform_scanner: Union[BaseTorchMLModule, TorchPretrainedModuleMixin],
+    data_platform_scanner: Union[BaseTorchMLModule],
     assert_state_dict_equals: Callable[[StateDict, StateDict], None]
 ) -> None:
     """Test that a scanner can be loaded and dumped"""
