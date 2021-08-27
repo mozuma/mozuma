@@ -1,11 +1,7 @@
-from io import BytesIO
-from typing import Dict, Optional, List, Callable, Any, Tuple
+from typing import Dict, List, Callable, Any, Tuple
 
-import boto3
 import torch
 from torchvision.transforms import Compose
-
-from mlmodule.torch.utils import torch_apply_state_to_partial_model
 
 
 class ResizableImageInputMixin:

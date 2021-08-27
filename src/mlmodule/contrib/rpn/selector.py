@@ -9,7 +9,7 @@ from torch.utils.data.dataloader import DataLoader
 from tqdm import tqdm
 
 from mlmodule.base import BaseMLModule
-from mlmodule.box import BBoxOutput, BBoxCollection
+from mlmodule.box import BBoxCollection
 from mlmodule.torch.data.base import IndexedDataset
 
 
