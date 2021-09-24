@@ -1,4 +1,4 @@
-from typing import List, Callable, Any, Tuple, Union
+from typing import List, Callable, Dict, Any, Tuple, Union
 import pickle
 from collections import OrderedDict
 
@@ -12,11 +12,12 @@ from mlmodule.torch.data.box import BoundingBoxDataset
 from mlmodule.torch.data.images import transforms
 from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.torch.modules import IBasicBlock, conv1x1
-
+from mlmodule.torch.utils import torch_apply_state_to_partial_model
+from mlmodule.utils import download_file_from_google_drive
 
 # See https://arxiv.org/pdf/2103.06627.pdf (Figure 5)
 MAGFACE_MAGNITUDE_THRESHOLD = 22.5
-
+GOOGLE_DRIVE_FILE_ID = '1Bd87admxOZvbIOAyTkGEntsEz3fyMt7H'
 
 class MagFaceFeatures(BaseTorchMLModule[BoundingBoxDataset],
                       DownloadPretrainedStateFromProvider):
@@ -105,16 +106,22 @@ class MagFaceFeatures(BaseTorchMLModule[BoundingBoxDataset],
 
         return x
 
-    def _torch_load(self, f, map_location=None, pickle_module=pickle, **pickle_load_args) -> Any:
-        """Safe method to load the state dict directly on the right device"""
-        map_location = map_location or self.device
-        state_dict = torch.load(f, map_location=map_location, pickle_module=pickle_module, **pickle_load_args)
+    def get_default_pretrained_state_dict_from_provider(self) -> Dict[str, torch.Tensor]:
+        """Gets the pretrained state dir from GoogleDrive
+        URL: https://github.com/IrvingMeng/MagFace#model-zoo
+        Model: iResNet100
+        """
+        # Downloading state dict from Google Drive
+        pretrained_state_dict = torch.load(download_file_from_google_drive(GOOGLE_DRIVE_FILE_ID), map_location=self.device)
         cleaned_state_dict = OrderedDict()
-        for k, v in state_dict['state_dict'].items():
+        for k, v in pretrained_state_dict['state_dict'].items():
             if k[0:16] == 'features.module.':
                 new_k = '.'.join(k.split('.')[2:])
                 cleaned_state_dict[new_k] = v
-        return cleaned_state_dict
+
+        # Removing deleted layers from state dict and updating the other with pretrained data
+        return torch_apply_state_to_partial_model(self, cleaned_state_dict)
+
 
     def bulk_inference(
             self, data: BoundingBoxDataset,
