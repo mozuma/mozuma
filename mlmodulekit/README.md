@@ -15,3 +15,11 @@ they must be used when using the LSIR PC32 machine.
 * PyTorch 1.7.1
 * TorchVision 0.8.2
 * MMCV full 1.3.11
+
+### `2`
+
+* Python 3.7
+* CUDA 11.1
+* PyTorch 1.9.1
+* TorchVision 0.10.1
+* MMCV full 1.3.14
