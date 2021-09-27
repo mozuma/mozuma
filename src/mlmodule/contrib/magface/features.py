@@ -1,5 +1,4 @@
-from typing import List, Callable, Dict, Any, Tuple, Union
-import pickle
+from typing import List, Callable, Dict, Tuple, Union
 from collections import OrderedDict
 
 import numpy as np
@@ -18,6 +17,7 @@ from mlmodule.utils import download_file_from_google_drive
 # See https://arxiv.org/pdf/2103.06627.pdf (Figure 5)
 MAGFACE_MAGNITUDE_THRESHOLD = 22.5
 GOOGLE_DRIVE_FILE_ID = '1Bd87admxOZvbIOAyTkGEntsEz3fyMt7H'
+
 
 class MagFaceFeatures(BaseTorchMLModule[BoundingBoxDataset],
                       DownloadPretrainedStateFromProvider):
@@ -112,7 +112,9 @@ class MagFaceFeatures(BaseTorchMLModule[BoundingBoxDataset],
         Model: iResNet100
         """
         # Downloading state dict from Google Drive
-        pretrained_state_dict = torch.load(download_file_from_google_drive(GOOGLE_DRIVE_FILE_ID), map_location=self.device)
+        pretrained_state_dict = torch.load(
+            download_file_from_google_drive(GOOGLE_DRIVE_FILE_ID), map_location=self.device
+        )
         cleaned_state_dict = OrderedDict()
         for k, v in pretrained_state_dict['state_dict'].items():
             if k[0:16] == 'features.module.':
@@ -121,7 +123,6 @@ class MagFaceFeatures(BaseTorchMLModule[BoundingBoxDataset],
 
         # Removing deleted layers from state dict and updating the other with pretrained data
         return torch_apply_state_to_partial_model(self, cleaned_state_dict)
-
 
     def bulk_inference(
             self, data: BoundingBoxDataset,
