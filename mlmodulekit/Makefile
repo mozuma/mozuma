@@ -1,4 +1,4 @@
-MLMODULEKIT_VERSION := 1
+MLMODULEKIT_VERSION := 2
 
 .PHONY: build release
 

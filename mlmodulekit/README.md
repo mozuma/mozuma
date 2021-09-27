@@ -18,7 +18,7 @@ they must be used when using the LSIR PC32 machine.
 
 ### `2`
 
-* Python 3.9
+* Python 3.7
 * CUDA 11.1
 * PyTorch 1.9.1
 * TorchVision 0.10.1
