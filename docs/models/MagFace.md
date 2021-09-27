@@ -1,6 +1,6 @@
-# ArcFace
+# MagFace
 
-We are using an implementation of InsightFace in Pytorch (https://github.com/TreB1eN/InsightFace_Pytorch)
+We are using the official implementation of MagFace in Pytorch (https://github.com/IrvingMeng/MagFace)
 
 
 ## Usage
@@ -13,7 +13,7 @@ from typing import List
 import torch
 
 from mlmodule.box import BBoxOutput
-from mlmodule.contrib.arcface import ArcFaceFeatures
+from mlmodule.contrib.arcface import MagFaceFeatures
 from mlmodule.contrib.mtcnn import MTCNNDetector
 from mlmodule.torch.data.box import BoundingBoxDataset
 from mlmodule.torch.data.images import ImageDataset
@@ -43,10 +43,10 @@ indices, file_names, bboxes = zip(*[
 # Create a dataset for the bounding boxes
 bbox_features = BoundingBoxDataset(indices, file_names, bboxes)
 
-arcface = ArcFaceFeatures(device=torch_device)
-arcface.load()
+magface = MagFaceFeatures(device=torch_device)
+magface.load()
 # Get face features
-indices, new_outputs = arcface.bulk_inference(
+indices, new_outputs = magface.bulk_inference(
     bbox_features, data_loader_options={'batch_size': 3})
 ```
 
@@ -56,5 +56,5 @@ indices, new_outputs = arcface.bulk_inference(
 ```bash
 export PUBLIC_ASSETS=/mnt/storage01/lsir-public-assets/pretrained-models
 # For text encoders
-python -m mlmodule.cli download arcface.ArcFaceFeatures --outdir "$PUBLIC_ASSETS/face-detection/"
+python -m mlmodule.cli download magface.MagFaceFeatures --outdir "$PUBLIC_ASSETS/face-detection/"
 ```

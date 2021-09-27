@@ -20,12 +20,16 @@ InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Un
 
 @dataclasses.dataclass
 class ResizeWithAspectRatios:
+    """
+    :param img_size: Desired output size (height, width).
+    """
     img_size: Tuple[int, int]
 
     def __call__(self, img) -> Tuple[np.ndarray, np.ndarray]:
+        height, width = self.img_size
         return (
             np.uint8(transforms.Resize(self.img_size)(img)),
-            np.array([x/target for x, target in zip(img.size, self.img_size)])
+            np.array([x/target for x, target in zip(img.size, (width, height))])
         )
 
 

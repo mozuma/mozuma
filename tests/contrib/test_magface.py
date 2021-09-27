@@ -2,9 +2,10 @@ import os
 from typing import List
 
 import torch
+import numpy as np
 
 from mlmodule.contrib.mtcnn import MTCNNDetector
-from mlmodule.contrib.arcface import ArcFaceFeatures
+from mlmodule.contrib.magface import MagFaceFeatures
 from mlmodule.box import BBoxOutput
 from mlmodule.torch.data.box import BoundingBoxDataset
 from mlmodule.torch.data.images import ImageDataset
@@ -14,9 +15,9 @@ FACE_DISTANCE_THRESHOLD = 0.5
 
 
 def _face_features_for_folder(torch_device: torch.device, folder, **opts):
-    arcface = ArcFaceFeatures(device=torch_device)
-    arcface.load()
-    mtcnn = MTCNNDetector(device=torch_device, image_size=(720, 720), min_face_size=20)
+    magface = MagFaceFeatures(device=torch_device)
+    magface.load()
+    mtcnn = MTCNNDetector(device=torch_device, min_face_size=20)
     mtcnn.load()
     file_names = list_files_in_dir(folder, allowed_extensions=('jpg', 'png'))
 
@@ -37,14 +38,15 @@ def _face_features_for_folder(torch_device: torch.device, folder, **opts):
     bbox_features = BoundingBoxDataset(indices, file_names, bboxes)
 
     # Get face features
-    return (d_indices, outputs), arcface.bulk_inference(
+    return (d_indices, outputs), magface.bulk_inference(
         bbox_features, data_loader_options={'batch_size': 3}, **opts)
 
 
-def test_arcface_features_inference(torch_device: torch.device):
+def test_magface_features_inference(torch_device: torch.device):
     base_path = os.path.join("tests", "fixtures", "berset")
-    _, (indices, new_outputs) = _face_features_for_folder(torch_device, base_path, remove_bad_quality_faces=False)
-    output_by_file = dict(zip(indices, new_outputs))
+    _, (indices, new_outputs) = _face_features_for_folder(torch_device, base_path)
+    normalized_features = new_outputs / np.linalg.norm(new_outputs, axis=1, keepdims=True)
+    output_by_file = dict(zip(indices, normalized_features))
 
     # tests
     assert output_by_file[os.path.join(base_path, 'berset1.jpg_0')].dot(
@@ -64,6 +66,6 @@ def test_bad_quality_face_filter():
         torch.device('cpu'), os.path.join("tests", "fixtures", "faces")
     )
     # office_blur has 2 visible faces
-    assert len([i for i in indices if 'office_blur' in i]) == 2
+    assert len([i for i in indices if 'office_blur' in i]) == 1
     # But 3 detected faces
     assert sum([len(b) for i, b in zip(detect_i, detect_box) if 'office_blur' in i]) == 3

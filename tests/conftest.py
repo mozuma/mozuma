@@ -11,6 +11,7 @@ from mlmodule.contrib.arcface import ArcFaceFeatures
 from mlmodule.contrib.clip import CLIPViTB32ImageEncoder
 from mlmodule.contrib.densenet import DenseNet161ImageNetFeatures, DenseNet161ImageNetClassifier, \
     DenseNet161PlacesFeatures, DenseNet161PlacesClassifier
+from mlmodule.contrib.magface.features import MagFaceFeatures
 from mlmodule.contrib.mtcnn import MTCNNDetector
 from mlmodule.contrib.resnet import ResNet18ImageNetFeatures, ResNet18ImageNetClassifier
 from mlmodule.contrib.rpn import RegionFeatures
@@ -68,6 +69,7 @@ def set_seeds():
     CLIPViTB32ImageEncoder,
     MTCNNDetector,
     ArcFaceFeatures,
+    MagFaceFeatures,
     RegionFeatures
 ])
 def data_platform_scanner(request: SubRequest):
@@ -104,6 +106,7 @@ def gpu_only_modules() -> Set[Type[BaseTorchMLModule]]:
     CLIPViTB32ImageEncoder,
     MTCNNDetector,
     ArcFaceFeatures,
+    MagFaceFeatures,
     RPN,
     RegionFeatures
 ])
