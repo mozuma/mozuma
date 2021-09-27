@@ -26,7 +26,7 @@ to get access to the pretrained models.
 Available models
 
 * [ResNet](docs/models/ResNet.md): ImageNet
-* Face detection with [MTCNN](docs/models/MTCNN.md) and [ArcFace](docs/models/ArcFace.md)
+* Face detection with [MTCNN](docs/models/MTCNN.md) and [ArcFace](docs/models/ArcFace.md) or [MagFace](docs/models/MagFace.md).
 * [DenseNet](docs/models/DenseNet.md): ImageNet and Places365
 * [RPN](docs/models/RPN.md): Object detection with [`mdetection`](https://github.com/open-mmlab/mmdetection).
 

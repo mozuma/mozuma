@@ -1,4 +1,4 @@
-# ArcFace
+# MagFace
 
 We are using the official implementation of MagFace in Pytorch (https://github.com/IrvingMeng/MagFace)
 
