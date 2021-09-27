@@ -11,10 +11,8 @@ Create a development environment:
 ```shell
 # CPU development
 tox --devenv venv -e py37
-# or CUDA 11.0
-tox --devenv venv -e cuda110-py37
-# or CUDA 11.0 on PC32 (compute ability 3.5)
-tox --devenv venv -e cuda110-ca35-py37
+# or CUDA 11.1
+tox --devenv venv -e cuda111-py37
 ```
 
 The environment can be activated with:
@@ -40,10 +38,8 @@ Testing can be done using `tox`
 ```shell
 # CPU testing
 tox -e py37
-# or CUDA 11.0
-tox -e cuda110-py37
-# or CUDA 11.0 on PC32
-tox -e cuda110-ca35-py37
+# or CUDA 11.1
+tox -e cuda111-py37
 ```
 
 or with directly using `pytest` on an environment with all dependencies installed
