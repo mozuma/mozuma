@@ -25,7 +25,7 @@ class MetricsCollector:
     def add(self, name: str, value: MetricValue) -> None:
         if name in self.metrics:
             warnings.warn(
-                f'metric named {name} will overwrite an existing metric ({name}={self.metrics[name]})', 
+                f'metric named {name} will overwrite an existing metric ({name}={self.metrics[name]})',
                 RuntimeWarning
             )
         self.metrics[name] = value
