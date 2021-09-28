@@ -11,11 +11,7 @@ From the git repository:
 pip install git+ssh://git@github.com/LSIR/mlmodule.git
 ```
 
-As a docker image:
-
-```shell
-docker pull lsirepfl/mlmodule:<version>
-```
+For convenience, we ship a base Docker image https://hub.docker.com/repository/docker/lsirepfl/mlmodulekit which contains dependencies that can be hard to install (for instance PyTorch or MMCV). See [MLModuleKit](mlmodulekit/README.md).
 
 ## Models
 

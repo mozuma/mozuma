@@ -1,8 +1,14 @@
 # MLModule Kit
 
-Docker images with PyTorch related libraries pre-installed to use MLModule
+Docker images with PyTorch related libraries pre-installed to use MLModule.
+
+```
+docker pull lsirepfl/mlmodulekit:<version>
+```
 
 ## Versions
+
+List of image tags and installed libraries.
 
 All versions are available with the suffix `-ca35`. 
 These images are compiled for the CUDA compute ability version 3.5 (see https://en.wikipedia.org/wiki/CUDA), 
