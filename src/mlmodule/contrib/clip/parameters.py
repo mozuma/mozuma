@@ -1,9 +1,10 @@
 __all__ = ('PARAMETERS',)
 
 from collections import OrderedDict
+from typing import Any, Dict, OrderedDict as OrderedDictType
 
 
-PARAMETERS = {
+PARAMETERS: Dict[str, OrderedDictType[str, Any]] = {
     "RN50": OrderedDict(
         embed_dim=1024,
         # Vision

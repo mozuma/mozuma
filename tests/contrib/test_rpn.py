@@ -22,6 +22,7 @@ from mlmodule.contrib.rpn.selector import CosineSimilarityRegionSelector
 from mlmodule.contrib.rpn.transforms import RegionCrop, StandardTorchvisionRegionTransforms
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.data.images import convert_to_rgb, get_pil_image_from_file
+from mlmodule.types import ImageDatasetType
 from mlmodule.utils import list_files_in_dir
 
 
@@ -111,9 +112,9 @@ def max_box_distance(box1, box2):
     return max(point_distance(p1_1, p1_2), point_distance(p2_1, p2_2))
 
 
-def test_region_inference(rpn, images, default_mmdet_encodings):
+def test_region_inference(rpn: RPN, images, default_mmdet_encodings):
     indices, imgs = images
-    dataset = IndexedDataset[str, Image, Image](indices, imgs)
+    dataset = IndexedDataset[str, ImageDatasetType](indices, imgs)
 
     num_regions = 10
     indices_out, regions = rpn.bulk_inference(dataset, data_loader_options={'batch_size': 1},
@@ -170,7 +171,7 @@ def test_region_inference(rpn, images, default_mmdet_encodings):
 
 def test_region_encoding(rpn, region_encoder, images, gpu_torch_device):
     indices, imgs = images
-    dataset = IndexedDataset[str, np.ndarray, np.ndarray](indices, imgs)
+    dataset = IndexedDataset[str, np.ndarray](indices, imgs)
 
     # Extract proposed regions from image
     num_regions = 10
@@ -209,7 +210,7 @@ def test_region_encoding(rpn, region_encoder, images, gpu_torch_device):
 
 def test_bbox_selector(rpn, region_encoder, region_selector, images):
     indices, imgs = images
-    dataset = IndexedDataset[str, np.ndarray, np.ndarray](indices, imgs)
+    dataset = IndexedDataset[str, np.ndarray](indices, imgs)
 
     # Extract proposed regions from image
     num_regions = 10
@@ -224,7 +225,7 @@ def test_bbox_selector(rpn, region_encoder, region_selector, images):
     indices, box_collections = RegionEncoder.parse_encodings(img_reg_indices, img_reg_encodings)
 
     # Select regions based on cosine similarity
-    box_dataset_w_features = IndexedDataset[str, BBoxCollection, BBoxCollection](indices, box_collections)
+    box_dataset_w_features = IndexedDataset[str, BBoxCollection](indices, box_collections)
     _, box_dataset_w_features_selected = region_selector.bulk_inference(box_dataset_w_features)
 
     assert len(box_dataset_w_features) == len(box_dataset_w_features_selected)
@@ -237,7 +238,7 @@ def test_bbox_selector(rpn, region_encoder, region_selector, images):
 
 def test_base(gpu_torch_device: torch.device, images):
     indices, imgs = images
-    dataset = IndexedDataset[str, np.ndarray, np.ndarray](indices, imgs)
+    dataset = IndexedDataset[str, np.ndarray](indices, imgs)
 
     region_features = RegionFeatures(device=gpu_torch_device).load()
     _, regions_with_features = region_features.bulk_inference(

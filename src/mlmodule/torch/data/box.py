@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-from typing import List, Callable, TypeVar, Tuple
+from pathlib import Path
+from typing import IO, List, Callable, TypeVar, Tuple, Union
 
 from PIL.Image import Image
 
 from mlmodule.box import BBoxOutput
 from mlmodule.torch.data.base import IndexedDataset
-from mlmodule.torch.data.files import ReadablePathType
 from mlmodule.torch.data.images import get_pil_image_from_file, convert_to_rgb
 
 
@@ -26,10 +26,13 @@ class ApplyFunctionToPosition:
 IndicesType = TypeVar('IndicesType')
 
 
-class BoundingBoxDataset(IndexedDataset[IndicesType, Tuple[ReadablePathType, BBoxOutput], Tuple[Image, BBoxOutput]]):
+ReadablePathTypeList = Union[List[str], List[Path], List[IO]]
+
+
+class BoundingBoxDataset(IndexedDataset[IndicesType, Tuple[Image, BBoxOutput]]):
 
     def __init__(
-            self, indices: List[IndicesType], image_paths: List[ReadablePathType], boxes: List[BBoxOutput], to_rgb=True
+            self, indices: List[IndicesType], image_paths: ReadablePathTypeList, boxes: List[BBoxOutput], to_rgb=True
     ):
         super().__init__(indices, list(zip(image_paths, boxes)))
         self.add_transforms([

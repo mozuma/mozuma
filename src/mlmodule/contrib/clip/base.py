@@ -1,25 +1,33 @@
 """
 Base classes for CLIP implementation
 """
-from typing import Dict
+from typing import Dict, TypeVar, Union
 
 import clip
 import torch
 from clip.model import CLIP
 from torch import nn
+from typing_extensions import Literal
 
 from mlmodule.contrib.clip.parameters import PARAMETERS
-from mlmodule.torch import BaseTorchMLModule
+from mlmodule.torch.base import TorchMLModuleFeatures
 from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 
 
-class BaseCLIPModule(BaseTorchMLModule, DownloadPretrainedStateFromProvider):
+_IndexType = TypeVar('_IndexType', covariant=True)
+_InputDataType = TypeVar('_InputDataType', covariant=True)
+
+
+class BaseCLIPModule(
+        TorchMLModuleFeatures[_IndexType, _InputDataType],
+        DownloadPretrainedStateFromProvider
+):
     """
     Base class for CLIP modules
     """
-    clip_model_name = None
-    model_type = None   # image or text
+    clip_model_name: str
+    model_type: Union[Literal['image'], Literal['text']]   # image or text
 
     def __init__(self, device: torch.device = None):
         super().__init__(device=device)

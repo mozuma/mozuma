@@ -1,4 +1,4 @@
-from typing import List, Callable, Dict, Tuple, Union
+from typing import List, Callable, Dict, Optional, Tuple, TypeVar
 import os
 
 import numpy as np
@@ -6,15 +6,18 @@ import requests
 import torch
 from torch.hub import load_state_dict_from_url
 import torch.nn as nn
+from mlmodule.box import BBoxOutput
 
 from mlmodule.contrib.arcface.transforms import ArcFaceAlignment
-from mlmodule.torch import BaseTorchMLModule
-from mlmodule.torch.data.box import BoundingBoxDataset
+from mlmodule.torch.base import MLModuleDatasetProtocol, TorchMLModuleFeatures
 from mlmodule.torch.data.images import transforms
 from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.torch.modules import Bottleneck_IR_SE, get_block
 from mlmodule.torch.utils import torch_apply_state_to_partial_model, l2_norm
+from mlmodule.types import ImageDatasetType
 
+
+_IndexType = TypeVar('_IndexType', contravariant=True)
 
 # Discovered by looking at OneDrive network activity when downloading a file manually from the Browser
 ONE_DRIVE_API_CALL = 'https://api.onedrive.com/v1.0/drives/CEC0E1F8F0542A13/items/CEC0E1F8F0542A13!835?' \
@@ -24,7 +27,7 @@ ONE_DRIVE_API_CALL = 'https://api.onedrive.com/v1.0/drives/CEC0E1F8F0542A13/item
 ARCFACE_MEAN_DISTANCE_THRESHOLD = 0.87
 
 
-class ArcFaceFeatures(BaseTorchMLModule[BoundingBoxDataset],
+class ArcFaceFeatures(TorchMLModuleFeatures[_IndexType, Tuple[ImageDatasetType, BBoxOutput]],
                       DownloadPretrainedStateFromProvider):
     """Creates face embeddings from MTCNN output"""
 
@@ -84,13 +87,18 @@ class ArcFaceFeatures(BaseTorchMLModule[BoundingBoxDataset],
         return torch_apply_state_to_partial_model(self, pretrained_state_dict)
 
     def bulk_inference(
-            self, data: BoundingBoxDataset,
-            remove_bad_quality_faces=True,
-            **opts
-    ) -> Tuple[List, Union[List, np.ndarray]]:
-        indices, features = super().bulk_inference(
-            data, **opts
+            self, data: MLModuleDatasetProtocol[_IndexType, Tuple[ImageDatasetType, BBoxOutput]],
+            **options
+    ) -> Optional[Tuple[List[_IndexType], np.ndarray]]:
+        remove_bad_quality_faces: bool = options.pop('remove_bad_quality_faces', True)
+        ret = super().bulk_inference(
+            data, **options
         )
+        if ret is None:
+            return None
+        else:
+            indices, features = ret
+
         if remove_bad_quality_faces:
             # Getting normalised faces to filter bad quality faces
             norm_faces = np.load(os.path.join(os.path.dirname(__file__), 'normalized_faces.npy'))

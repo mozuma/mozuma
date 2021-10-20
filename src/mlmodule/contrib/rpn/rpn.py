@@ -1,22 +1,21 @@
 import os
-from typing import Dict, Tuple, List, Union, TypeVar, Any
+from typing import Dict, Tuple, List, TypeVar
 
 import mmcv
 import mmcv.parallel as mmcv_parallel
 import numpy as np
 import torch
 from mmcv.runner import load_state_dict as mmcv_load_state_dict
-from PIL.Image import Image
 from torch.hub import load_state_dict_from_url
 
 from mlmodule.box import BBoxPoint, BBoxOutput, BBoxCollection
 from mlmodule.contrib.rpn.transforms import RGBToBGR
-from mlmodule.torch import BaseTorchMLModule
-from mlmodule.torch.data.base import IndexedDataset
+from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
+from mlmodule.torch.utils import tensor_to_python_list_safe
 
 
-InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Union[Image, np.ndarray]])
+InputDatasetType = TypeVar('InputDatasetType')
 
 
 class RPN(BaseTorchMLModule, DownloadPretrainedStateFromProvider):
@@ -134,7 +133,7 @@ class RPN(BaseTorchMLModule, DownloadPretrainedStateFromProvider):
         indices, output = acc_results or ([], [])
 
         # Converting to list
-        new_indices = cls.tensor_to_python_list_safe(new_indices)
+        new_indices = tensor_to_python_list_safe(new_indices)
         indices += new_indices
 
         for ind, (boxes, scores) in zip(new_indices, zip(*new_output)):

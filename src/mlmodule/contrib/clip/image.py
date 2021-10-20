@@ -7,7 +7,8 @@ __all__ = (
     'CLIPViTB32ImageEncoder',
 )
 
-from typing import Optional, List, Callable
+from typing import Optional, List, Callable, TypeVar, Union
+from typing_extensions import Literal
 
 import torch
 from PIL import Image
@@ -15,6 +16,10 @@ from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normal
 
 from mlmodule.contrib.clip.base import BaseCLIPModule
 from mlmodule.torch.data.images import convert_to_rgb
+from mlmodule.types import ImageDatasetType
+
+
+_IndexType = TypeVar('_IndexType', covariant=True)
 
 
 def get_image_transform(src_pixel_size: int):
@@ -28,9 +33,9 @@ def get_image_transform(src_pixel_size: int):
     ])
 
 
-class CLIPImageEncoder(BaseCLIPModule):
+class CLIPImageEncoder(BaseCLIPModule[_IndexType, ImageDatasetType]):
     """Image encoder of the CLIP model"""
-    model_type = "image"
+    model_type: Union[Literal['image'], Literal['text']] = "image"
 
     def __init__(self, device: Optional[torch.device] = None):
         super().__init__(device=device)

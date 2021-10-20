@@ -1,6 +1,6 @@
 import torchvision.models as m
 
-from mlmodule.torch import BaseTorchMLModule
+from mlmodule.torch.base import BaseTorchMLModule
 
 
 class BaseDenseNetPretrainedModule(BaseTorchMLModule):

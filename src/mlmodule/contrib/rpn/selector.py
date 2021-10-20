@@ -10,7 +10,6 @@ from tqdm import tqdm
 
 from mlmodule.base import BaseMLModule
 from mlmodule.box import BBoxCollection
-from mlmodule.torch.data.base import IndexedDataset
 
 
 logger = logging.getLogger(__name__)
@@ -18,7 +17,7 @@ logger = logging.getLogger(__name__)
 """ Given regions extracted from images, filters some of them out to reduce redundancy """
 
 
-InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, BBoxCollection])
+InputDatasetType = TypeVar('InputDatasetType')
 
 
 class CosineSimilarityRegionSelector(BaseMLModule):

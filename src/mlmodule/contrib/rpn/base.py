@@ -1,7 +1,5 @@
-from typing import Any, List, Optional, Tuple, TypeVar, Union
+from typing import List, Optional, Tuple, TypeVar
 
-import numpy as np
-from PIL.Image import Image
 import torch
 
 from mlmodule.box import BBoxCollection
@@ -16,8 +14,8 @@ from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.types import StateDict
 
 
-InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Union[Image, np.ndarray]])
-OutputDatasetType = TypeVar('OutputDatasetType', bound=IndexedDataset[Any, Any, BBoxCollection])
+InputDatasetType = TypeVar('InputDatasetType')
+OutputDatasetType = TypeVar('OutputDatasetType')
 
 
 class RegionFeatures(BaseTorchMLModule, DownloadPretrainedStateFromProvider):
@@ -84,7 +82,7 @@ class RegionFeatures(BaseTorchMLModule, DownloadPretrainedStateFromProvider):
 
         with self.metrics.measure('time_region_selector'):
             # Select regions based on cosine similarity
-            box_dataset_w_features = IndexedDataset[str, BBoxCollection, BBoxCollection](indices, box_collections)
+            box_dataset_w_features = IndexedDataset[str, BBoxCollection](indices, box_collections)
             image_indices, region_features = self.region_selector.bulk_inference(box_dataset_w_features)
 
         # Ordering results by indices in a dictionary

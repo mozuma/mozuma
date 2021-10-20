@@ -1,10 +1,11 @@
 import logging
+from typing import Dict, Callable, List, Union, cast
 
+import numpy as np
 import torch
-from typing import Dict, Callable
-
 from torch.utils.data.dataloader import DataLoader
 from tqdm import tqdm
+
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +65,30 @@ def generic_inference(
 
     # Returning accumulated results
     return acc_results
+
+
+def tensor_to_python_list_safe(tensor_or_list: Union[torch.Tensor, List]) -> List:
+    """Transforms a tensor into a Python list.
+
+    If the argument is a list, returns is without raising.
+
+    :param tensor_or_list:
+    :return:
+    """
+    ret: list
+    if hasattr(tensor_or_list, "tolist"):  # This is a tensor
+        ret = cast(torch.Tensor, tensor_or_list).tolist()
+    else:
+        ret = cast(list, tensor_or_list)
+    return ret
+
+
+def tensor_to_ndarray(arr: Union[torch.Tensor, np.ndarray]) -> np.ndarray:
+    """Transforms a tensor to ndarray"""
+    if hasattr(arr, 'cpu'):
+        return cast(torch.Tensor, arr).cpu().numpy()
+    else:
+        return cast(np.ndarray, arr)
 
 
 def l2_norm(x, axis=1):

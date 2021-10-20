@@ -24,7 +24,7 @@ import torch
 from torchvision import models
 
 # Import the base NN Module for AI Data platform
-from mlmodule.torch import BaseTorchMLModule
+from mlmodule.torch.base import BaseTorchMLModule
 # Utility to manipulate torch state dictionary
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 # Dataset and transforms for image processing

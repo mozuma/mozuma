@@ -4,7 +4,7 @@ import os
 import torch
 import torch.nn as nn
 
-from mlmodule.torch import BaseTorchMLModule
+from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset, TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 from mlmodule.utils import list_files_in_dir
 
