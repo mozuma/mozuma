@@ -82,7 +82,7 @@ class RegionFeatures(BaseTorchMLModule, DownloadPretrainedStateFromProvider):
 
         with self.metrics.measure('time_region_selector'):
             # Select regions based on cosine similarity
-            box_dataset_w_features = IndexedDataset[str, BBoxCollection, BBoxCollection](indices, box_collections)
+            box_dataset_w_features = IndexedDataset[str, BBoxCollection](indices, box_collections)
             image_indices, region_features = self.region_selector.bulk_inference(box_dataset_w_features)
 
         # Ordering results by indices in a dictionary

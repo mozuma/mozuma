@@ -12,6 +12,7 @@ from mlmodule.box import BBoxPoint, BBoxOutput, BBoxCollection
 from mlmodule.contrib.rpn.transforms import RGBToBGR
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
+from mlmodule.torch.utils import tensor_to_python_list_safe
 
 
 InputDatasetType = TypeVar('InputDatasetType')
@@ -132,7 +133,7 @@ class RPN(BaseTorchMLModule, DownloadPretrainedStateFromProvider):
         indices, output = acc_results or ([], [])
 
         # Converting to list
-        new_indices = cls.tensor_to_python_list_safe(new_indices)
+        new_indices = tensor_to_python_list_safe(new_indices)
         indices += new_indices
 
         for ind, (boxes, scores) in zip(new_indices, zip(*new_output)):
