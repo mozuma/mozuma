@@ -7,7 +7,8 @@ __all__ = (
     'CLIPViTB32TextEncoder'
 )
 
-from typing import Optional, List, Callable
+from typing import Optional, List, Callable, TypeVar, Union
+from typing_extensions import Literal
 
 import clip
 import torch
@@ -15,14 +16,17 @@ import torch
 from mlmodule.contrib.clip.base import BaseCLIPModule
 
 
+_IndexType = TypeVar('_IndexType', covariant=True)
+
+
 def tokenize_single(text: str) -> torch.LongTensor:
     """Takes a str and returns its tokenized version"""
     return clip.tokenize(text)[0]
 
 
-class CLIPTextEncoder(BaseCLIPModule):
+class CLIPTextEncoder(BaseCLIPModule[_IndexType, str]):
     """Text encoder of CLIP model"""
-    model_type = "text"
+    model_type: Union[Literal['image'], Literal['text']] = "text"
 
     def __init__(self, device: Optional[torch.device] = None):
         super().__init__(device=device)

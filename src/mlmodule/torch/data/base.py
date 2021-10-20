@@ -1,7 +1,7 @@
+import dataclasses
 import logging
-from typing import Generic, TypeVar, List, Tuple
-
-from torch.utils.data.dataset import Dataset
+from typing import TypeVar, List, Tuple, cast
+from mlmodule.torch.base import MLModuleDatasetProtocol
 
 from mlmodule.torch.mixins import TorchDatasetTransformsMixin
 
@@ -9,35 +9,35 @@ from mlmodule.torch.mixins import TorchDatasetTransformsMixin
 logger = logging.getLogger(__name__)
 
 
-IndicesType = TypeVar('IndicesType')
-InputItemsType = TypeVar('InputItemsType')
-OutputItemsType = TypeVar('OutputItemsType')
+_IndicesType = TypeVar('_IndicesType')
+_OutputItemsType = TypeVar('_OutputItemsType')
 
 
-class IndexedDataset(Dataset, TorchDatasetTransformsMixin, Generic[IndicesType, InputItemsType, OutputItemsType]):
+@dataclasses.dataclass
+class IndexedDataset(MLModuleDatasetProtocol[_IndicesType, _OutputItemsType], TorchDatasetTransformsMixin):
     """Torch dataset returning a tuple of indices and data point"""
+    # Indices to identify items
+    indices: List[_IndicesType]
+    # Actual data to pass to transforms
+    items: list
 
-    def __init__(self, indices: List[IndicesType], items: List[InputItemsType]):
-        """
-        :param indices: Indices to identify items
-        :param items: Actual data
-        """
-        if len(items) != len(indices):
+    transforms: list = dataclasses.field(init=False, default_factory=list)
+
+    def __post_init__(self):
+        if len(self.items) != len(self.indices):
             raise ValueError("Inconsistent length between indices and items")
-        self.indices = indices
-        self.items = items
-        self.transforms = []
 
-    def __getitem__(self, item_num: int) -> Tuple[IndicesType, OutputItemsType]:
+    def __getitem__(self, item_num: int) -> Tuple[_IndicesType, _OutputItemsType]:
         index = self.indices[item_num]
         value = self.items[item_num]
         logger.debug(f"Reading item {item_num}, index: {index}")
 
         value = self.apply_transforms(value)
         if type(value) == tuple:
-            return (index, *value)
+            ret = (index, *value)
         else:
-            return index, value
+            ret = index, value
+        return cast(Tuple[_IndicesType, _OutputItemsType], ret)
 
     def __len__(self) -> int:
         return len(self.indices)

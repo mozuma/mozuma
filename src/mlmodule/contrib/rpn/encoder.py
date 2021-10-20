@@ -1,31 +1,27 @@
-from typing import Optional, Tuple, List, TypeVar, Any, Union
+from typing import Optional, Tuple, List, TypeVar, Any
 
-import numpy as np
 import torch
 from PIL.Image import Image
 from torchvision.transforms.transforms import Compose
 
 from mlmodule.box import BBoxOutput, BBoxCollection
 from mlmodule.contrib.rpn.transforms import RegionCrop
-from mlmodule.torch.base import BaseTorchMLModule
+from mlmodule.torch.base import MLModuleDatasetProtocol, TorchMLModuleBBox, TorchMLModuleFeatures
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.data.box import ApplyFunctionToPosition
-from mlmodule.types import StateDict
+from mlmodule.torch.utils import tensor_to_python_list_safe
+from mlmodule.types import ImageDatasetType, StateDict
 
 
 """ Creates encodings for regions extracted from an image """
 
-
-InputDatasetType = TypeVar('InputDatasetType',
-                           bound=IndexedDataset[Tuple[Any, int], Any, Tuple[Image, BBoxOutput]])
-
-ImageDatasetType = TypeVar('ImageDatasetType', bound=IndexedDataset[Any, Any, Union[Image, np.ndarray]])
+_IndexType = TypeVar('_IndexType')
 
 
-class RegionEncoder(BaseTorchMLModule):
+class RegionEncoder(TorchMLModuleBBox[_IndexType, ImageDatasetType]):
     """ Applies an encoder to regions """
 
-    def __init__(self, encoder: BaseTorchMLModule, device=None):
+    def __init__(self, encoder: TorchMLModuleFeatures[Any, ImageDatasetType], device=None):
         super().__init__(device=device)
         self.encoder = encoder
 
@@ -42,7 +38,7 @@ class RegionEncoder(BaseTorchMLModule):
         }
 
     @classmethod
-    def prep_encodings(cls, image_dataset: ImageDatasetType, regions: List[BBoxCollection]) -> InputDatasetType:
+    def prep_encodings(cls, image_dataset: ImageDatasetType, regions: List[BBoxCollection]):
         assert len(image_dataset) == len(regions)
         new_idx = []
         new_data = []
@@ -52,7 +48,7 @@ class RegionEncoder(BaseTorchMLModule):
                 new_data.append((img, box))
 
         dataset = IndexedDataset[
-            Tuple[Any, int], Tuple[Image, BBoxOutput], Tuple[Image, BBoxOutput]
+            Tuple[Any, int], Tuple[Image, BBoxOutput]
         ](new_idx, new_data)
         dataset.transforms = [
             ApplyFunctionToPosition(Compose(image_dataset.transforms), pos=0)
@@ -98,11 +94,12 @@ class RegionEncoder(BaseTorchMLModule):
         return self.encoder(x)
 
     def bulk_inference(
-            self, data: InputDatasetType, data_loader_options=None, **opts
-    ) -> Optional[Tuple[List[Tuple[Any, int]], List[BBoxOutput]]]:
+            self, data: MLModuleDatasetProtocol[_IndexType, ImageDatasetType],
+            **options
+    ) -> Optional[Tuple[List[_IndexType], List[BBoxCollection]]]:
         # Don't shuffle data as it will make it more complicated to regroup the boxes for images into a collection!
         # Force shuffle off
-        data_loader_options = data_loader_options or {}
+        data_loader_options = options.get('data_loader_options', {})
         data_loader_options['shuffle'] = False
 
         # Extract boxes to give to the result handler - data.items: List[Tuple[Image, BBoxOutput]]
@@ -110,7 +107,7 @@ class RegionEncoder(BaseTorchMLModule):
         result_handler_options = {'box_outputs': data_boxes}
 
         return super().bulk_inference(
-            data, data_loader_options=data_loader_options, result_handler_options=result_handler_options, **opts
+            data, data_loader_options=data_loader_options, result_handler_options=result_handler_options, **options
         )
 
     @classmethod
@@ -136,8 +133,8 @@ class RegionEncoder(BaseTorchMLModule):
         regions_processed = len(indices)
 
         # Converting to list
-        new_image_indices = cls.tensor_to_python_list_safe(new_indices[0])
-        new_box_indices = cls.tensor_to_python_list_safe(new_indices[1])
+        new_image_indices = tensor_to_python_list_safe(new_indices[0])
+        new_box_indices = tensor_to_python_list_safe(new_indices[1])
         assert len(new_image_indices) == len(new_box_indices)
         new_indices = list(zip(new_image_indices, new_box_indices))
 

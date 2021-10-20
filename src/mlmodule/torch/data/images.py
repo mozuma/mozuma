@@ -2,13 +2,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, TypeVar, Union, IO, Tuple, Optional
 
-import numpy as np
 import requests
 from PIL import Image
 from torchvision import transforms
 
 from mlmodule.torch.data.base import IndexedDataset
-from mlmodule.torch.data.files import ReadablePathType
+from mlmodule.types import ImageDatasetType
 
 TORCHVISION_STANDARD_IMAGE_TRANSFORMS = [
     transforms.Resize(256),
@@ -53,7 +52,7 @@ def convert_to_rgb(pil_image: Image.Image) -> Image.Image:
 IndicesType = TypeVar('IndicesType')
 
 
-class BaseImageDataset(IndexedDataset[IndicesType, ReadablePathType, Union[Image.Image, np.ndarray]]):
+class BaseImageDataset(IndexedDataset[IndicesType, ImageDatasetType]):
     """Dataset returning a tuple with an index and an image"""
 
     def __init__(self, indices: List[IndicesType], image_path: List[str], to_rgb=True, shrink_img_size=None):

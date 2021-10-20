@@ -1,22 +1,20 @@
 import os
-from typing import Dict, Tuple, List, Union, TypeVar, Any
+from typing import Dict, Tuple, List, TypeVar
 
 import mmcv
 import mmcv.parallel as mmcv_parallel
 import numpy as np
 import torch
 from mmcv.runner import load_state_dict as mmcv_load_state_dict
-from PIL.Image import Image
 from torch.hub import load_state_dict_from_url
 
 from mlmodule.box import BBoxPoint, BBoxOutput, BBoxCollection
 from mlmodule.contrib.rpn.transforms import RGBToBGR
-from mlmodule.torch import BaseTorchMLModule
-from mlmodule.torch.data.base import IndexedDataset
+from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 
 
-InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Union[Image, np.ndarray]])
+InputDatasetType = TypeVar('InputDatasetType')
 
 
 class RPN(BaseTorchMLModule, DownloadPretrainedStateFromProvider):

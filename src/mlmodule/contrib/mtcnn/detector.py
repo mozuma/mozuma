@@ -1,21 +1,20 @@
 import dataclasses
-from typing import Dict, Tuple, List, Union, TypeVar, Any
+from typing import Dict, Optional, Tuple, List, TypeVar
 
 import torch
 import numpy as np
-from PIL.Image import Image
 
 from mlmodule.contrib.mtcnn.mtcnn import MLModuleMTCNN
-from mlmodule.box import BBoxOutput, BBoxPoint, BBoxCollection
-from mlmodule.torch import BaseTorchMLModule
-from mlmodule.torch.data.base import IndexedDataset
+from mlmodule.box import BBoxCollection, BBoxOutputArrayFormat
+from mlmodule.torch.base import MLModuleDatasetProtocol, TorchMLModuleBBox
 from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider, \
     ResizableImageInputMixin
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 from mlmodule.torch.data.images import transforms
+from mlmodule.types import ImageDatasetType
 
 
-InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Union[Image, np.ndarray]])
+_IndexType = TypeVar('_IndexType', contravariant=True)
 
 
 @dataclasses.dataclass
@@ -33,7 +32,10 @@ class ResizeWithAspectRatios:
         )
 
 
-class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
+class MTCNNDetector(TorchMLModuleBBox[
+                        _IndexType,
+                        ImageDatasetType
+                    ],
                     DownloadPretrainedStateFromProvider,
                     ResizableImageInputMixin):
     """Face detection module"""
@@ -59,17 +61,23 @@ class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
         }
         return torch_apply_state_to_partial_model(self, pretrained_dict)
 
-    def forward(self, x, aspect_ratios):
+    def forward(self, x, aspect_ratios) -> BBoxOutputArrayFormat:
         boxes, prob, landmarks = self.mtcnn.detect(x, landmarks=True)
         # Applying aspect ratios
         aspect_ratios = aspect_ratios.numpy()
         boxes = [b*np.hstack((a, a)) if b is not None else b for b, a in zip(boxes, aspect_ratios)]
         landmarks = [land*a if land is not None else land for land, a in zip(landmarks, aspect_ratios)]
-        return boxes, prob, landmarks
+        return BBoxOutputArrayFormat(
+            bounding_boxes=boxes,
+            probabilities=prob,
+            features=landmarks
+        )
 
     def bulk_inference(
-            self, data: InputDatasetType, data_loader_options=None, **opts
-    ) -> Tuple[List, List[BBoxCollection]]:
+            self,
+            data: MLModuleDatasetProtocol[_IndexType, ImageDatasetType],
+            **options
+    ) -> Optional[Tuple[List[_IndexType], List[BBoxCollection]]]:
         """Runs inference on all images in a ImageFilesDatasets
 
         :param data_loader_options:
@@ -77,55 +85,15 @@ class MTCNNDetector(BaseTorchMLModule[InputDatasetType],
         :return:
         """
         # Default batch size
-        data_loader_options = data_loader_options or {}
+        data_loader_options = options.pop("data_loader_options", {})
         data_loader_options.setdefault('batch_size', 256)
         return super().bulk_inference(
-            data, data_loader_options=data_loader_options,
-            **opts
+            data,
+            data_loader_options=data_loader_options,
+            **options
         )
 
     def get_dataset_transforms(self):
         return [
             ResizeWithAspectRatios(self.image_size)
         ]
-
-    @classmethod
-    def results_handler(
-            cls, acc_results: Tuple[List, List[BBoxCollection]],
-            new_indices: List,
-            new_output: Tuple[torch.Tensor, torch.Tensor, torch.Tensor],
-    ) -> Tuple[List, List[BBoxCollection]]:
-        """Runs after the forward pass at inference
-
-        :param acc_results: Holds a tuple with indices, list of FacesFeatures namedtuple
-        :param new_indices: New indices for the current batch
-        :param new_output: New inference output for the current batch
-        :return:
-        """
-
-        # Dealing for the first call where acc_results is None
-        output: List[BBoxCollection]
-        indices, output = acc_results or ([], [])
-
-        # Converting to list
-        new_indices = cls.tensor_to_python_list_safe(new_indices)
-        indices += new_indices
-
-        for ind, (boxes, probs, landmarks) in zip(new_indices, zip(*new_output)):
-            # Iterating through output for each image
-            img_bbox = []
-
-            if boxes is not None:
-                # Rescaling
-                for b, p, l in zip(boxes.tolist(), probs.tolist(), landmarks):
-                    # Iterating through each bounding box
-                    if b is not None:
-                        # We have detected a face
-                        img_bbox.append(BBoxOutput(
-                            bounding_box=(BBoxPoint(*b[:2]), BBoxPoint(*b[2:])),  # Extracting two points
-                            probability=p,
-                            features=l
-                        ))
-            output.append(img_bbox)
-
-        return indices, output

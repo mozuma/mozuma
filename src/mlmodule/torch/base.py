@@ -1,3 +1,4 @@
+import abc
 import pickle
 from typing import Any, Dict, Optional, Union, List, Tuple, Generic, TypeVar
 
@@ -7,17 +8,38 @@ import torch
 import torch.nn as nn
 from io import BytesIO
 from torch.utils.data.dataloader import DataLoader
+from typing_extensions import Protocol
 
 from mlmodule.base import BaseMLModule, LoadDumpMixin
-from mlmodule.torch.data.base import IndexedDataset
-from mlmodule.torch.utils import generic_inference, torch_apply_state_to_partial_model
+from mlmodule.box import BBoxCollection, BBoxOutputArrayFormat
+from mlmodule.torch.handlers import results_handler_bbox, results_handler_numpy_array
+from mlmodule.torch.utils import (
+    generic_inference,
+    torch_apply_state_to_partial_model
+)
 from mlmodule.types import StateDict
 
 
-InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset)
+_IndexType = TypeVar('_IndexType', covariant=True)
+_InputDataType = TypeVar('_InputDataType', covariant=True)
+_ForwardRetType = TypeVar('_ForwardRetType')
+_InferenceRetType = TypeVar('_InferenceRetType')
 
 
-class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDatasetType]):
+class MLModuleDatasetProtocol(Protocol[_IndexType, _InputDataType]):
+    """Pytorch dataset protocol with __len__"""
+
+    def __getitem__(self, index: int) -> Tuple[_IndexType, _InputDataType]: ...
+
+    def __len__(self) -> int: ...
+
+
+class AbstractTorchMLModule(
+        BaseMLModule,
+        nn.Module,
+        LoadDumpMixin,
+        Generic[_IndexType, _InputDataType, _ForwardRetType, _InferenceRetType]
+):
 
     state_dict_key: Optional[str] = None
     default_batch_size = 128
@@ -113,62 +135,44 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDat
         # Building data loader
         return DataLoader(data, **data_loader_options)
 
-    @classmethod
-    def tensor_to_python_list_safe(cls, tensor_or_list: Union[torch.Tensor, List]) -> List:
-        """Transforms a tensor into a Python list.
+    @abc.abstractmethod
+    def forward(self, *args, **kwargs) -> _ForwardRetType:
+        """Forward pass of the module"""
 
-        If the argument is a list, returns is without raising.
-
-        :param tensor_or_list:
-        :return:
-        """
-        if hasattr(tensor_or_list, "tolist"):  # This is a tensor
-            tensor_or_list = tensor_or_list.tolist()
-        return tensor_or_list
-
-    @classmethod
-    def results_handler(cls, acc_results, new_indices, new_output: torch.Tensor):
-        """
+    @abc.abstractmethod
+    def results_handler(
+            self,
+            acc_results: Tuple[List[_IndexType], _InferenceRetType],
+            new_indices: Union[torch.Tensor, List],
+            new_output: _ForwardRetType
+    ) -> Tuple[List[_IndexType], _InferenceRetType]:
+        """Runs at the end of the inference loop
 
         :param acc_results: The results accumulated
         :param new_indices: The new indices of data for the current batch
         :param new_output: The new data for the current batch
         :return: new accumulated results
         """
-        # Transforming new_output to Numpy
-        new_output = new_output.cpu().numpy()
 
-        # Collecting accumulated results or default value
-        res_indices, res_output = acc_results or (
-            [],
-            np.empty((0, new_output.shape[1]), dtype=new_output.dtype)
-        )
-
-        # Adding indices
-        res_indices += cls.tensor_to_python_list_safe(new_indices)
-
-        # Adding data
-        res_output = np.vstack((res_output, new_output))
-        return res_indices, res_output
-
-    def inference(self, *args, **kwargs):
-        return self.__call__(*args, **kwargs)
+    def inference(self, *args, **kwargs) -> _ForwardRetType:
+        return self.forward(*args, **kwargs)
 
     def bulk_inference(
-            self, data: InputDatasetType,
-            data_loader_options=None, result_handler_options=None, inference_options=None,
-            tqdm_enabled=False
-    ) -> Optional[Tuple[List, Union[List, np.ndarray]]]:    # Returns None is dataset length = 0
+            self,
+            data: MLModuleDatasetProtocol[_IndexType, _InputDataType],
+            **options
+    ) -> Optional[Tuple[List[_IndexType], _InferenceRetType]]:    # Returns None is dataset length = 0
         """Run the model against all elements in data"""
         self.metrics.add('dataset_size', len(data))
-        loader = self.get_data_loader(data, **(data_loader_options or {}))
+        loader = self.get_data_loader(data, **(options.get('data_loader_options', {})))
 
         with self.metrics.measure('time_generic_inference'):
             # Running inference batch loop
             return generic_inference(
                 self, loader, self.inference, self.results_handler, self.device,
-                result_handler_options=result_handler_options, inference_options=inference_options,
-                tqdm_enabled=tqdm_enabled
+                result_handler_options=options.get('result_handler_options'),
+                inference_options=options.get('inference_options'),
+                tqdm_enabled=options.get('tqdm_enabled', False)
             )
 
     def get_dataset_transforms(self):
@@ -177,3 +181,43 @@ class BaseTorchMLModule(BaseMLModule, nn.Module, LoadDumpMixin, Generic[InputDat
         :return: List of transforms
         """
         return []
+
+
+class TorchMLModuleFeatures(
+        AbstractTorchMLModule[
+            _IndexType,             # Type of the data index (generic)
+            _InputDataType,         # Type of the input dataset
+            torch.Tensor,           # Type of the data returned by forward
+            np.ndarray              # Type of data returned by bulk_inference
+        ]
+):
+
+    def results_handler(
+            self,
+            acc_results: Tuple[List[_IndexType], np.ndarray],
+            new_indices: Union[torch.Tensor, List],
+            new_output: torch.Tensor
+    ) -> Tuple[List[_IndexType], np.ndarray]:
+        return results_handler_numpy_array(acc_results, new_indices, new_output)
+
+
+# for compatibility reasons
+BaseTorchMLModule = TorchMLModuleFeatures
+
+
+class TorchMLModuleBBox(
+        AbstractTorchMLModule[
+            _IndexType,
+            _InputDataType,
+            BBoxOutputArrayFormat,
+            List[BBoxCollection]
+        ]
+):
+
+    def results_handler(
+            self,
+            acc_results: Tuple[List[_IndexType], List[BBoxCollection]],
+            new_indices: Union[torch.Tensor, List],
+            new_output: BBoxOutputArrayFormat
+    ) -> Tuple[List[_IndexType], List[BBoxCollection]]:
+        return results_handler_bbox(acc_results, new_indices, new_output)

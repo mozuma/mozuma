@@ -1,6 +1,6 @@
 from typing import Union
 
-from mlmodule.torch import BaseTorchMLModule
+from mlmodule.torch.base import BaseTorchMLModule
 
 
 def test_deterministic_pretrained_dict(

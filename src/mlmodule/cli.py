@@ -9,7 +9,7 @@ import torch
 from mlmodule.metrics import MetricsCollector
 from mlmodule.serializers import Serializer
 
-from mlmodule.torch import BaseTorchMLModule
+from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
 
 logger = logging.getLogger(__name__)

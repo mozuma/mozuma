@@ -1,7 +1,5 @@
-from typing import Any, List, Optional, Tuple, TypeVar, Union
+from typing import List, Optional, Tuple, TypeVar
 
-import numpy as np
-from PIL.Image import Image
 import torch
 
 from mlmodule.box import BBoxCollection
@@ -16,8 +14,8 @@ from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.types import StateDict
 
 
-InputDatasetType = TypeVar('InputDatasetType', bound=IndexedDataset[Any, Any, Union[Image, np.ndarray]])
-OutputDatasetType = TypeVar('OutputDatasetType', bound=IndexedDataset[Any, Any, BBoxCollection])
+InputDatasetType = TypeVar('InputDatasetType')
+OutputDatasetType = TypeVar('OutputDatasetType')
 
 
 class RegionFeatures(BaseTorchMLModule, DownloadPretrainedStateFromProvider):
