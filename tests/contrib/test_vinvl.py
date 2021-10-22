@@ -5,10 +5,6 @@ from mlmodule.torch.data.images import ImageDataset
 from mlmodule.utils import list_files_in_dir
 
 
-def vinvl_instance(torch_device) -> VinVLDetector[str]:
-    return VinVLDetector[str](device=torch_device, score_threshold=0.5)
-
-
 def test_vinvl_object_detection(torch_device):
     vinvl = VinVLDetector(device=torch_device, score_threshold=0.5)
 
