@@ -23,12 +23,13 @@ def test_vinvl_object_detection(torch_device):
     # Getting features
     img_paths, detections = vinvl.bulk_inference(dataset, data_loader_options={'batch_size': 10})
 
-    assert os.path.basename(img_paths[0]) == 'icrc_vehicle.jpg'
-    assert os.path.basename(img_paths[1]) == 'soldiers.jpg'
+    idx_icrc = next(i for i, path in enumerate(img_paths) if os.path.basename(path) == 'icrc_vehicle.jpg')
+    idx_sol = next(i for i, path in enumerate(img_paths) if os.path.basename(path) == 'soldiers.jpg')
+
     assert len(detections) == len(file_names)
-    assert len(detections[0]) == 10
-    assert labels[detections[0][0].labels] == 'sign'
-    assert attribute_labels[detections[0][0].attributes[0]] == 'black'
-    assert len(detections[1]) == 19
-    assert labels[detections[1][0].labels] == 'gun'
-    assert attribute_labels[detections[1][4].attributes[0]] == 'blue'
+    assert len(detections[idx_icrc]) == 10
+    assert labels[detections[idx_icrc][0].labels] == 'sign'
+    assert attribute_labels[detections[idx_icrc][0].attributes[0]] == 'black'
+    assert len(detections[idx_sol]) == 19
+    assert labels[detections[idx_sol][0].labels] == 'gun'
+    assert attribute_labels[detections[idx_sol][4].attributes[0]] == 'blue'

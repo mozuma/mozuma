@@ -71,7 +71,8 @@ class VinVLDetector(TorchMLModuleBBox[
 
     def get_default_pretrained_state_dict_from_provider(self) -> Dict[str, torch.Tensor]:
         """
-        Get pretrained model from https://penzhanwu2.blob.core.windows.net/sgg/sgg_benchmark/vinvl_model_zoo/vinvl_vg_x152c4.pth
+        Get pretrained model from
+        https://penzhanwu2.blob.core.windows.net/sgg/sgg_benchmark/vinvl_model_zoo/vinvl_vg_x152c4.pth
         """
         pretrained_dict = torch.hub.load_state_dict_from_url(STATE_DICT_URL)
         cleaned_pretrained_dict = {k.replace('module.', 'vinvl.'): v for k, v in pretrained_dict.items()}
