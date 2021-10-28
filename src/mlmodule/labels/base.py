@@ -3,6 +3,8 @@ from typing import List
 from mlmodule.labels.imagenet import IMAGENET_LABELS
 from mlmodule.labels.places import PLACES_LABELS
 from mlmodule.labels.places_io import PLACES_IO_LABELS, PLACES_IN_OUT_DOOR
+from mlmodule.labels.vinvl import VINVL_LABELS
+from mlmodule.labels.vinvl_attributes import VINVL_ATTRIBUTE_LABELS
 
 
 class LabelSet(object):
@@ -35,6 +37,16 @@ class PlacesIOLabels(LabelSet):
 class IndoorOutdoorLabels(LabelSet):
     __label_set_name__ = "in_out_door"
     label_list = PLACES_IN_OUT_DOOR
+
+
+class VinVLLabels(LabelSet):
+    __label_set_name__ = "vinvl"
+    label_list = VINVL_LABELS
+
+
+class VinVLAttributeLabels(LabelSet):
+    __label_set_name__ = "vinvl_attributes"
+    label_list = VINVL_ATTRIBUTE_LABELS
 
 
 class LabelsMixin(object):
