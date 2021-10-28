@@ -28,8 +28,8 @@ def test_vinvl_object_detection(torch_device):
 
     assert len(detections) == len(file_names)
     assert len(detections[idx_icrc]) == 10
-    assert labels[detections[idx_icrc][0].labels] == 'sign'
+    assert labels[detections[idx_icrc][0].labels[0]] == 'sign'
     assert attribute_labels[detections[idx_icrc][0].attributes[0]] == 'black'
     assert len(detections[idx_sol]) == 19
-    assert labels[detections[idx_sol][0].labels] == 'gun'
+    assert labels[detections[idx_sol][0].labels[0]] == 'gun'
     assert attribute_labels[detections[idx_sol][4].attributes[0]] == 'blue'
