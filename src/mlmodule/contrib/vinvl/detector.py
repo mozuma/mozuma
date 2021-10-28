@@ -4,6 +4,7 @@ import torch
 
 from mlmodule.contrib.vinvl.config import sg_cfg
 from mlmodule.contrib.vinvl.models.config import cfg
+from mlmodule.contrib.vinvl.models.structures.bounding_box import BoxList
 from mlmodule.contrib.vinvl.transforms import Resize, ToTensor, Normalize
 from mlmodule.contrib.vinvl.collator import BatchCollator
 
@@ -79,14 +80,14 @@ class VinVLDetector(TorchMLModuleBBox[
         return torch_apply_state_to_partial_model(self, cleaned_pretrained_dict)
 
     def forward(self, x, sizes) -> BBoxOutputArrayFormat:
-        predictions = self.vinvl(x)
+        predictions: List[BoxList] = self.vinvl(x)
         boxes, classes, scores, features = [], [], [], []
         attr_labels, attr_scores = [], []
         for i, prediction in enumerate(predictions):
             prediction = prediction.to(torch.device("cpu"))
             prediction = prediction.resize(sizes[i])
             boxes.append(prediction.bbox)
-            classes.append(prediction.get_field("labels"))
+            classes.append(prediction.get_field("labels").unsqueeze(1))
             scores.append(prediction.get_field("scores"))
             features.append(prediction.get_field("box_features"))
             attr_scores.append(prediction.get_field("attr_scores"))

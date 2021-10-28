@@ -40,7 +40,7 @@ class BBoxOutput:
     bounding_box: Tuple[BBoxPoint, BBoxPoint]   # Point pair
     probability: float  # Confidence of the bounding box
     features: Optional[np.ndarray] = None
-    labels: Optional[np.ndarray] = None
+    labels: Optional[List[int]] = None
     attributes: Optional[np.ndarray] = None
     attr_scores: Optional[np.ndarray] = None
 
@@ -107,7 +107,7 @@ class BBoxOutputArrayFormat:
         if self._iter_features:
             features = tensor_to_ndarray(cast(_TensorOrArray, next(self._iter_features)))
         if self._iter_labels:
-            labels = tensor_to_ndarray(cast(_TensorOrArray, next(self._iter_labels)))
+            labels = tensor_to_ndarray(cast(_TensorOrArray, next(self._iter_labels))).tolist()
         if self._iter_attributes:
             attributes = tensor_to_ndarray(cast(_TensorOrArray, next(self._iter_attributes)))
         if self._iter_attr_scores:
