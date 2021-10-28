@@ -44,7 +44,7 @@ attribute_labels = vinvl.get_attribute_labels()
 for i, img_path in enumerate(indices):
     print(f'Object with attributes detected for {img_path}')
     for k, det in enumerate(detections[i]):
-        label = labels[det.labels]
+        label = labels[det.labels[0]]
         attr_labels = det.attributes[det.attr_scores > 0.5]
         attr_scores = det.attr_scores[det.attr_scores > 0.5]
         attributes = postprocess_attr(attribute_labels, attr_labels, attr_scores)
