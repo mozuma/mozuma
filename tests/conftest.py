@@ -14,8 +14,7 @@ from mlmodule.contrib.densenet import DenseNet161ImageNetFeatures, DenseNet161Im
 from mlmodule.contrib.magface.features import MagFaceFeatures
 from mlmodule.contrib.mtcnn import MTCNNDetector
 from mlmodule.contrib.resnet import ResNet18ImageNetFeatures, ResNet18ImageNetClassifier
-from mlmodule.contrib.rpn import RegionFeatures
-from mlmodule.contrib.rpn.rpn import RPN
+from mlmodule.contrib.vinvl import VinVLDetector
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
 from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
@@ -70,7 +69,7 @@ def set_seeds():
     MTCNNDetector,
     ArcFaceFeatures,
     MagFaceFeatures,
-    RegionFeatures
+    VinVLDetector
 ])
 def data_platform_scanner(request: SubRequest):
     """Fixture for generic tests of Modules to be used in the data platform
@@ -87,7 +86,7 @@ def data_platform_scanner(request: SubRequest):
     DenseNet161PlacesFeatures,
     CLIPViTB32ImageEncoder,
     MTCNNDetector,
-    RegionFeatures
+    VinVLDetector
 ])
 def image_module(request: SubRequest) -> Type[BaseTorchMLModule]:
     """MLModules operating on images"""
@@ -97,9 +96,7 @@ def image_module(request: SubRequest) -> Type[BaseTorchMLModule]:
 @pytest.fixture(scope='session')
 def gpu_only_modules() -> Set[Type[BaseTorchMLModule]]:
     """MLModules operating on images"""
-    return {
-        RegionFeatures
-    }
+    return set()
 
 
 @pytest.fixture(params=[
@@ -107,8 +104,7 @@ def gpu_only_modules() -> Set[Type[BaseTorchMLModule]]:
     MTCNNDetector,
     ArcFaceFeatures,
     MagFaceFeatures,
-    RPN,
-    RegionFeatures
+    # VinVLDetector - too slow to download
 ])
 def provider_pretrained_module(request: SubRequest) -> DownloadPretrainedStateFromProvider:
     """Returns a module that implements DownloadPretrainedStateFromProvider"""

@@ -1,9 +1,7 @@
 import dataclasses
 import logging
-from typing import TypeVar, List, Tuple, cast
-from mlmodule.torch.base import MLModuleDatasetProtocol
-
-from mlmodule.torch.mixins import TorchDatasetTransformsMixin
+from torchvision.transforms import Compose
+from typing import Any, Callable, Generic, TypeVar, cast
 
 
 logger = logging.getLogger(__name__)
@@ -14,10 +12,10 @@ _OutputItemsType = TypeVar('_OutputItemsType')
 
 
 @dataclasses.dataclass
-class IndexedDataset(MLModuleDatasetProtocol[_IndicesType, _OutputItemsType], TorchDatasetTransformsMixin):
+class IndexedDataset(Generic[_IndicesType, _OutputItemsType]):
     """Torch dataset returning a tuple of indices and data point"""
     # Indices to identify items
-    indices: List[_IndicesType]
+    indices: list[_IndicesType]
     # Actual data to pass to transforms
     items: list
 
@@ -27,7 +25,23 @@ class IndexedDataset(MLModuleDatasetProtocol[_IndicesType, _OutputItemsType], To
         if len(self.items) != len(self.indices):
             raise ValueError("Inconsistent length between indices and items")
 
-    def __getitem__(self, item_num: int) -> Tuple[_IndicesType, _OutputItemsType]:
+    def add_transforms(self, transforms: list[Callable]) -> None:
+        """Adding transforms to the list
+
+        :param transforms:
+        :return:
+        """
+        self.transforms += transforms
+
+    def apply_transforms(self, x: Any) -> _OutputItemsType:
+        """Applies the list of transforms to x
+
+        :param x:
+        :return:
+        """
+        return Compose(self.transforms)(x)
+
+    def __getitem__(self, item_num: int) -> tuple[_IndicesType, _OutputItemsType]:
         index = self.indices[item_num]
         value = self.items[item_num]
         logger.debug(f"Reading item {item_num}, index: {index}")
@@ -37,7 +51,7 @@ class IndexedDataset(MLModuleDatasetProtocol[_IndicesType, _OutputItemsType], To
             ret = (index, *value)
         else:
             ret = index, value
-        return cast(Tuple[_IndicesType, _OutputItemsType], ret)
+        return cast(tuple[_IndicesType, _OutputItemsType], ret)
 
     def __len__(self) -> int:
         return len(self.indices)
