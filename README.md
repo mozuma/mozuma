@@ -3,6 +3,10 @@
 The goal of this library is to standardise the definition of models
 used in the AI Data platform.
 
+## Requirements
+
+* Python 3.9 or newer
+
 ## Installation
 
 From the git repository:

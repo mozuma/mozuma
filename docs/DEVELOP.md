@@ -10,9 +10,9 @@ Create a development environment:
 
 ```shell
 # CPU development
-tox --devenv venv -e py37
+tox --devenv venv -e py39
 # or CUDA 11.1
-tox --devenv venv -e cuda111-py37
+tox --devenv venv -e cuda111-py39
 ```
 
 The environment can be activated with:
@@ -37,9 +37,9 @@ Testing can be done using `tox`
 
 ```shell
 # CPU testing
-tox -e py37
+tox -e py39
 # or CUDA 11.1
-tox -e cuda111-py37
+tox -e cuda111-py39
 ```
 
 or with directly using `pytest` on an environment with all dependencies installed
