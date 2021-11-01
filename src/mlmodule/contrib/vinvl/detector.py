@@ -28,7 +28,7 @@ class VinVLDetector(TorchMLModuleBBox[
     ImageDatasetType
 ],
         DownloadPretrainedStateFromProvider,
-        ResizableImageInputMixin, LabelsMixin):
+        LabelsMixin):
     """Face detection module"""
 
     state_dict_key = "pretrained-models/object-detection/vinvl_vg_x152c4.pt"
