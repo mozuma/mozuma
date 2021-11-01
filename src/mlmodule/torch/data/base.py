@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import dataclasses
 import logging
 from torchvision.transforms import Compose
-from typing import Any, Callable, Generic, TypeVar, cast
+from typing import Any, Callable, Generic, Tuple, TypeVar, cast
 
 
 logger = logging.getLogger(__name__)
@@ -51,7 +53,7 @@ class IndexedDataset(Generic[_IndicesType, _OutputItemsType]):
             ret = (index, *value)
         else:
             ret = index, value
-        return cast(tuple[_IndicesType, _OutputItemsType], ret)
+        return cast(Tuple[_IndicesType, _OutputItemsType], ret)
 
     def __len__(self) -> int:
         return len(self.indices)
