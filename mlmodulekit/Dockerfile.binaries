@@ -8,7 +8,7 @@ RUN apt-get -qq update && apt-get -qq -y install curl bzip2 git build-essential 
 
 ENV PATH /opt/conda/bin:$PATH
 
-ARG PYTHON_VERSION=3.9
+ARG PYTHON_VERSION=3.7
 ARG CUDA_VERSION=11.1
 ARG TORCH_VERSION=1.9.1
 ARG TORCHVISION_VERSION=0.10.1
