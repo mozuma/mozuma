@@ -29,3 +29,10 @@ they must be used when using the LSIR PC32 machine.
 * PyTorch 1.9.1
 * TorchVision 0.10.1
 * MMCV full 1.3.14
+
+### `3`
+
+* Python 3.9
+* CUDA 11.1
+* PyTorch 1.9.1
+* TorchVision 0.10.1
