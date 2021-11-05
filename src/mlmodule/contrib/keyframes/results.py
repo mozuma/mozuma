@@ -1,7 +1,9 @@
 import dataclasses
 from typing import List, Tuple
+import numpy as np
 
 import torch
+from mlmodule.contrib.keyframes.keyframes import KeyFramesExtractor
 from mlmodule.frames import FrameOutput, FrameOutputCollection
 from mlmodule.torch.utils import tensor_to_python_list_safe
 from mlmodule.v2.torch.results import AbstractResultsProcessor
@@ -15,14 +17,27 @@ class KeyFramesSelector(AbstractResultsProcessor[
     indices: list = dataclasses.field(default_factory=list, init=False)
     frames: List[FrameOutputCollection] = dataclasses.field(default_factory=list, init=False)
 
+    @staticmethod
+    def filter_keyframes(
+        forward_output: Tuple[torch.Tensor, torch.Tensor]
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        # Gathering forward output into numpy arrays
+        frame_indices_tensor, frame_features_tensor = forward_output
+        frame_indices: np.ndarray = frame_indices_tensor.cpu().numpy()
+        frame_features: np.ndarray = frame_features_tensor.cpu().numpy()
+        extractor = KeyFramesExtractor()
+        keyframe_indices = extractor.extract_keyframes(frame_features)
+        return frame_indices[keyframe_indices], frame_features[keyframe_indices]
+
     def process(
         self, indices: list, batch, forward_output: Tuple[torch.Tensor, torch.Tensor]
     ) -> None:
+        # Proceesing indices
         self.indices += tensor_to_python_list_safe(indices)
-        # TODO: Extract key frames
-        frame_indices, frame_features = forward_output
+        # Processing keyframes
+        frame_indices, frame_features = self.filter_keyframes(forward_output)
         self.frames.append([
-            FrameOutput(frame_pos=pos, probability=1, features=features)
+            FrameOutput(frame_pos=int(pos), probability=1, features=features)
             for pos, features in zip(frame_indices, frame_features)
         ])
 

@@ -1,3 +1,4 @@
+from io import BytesIO
 from typing import BinaryIO
 import pytest
 import torch
@@ -49,5 +50,26 @@ def test_keyframes_extractor(torch_device: torch.device, video_file: BinaryIO):
         )
     ).get_runner()
 
-    ret = inference_runner.bulk_inference(dataset)
-    assert ret is not None
+    indices, video_keyframes = inference_runner.bulk_inference(dataset)
+    assert len(indices) == 1
+    assert len(video_keyframes) == 1
+    assert len(video_keyframes[0]) > 0 and len(video_keyframes[0]) < 83
+
+
+def test_keyframes_extractor_bad_file(torch_device: torch.device):
+    dataset = FPSVideoFrameExtractor([0], [BytesIO(b"bbbbbb")], 1)
+
+    resnet = ResNet18ImageNetFeatures(device=torch_device).load()
+
+    inference_runner = KeyFramesInferenceFactory(
+        model=VideoFramesEncoder(image_encoder=resnet),
+        options=TorchRunnerOptions(
+            device=torch_device
+        )
+    ).get_runner()
+
+    indices, video_keyframes = inference_runner.bulk_inference(dataset)
+
+    assert len(indices) == 1
+    assert len(video_keyframes) == 1
+    assert len(video_keyframes[0]) == 0

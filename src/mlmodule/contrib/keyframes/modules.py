@@ -24,7 +24,7 @@ class VideoFramesEncoder(TorchModel):
                 f"Unexpected len(frame_images)={len(frame_images)}, should be 1."
             )
         frames: torch.Tensor = self.image_encoder(frame_images[0])
-        return frame_indices, frames
+        return frame_indices[0], frames
 
     def get_dataset_transforms(self) -> List[Callable]:
         return [
