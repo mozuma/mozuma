@@ -125,3 +125,9 @@ def image_dataset() -> ImageDataset:
     base_path = os.path.join("tests", "fixtures", "faces")
     file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))
     return ImageDataset(file_names)
+
+
+@pytest.fixture(scope='session')
+def video_file():
+    with open(os.path.join("tests", "fixtures", "video", "test.mp4"), mode='rb') as f:
+        yield f
