@@ -11,8 +11,7 @@ from mlmodule.contrib.vinvl.collator import BatchCollator
 from mlmodule.contrib.vinvl.models import AttrRCNN
 from mlmodule.box import BBoxCollection, BBoxOutputArrayFormat
 from mlmodule.torch.base import MLModuleDatasetProtocol, TorchMLModuleBBox
-from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider, \
-    ResizableImageInputMixin
+from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 from mlmodule.types import ImageDatasetType
 from mlmodule.labels import LabelsMixin, VinVLLabels, VinVLAttributeLabels
