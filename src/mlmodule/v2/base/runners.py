@@ -1,10 +1,8 @@
 import abc
-from typing import Any, Generic, TypeVar
-from typing_extensions import Protocol
+from typing import Generic, TypeVar
 
 
 _Input = TypeVar("_Input")
-_Model = TypeVar("_Model")
 _Result = TypeVar("_Result")
 
 
@@ -18,14 +16,3 @@ class AbstractInferenceRunner(AbstractRunner, Generic[_Input, _Result]):
     @abc.abstractmethod
     def bulk_inference(self, data: _Input) -> _Result:
         """Runs inference on the given data"""
-
-
-_Runner = TypeVar("_Runner", covariant=True, bound=AbstractRunner)
-
-
-class RunnerFactory(Protocol, Generic[_Model, _Runner]):
-    model: _Model
-    options: Any
-
-    def get_runner(self) -> _Runner:
-        ...

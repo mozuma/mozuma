@@ -1,10 +1,24 @@
 import abc
+from io import BytesIO
 from typing import Callable, List
 
-from torch import nn
+import torch
 
 
-class TorchModel(nn.Module):
+class TorchModel(torch.nn.Module):
+
+    def set_state(self, state: bytes, **options) -> None:
+        map_location = options.get('device')
+        state_dict = torch.load(
+            BytesIO(state),
+            map_location=map_location
+        )
+        self.load_state_dict(state_dict)
+
+    def get_state(self, **options) -> bytes:
+        f = BytesIO()
+        torch.save(self.state_dict(), f)
+        return f.read()
 
     @abc.abstractmethod
     def get_dataset_transforms(self) -> List[Callable]:

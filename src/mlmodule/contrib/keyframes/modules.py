@@ -1,12 +1,14 @@
-from typing import Callable, List, Tuple
+from typing import Callable, List, Tuple, cast
 
 import torch
 from torchvision.transforms import Compose
 from mlmodule.contrib.keyframes.transforms import ApplyImageTransformToVideoFrames, stack_and_squeeze_video_frames
+from mlmodule.contrib.resnet.features import ResNet18ImageNetFeatures
+from mlmodule.torch.base import TorchMLModuleFeatures
 from mlmodule.v2.torch.models import TorchModel
 
 
-class VideoFramesEncoder(TorchModel):
+class GenericVideoFramesEncoder(TorchModel):
 
     def __init__(self, image_encoder: TorchModel):
         super().__init__()
@@ -37,3 +39,13 @@ class VideoFramesEncoder(TorchModel):
             ),
             stack_and_squeeze_video_frames
         ]
+
+    def set_state_from_provider(self) -> None:
+        cast(TorchMLModuleFeatures, self.image_encoder).load()
+
+
+class ResNet18VideoFrameEncoder(GenericVideoFramesEncoder):
+    mlmodule_model_uri = "keyframes/rn18-imagenet.pth"
+
+    def __init__(self):
+        super().__init__(image_encoder=ResNet18ImageNetFeatures())

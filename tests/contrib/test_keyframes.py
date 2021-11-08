@@ -3,9 +3,7 @@ from typing import BinaryIO
 import pytest
 import torch
 
-from mlmodule.contrib.resnet import ResNet18ImageNetFeatures
 from mlmodule.contrib.keyframes.factories import KeyFramesInferenceFactory
-from mlmodule.contrib.keyframes.modules import VideoFramesEncoder
 from mlmodule.contrib.keyframes.datasets import (
     compute_every_param_from_target_fps,
     FPSVideoFrameExtractor
@@ -39,12 +37,10 @@ def test_fps_video_extractor(video_file: BinaryIO):
 
 
 def test_keyframes_extractor(torch_device: torch.device, video_file: BinaryIO):
+    video_file.seek(0)
     dataset = FPSVideoFrameExtractor([0], [video_file], 1)
 
-    resnet = ResNet18ImageNetFeatures(device=torch_device).load()
-
     inference_runner = KeyFramesInferenceFactory(
-        model=VideoFramesEncoder(image_encoder=resnet),
         options=TorchRunnerOptions(
             device=torch_device
         )
@@ -53,16 +49,13 @@ def test_keyframes_extractor(torch_device: torch.device, video_file: BinaryIO):
     indices, video_keyframes = inference_runner.bulk_inference(dataset)
     assert len(indices) == 1
     assert len(video_keyframes) == 1
-    assert len(video_keyframes[0]) > 0 and len(video_keyframes[0]) < 83
+    assert len(video_keyframes[0]) > 0 and len(video_keyframes[0]) < 20
 
 
 def test_keyframes_extractor_bad_file(torch_device: torch.device):
     dataset = FPSVideoFrameExtractor([0], [BytesIO(b"bbbbbb")], 1)
 
-    resnet = ResNet18ImageNetFeatures(device=torch_device).load()
-
     inference_runner = KeyFramesInferenceFactory(
-        model=VideoFramesEncoder(image_encoder=resnet),
         options=TorchRunnerOptions(
             device=torch_device
         )

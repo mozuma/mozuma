@@ -1,19 +1,23 @@
 import dataclasses
-from typing import List
+from typing import List, Optional
 
-from mlmodule.contrib.keyframes.modules import VideoFramesEncoder
+from mlmodule.contrib.keyframes.modules import ResNet18VideoFrameEncoder
 from mlmodule.contrib.keyframes.results import KeyFramesSelector
 from mlmodule.frames import FrameOutputCollection
+from mlmodule.v2.base.models import AbstractModelStore, ProviderModelStore
 from mlmodule.v2.torch.datasets import VideoFramesDataset
-from mlmodule.v2.torch.factories import BaseInferenceRunnerFactory
+from mlmodule.v2.torch.factories import AbstractTorchInferenceRunnerFactory
 from mlmodule.v2.torch.options import TorchRunnerOptions
-from mlmodule.v2.torch.runners import TorchInferenceRunner
 
 
 @dataclasses.dataclass
-class KeyFramesInferenceFactory:
-    model: VideoFramesEncoder
+class KeyFramesInferenceFactory(
+    AbstractTorchInferenceRunnerFactory[
+        VideoFramesDataset, ResNet18VideoFrameEncoder, List[FrameOutputCollection]
+    ]
+):
     options: TorchRunnerOptions
+    model_store: Optional[AbstractModelStore] = None
 
     def __post_init__(self):
         # Raise an error if the batch size is set to something different from 1
@@ -23,9 +27,11 @@ class KeyFramesInferenceFactory:
             raise ValueError("VideoFramesEncoder doesn't support a batch_size != 1")
         self.options = dataclasses.replace(self.options, data_loader_options=data_loader_options)
 
-    def get_runner(self) -> TorchInferenceRunner[VideoFramesDataset, List[FrameOutputCollection]]:
-        return BaseInferenceRunnerFactory[VideoFramesDataset, List[FrameOutputCollection]](
-            model=self.model,
-            results_processor=KeyFramesSelector(),
-            options=self.options
-        ).get_runner()
+    def get_results_processor(self) -> KeyFramesSelector:
+        return KeyFramesSelector()
+
+    def get_model(self) -> ResNet18VideoFrameEncoder:
+        return ResNet18VideoFrameEncoder()
+
+    def get_model_store(self) -> AbstractModelStore:
+        return self.model_store or ProviderModelStore()
