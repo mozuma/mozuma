@@ -6,7 +6,8 @@ import numpy as np
 
 from mlmodule.contrib.mtcnn.mtcnn import MLModuleMTCNN
 from mlmodule.box import BBoxCollection, BBoxOutputArrayFormat
-from mlmodule.torch.base import MLModuleDatasetProtocol, TorchMLModuleBBox
+from mlmodule.torch.base import TorchMLModuleBBox
+from mlmodule.torch.data.base import MLModuleDatasetProtocol
 from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider, \
     ResizableImageInputMixin
 from mlmodule.torch.utils import torch_apply_state_to_partial_model

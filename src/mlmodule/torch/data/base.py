@@ -5,12 +5,24 @@ import logging
 from torchvision.transforms import Compose
 from typing import Any, Callable, Generic, Tuple, TypeVar, cast
 
+from typing_extensions import Protocol
 
-logger = logging.getLogger(__name__)
+
+logger = logging.getLogger()
 
 
-_IndicesType = TypeVar('_IndicesType')
-_OutputItemsType = TypeVar('_OutputItemsType')
+_IndicesType = TypeVar('_IndicesType', covariant=True)
+_OutputItemsType = TypeVar('_OutputItemsType', covariant=True)
+
+
+class MLModuleDatasetProtocol(Protocol[_IndicesType, _OutputItemsType]):
+    """Pytorch dataset protocol with __len__"""
+
+    def __getitem__(self, index: int) -> Tuple[_IndicesType, _OutputItemsType]:
+        ...
+
+    def __len__(self) -> int:
+        ...
 
 
 @dataclasses.dataclass
