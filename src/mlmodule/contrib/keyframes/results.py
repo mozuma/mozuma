@@ -25,9 +25,12 @@ class KeyFramesSelector(AbstractResultsProcessor[
         frame_indices_tensor, frame_features_tensor = forward_output
         frame_indices: np.ndarray = frame_indices_tensor.cpu().numpy()
         frame_features: np.ndarray = frame_features_tensor.cpu().numpy()
-        extractor = KeyFramesExtractor()
-        keyframe_indices = extractor.extract_keyframes(frame_features)
-        return frame_indices[keyframe_indices], frame_features[keyframe_indices]
+        if len(frame_features) > 0:
+            extractor = KeyFramesExtractor()
+            keyframe_indices = extractor.extract_keyframes(frame_features)
+            return frame_indices[keyframe_indices], frame_features[keyframe_indices]
+        else:
+            return frame_indices, frame_features
 
     def process(
         self, indices: list, batch, forward_output: Tuple[torch.Tensor, torch.Tensor]

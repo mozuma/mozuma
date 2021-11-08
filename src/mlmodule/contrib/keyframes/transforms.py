@@ -28,4 +28,4 @@ def stack_and_squeeze_video_frames(
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """Take video frames and stack them into one Tensor"""
     frame_indices, frame_tensors = video_frames
-    return torch.tensor(frame_indices), torch.stack(frame_tensors).squeeze()
+    return torch.tensor(frame_indices), torch.stack(frame_tensors).squeeze() if frame_tensors else torch.Tensor(0)
