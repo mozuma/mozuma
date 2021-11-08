@@ -11,6 +11,7 @@ from mlmodule.contrib.arcface import ArcFaceFeatures
 from mlmodule.contrib.clip import CLIPViTB32ImageEncoder
 from mlmodule.contrib.densenet import DenseNet161ImageNetFeatures, DenseNet161ImageNetClassifier, \
     DenseNet161PlacesFeatures, DenseNet161PlacesClassifier
+from mlmodule.contrib.keyframes.v1 import TorchMLModuleKeyFrames
 from mlmodule.contrib.magface.features import MagFaceFeatures
 from mlmodule.contrib.mtcnn import MTCNNDetector
 from mlmodule.contrib.resnet import ResNet18ImageNetFeatures, ResNet18ImageNetClassifier
@@ -69,7 +70,8 @@ def set_seeds():
     MTCNNDetector,
     ArcFaceFeatures,
     MagFaceFeatures,
-    VinVLDetector
+    TorchMLModuleKeyFrames,
+    VinVLDetector,
 ])
 def data_platform_scanner(request: SubRequest):
     """Fixture for generic tests of Modules to be used in the data platform
@@ -86,7 +88,7 @@ def data_platform_scanner(request: SubRequest):
     DenseNet161PlacesFeatures,
     CLIPViTB32ImageEncoder,
     MTCNNDetector,
-    VinVLDetector
+    VinVLDetector,
 ])
 def image_module(request: SubRequest) -> Type[BaseTorchMLModule]:
     """MLModules operating on images"""
@@ -104,6 +106,7 @@ def gpu_only_modules() -> Set[Type[BaseTorchMLModule]]:
     MTCNNDetector,
     ArcFaceFeatures,
     MagFaceFeatures,
+    TorchMLModuleKeyFrames,
     # VinVLDetector - too slow to download
 ])
 def provider_pretrained_module(request: SubRequest) -> DownloadPretrainedStateFromProvider:

@@ -33,7 +33,6 @@ from mlmodule.types import StateDict
 
 _IndexType = TypeVar("_IndexType", covariant=True)
 _InputDataType = TypeVar("_InputDataType", covariant=True)
-_TransformedDataType = TypeVar("_TransformedDataType", covariant=True)
 _ForwardRetType = TypeVar("_ForwardRetType")
 _InferenceRetType = TypeVar("_InferenceRetType")
 

@@ -8,6 +8,7 @@ from mlmodule.contrib.keyframes.datasets import (
     compute_every_param_from_target_fps,
     FPSVideoFrameExtractor
 )
+from mlmodule.contrib.keyframes.v1 import TorchMLModuleKeyFrames
 from mlmodule.v2.torch.options import TorchRunnerOptions
 
 
@@ -47,6 +48,18 @@ def test_keyframes_extractor(torch_device: torch.device, video_file: BinaryIO):
     ).get_runner()
 
     indices, video_keyframes = inference_runner.bulk_inference(dataset)
+    assert len(indices) == 1
+    assert len(video_keyframes) == 1
+    assert len(video_keyframes[0]) > 0 and len(video_keyframes[0]) < 20
+
+
+def test_keyframes_extractor_v1(torch_device: torch.device, video_file: BinaryIO):
+    video_file.seek(0)
+    dataset = FPSVideoFrameExtractor([0], [video_file], 1)
+
+    model = TorchMLModuleKeyFrames(device=torch_device).load()
+
+    indices, video_keyframes = model.bulk_inference(dataset)
     assert len(indices) == 1
     assert len(video_keyframes) == 1
     assert len(video_keyframes[0]) > 0 and len(video_keyframes[0]) < 20
