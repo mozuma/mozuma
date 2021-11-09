@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, OrderedDict, Tuple, TypeVar, Union
+from typing import Any, BinaryIO, Dict, List, Optional, OrderedDict, Tuple, TypeVar, Union
 
 import torch
 from torchvision.transforms import Compose
@@ -9,7 +9,7 @@ from mlmodule.frames import FrameOutputCollection
 from mlmodule.torch.base import AbstractTorchMLModule
 from mlmodule.types import StateDict
 from mlmodule.v2.base.models import ProviderModelStore
-from mlmodule.v2.torch.datasets import VideoFramesDataset
+from mlmodule.v2.torch.datasets import TorchDataset
 from mlmodule.v2.torch.factories import DataLoaderFactory
 from mlmodule.v2.torch.runners import TorchInferenceRunner
 
@@ -19,7 +19,7 @@ _IndexType = TypeVar("_IndexType", covariant=True)
 
 class TorchMLModuleKeyFrames(
     AbstractTorchMLModule[
-        _IndexType, VideoFramesDataset, torch.Tensor, List[FrameOutputCollection]
+        _IndexType, TorchDataset[Any, BinaryIO], torch.Tensor, List[FrameOutputCollection]
     ]
 ):
     def __init__(self, device: torch.device = None):
@@ -70,7 +70,7 @@ class TorchMLModuleKeyFrames(
         return self.get_default_pretrained_state_dict()
 
     def bulk_inference(
-        self, data: VideoFramesDataset, **options
+        self, data: TorchDataset[Any, BinaryIO], **options
     ) -> Optional[
         Tuple[List[_IndexType], List[FrameOutputCollection]]
     ]:  # Returns None is dataset length = 0

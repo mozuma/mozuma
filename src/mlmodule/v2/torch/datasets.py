@@ -1,9 +1,7 @@
 import dataclasses
-from typing import Callable, Generic, Tuple, TypeVar
+from typing import BinaryIO, Callable, Generic, List, Tuple, TypeVar
 
 from typing_extensions import Protocol
-
-from mlmodule.types import FrameSequenceType
 
 
 _IndicesType = TypeVar("_IndicesType", covariant=True)
@@ -21,9 +19,6 @@ class TorchDataset(Protocol[_IndicesType, _DatasetType]):
         ...
 
 
-VideoFramesDataset = TorchDataset[_IndicesType, FrameSequenceType]
-
-
 @dataclasses.dataclass
 class TorchDatasetTransformsWrapper(
     Generic[_IndicesType, _DatasetType, _NewDatasetType],
@@ -37,3 +32,25 @@ class TorchDatasetTransformsWrapper(
 
     def __len__(self) -> int:
         return self.dataset.__len__()
+
+
+@dataclasses.dataclass
+class ListDataset(Generic[_DatasetType]):
+    objects: List[_DatasetType]
+
+    def __getitem__(self, index: int) -> Tuple[int, _DatasetType]:
+        return index, self.objects[index]
+
+    def __len__(self) -> int:
+        return len(self.objects)
+
+
+@dataclasses.dataclass
+class OpenBinaryFileDataset:
+    paths: List[str]
+
+    def __getitem__(self, index: int) -> Tuple[str, BinaryIO]:
+        return self.paths[index], open(self.paths[index], mode='rb')
+
+    def __len__(self) -> int:
+        return len(self.paths)

@@ -2,6 +2,7 @@ from typing import Callable, List, Tuple, cast
 
 import torch
 from torchvision.transforms import Compose
+from mlmodule.contrib.keyframes.datasets import FPSVideoFrameExtractorTransform
 from mlmodule.contrib.keyframes.transforms import ApplyImageTransformToVideoFrames, stack_and_squeeze_video_frames
 from mlmodule.contrib.resnet.features import ResNet18ImageNetFeatures
 from mlmodule.torch.base import TorchMLModuleFeatures
@@ -34,6 +35,7 @@ class GenericVideoFramesEncoder(TorchModel):
 
     def get_dataset_transforms(self) -> List[Callable]:
         return [
+            FPSVideoFrameExtractorTransform(fps=1),
             ApplyImageTransformToVideoFrames(
                 image_transform_func=Compose(self.image_encoder.get_dataset_transforms())
             ),

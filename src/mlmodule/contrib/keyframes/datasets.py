@@ -2,7 +2,7 @@ import dataclasses
 import math
 import shutil
 import tempfile
-from typing import IO, BinaryIO, Generic, Iterator, List, Optional, Tuple, TypeVar
+from typing import IO, BinaryIO, Iterator, List, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -10,9 +10,6 @@ from PIL.Image import Image
 
 from mlmodule.types import FrameIdxType, FrameSequenceType
 from mlmodule.utils import convert_cv2_image_to_pil
-
-
-_IndexType = TypeVar("_IndexType")
 
 
 def extract_video_frames(
@@ -78,14 +75,12 @@ def compute_every_param_from_target_fps(video_fps: float, max_target_fps: int) -
 
 
 @dataclasses.dataclass
-class FPSVideoFrameExtractor(Generic[_IndexType]):
-    indices: List[_IndexType]
-    video_files: List[BinaryIO]
-    fps: int
+class FPSVideoFrameExtractorTransform:
     # Number of frames per second to return
+    fps: int
 
-    def __getitem__(self, index: int) -> Tuple[_IndexType, FrameSequenceType]:
-        with BinaryVideoCapture(self.video_files[index]) as capture:
+    def __call__(self, video_file: BinaryIO) -> FrameSequenceType:
+        with BinaryVideoCapture(video_file) as capture:
             every_n_frames = compute_every_param_from_target_fps(
                 capture.get(cv2.CAP_PROP_FPS), self.fps
             )
@@ -94,7 +89,4 @@ class FPSVideoFrameExtractor(Generic[_IndexType]):
             for frame_idx, frame_img in extract_video_frames(capture, every_n_frames=every_n_frames):
                 frame_indices.append(frame_idx)
                 frame_images.append(frame_img)
-            return self.indices[index], (frame_indices, frame_images)
-
-    def __len__(self) -> int:
-        return len(self.video_files)
+            return frame_indices, frame_images

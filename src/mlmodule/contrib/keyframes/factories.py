@@ -1,11 +1,11 @@
 import dataclasses
-from typing import List, Optional
+from typing import Any, BinaryIO, List, Optional
 
 from mlmodule.contrib.keyframes.modules import ResNet18VideoFrameEncoder
 from mlmodule.contrib.keyframes.results import KeyFramesSelector
 from mlmodule.frames import FrameOutputCollection
 from mlmodule.v2.base.models import AbstractModelStore, ProviderModelStore
-from mlmodule.v2.torch.datasets import VideoFramesDataset
+from mlmodule.v2.torch.datasets import TorchDataset
 from mlmodule.v2.torch.factories import AbstractTorchInferenceRunnerFactory
 from mlmodule.v2.torch.options import TorchRunnerOptions
 
@@ -13,7 +13,7 @@ from mlmodule.v2.torch.options import TorchRunnerOptions
 @dataclasses.dataclass
 class KeyFramesInferenceFactory(
     AbstractTorchInferenceRunnerFactory[
-        VideoFramesDataset, ResNet18VideoFrameEncoder, List[FrameOutputCollection]
+        TorchDataset[Any, BinaryIO], ResNet18VideoFrameEncoder, List[FrameOutputCollection]
     ]
 ):
     options: TorchRunnerOptions
