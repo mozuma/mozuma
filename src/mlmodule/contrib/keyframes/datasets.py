@@ -2,7 +2,7 @@ import dataclasses
 import math
 import shutil
 import tempfile
-from typing import IO, BinaryIO, Generic, Iterator, List, Tuple, TypeVar
+from typing import IO, BinaryIO, Generic, Iterator, List, Optional, Tuple, TypeVar
 
 import cv2
 import numpy as np
@@ -16,7 +16,7 @@ _IndexType = TypeVar("_IndexType")
 
 
 def extract_video_frames(
-    video_stream: cv2.VideoCapture, every_n_frames: int
+    video_stream: cv2.VideoCapture, every_n_frames: Optional[int] = None
 ) -> Iterator[Tuple[FrameIdxType, Image]]:
     """Generator of video frames extracted from a video
 
@@ -33,7 +33,7 @@ def extract_video_frames(
             # We reached the end of the video
             break
 
-        if frame_idx % every_n_frames == 0:
+        if every_n_frames is None or frame_idx % every_n_frames == 0:
             # Return the current frame
             yield frame_idx, convert_cv2_image_to_pil(frame)
 
@@ -41,7 +41,7 @@ def extract_video_frames(
 
 
 @dataclasses.dataclass
-class BinaryVideoCatpure:
+class BinaryVideoCapture:
     """Adds support for cv2.VideoCapture to read from binary data
 
     It uses a local temporary file to pass a valid path to the cv2.VideoCapture class
@@ -85,7 +85,7 @@ class FPSVideoFrameExtractor(Generic[_IndexType]):
     # Number of frames per second to return
 
     def __getitem__(self, index: int) -> Tuple[_IndexType, FrameSequenceType]:
-        with BinaryVideoCatpure(self.video_files[index]) as capture:
+        with BinaryVideoCapture(self.video_files[index]) as capture:
             every_n_frames = compute_every_param_from_target_fps(
                 capture.get(cv2.CAP_PROP_FPS), self.fps
             )
