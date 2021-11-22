@@ -24,7 +24,7 @@ class ModelWithState(Protocol):
 class ModelWithStateFromProvider(Protocol):
     """Set the model state from data provided by the model author."""
 
-    def set_state_from_provider(self) -> None:
+    def set_state_from_provider(self, **options) -> None:
         ...
 
 
@@ -76,4 +76,4 @@ class ProviderModelStore(AbstractModelStore):
 
     def load(self, model: ModelWithState, **options) -> None:
         """Reads the model weights from LSIR public assets S3"""
-        cast(ModelWithStateFromProvider, model).set_state_from_provider()
+        cast(ModelWithStateFromProvider, model).set_state_from_provider(**options)

@@ -42,7 +42,8 @@ class GenericVideoFramesEncoder(TorchModel):
             stack_and_squeeze_video_frames
         ]
 
-    def set_state_from_provider(self) -> None:
+    def set_state_from_provider(self, **options) -> None:
+        self.image_encoder.device = options.get("device")
         cast(TorchMLModuleFeatures, self.image_encoder).load()
 
 

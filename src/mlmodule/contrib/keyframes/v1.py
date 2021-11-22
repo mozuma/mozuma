@@ -25,6 +25,7 @@ class TorchMLModuleKeyFrames(
     def __init__(self, device: torch.device = None):
         super().__init__(device=device)
         self.keyframes = ResNet18VideoFrameEncoder()
+        self.keyframes.to(self.device)
 
     def load_state_dict(self, state_dict: 'OrderedDict[str, torch.Tensor]', strict: bool = True):
         self.keyframes.load_state_dict(state_dict, strict=strict)
@@ -63,7 +64,7 @@ class TorchMLModuleKeyFrames(
         aws_access_key_id: Optional[str] = None,
         aws_secret_access_key: Optional[str] = None,
     ) -> StateDict:
-        ProviderModelStore().load(self.keyframes)
+        ProviderModelStore().load(self.keyframes, device=self.device)
         return self.keyframes.state_dict()
 
     def get_default_pretrained_state_dict_from_provider(self) -> StateDict:
