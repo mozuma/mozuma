@@ -7,7 +7,8 @@ import torch.nn as nn
 
 from mlmodule.box import BBoxOutput
 from mlmodule.contrib.arcface.transforms import ArcFaceAlignment
-from mlmodule.torch.base import MLModuleDatasetProtocol, TorchMLModuleFeatures
+from mlmodule.torch.base import TorchMLModuleFeatures
+from mlmodule.torch.data.base import MLModuleDatasetProtocol
 from mlmodule.torch.data.images import transforms
 from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.torch.modules import IBasicBlock, conv1x1

@@ -1,5 +1,6 @@
 {
     "githubIssues.issueBranchTitle": "issues/${issueNumber}-${sanitizedIssueTitle}",
     "python.linting.flake8Enabled": true,
-    "python.linting.mypyEnabled": true
+    "python.linting.mypyEnabled": true,
+    "python.formatting.provider": "black"
 }

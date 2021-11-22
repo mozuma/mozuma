@@ -2,6 +2,10 @@ import os
 import requests
 from io import BytesIO
 
+import cv2
+import numpy as np
+from PIL import Image
+
 CHUNK_SIZE = 32768
 
 
@@ -14,7 +18,8 @@ def list_files_in_dir(dir_path, allowed_extensions=None):
     :return:
     """
     return [
-        os.path.join(dir_path, f) for f in os.listdir(dir_path)
+        os.path.join(dir_path, f)
+        for f in os.listdir(dir_path)
         if allowed_extensions is None or any(f.endswith(e) for e in allowed_extensions)
     ]
 
@@ -24,16 +29,16 @@ def download_file_from_google_drive(id):
 
     session = requests.Session()
 
-    response = session.get(URL, params={'id': id}, stream=True)
+    response = session.get(URL, params={"id": id}, stream=True)
     token = get_confirm_token(response)
 
     if token:
-        params = {'id': id, 'confirm': token}
+        params = {"id": id, "confirm": token}
         response = session.get(URL, params=params, stream=True)
 
     f = BytesIO()
     for chunk in response.iter_content(CHUNK_SIZE):
-        if chunk:   # filter out keep-alive new chunks
+        if chunk:  # filter out keep-alive new chunks
             f.write(chunk)
     f.seek(0)
     return f
@@ -41,7 +46,16 @@ def download_file_from_google_drive(id):
 
 def get_confirm_token(response):
     for key, value in response.cookies.items():
-        if key.startswith('download_warning'):
+        if key.startswith("download_warning"):
             return value
 
     return None
+
+
+def convert_cv2_image_to_pil(cv2_image_arr: np.ndarray) -> Image.Image:
+    """Converts image format from OpenCV2 to PIL
+
+    Makes sure the RGB channels are reordered (see https://stackoverflow.com/a/43234001)
+    """
+    img = cv2.cvtColor(cv2_image_arr, cv2.COLOR_BGR2RGB)
+    return Image.fromarray(img)

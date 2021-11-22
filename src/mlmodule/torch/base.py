@@ -1,6 +1,18 @@
 import abc
+import os
 import pickle
-from typing import Any, Dict, Optional, Union, List, Tuple, Generic, TypeVar
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Optional,
+    Union,
+    List,
+    Tuple,
+    Generic,
+    TypeVar,
+    cast,
+)
 
 import boto3
 import numpy as np
@@ -8,37 +20,28 @@ import torch
 import torch.nn as nn
 from io import BytesIO
 from torch.utils.data.dataloader import DataLoader
-from typing_extensions import Protocol
+from torch.utils.data.dataset import Dataset
+
 
 from mlmodule.base import BaseMLModule, LoadDumpMixin
 from mlmodule.box import BBoxCollection, BBoxOutputArrayFormat
+from mlmodule.torch.data.base import MLModuleDatasetProtocol
 from mlmodule.torch.handlers import results_handler_bbox, results_handler_numpy_array
-from mlmodule.torch.utils import (
-    generic_inference,
-    torch_apply_state_to_partial_model
-)
+from mlmodule.torch.utils import generic_inference, torch_apply_state_to_partial_model
 from mlmodule.types import StateDict
 
 
-_IndexType = TypeVar('_IndexType', covariant=True)
-_InputDataType = TypeVar('_InputDataType', covariant=True)
-_ForwardRetType = TypeVar('_ForwardRetType')
-_InferenceRetType = TypeVar('_InferenceRetType')
-
-
-class MLModuleDatasetProtocol(Protocol[_IndexType, _InputDataType]):
-    """Pytorch dataset protocol with __len__"""
-
-    def __getitem__(self, index: int) -> Tuple[_IndexType, _InputDataType]: ...
-
-    def __len__(self) -> int: ...
+_IndexType = TypeVar("_IndexType", covariant=True)
+_InputDataType = TypeVar("_InputDataType", covariant=True)
+_ForwardRetType = TypeVar("_ForwardRetType")
+_InferenceRetType = TypeVar("_InferenceRetType")
 
 
 class AbstractTorchMLModule(
-        BaseMLModule,
-        nn.Module,
-        LoadDumpMixin,
-        Generic[_IndexType, _InputDataType, _ForwardRetType, _InferenceRetType]
+    BaseMLModule,
+    nn.Module,
+    LoadDumpMixin,
+    Generic[_IndexType, _InputDataType, _ForwardRetType, _InferenceRetType],
 ):
 
     state_dict_key: Optional[str] = None
@@ -48,14 +51,23 @@ class AbstractTorchMLModule(
         super().__init__()
         self.device = device or self._resolve_device()
 
-    def _torch_load(self, f, map_location=None, pickle_module=pickle, **pickle_load_args) -> Any:
+    def _torch_load(
+        self, f, map_location=None, pickle_module=pickle, **pickle_load_args
+    ) -> Any:
         """Safe method to load the state dict directly on the right device"""
         map_location = map_location or self.device
-        return torch.load(f, map_location=map_location, pickle_module=pickle_module, **pickle_load_args)
+        return torch.load(
+            f,
+            map_location=map_location,
+            pickle_module=pickle_module,
+            **pickle_load_args
+        )
 
     @classmethod
     def _resolve_device(cls):
-        return torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        return (
+            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        )
 
     def load(self, fp=None, pretrained_getter_opts: Dict[str, Any] = None):
         """Loads model from file or from a default pretrained model if `fp=None`
@@ -64,14 +76,16 @@ class AbstractTorchMLModule(
         :param fp:
         :return:
         """
-        with self.metrics.measure('time_load_weigths'):
+        with self.metrics.measure("time_load_weigths"):
             # Getting state dict
             if fp:
                 fp.seek(0)
                 state = self._torch_load(fp)
             else:
                 # Getting default pretrained state dict
-                state = self.get_default_pretrained_state_dict(**(pretrained_getter_opts or {}))
+                state = self.get_default_pretrained_state_dict(
+                    **(pretrained_getter_opts or {})
+                )
 
             # Loading state
             self.load_state_dict(state)
@@ -80,13 +94,13 @@ class AbstractTorchMLModule(
         return self
 
     def dump(self, fp):
-        with self.metrics.measure('time_dump_weights'):
+        with self.metrics.measure("time_dump_weights"):
             torch.save(self.state_dict(), fp)
 
     def get_default_pretrained_state_dict(
-            self,
-            aws_access_key_id: Optional[str] = None,
-            aws_secret_access_key: Optional[str] = None
+        self,
+        aws_access_key_id: Optional[str] = None,
+        aws_secret_access_key: Optional[str] = None,
     ) -> StateDict:
         """
         Returns the state dict to apply to the current module to get a pretrained model.
@@ -98,14 +112,14 @@ class AbstractTorchMLModule(
         :return:
         """
         s3 = boto3.resource(
-            's3',
+            "s3",
             endpoint_url="https://sos-ch-gva-2.exo.io",
             # Optionally using the provided credentials
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key
+            aws_access_key_id=aws_access_key_id or os.environ.get("MLMODULE_AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=aws_secret_access_key or os.environ.get("MLMODULE_AWS_SECRET_ACCESS_KEY"),
         )
         # Select lsir-public-assets bucket
-        b = s3.Bucket('lsir-public-assets')
+        b = s3.Bucket("lsir-public-assets")
 
         # Download state dict into BytesIO file
         f = BytesIO()
@@ -113,10 +127,16 @@ class AbstractTorchMLModule(
 
         # Load the state dict
         f.seek(0)
-        pretrained_state_dict = self._torch_load(f, map_location=lambda storage, loc: storage)
+        pretrained_state_dict = self._torch_load(
+            f, map_location=lambda storage, loc: storage
+        )
         return torch_apply_state_to_partial_model(self, pretrained_state_dict)
 
-    def get_data_loader(self, data, **data_loader_options):
+    def get_data_loader(
+        self,
+        data: MLModuleDatasetProtocol[_IndexType, _InputDataType],
+        **data_loader_options
+    ) -> DataLoader:
         """Configured data loader with applied transforms
 
         :param data:
@@ -128,23 +148,20 @@ class AbstractTorchMLModule(
         # Data loader default options
         data_loader_options.setdefault("shuffle", False)
         data_loader_options.setdefault("drop_last", False)
-        data_loader_options["batch_size"] = data_loader_options.get("batch_size") or self.default_batch_size
+        data_loader_options["batch_size"] = (
+            data_loader_options.get("batch_size") or self.default_batch_size
+        )
         # We send to pin memory only if using CUDA device
-        data_loader_options.setdefault(
-            "pin_memory", self.device != torch.device('cpu'))
+        data_loader_options.setdefault("pin_memory", self.device != torch.device("cpu"))
         # Building data loader
-        return DataLoader(data, **data_loader_options)
-
-    @abc.abstractmethod
-    def forward(self, *args, **kwargs) -> _ForwardRetType:
-        """Forward pass of the module"""
+        return DataLoader(cast(Dataset, data), **data_loader_options)
 
     @abc.abstractmethod
     def results_handler(
-            self,
-            acc_results: Tuple[List[_IndexType], _InferenceRetType],
-            new_indices: Union[torch.Tensor, List],
-            new_output: _ForwardRetType
+        self,
+        acc_results: Tuple[List[_IndexType], _InferenceRetType],
+        new_indices: Union[torch.Tensor, List],
+        new_output: _ForwardRetType,
     ) -> Tuple[List[_IndexType], _InferenceRetType]:
         """Runs at the end of the inference loop
 
@@ -158,24 +175,28 @@ class AbstractTorchMLModule(
         return self.forward(*args, **kwargs)
 
     def bulk_inference(
-            self,
-            data: MLModuleDatasetProtocol[_IndexType, _InputDataType],
-            **options
-    ) -> Optional[Tuple[List[_IndexType], _InferenceRetType]]:    # Returns None is dataset length = 0
+        self, data: MLModuleDatasetProtocol[_IndexType, _InputDataType], **options
+    ) -> Optional[
+        Tuple[List[_IndexType], _InferenceRetType]
+    ]:  # Returns None is dataset length = 0
         """Run the model against all elements in data"""
-        self.metrics.add('dataset_size', len(data))
-        loader = self.get_data_loader(data, **(options.get('data_loader_options', {})))
+        self.metrics.add("dataset_size", len(data))
+        loader = self.get_data_loader(data, **(options.get("data_loader_options", {})))
 
-        with self.metrics.measure('time_generic_inference'):
+        with self.metrics.measure("time_generic_inference"):
             # Running inference batch loop
             return generic_inference(
-                self, loader, self.inference, self.results_handler, self.device,
-                result_handler_options=options.get('result_handler_options'),
-                inference_options=options.get('inference_options'),
-                tqdm_enabled=options.get('tqdm_enabled', False)
+                self,
+                loader,
+                self.inference,
+                self.results_handler,
+                self.device,
+                result_handler_options=options.get("result_handler_options"),
+                inference_options=options.get("inference_options"),
+                tqdm_enabled=options.get("tqdm_enabled", False),
             )
 
-    def get_dataset_transforms(self):
+    def get_dataset_transforms(self) -> List[Callable]:
         """Returns callable that transform the input data before the forward pass
 
         :return: List of transforms
@@ -184,19 +205,18 @@ class AbstractTorchMLModule(
 
 
 class TorchMLModuleFeatures(
-        AbstractTorchMLModule[
-            _IndexType,             # Type of the data index (generic)
-            _InputDataType,         # Type of the input dataset
-            torch.Tensor,           # Type of the data returned by forward
-            np.ndarray              # Type of data returned by bulk_inference
-        ]
+    AbstractTorchMLModule[
+        _IndexType,  # Type of the data index (generic)
+        _InputDataType,  # Type of the input dataset
+        torch.Tensor,  # Type of the data returned by forward
+        np.ndarray,  # Type of data returned by bulk_inference
+    ]
 ):
-
     def results_handler(
-            self,
-            acc_results: Tuple[List[_IndexType], np.ndarray],
-            new_indices: Union[torch.Tensor, List],
-            new_output: torch.Tensor
+        self,
+        acc_results: Tuple[List[_IndexType], np.ndarray],
+        new_indices: Union[torch.Tensor, List],
+        new_output: torch.Tensor,
     ) -> Tuple[List[_IndexType], np.ndarray]:
         return results_handler_numpy_array(acc_results, new_indices, new_output)
 
@@ -206,18 +226,14 @@ BaseTorchMLModule = TorchMLModuleFeatures
 
 
 class TorchMLModuleBBox(
-        AbstractTorchMLModule[
-            _IndexType,
-            _InputDataType,
-            BBoxOutputArrayFormat,
-            List[BBoxCollection]
-        ]
+    AbstractTorchMLModule[
+        _IndexType, _InputDataType, BBoxOutputArrayFormat, List[BBoxCollection]
+    ]
 ):
-
     def results_handler(
-            self,
-            acc_results: Tuple[List[_IndexType], List[BBoxCollection]],
-            new_indices: Union[torch.Tensor, List],
-            new_output: BBoxOutputArrayFormat
+        self,
+        acc_results: Tuple[List[_IndexType], List[BBoxCollection]],
+        new_indices: Union[torch.Tensor, List],
+        new_output: BBoxOutputArrayFormat,
     ) -> Tuple[List[_IndexType], List[BBoxCollection]]:
         return results_handler_bbox(acc_results, new_indices, new_output)
