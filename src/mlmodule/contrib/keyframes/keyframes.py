@@ -56,6 +56,9 @@ class KeyFramesExtractor:
         if max_pairwise_features_distance < self.min_features_distance:
             # We consider there is one cluster and return the mean frame
             return np.mean(features, axis=0)[np.newaxis, :]
+        elif len(features) == 2:
+            # Not enough frames to run KMeans, we keep all frames since they are different
+            return features
 
         # Otherwise, we look from the number of clusters
         num_clusters = self.find_number_of_frame_clusters(features)
@@ -66,6 +69,10 @@ class KeyFramesExtractor:
 
     def extract_keyframes(self, features: np.ndarray) -> List[int]:
         """From frames features returns the list of indices of the keyframes"""
+        if len(features) == 1:
+            # Only on feature -> return one frame
+            return [0]
+
         centroids = self.extract_centroid_features(features)
 
         # Finding the unique closest frame for each centroid
