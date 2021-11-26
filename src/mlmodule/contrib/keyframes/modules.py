@@ -27,7 +27,9 @@ class GenericVideoFramesEncoder(TorchModel):
                 f"Unexpected len(frame_images)={len(frame_images)}, should be 1."
             )
         frames: torch.Tensor
-        if len(frame_images[0]) > 0:
+        if len(frame_images.shape) == 4:
+            frames = self.image_encoder(frame_images)
+        elif len(frame_images[0]) > 0:
             frames = self.image_encoder(frame_images[0])
         else:
             frames = torch.Tensor(0)

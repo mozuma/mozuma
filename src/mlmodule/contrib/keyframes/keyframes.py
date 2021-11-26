@@ -66,6 +66,10 @@ class KeyFramesExtractor:
 
     def extract_keyframes(self, features: np.ndarray) -> List[int]:
         """From frames features returns the list of indices of the keyframes"""
+        if len(features) == 1:
+            # Only on feature -> return one frame
+            return [0]
+
         centroids = self.extract_centroid_features(features)
 
         # Finding the unique closest frame for each centroid
