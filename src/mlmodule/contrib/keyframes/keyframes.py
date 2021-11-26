@@ -56,6 +56,9 @@ class KeyFramesExtractor:
         if max_pairwise_features_distance < self.min_features_distance:
             # We consider there is one cluster and return the mean frame
             return np.mean(features, axis=0)[np.newaxis, :]
+        elif len(features) == 2:
+            # Not enough frames to run KMeans, we keep all frames since they are different
+            return features
 
         # Otherwise, we look from the number of clusters
         num_clusters = self.find_number_of_frame_clusters(features)

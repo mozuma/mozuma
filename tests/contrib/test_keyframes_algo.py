@@ -76,9 +76,18 @@ def test_extract_centroid_features(centers: list, min_distance: int):
         (
             [
                 (5, 5),
+                (5, -5),
             ],
-            3,
+            1,
             2,
+        ),
+        (
+            [
+                (5, 5),
+                (5, -5),
+            ],
+            1,
+            3,
         ),
     ],
     ids=[
@@ -86,6 +95,7 @@ def test_extract_centroid_features(centers: list, min_distance: int):
         "single-cluster",
         "one-sample",
         "two-samples",
+        "three-samples",
     ],
 )
 def test_extract_keyframes(centers: list, min_distance: int, n_samples: int):
