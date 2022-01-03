@@ -7,9 +7,8 @@ import torch
 
 from mlmodule.torch.utils import tensor_to_python_list_safe
 
-
-_ForwardOutput = TypeVar('_ForwardOutput')
-_Results = TypeVar('_Results')
+_ForwardOutput = TypeVar("_ForwardOutput")
+_Results = TypeVar("_Results")
 
 
 class AbstractResultsProcessor(abc.ABC, Generic[_ForwardOutput, _Results]):

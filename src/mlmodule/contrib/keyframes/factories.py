@@ -13,7 +13,9 @@ from mlmodule.v2.torch.options import TorchRunnerOptions
 @dataclasses.dataclass
 class KeyFramesInferenceFactory(
     AbstractTorchInferenceRunnerFactory[
-        TorchDataset[Any, BinaryIO], ResNet18VideoFrameEncoder, List[FrameOutputCollection]
+        TorchDataset[Any, BinaryIO],
+        ResNet18VideoFrameEncoder,
+        List[FrameOutputCollection],
     ]
 ):
     options: TorchRunnerOptions
@@ -22,10 +24,12 @@ class KeyFramesInferenceFactory(
     def __post_init__(self):
         # Raise an error if the batch size is set to something different from 1
         data_loader_options = self.options.data_loader_options.copy()
-        data_loader_options.setdefault('batch_size', 1)
-        if data_loader_options['batch_size'] != 1:
+        data_loader_options.setdefault("batch_size", 1)
+        if data_loader_options["batch_size"] != 1:
             raise ValueError("VideoFramesEncoder doesn't support a batch_size != 1")
-        self.options = dataclasses.replace(self.options, data_loader_options=data_loader_options)
+        self.options = dataclasses.replace(
+            self.options, data_loader_options=data_loader_options
+        )
 
     def get_results_processor(self) -> KeyFramesSelector:
         return KeyFramesSelector()

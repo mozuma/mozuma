@@ -1,5 +1,5 @@
-from typing import List, Callable, Dict, Optional, Tuple, TypeVar
 from collections import OrderedDict
+from typing import Callable, Dict, List, Optional, Tuple, TypeVar
 
 import numpy as np
 import torch
@@ -16,18 +16,20 @@ from mlmodule.torch.utils import torch_apply_state_to_partial_model
 from mlmodule.types import ImageDatasetType
 from mlmodule.utils import download_file_from_google_drive
 
-_IndexType = TypeVar('_IndexType', contravariant=True)
+_IndexType = TypeVar("_IndexType", contravariant=True)
 
 # See https://arxiv.org/pdf/2103.06627.pdf (Figure 5)
 MAGFACE_MAGNITUDE_THRESHOLD = 22.5
-GOOGLE_DRIVE_FILE_ID = '1Bd87admxOZvbIOAyTkGEntsEz3fyMt7H'
+GOOGLE_DRIVE_FILE_ID = "1Bd87admxOZvbIOAyTkGEntsEz3fyMt7H"
 
 
-class MagFaceFeatures(TorchMLModuleFeatures[_IndexType, Tuple[ImageDatasetType, BBoxOutput]],
-                      DownloadPretrainedStateFromProvider):
+class MagFaceFeatures(
+    TorchMLModuleFeatures[_IndexType, Tuple[ImageDatasetType, BBoxOutput]],
+    DownloadPretrainedStateFromProvider,
+):
     """Creates face embeddings from MTCNN output"""
 
-    state_dict_key = 'pretrained-models/face-detection/magface_epoch_00025.pth'
+    state_dict_key = "pretrained-models/face-detection/magface_epoch_00025.pth"
     fc_scale = 7 * 7
 
     def __init__(self, device: torch.device = None, zero_init_residual: bool = False):
@@ -37,29 +39,25 @@ class MagFaceFeatures(TorchMLModuleFeatures[_IndexType, Tuple[ImageDatasetType, 
         self.dilation = 1
         self.groups = 1
         self.base_width = 64
-        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=3, stride=1, padding=1,
-                               bias=False)
+        self.conv1 = nn.Conv2d(
+            3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
+        )
         self.bn1 = nn.BatchNorm2d(self.inplanes, eps=2e-05, momentum=0.9)
         self.prelu = nn.PReLU(self.inplanes)
         self.layer1 = self._make_layer(IBasicBlock, 64, 3, stride=2)
-        self.layer2 = self._make_layer(IBasicBlock, 128, 13, stride=2,
-                                       dilate=False)
-        self.layer3 = self._make_layer(IBasicBlock, 256, 30, stride=2,
-                                       dilate=False)
-        self.layer4 = self._make_layer(IBasicBlock, 512, 3, stride=2,
-                                       dilate=False)
+        self.layer2 = self._make_layer(IBasicBlock, 128, 13, stride=2, dilate=False)
+        self.layer3 = self._make_layer(IBasicBlock, 256, 30, stride=2, dilate=False)
+        self.layer4 = self._make_layer(IBasicBlock, 512, 3, stride=2, dilate=False)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
-        self.bn2 = nn.BatchNorm2d(
-            512 * IBasicBlock.expansion, eps=2e-05, momentum=0.9)
+        self.bn2 = nn.BatchNorm2d(512 * IBasicBlock.expansion, eps=2e-05, momentum=0.9)
         self.dropout = nn.Dropout2d(p=0.4, inplace=True)
         self.fc = nn.Linear(512 * IBasicBlock.expansion * self.fc_scale, 512)
         self.features = nn.BatchNorm1d(512, eps=2e-05, momentum=0.9)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(
-                    m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
             elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
@@ -78,17 +76,32 @@ class MagFaceFeatures(TorchMLModuleFeatures[_IndexType, Tuple[ImageDatasetType, 
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 conv1x1(self.inplanes, planes * block.expansion, stride),
-                nn.BatchNorm2d(planes * block.expansion,
-                               eps=2e-05, momentum=0.9),
+                nn.BatchNorm2d(planes * block.expansion, eps=2e-05, momentum=0.9),
             )
 
         layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample, self.groups,
-                            self.base_width, previous_dilation))
+        layers.append(
+            block(
+                self.inplanes,
+                planes,
+                stride,
+                downsample,
+                self.groups,
+                self.base_width,
+                previous_dilation,
+            )
+        )
         self.inplanes = planes * block.expansion
         for _ in range(1, blocks):
-            layers.append(block(self.inplanes, planes, groups=self.groups,
-                                base_width=self.base_width, dilation=self.dilation))
+            layers.append(
+                block(
+                    self.inplanes,
+                    planes,
+                    groups=self.groups,
+                    base_width=self.base_width,
+                    dilation=self.dilation,
+                )
+            )
 
         return nn.Sequential(*layers)
 
@@ -110,33 +123,34 @@ class MagFaceFeatures(TorchMLModuleFeatures[_IndexType, Tuple[ImageDatasetType, 
 
         return x
 
-    def get_default_pretrained_state_dict_from_provider(self) -> Dict[str, torch.Tensor]:
+    def get_default_pretrained_state_dict_from_provider(
+        self,
+    ) -> Dict[str, torch.Tensor]:
         """Gets the pretrained state dir from GoogleDrive
         URL: https://github.com/IrvingMeng/MagFace#model-zoo
         Model: iResNet100
         """
         # Downloading state dict from Google Drive
         pretrained_state_dict = torch.load(
-            download_file_from_google_drive(GOOGLE_DRIVE_FILE_ID), map_location=self.device
+            download_file_from_google_drive(GOOGLE_DRIVE_FILE_ID),
+            map_location=self.device,
         )
         cleaned_state_dict = OrderedDict()
-        for k, v in pretrained_state_dict['state_dict'].items():
-            if k[0:16] == 'features.module.':
-                new_k = '.'.join(k.split('.')[2:])
+        for k, v in pretrained_state_dict["state_dict"].items():
+            if k[0:16] == "features.module.":
+                new_k = ".".join(k.split(".")[2:])
                 cleaned_state_dict[new_k] = v
 
         # Removing deleted layers from state dict and updating the other with pretrained data
         return torch_apply_state_to_partial_model(self, cleaned_state_dict)
 
     def bulk_inference(
-            self,
-            data: MLModuleDatasetProtocol[_IndexType, Tuple[ImageDatasetType, BBoxOutput]],
-            **options
+        self,
+        data: MLModuleDatasetProtocol[_IndexType, Tuple[ImageDatasetType, BBoxOutput]],
+        **options
     ) -> Optional[Tuple[List[_IndexType], np.ndarray]]:
-        remove_bad_quality_faces: bool = options.pop('remove_bad_quality_faces', True)
-        ret = super().bulk_inference(
-            data, **options
-        )
+        remove_bad_quality_faces: bool = options.pop("remove_bad_quality_faces", True)
+        ret = super().bulk_inference(data, **options)
         if ret is None:
             return None
         else:
@@ -153,5 +167,5 @@ class MagFaceFeatures(TorchMLModuleFeatures[_IndexType, Tuple[ImageDatasetType, 
         return [
             ArcFaceAlignment(),
             transforms.ToTensor(),
-            transforms.Normalize([0.0, 0.0, 0.0], [1.0, 1.0, 1.0])
+            transforms.Normalize([0.0, 0.0, 0.0], [1.0, 1.0, 1.0]),
         ]

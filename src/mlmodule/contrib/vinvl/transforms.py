@@ -1,6 +1,7 @@
-from typing import Tuple
 import dataclasses
 import random
+from typing import Tuple
+
 from torchvision.transforms import functional as F
 
 
@@ -26,8 +27,7 @@ class Resize:
             min_original_size = float(min((w, h)))
             max_original_size = float(max((w, h)))
             if max_original_size / min_original_size * size > max_size:
-                size = int(
-                    round(max_size * min_original_size / max_original_size))
+                size = int(round(max_size * min_original_size / max_original_size))
 
         if (w <= h and w == size) or (h <= w and h == size):
             return (h, w)

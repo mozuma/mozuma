@@ -1,5 +1,17 @@
-from mlmodule.labels.base import LabelsMixin, ImageNetLabels, PlacesLabels, PlacesIOLabels
-from mlmodule.labels.base import VinVLLabels, VinVLAttributeLabels
+from mlmodule.labels.base import (
+    ImageNetLabels,
+    LabelsMixin,
+    PlacesIOLabels,
+    PlacesLabels,
+    VinVLAttributeLabels,
+    VinVLLabels,
+)
 
-
-__all__ = ['LabelsMixin', 'ImageNetLabels', 'PlacesIOLabels', 'PlacesLabels', 'VinVLLabels', 'VinVLAttributeLabels']
+__all__ = [
+    "LabelsMixin",
+    "ImageNetLabels",
+    "PlacesIOLabels",
+    "PlacesLabels",
+    "VinVLLabels",
+    "VinVLAttributeLabels",
+]

@@ -1,8 +1,11 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import torch
-from mlmodule.contrib.vinvl.models.box_head.roi_box_feature_extractors import ResNet50Conv5ROIFeatureExtractor
-from mlmodule.contrib.vinvl.models.box_head.roi_box_predictors import FastRCNNPredictor
+
 from mlmodule.contrib.vinvl.models.box_head.inference import make_roi_box_post_processor
+from mlmodule.contrib.vinvl.models.box_head.roi_box_feature_extractors import (
+    ResNet50Conv5ROIFeatureExtractor,
+)
+from mlmodule.contrib.vinvl.models.box_head.roi_box_predictors import FastRCNNPredictor
 
 
 class ROIBoxHead(torch.nn.Module):
@@ -12,10 +15,8 @@ class ROIBoxHead(torch.nn.Module):
 
     def __init__(self, cfg, in_channels):
         super(ROIBoxHead, self).__init__()
-        self.feature_extractor = ResNet50Conv5ROIFeatureExtractor(
-            cfg, in_channels)
-        self.predictor = FastRCNNPredictor(
-            cfg, self.feature_extractor.out_channels)
+        self.feature_extractor = ResNet50Conv5ROIFeatureExtractor(cfg, in_channels)
+        self.predictor = FastRCNNPredictor(cfg, self.feature_extractor.out_channels)
         self.post_processor = make_roi_box_post_processor(cfg)
         self.loss_evaluator = None
 
@@ -39,8 +40,7 @@ class ROIBoxHead(torch.nn.Module):
         # final classifier that converts the features into predictions
         class_logits, box_regression = self.predictor(x)
 
-        result = self.post_processor((class_logits, box_regression),
-                                     proposals, x)
+        result = self.post_processor((class_logits, box_regression), proposals, x)
         return x, result, {}
 
 
@@ -55,7 +55,10 @@ class CombinedROIHeads(torch.nn.ModuleDict):
         self.cfg = cfg.clone()
         if cfg.MODEL.MASK_ON and cfg.MODEL.ROI_MASK_HEAD.SHARE_BOX_FEATURE_EXTRACTOR:
             self.mask.feature_extractor = self.box.feature_extractor
-        if cfg.MODEL.KEYPOINT_ON and cfg.MODEL.ROI_KEYPOINT_HEAD.SHARE_BOX_FEATURE_EXTRACTOR:
+        if (
+            cfg.MODEL.KEYPOINT_ON
+            and cfg.MODEL.ROI_KEYPOINT_HEAD.SHARE_BOX_FEATURE_EXTRACTOR
+        ):
             self.keypoint.feature_extractor = self.box.feature_extractor
 
     def forward(self, features, proposals, targets=None):
@@ -74,8 +77,7 @@ class CombinedROIHeads(torch.nn.ModuleDict):
                 mask_features = x
             # During training, self.box() will return the unaltered proposals as "detections"
             # this makes the API consistent during training and testing
-            x, detections, loss_mask = self.mask(
-                mask_features, detections, targets)
+            x, detections, loss_mask = self.mask(mask_features, detections, targets)
             losses.update(loss_mask)
 
         if self.cfg.MODEL.KEYPOINT_ON:
@@ -90,6 +92,7 @@ class CombinedROIHeads(torch.nn.ModuleDict):
             # During training, self.box() will return the unaltered proposals as "detections"
             # this makes the API consistent during training and testing
             x, detections, loss_keypoint = self.keypoint(
-                keypoint_features, detections, targets)
+                keypoint_features, detections, targets
+            )
             losses.update(loss_keypoint)
         return x, detections, losses

@@ -1,11 +1,10 @@
-from typing import Dict, List, Callable, Any, Tuple
+from typing import Any, Callable, Dict, List, Tuple
 
 import torch
 from torchvision.transforms import Compose
 
 
 class ResizableImageInputMixin:
-
     def shrink_input_image_size(self) -> Tuple[int, int]:
         raise NotImplementedError()
 
@@ -32,7 +31,8 @@ class TorchDatasetTransformsMixin:
 
 
 class DownloadPretrainedStateFromProvider:
-
-    def get_default_pretrained_state_dict_from_provider(self) -> Dict[str, torch.Tensor]:
+    def get_default_pretrained_state_dict_from_provider(
+        self,
+    ) -> Dict[str, torch.Tensor]:
         """Allows to download pretrained state dir from model provider directly (used in the cli download)"""
         raise NotImplementedError()

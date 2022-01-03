@@ -26,17 +26,19 @@ class DataLoaderFactory:
 
     def __call__(self, dataset) -> DataLoader:
         return DataLoader(
-            cast(Dataset, TorchDatasetTransformsWrapper(
-                dataset=dataset,
-                transform_func=self.transform_func
-            )),
+            cast(
+                Dataset,
+                TorchDatasetTransformsWrapper(
+                    dataset=dataset, transform_func=self.transform_func
+                ),
+            ),
             **self.data_loader_options
         )
 
 
 class AbstractTorchInferenceRunnerFactory(
     AbstractRunnerFactory[_Model, TorchInferenceRunner[_Input, _Result]],
-    Generic[_Input, _Model, _Result]
+    Generic[_Input, _Model, _Result],
 ):
     options: TorchRunnerOptions
 
@@ -48,7 +50,7 @@ class AbstractTorchInferenceRunnerFactory(
         """"""
         return DataLoaderFactory(
             transform_func=Compose(model.get_dataset_transforms()),
-            data_loader_options=self.options.data_loader_options
+            data_loader_options=self.options.data_loader_options,
         )
 
     def get_runner(self) -> TorchInferenceRunner[_Input, _Result]:
@@ -62,5 +64,5 @@ class AbstractTorchInferenceRunnerFactory(
             data_loader_factory=self.get_data_loader_factory(model),
             results_processor=self.get_results_processor(),
             device=self.options.device,
-            tqdm_enabled=self.options.tqdm_enabled
+            tqdm_enabled=self.options.tqdm_enabled,
         )

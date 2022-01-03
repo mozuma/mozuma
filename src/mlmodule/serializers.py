@@ -6,7 +6,6 @@ import numpy as np
 from mlmodule.box import BBoxCollection, BBoxOutput
 from mlmodule.frames import FrameOutput, FrameOutputCollection
 
-
 _BBoxModelOutput = List[BBoxCollection]
 _FramesModelOutput = List[FrameOutputCollection]
 _FeaturesModelOutput = np.ndarray
@@ -42,9 +41,13 @@ class Serializer:
         ):
             if isinstance(self.data[0][0], BBoxOutput):
                 # This is a list of BoudingBox collection
-                return [[self.safe_json_bbox(bbox) for bbox in col] for col in self.data]
+                return [
+                    [self.safe_json_bbox(bbox) for bbox in col] for col in self.data
+                ]
             elif isinstance(self.data[0][0], FrameOutput):
-                return [[self.safe_json_frames(frame) for frame in col] for col in self.data]
+                return [
+                    [self.safe_json_frames(frame) for frame in col] for col in self.data
+                ]
         elif hasattr(self.data, "tolist"):
             # This is a numpy array
             return self.data.tolist()

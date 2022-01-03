@@ -1,4 +1,4 @@
-__all__ = ['MTCNNDetector']
+__all__ = ["MTCNNDetector"]
 
 
 from mlmodule.contrib.mtcnn.detector import MTCNNDetector

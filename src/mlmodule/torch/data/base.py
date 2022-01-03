@@ -2,17 +2,16 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-from torchvision.transforms import Compose
 from typing import Any, Callable, Generic, Tuple, TypeVar, cast
 
+from torchvision.transforms import Compose
 from typing_extensions import Protocol
-
 
 logger = logging.getLogger()
 
 
-_IndicesType = TypeVar('_IndicesType', covariant=True)
-_OutputItemsType = TypeVar('_OutputItemsType', covariant=True)
+_IndicesType = TypeVar("_IndicesType", covariant=True)
+_OutputItemsType = TypeVar("_OutputItemsType", covariant=True)
 
 
 class MLModuleDatasetProtocol(Protocol[_IndicesType, _OutputItemsType]):
@@ -28,6 +27,7 @@ class MLModuleDatasetProtocol(Protocol[_IndicesType, _OutputItemsType]):
 @dataclasses.dataclass
 class IndexedDataset(Generic[_IndicesType, _OutputItemsType]):
     """Torch dataset returning a tuple of indices and data point"""
+
     # Indices to identify items
     indices: list[_IndicesType]
     # Actual data to pass to transforms

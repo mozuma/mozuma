@@ -1,16 +1,17 @@
 import abc
 import os
 import pickle
+from io import BytesIO
 from typing import (
     Any,
     Callable,
     Dict,
-    Optional,
-    Union,
-    List,
-    Tuple,
     Generic,
+    List,
+    Optional,
+    Tuple,
     TypeVar,
+    Union,
     cast,
 )
 
@@ -18,10 +19,8 @@ import boto3
 import numpy as np
 import torch
 import torch.nn as nn
-from io import BytesIO
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.dataset import Dataset
-
 
 from mlmodule.base import BaseMLModule, LoadDumpMixin
 from mlmodule.box import BBoxCollection, BBoxOutputArrayFormat
@@ -29,7 +28,6 @@ from mlmodule.torch.data.base import MLModuleDatasetProtocol
 from mlmodule.torch.handlers import results_handler_bbox, results_handler_numpy_array
 from mlmodule.torch.utils import generic_inference, torch_apply_state_to_partial_model
 from mlmodule.types import StateDict
-
 
 _IndexType = TypeVar("_IndexType", covariant=True)
 _InputDataType = TypeVar("_InputDataType", covariant=True)
@@ -115,8 +113,10 @@ class AbstractTorchMLModule(
             "s3",
             endpoint_url="https://sos-ch-gva-2.exo.io",
             # Optionally using the provided credentials
-            aws_access_key_id=aws_access_key_id or os.environ.get("MLMODULE_AWS_ACCESS_KEY_ID"),
-            aws_secret_access_key=aws_secret_access_key or os.environ.get("MLMODULE_AWS_SECRET_ACCESS_KEY"),
+            aws_access_key_id=aws_access_key_id
+            or os.environ.get("MLMODULE_AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=aws_secret_access_key
+            or os.environ.get("MLMODULE_AWS_SECRET_ACCESS_KEY"),
         )
         # Select lsir-public-assets bucket
         b = s3.Bucket("lsir-public-assets")

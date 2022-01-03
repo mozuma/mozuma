@@ -14,20 +14,20 @@ from mlmodule.torch.base import TorchMLModuleFeatures
 from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 
-
-_IndexType = TypeVar('_IndexType', covariant=True)
-_InputDataType = TypeVar('_InputDataType', covariant=True)
+_IndexType = TypeVar("_IndexType", covariant=True)
+_InputDataType = TypeVar("_InputDataType", covariant=True)
 
 
 class BaseCLIPModule(
-        TorchMLModuleFeatures[_IndexType, _InputDataType],
-        DownloadPretrainedStateFromProvider
+    TorchMLModuleFeatures[_IndexType, _InputDataType],
+    DownloadPretrainedStateFromProvider,
 ):
     """
     Base class for CLIP modules
     """
+
     clip_model_name: str
-    model_type: Union[Literal['image'], Literal['text']]   # image or text
+    model_type: Union[Literal["image"], Literal["text"]]  # image or text
 
     def __init__(self, device: torch.device = None):
         super().__init__(device=device)
@@ -44,9 +44,11 @@ class BaseCLIPModule(
     @property
     def state_dict_key(self) -> str:
         """Key in LSIR public asset bucket to download model"""
-        return f"pretrained-models/" \
-               f"{self.model_type}-encoder/" \
-               f"clip-{self.url_safe_clip_model_name}-{self.model_type}.pt"
+        return (
+            f"pretrained-models/"
+            f"{self.model_type}-encoder/"
+            f"clip-{self.url_safe_clip_model_name}-{self.model_type}.pt"
+        )
 
     def convert_weights(self: nn.Module):
         """
@@ -59,7 +61,8 @@ class BaseCLIPModule(
         See https://github.com/openai/CLIP/issues/30
         """
 
-        if self.device != torch.device('cpu'):
+        if self.device != torch.device("cpu"):
+
             def _convert_weights_to_fp16(layer: nn.Module):
                 if isinstance(layer, (nn.Conv1d, nn.Conv2d, nn.Linear)):
                     layer.weight.data = layer.weight.data.half()
@@ -68,7 +71,10 @@ class BaseCLIPModule(
 
                 if isinstance(layer, nn.MultiheadAttention):
                     for attr in [
-                        *[f"{s}_proj_weight" for s in ["in", "q", "k", "v"]], "in_proj_bias", "bias_k", "bias_v"
+                        *[f"{s}_proj_weight" for s in ["in", "q", "k", "v"]],
+                        "in_proj_bias",
+                        "bias_k",
+                        "bias_v",
                     ]:
                         tensor = getattr(layer, attr)
                         if tensor is not None:
@@ -90,12 +96,16 @@ class BaseCLIPModule(
         """
         return CLIP(*PARAMETERS[cls.clip_model_name].values())
 
-    def get_default_pretrained_state_dict_from_provider(self) -> Dict[str, torch.Tensor]:
+    def get_default_pretrained_state_dict_from_provider(
+        self,
+    ) -> Dict[str, torch.Tensor]:
         """Get the pretrained state dictionary directly from CLIP repository
 
         :return:
         """
         clip_pretrained, _ = clip.load(self.clip_model_name, jit=False)
-        partial_state_dict = torch_apply_state_to_partial_model(self, clip_pretrained.state_dict())
+        partial_state_dict = torch_apply_state_to_partial_model(
+            self, clip_pretrained.state_dict()
+        )
 
         return partial_state_dict

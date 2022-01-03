@@ -2,8 +2,8 @@ from typing import Tuple
 
 import torch
 
-from mlmodule.torch.data.images import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 from mlmodule.contrib.resnet.base import BaseResNetImageNetModule
+from mlmodule.torch.data.images import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 from mlmodule.torch.mixins import ResizableImageInputMixin
 
 
@@ -53,6 +53,5 @@ class BaseResNetImageNetFeatures(BaseResNetImageNetModule, ResizableImageInputMi
 
 
 class ResNet18ImageNetFeatures(BaseResNetImageNetFeatures):
-
     def __init__(self, device=None):
         super().__init__("resnet18", device=device)

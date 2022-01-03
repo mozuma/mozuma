@@ -1,9 +1,8 @@
 import abc
 from typing import Any, Generic, Optional, TypeVar
+
 from mlmodule.v2.base.models import AbstractModelStore, MLModuleModelStore
-
 from mlmodule.v2.base.runners import AbstractRunner
-
 
 _Model = TypeVar("_Model")
 _Runner = TypeVar("_Runner", covariant=True, bound=AbstractRunner)
@@ -19,6 +18,7 @@ class AbstractRunnerFactory(abc.ABC, Generic[_Model, _Runner]):
     - Model state management
     - Runner execution options
     """
+
     model_store: Optional[AbstractModelStore]
     options: Any
 

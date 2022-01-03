@@ -2,9 +2,9 @@ import dataclasses
 from typing import List
 
 import numpy as np
+from scipy.spatial.distance import pdist
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
-from scipy.spatial.distance import pdist
 from sklearn.metrics.pairwise import pairwise_distances_argmin
 
 
@@ -16,20 +16,18 @@ class KeyFramesExtractor:
     @staticmethod
     def kmeans_fit(n_clusters: int, features: np.ndarray) -> KMeans:
         """Fits a KMeans on the given features"""
-        return KMeans(
-            n_clusters=n_clusters,
-            algorithm="full",
-            max_iter=20
-        ).fit(features)
+        return KMeans(n_clusters=n_clusters, algorithm="full", max_iter=20).fit(
+            features
+        )
 
     @staticmethod
     def silhouette_stop(scores, steps=3):
         """Tell whether we reached the peak in the silhouette scores"""
-        if len(scores) < steps+1:
+        if len(scores) < steps + 1:
             return False
         for i in range(steps):
             # Tries to detect an upward slope in the past "steps"
-            if scores[-(i+1)] - scores[-(i+2)] > 0:
+            if scores[-(i + 1)] - scores[-(i + 2)] > 0:
                 return False
         return True
 
@@ -76,7 +74,9 @@ class KeyFramesExtractor:
         centroids = self.extract_centroid_features(features)
 
         # Finding the unique closest frame for each centroid
-        keyframes_indices: List[int] = list(set(pairwise_distances_argmin(centroids, features)))
+        keyframes_indices: List[int] = list(
+            set(pairwise_distances_argmin(centroids, features))
+        )
 
         if len(keyframes_indices) == 1:
             return keyframes_indices
@@ -88,7 +88,7 @@ class KeyFramesExtractor:
             return list(
                 pairwise_distances_argmin(
                     np.mean(features[keyframes_indices], axis=0)[np.newaxis, :],
-                    features
+                    features,
                 )
             )
 

@@ -1,6 +1,6 @@
 import os
 
-from mlmodule.contrib.resnet import ResNet18ImageNetFeatures, ResNet18ImageNetClassifier
+from mlmodule.contrib.resnet import ResNet18ImageNetClassifier, ResNet18ImageNetFeatures
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.data.images import ImageDataset
 from mlmodule.utils import list_files_in_dir
@@ -11,10 +11,12 @@ def test_resnet_features_inference(torch_device):
     # Pretrained model
     resnet.load()
     base_path = os.path.join("tests", "fixtures", "cats_dogs")
-    file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))[:50]
+    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
     dataset = ImageDataset(file_names)
 
-    file_names_idx, features = resnet.bulk_inference(dataset, data_loader_options={'batch_size': 10})
+    file_names_idx, features = resnet.bulk_inference(
+        dataset, data_loader_options={"batch_size": 10}
+    )
     assert len(features) == 50
     assert len(features[0]) == 512
     assert type(file_names[0]) == str
@@ -28,14 +30,16 @@ def test_resnet_classifier(torch_device):
 
     # Getting data
     base_path = os.path.join("tests", "fixtures", "cats_dogs")
-    file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))[:50]
+    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
     dataset = ImageDataset(file_names)
 
     # Getting features
-    idx, features = resnet.bulk_inference(dataset, data_loader_options={'batch_size': 10})
+    idx, features = resnet.bulk_inference(
+        dataset, data_loader_options={"batch_size": 10}
+    )
 
     # Creating features dataset
-    features = IndexedDataset(idx, features)   # Zipping indices and features
+    features = IndexedDataset(idx, features)  # Zipping indices and features
 
     # Getting classifier
     resnet_cls = ResNet18ImageNetClassifier(device=torch_device)
@@ -55,6 +59,8 @@ def test_resnet_classifier(torch_device):
     assert set(file_names) == set(file_names_idx)
 
     # Verifying a couple of output labels
-    assert 'cat' in file_class[os.path.join(base_path, "cat_921.jpg")].lower()
-    assert 'pointer' in file_class[os.path.join(base_path, "dog_900.jpg")].lower() \
-           or 'labrador' in file_class[os.path.join(base_path, "dog_900.jpg")].lower()
+    assert "cat" in file_class[os.path.join(base_path, "cat_921.jpg")].lower()
+    assert (
+        "pointer" in file_class[os.path.join(base_path, "dog_900.jpg")].lower()
+        or "labrador" in file_class[os.path.join(base_path, "dog_900.jpg")].lower()
+    )

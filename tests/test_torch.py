@@ -1,16 +1,18 @@
-import tempfile
 import os
+import tempfile
 
 import torch
 import torch.nn as nn
 
 from mlmodule.torch.base import BaseTorchMLModule
-from mlmodule.torch.data.images import ImageDataset, TORCHVISION_STANDARD_IMAGE_TRANSFORMS
+from mlmodule.torch.data.images import (
+    TORCHVISION_STANDARD_IMAGE_TRANSFORMS,
+    ImageDataset,
+)
 from mlmodule.utils import list_files_in_dir
 
 
 class MyTestModuleBase(BaseTorchMLModule):
-
     def __init__(self):
         super().__init__()
         self.linear = nn.Linear(10, 2)
@@ -45,7 +47,7 @@ def test_load_dump_model(torch_device: torch.device):
 
 def test_image_file_dataset():
     base_path = os.path.join("tests", "fixtures", "cats_dogs")
-    file_objects = list_files_in_dir(base_path, allowed_extensions=('jpg',))
+    file_objects = list_files_in_dir(base_path, allowed_extensions=("jpg",))
     dataset = ImageDataset(file_objects)
     # Trying to load an image
     assert len(dataset[10]) > 0
@@ -53,7 +55,7 @@ def test_image_file_dataset():
 
 def test_image_file_dataset_torchvision_transform():
     base_path = os.path.join("tests", "fixtures", "cats_dogs")
-    file_objects = list_files_in_dir(base_path, allowed_extensions=('jpg',))
+    file_objects = list_files_in_dir(base_path, allowed_extensions=("jpg",))
     dataset = ImageDataset(file_objects)
     dataset.add_transforms(TORCHVISION_STANDARD_IMAGE_TRANSFORMS)
     # Trying to load an image

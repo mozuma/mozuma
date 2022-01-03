@@ -1,9 +1,8 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-# Copyright (c) 2021 Microsoft Corporation. Licensed under the MIT license. 
+# Copyright (c) 2021 Microsoft Corporation. Licensed under the MIT license.
 import os
 
 from yacs.config import CfgNode as CN
-
 
 # -----------------------------------------------------------------------------
 # Convention about Training / Test specific parameters
@@ -51,7 +50,7 @@ _C.INPUT.MAX_SIZE_TEST = 1333
 # Values to be used for image normalization
 _C.INPUT.PIXEL_MEAN = [102.9801, 115.9465, 122.7717]
 # Values to be used for image normalization
-_C.INPUT.PIXEL_STD = [1., 1., 1.]
+_C.INPUT.PIXEL_STD = [1.0, 1.0, 1.0]
 # Convert image to BGR format (for Caffe2 models), in range 0-255
 _C.INPUT.TO_BGR255 = True
 
@@ -92,7 +91,7 @@ _C.DATALOADER.SIZE_DIVISIBILITY = 0
 # are not batched with portrait images.
 _C.DATALOADER.ASPECT_RATIO_GROUPING = True
 # Labelmap file to convert to tsv or for demo purpose
-_C.DATASETS.LABELMAP_FILE = ''
+_C.DATASETS.LABELMAP_FILE = ""
 
 
 # ---------------------------------------------------------------------------- #
@@ -194,7 +193,7 @@ _C.MODEL.ROI_HEADS.FG_IOU_THRESHOLD = 0.5
 _C.MODEL.ROI_HEADS.BG_IOU_THRESHOLD = 0.5
 # Default weights on (dx, dy, dw, dh) for normalizing bbox regression targets
 # These are empirically chosen to approximately lead to unit variance targets
-_C.MODEL.ROI_HEADS.BBOX_REG_WEIGHTS = (10., 10., 5., 5.)
+_C.MODEL.ROI_HEADS.BBOX_REG_WEIGHTS = (10.0, 10.0, 5.0, 5.0)
 # RoI minibatch size *per image* (number of regions of interest [ROIs])
 # Total number of RoIs per training minibatch =
 #   TRAIN.BATCH_SIZE_PER_IM * TRAIN.IMS_PER_BATCH
@@ -312,12 +311,12 @@ _C.MODEL.TRANSFORMER.DROP = 0.0
 _C.MODEL.TRANSFORMER.DROP_PATH = 0.1
 _C.MODEL.TRANSFORMER.NORM_EMBED = True
 _C.MODEL.TRANSFORMER.AVG_POOL = False
-_C.MODEL.TRANSFORMER.VITHEADARCH = 'l4,h12,d768,n1,s0,g0,p2,f7,a0'
+_C.MODEL.TRANSFORMER.VITHEADARCH = "l4,h12,d768,n1,s0,g0,p2,f7,a0"
 
 _C.MODEL.TRANSFORMER.MSVIT = CN()
-_C.MODEL.TRANSFORMER.MSVIT.ARCH = 'l1,h3,d96,n1,s1,g1,p4,f7,a0_l2,h3,d192,n2,s1,g1,p2,f7,a0_l3,h6,d384,n8,s1,g1,p2,f7,a0_l4,h12,d768,n1,s1,g0,p2,f7,a0'
+_C.MODEL.TRANSFORMER.MSVIT.ARCH = "l1,h3,d96,n1,s1,g1,p4,f7,a0_l2,h3,d192,n2,s1,g1,p2,f7,a0_l3,h6,d384,n8,s1,g1,p2,f7,a0_l4,h12,d768,n1,s1,g0,p2,f7,a0"
 _C.MODEL.TRANSFORMER.MSVIT.SHARE_W = True
-_C.MODEL.TRANSFORMER.MSVIT.ATTN_TYPE = 'longformerhand'
+_C.MODEL.TRANSFORMER.MSVIT.ATTN_TYPE = "longformerhand"
 _C.MODEL.TRANSFORMER.MSVIT.SHARE_KV = True
 _C.MODEL.TRANSFORMER.MSVIT.ONLY_GLOBAL = False
 _C.MODEL.TRANSFORMER.MSVIT.SW_EXACT = 0
@@ -456,7 +455,7 @@ _C.SOLVER.IMS_PER_BATCH = 16
 
 _C.SOLVER.USE_AMP = False
 
-_C.SOLVER.OPTIMIZER = 'SGD' # also support ADAMW
+_C.SOLVER.OPTIMIZER = "SGD"  # also support ADAMW
 _C.SOLVER.CLIP_GRADIENTS = CN()
 _C.SOLVER.CLIP_GRADIENTS.ENABLED = False
 _C.SOLVER.CLIP_GRADIENTS.CLIP_TYPE = "full_model"
@@ -472,7 +471,7 @@ _C.TEST.SAVE_PREDICTIONS = False
 _C.TEST.SAVE_RESULTS_TO_TSV = False
 # only these fields will be saved to tsv. Full list:
 # ['class', 'conf', 'rect', 'feature', 'scores_all']
-_C.TEST.TSV_SAVE_SUBSET = ['rect', 'class', 'conf']
+_C.TEST.TSV_SAVE_SUBSET = ["rect", "class", "conf"]
 _C.TEST.EXPECTED_RESULTS = []
 _C.TEST.EXPECTED_RESULTS_SIGMA_TOL = 4
 # Number of images per batch

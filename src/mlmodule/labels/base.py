@@ -2,7 +2,7 @@ from typing import List
 
 from mlmodule.labels.imagenet import IMAGENET_LABELS
 from mlmodule.labels.places import PLACES_LABELS
-from mlmodule.labels.places_io import PLACES_IO_LABELS, PLACES_IN_OUT_DOOR
+from mlmodule.labels.places_io import PLACES_IN_OUT_DOOR, PLACES_IO_LABELS
 from mlmodule.labels.vinvl import VINVL_LABELS
 from mlmodule.labels.vinvl_attributes import VINVL_ATTRIBUTE_LABELS
 
@@ -20,17 +20,17 @@ class LabelSet(object):
 
 
 class ImageNetLabels(LabelSet):
-    __label_set_name__ = 'imagenet'
+    __label_set_name__ = "imagenet"
     label_list = IMAGENET_LABELS
 
 
 class PlacesLabels(LabelSet):
-    __label_set_name__ = 'places'
+    __label_set_name__ = "places"
     label_list = PLACES_LABELS
 
 
 class PlacesIOLabels(LabelSet):
-    __label_set_name__ = 'places_io'
+    __label_set_name__ = "places_io"
     label_list = PLACES_IO_LABELS
 
 
@@ -50,6 +50,5 @@ class VinVLAttributeLabels(LabelSet):
 
 
 class LabelsMixin(object):
-
     def get_labels(self) -> LabelSet:
         raise NotImplementedError()

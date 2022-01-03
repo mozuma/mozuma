@@ -3,14 +3,14 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from mlmodule.contrib.vinvl.models.structures.boxlist_ops import cat_boxlist
-from mlmodule.contrib.vinvl.models.structures.boxlist_ops import remove_small_boxes
-from mlmodule.contrib.vinvl.models.structures.bounding_box import BoxList
-from mlmodule.contrib.vinvl.models.structures.boxlist_ops import boxlist_nms
-
-
-from mlmodule.contrib.vinvl.models.box_coder import BoxCoder
 from mlmodule.contrib.vinvl.models.anchor_generator import make_anchor_generator
+from mlmodule.contrib.vinvl.models.box_coder import BoxCoder
+from mlmodule.contrib.vinvl.models.structures.bounding_box import BoxList
+from mlmodule.contrib.vinvl.models.structures.boxlist_ops import (
+    boxlist_nms,
+    cat_boxlist,
+    remove_small_boxes,
+)
 
 
 def permute_and_flatten(layer, N, A, C, H, W):
@@ -99,8 +99,7 @@ class RPNPostProcessor(nn.Module):
         # later cat of bbox requires all fields to be present for all bbox
         # so we need to add a dummy for objectness that's missing
         for gt_box in gt_boxes:
-            gt_box.add_field("objectness", torch.ones(
-                len(gt_box), device=device))
+            gt_box.add_field("objectness", torch.ones(len(gt_box), device=device))
 
         proposals = [
             cat_boxlist((proposal, gt_box))
@@ -128,8 +127,7 @@ class RPNPostProcessor(nn.Module):
         num_anchors = A * H * W
 
         pre_nms_top_n = min(self.pre_nms_top_n, num_anchors)
-        objectness, topk_idx = objectness.topk(
-            pre_nms_top_n, dim=1, sorted=True)
+        objectness, topk_idx = objectness.topk(pre_nms_top_n, dim=1, sorted=True)
 
         batch_idx = torch.arange(N, device=device)[:, None]
         box_regression = box_regression[batch_idx, topk_idx]
@@ -201,8 +199,7 @@ class RPNPostProcessor(nn.Module):
             )
             box_sizes = [len(boxlist) for boxlist in boxlists]
             post_nms_top_n = min(self.fpn_post_nms_top_n, len(objectness))
-            _, inds_sorted = torch.topk(
-                objectness, post_nms_top_n, dim=0, sorted=True)
+            _, inds_sorted = torch.topk(objectness, post_nms_top_n, dim=0, sorted=True)
             inds_mask = torch.zeros_like(objectness, dtype=torch.bool)
             inds_mask[inds_sorted] = 1
             inds_mask = inds_mask.split(box_sizes)
@@ -235,8 +232,7 @@ class RPNHead(nn.Module):
         self.conv = nn.Conv2d(
             in_channels, in_channels, kernel_size=3, stride=1, padding=1
         )
-        self.cls_logits = nn.Conv2d(
-            in_channels, num_anchors, kernel_size=1, stride=1)
+        self.cls_logits = nn.Conv2d(in_channels, num_anchors, kernel_size=1, stride=1)
         self.bbox_pred = nn.Conv2d(
             in_channels, num_anchors * 4, kernel_size=1, stride=1
         )
@@ -257,7 +253,7 @@ class RPNHead(nn.Module):
 
 class RPNModule(torch.nn.Module):
     """
-    Module for RPN computation. Takes feature maps from the backbone and outputs 
+    Module for RPN computation. Takes feature maps from the backbone and outputs
     RPN proposals and losses. Works for both FPN and non-FPN.
     """
 
@@ -268,14 +264,11 @@ class RPNModule(torch.nn.Module):
 
         anchor_generator = make_anchor_generator(cfg)
 
-        head = RPNHead(
-            cfg, in_channels, anchor_generator.num_anchors_per_location()[0]
-        )
+        head = RPNHead(cfg, in_channels, anchor_generator.num_anchors_per_location()[0])
 
         rpn_box_coder = BoxCoder(weights=(1.0, 1.0, 1.0, 1.0))
 
-        box_selector_test = make_rpn_postprocessor(
-            cfg, rpn_box_coder, is_train=False)
+        box_selector_test = make_rpn_postprocessor(cfg, rpn_box_coder, is_train=False)
 
         self.anchor_generator = anchor_generator
         self.head = head

@@ -5,12 +5,13 @@ Implements the FRCNN with Attribute Head
 from collections import OrderedDict
 
 import torch.nn as nn
+
+from mlmodule.contrib.vinvl.models.attribute_head.attribute_head import ROIAttributeHead
 from mlmodule.contrib.vinvl.models.resnet import ResNet
-from mlmodule.contrib.vinvl.models.rpn import RPNModule
 from mlmodule.contrib.vinvl.models.roi_heads import CombinedROIHeads, ROIBoxHead
+from mlmodule.contrib.vinvl.models.rpn import RPNModule
 from mlmodule.contrib.vinvl.models.structures.bounding_box import BoxList
 from mlmodule.contrib.vinvl.models.structures.image_list import to_image_list
-from mlmodule.contrib.vinvl.models.attribute_head.attribute_head import ROIAttributeHead
 
 
 class AttrRCNN(nn.Module):
@@ -23,7 +24,7 @@ class AttrRCNN(nn.Module):
     - Scene graph parser model: IMP, MSDN, MOTIF, graph-rcnn, ect
     """
 
-    def __init__(self, cfg, device='cpu'):
+    def __init__(self, cfg, device="cpu"):
         # GeneralizedRCNN.__init__(self, cfg)
         super(AttrRCNN, self).__init__()
         body = ResNet(cfg)
@@ -32,7 +33,8 @@ class AttrRCNN(nn.Module):
         self.backbone = model
         self.rpn = RPNModule(cfg, self.backbone.out_channels)
         self.roi_heads = CombinedROIHeads(
-            cfg, [("box", ROIBoxHead(cfg, self.backbone.out_channels))])
+            cfg, [("box", ROIBoxHead(cfg, self.backbone.out_channels))]
+        )
         self.force_boxes = cfg.MODEL.RPN.FORCE_BOXES
 
         self.cfg = cfg
@@ -76,12 +78,14 @@ class AttrRCNN(nn.Module):
         features = self.backbone(images.tensors)
 
         if targets:
-            targets = [target.to(self.device)
-                       for target in targets if target is not None]
+            targets = [
+                target.to(self.device) for target in targets if target is not None
+            ]
 
         if self.force_boxes:
-            proposals = [BoxList(target.bbox, target.size, target.mode)
-                         for target in targets]
+            proposals = [
+                BoxList(target.bbox, target.size, target.mode) for target in targets
+            ]
             if self.training:
                 # note we still need to compute a loss using all rpn
                 # named parameters, otherwise it will
@@ -89,19 +93,18 @@ class AttrRCNN(nn.Module):
                 null_loss = 0
                 for key, param in self.rpn.named_parameters():
                     null_loss += 0.0 * param.sum()
-                proposal_losses = {'rpn_null_loss', null_loss}
+                proposal_losses = {"rpn_null_loss", null_loss}
         else:
             proposals, proposal_losses = self.rpn(images, features, targets)
 
-        x, predictions, detector_losses = self.roi_heads(features,
-                                                         proposals, targets)
+        x, predictions, detector_losses = self.roi_heads(features, proposals, targets)
 
         if self.cfg.MODEL.ATTRIBUTE_ON:
             attribute_features = features
             # the attribute head reuse the features from the box head
             if (
-                    self.training
-                    and self.cfg.MODEL.ROI_ATTRIBUTE_HEAD.SHARE_BOX_FEATURE_EXTRACTOR
+                self.training
+                and self.cfg.MODEL.ROI_ATTRIBUTE_HEAD.SHARE_BOX_FEATURE_EXTRACTOR
             ):
                 attribute_features = x
             # During training, self.box() will return the unaltered proposals as "detections"

@@ -1,18 +1,17 @@
 import logging
-from typing import Dict, Callable, List, Union, cast
+from typing import Callable, Dict, List, Union, cast
 
 import numpy as np
 import torch
 from torch.utils.data.dataloader import DataLoader
 from tqdm import tqdm
 
-
 logger = logging.getLogger(__name__)
 
 
 def torch_apply_state_to_partial_model(
-        partial_model: torch.nn.Module,
-        pretrained_state_dict: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+    partial_model: torch.nn.Module, pretrained_state_dict: Dict[str, torch.Tensor]
+) -> Dict[str, torch.Tensor]:
     """Creates a new state dict by updating the partial_model state with matching parameters of pretrained_state_dict
 
     See https://discuss.pytorch.org/t/how-to-load-part-of-pre-trained-model/1113/3
@@ -24,8 +23,7 @@ def torch_apply_state_to_partial_model(
     model_dict = partial_model.state_dict()
 
     # 1. filter out unnecessary keys
-    state_dict = {k: v for k, v in pretrained_state_dict.items()
-                  if k in model_dict}
+    state_dict = {k: v for k, v in pretrained_state_dict.items() if k in model_dict}
     # 2. overwrite entries in the existing state dict
     model_dict.update(state_dict)
 
@@ -33,11 +31,14 @@ def torch_apply_state_to_partial_model(
 
 
 def generic_inference(
-        model: torch.nn.Module, data_loader: DataLoader,
-        inference_func: Callable,
-        result_handler: Callable,
-        device: torch.device,
-        result_handler_options=None, inference_options=None, tqdm_enabled=False
+    model: torch.nn.Module,
+    data_loader: DataLoader,
+    inference_func: Callable,
+    result_handler: Callable,
+    device: torch.device,
+    result_handler_options=None,
+    inference_options=None,
+    tqdm_enabled=False,
 ):
     # Setting model in eval mode
     model.eval()
@@ -58,8 +59,10 @@ def generic_inference(
             # Sending data on device
             batch = batch.to(device)
             acc_results = result_handler(
-                acc_results, indices, inference_func(batch, *batch_params, **(inference_options or {})),
-                **(result_handler_options or {})
+                acc_results,
+                indices,
+                inference_func(batch, *batch_params, **(inference_options or {})),
+                **(result_handler_options or {}),
             )
             logger.debug(f"Collecting results: {batch_n}/{n_batches}")
 
@@ -85,7 +88,7 @@ def tensor_to_python_list_safe(tensor_or_list: Union[torch.Tensor, List]) -> Lis
 
 def tensor_to_ndarray(arr: Union[torch.Tensor, np.ndarray]) -> np.ndarray:
     """Transforms a tensor to ndarray"""
-    if hasattr(arr, 'cpu'):
+    if hasattr(arr, "cpu"):
         return cast(torch.Tensor, arr).cpu().numpy()
     else:
         return cast(np.ndarray, arr)

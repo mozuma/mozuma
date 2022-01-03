@@ -6,14 +6,13 @@ import torch
 from mlmodule.box import BBoxCollection, BBoxOutputArrayFormat
 from mlmodule.torch.utils import tensor_to_python_list_safe
 
-
-_IndicesType = TypeVar('_IndicesType')
+_IndicesType = TypeVar("_IndicesType")
 
 
 def results_handler_numpy_array(
-        acc_results: Tuple[List[_IndicesType], np.ndarray],
-        new_indices: Union[torch.Tensor, List],
-        new_output: torch.Tensor
+    acc_results: Tuple[List[_IndicesType], np.ndarray],
+    new_indices: Union[torch.Tensor, List],
+    new_output: torch.Tensor,
 ) -> Tuple[List[_IndicesType], np.ndarray]:
     """Generic result handler that stacks results and indices together
 
@@ -28,7 +27,7 @@ def results_handler_numpy_array(
     # Collecting accumulated results or default value
     res_indices, res_output = acc_results or (
         [],
-        np.empty((0, new_output.shape[1]), dtype=new_output.dtype)
+        np.empty((0, new_output.shape[1]), dtype=new_output.dtype),
     )
 
     # Adding indices
@@ -40,9 +39,9 @@ def results_handler_numpy_array(
 
 
 def results_handler_bbox(
-        acc_results: Tuple[List[_IndicesType], List[BBoxCollection]],
-        new_indices: Union[torch.Tensor, List],
-        new_output: BBoxOutputArrayFormat,
+    acc_results: Tuple[List[_IndicesType], List[BBoxCollection]],
+    new_indices: Union[torch.Tensor, List],
+    new_output: BBoxOutputArrayFormat,
 ) -> Tuple[List[_IndicesType], List[BBoxCollection]]:
     """Runs after the forward pass at inference
 
