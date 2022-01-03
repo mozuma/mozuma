@@ -5,7 +5,9 @@ Created on Mon Apr 24 15:43:29 2017
 """
 import cv2
 import numpy as np
-from numpy.linalg import inv, lstsq, matrix_rank as rank, norm
+from numpy.linalg import inv, lstsq
+from numpy.linalg import matrix_rank as rank
+from numpy.linalg import norm
 
 # from scipy.linalg import lstsq
 # from scipy.ndimage import geometric_transform  # , map_coordinates
@@ -17,7 +19,7 @@ REFERENCE_FACIAL_POINTS = [
     [65.53179932, 51.50139999],
     [48.02519989, 71.73660278],
     [33.54930115, 92.3655014],
-    [62.72990036, 92.20410156]
+    [62.72990036, 92.20410156],
 ]
 
 DEFAULT_CROP_SIZE = (96, 112)
@@ -25,8 +27,7 @@ DEFAULT_CROP_SIZE = (96, 112)
 
 class FaceWarpException(Exception):
     def __str__(self):
-        return 'In File {}:{}'.format(
-            __file__, super.__str__(self))
+        return "In File {}:{}".format(__file__, super.__str__(self))
 
 
 def tformfwd(trans, uv):
@@ -45,9 +46,7 @@ def tformfwd(trans, uv):
         @xy: Kx2 np.array
             each row is a pair of transformed coordinates (x, y)
     """
-    uv = np.hstack((
-        uv, np.ones((uv.shape[0], 1))
-    ))
+    uv = np.hstack((uv, np.ones((uv.shape[0], 1))))
     xy = np.dot(uv, trans)
     xy = xy[:, 0:-1]
     return xy
@@ -78,9 +77,9 @@ def findNonreflectiveSimilarity(uv, xy, options=None):
         @trans_inv: 3x3 np.array
             inverse of trans, transform matrix from xy to uv
     """
-    options = {'K': 2}
+    options = {"K": 2}
 
-    K = options['K']
+    K = options["K"]
     M = xy.shape[0]
     x = xy[:, 0].reshape((-1, 1))  # use reshape to keep a column vector
     y = xy[:, 1].reshape((-1, 1))  # use reshape to keep a column vector
@@ -103,7 +102,7 @@ def findNonreflectiveSimilarity(uv, xy, options=None):
         r, _, _, _ = lstsq(X, U)
         r = np.squeeze(r)
     else:
-        raise Exception('cp2tform:twoUniquePointsReq')
+        raise Exception("cp2tform:twoUniquePointsReq")
 
     # print '--->r:\n', r
 
@@ -112,11 +111,7 @@ def findNonreflectiveSimilarity(uv, xy, options=None):
     tx = r[2]
     ty = r[3]
 
-    Tinv = np.array([
-        [sc, -ss, 0],
-        [ss, sc, 0],
-        [tx, ty, 1]
-    ])
+    Tinv = np.array([[sc, -ss, 0], [ss, sc, 0], [tx, ty, 1]])
 
     # print '--->Tinv:\n', Tinv
 
@@ -155,10 +150,10 @@ def findSimilarity(uv, xy, options=None):
             inverse of trans, transform matrix from xy to uv
 
     """
-    options = {'K': 2}
+    options = {"K": 2}
 
-#    uv = np.array(uv)
-#    xy = np.array(xy)
+    #    uv = np.array(uv)
+    #    xy = np.array(xy)
 
     # Solve for trans1
     trans1, trans1_inv = findNonreflectiveSimilarity(uv, xy, options)
@@ -172,11 +167,7 @@ def findSimilarity(uv, xy, options=None):
     trans2r, trans2r_inv = findNonreflectiveSimilarity(uv, xyR, options)
 
     # manually reflect the tform to undo the reflection done on xyR
-    TreflectY = np.array([
-        [-1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1]
-    ])
+    TreflectY = np.array([[-1, 0, 0], [0, 1, 0], [0, 0, 1]])
 
     trans2 = np.dot(trans2r, TreflectY)
 
@@ -299,10 +290,12 @@ def get_similarity_transform_for_cv2(src_pts, dst_pts, reflective=True):
     return cv2_trans
 
 
-def get_reference_facial_points(output_size=None,
-                                inner_padding_factor=0.0,
-                                outer_padding=(0, 0),
-                                default_square=False):
+def get_reference_facial_points(
+    output_size=None,
+    inner_padding_factor=0.0,
+    outer_padding=(0, 0),
+    default_square=False,
+):
     """
     Function:
     ----------
@@ -358,36 +351,41 @@ def get_reference_facial_points(output_size=None,
     # print('              crop_size = ', tmp_crop_size)
     # print('              reference_5pts = ', tmp_5pts)
 
-    if (output_size and
-            output_size[0] == tmp_crop_size[0] and
-            output_size[1] == tmp_crop_size[1]):
+    if (
+        output_size
+        and output_size[0] == tmp_crop_size[0]
+        and output_size[1] == tmp_crop_size[1]
+    ):
         # print('output_size == DEFAULT_CROP_SIZE {}: return default reference points'.format(tmp_crop_size))
         return tmp_5pts
 
-    if (inner_padding_factor == 0 and
-            outer_padding == (0, 0)):
+    if inner_padding_factor == 0 and outer_padding == (0, 0):
         if output_size is None:
             # print('No paddings to do: return default reference points')
             return tmp_5pts
         else:
             raise FaceWarpException(
-                'No paddings to do, output_size must be None or {}'.format(tmp_crop_size))
+                "No paddings to do, output_size must be None or {}".format(
+                    tmp_crop_size
+                )
+            )
 
     # check output size
     if not (0 <= inner_padding_factor <= 1.0):
-        raise FaceWarpException('Not (0 <= inner_padding_factor <= 1.0)')
+        raise FaceWarpException("Not (0 <= inner_padding_factor <= 1.0)")
 
-    if ((inner_padding_factor > 0 or outer_padding[0] > 0 or outer_padding[1] > 0) and
-            output_size is None):
-        output_size = tmp_crop_size * \
-            (1 + inner_padding_factor * 2).astype(np.int32)
+    if (
+        inner_padding_factor > 0 or outer_padding[0] > 0 or outer_padding[1] > 0
+    ) and output_size is None:
+        output_size = tmp_crop_size * (1 + inner_padding_factor * 2).astype(np.int32)
         output_size += np.array(outer_padding)
         # print('              deduced from paddings, output_size = ', output_size)
 
-    if not (outer_padding[0] < output_size[0] and
-            outer_padding[1] < output_size[1]):
-        raise FaceWarpException('Not (outer_padding[0] < output_size[0]'
-                                'and outer_padding[1] < output_size[1])')
+    if not (outer_padding[0] < output_size[0] and outer_padding[1] < output_size[1]):
+        raise FaceWarpException(
+            "Not (outer_padding[0] < output_size[0]"
+            "and outer_padding[1] < output_size[1])"
+        )
 
     # 1) pad the inner region according inner_padding_factor
     # print('---> STEP1: pad the inner region according inner_padding_factor')
@@ -405,15 +403,20 @@ def get_reference_facial_points(output_size=None,
     # print('              crop_size = ', tmp_crop_size)
     # print('              size_bf_outer_pad = ', size_bf_outer_pad)
 
-    if size_bf_outer_pad[0] * tmp_crop_size[1] != size_bf_outer_pad[1] * tmp_crop_size[0]:
-        raise FaceWarpException('Must have (output_size - outer_padding)'
-                                '= some_scale * (crop_size * (1.0 + inner_padding_factor)')
+    if (
+        size_bf_outer_pad[0] * tmp_crop_size[1]
+        != size_bf_outer_pad[1] * tmp_crop_size[0]
+    ):
+        raise FaceWarpException(
+            "Must have (output_size - outer_padding)"
+            "= some_scale * (crop_size * (1.0 + inner_padding_factor)"
+        )
 
     scale_factor = size_bf_outer_pad[0].astype(np.float32) / tmp_crop_size[0]
     # print('              resize scale_factor = ', scale_factor)
     tmp_5pts = tmp_5pts * scale_factor
-#    size_diff = tmp_crop_size * (scale_factor - min(scale_factor))
-#    tmp_5pts = tmp_5pts + size_diff / 2
+    #    size_diff = tmp_crop_size * (scale_factor - min(scale_factor))
+    #    tmp_5pts = tmp_5pts + size_diff / 2
     tmp_crop_size = size_bf_outer_pad
     # print('              crop_size = ', tmp_crop_size)
     # print('              reference_5pts = ', tmp_5pts)
@@ -453,35 +456,27 @@ def get_affine_transform_matrix(src_pts, dst_pts):
     src_pts_ = np.hstack([src_pts, ones])
     dst_pts_ = np.hstack([dst_pts, ones])
 
-#    # print(('src_pts_:\n' + str(src_pts_))
-#    # print(('dst_pts_:\n' + str(dst_pts_))
+    #    # print(('src_pts_:\n' + str(src_pts_))
+    #    # print(('dst_pts_:\n' + str(dst_pts_))
 
     A, res, rank, s = np.linalg.lstsq(src_pts_, dst_pts_)
 
-#    # print(('np.linalg.lstsq return A: \n' + str(A))
-#    # print(('np.linalg.lstsq return res: \n' + str(res))
-#    # print(('np.linalg.lstsq return rank: \n' + str(rank))
-#    # print(('np.linalg.lstsq return s: \n' + str(s))
+    #    # print(('np.linalg.lstsq return A: \n' + str(A))
+    #    # print(('np.linalg.lstsq return res: \n' + str(res))
+    #    # print(('np.linalg.lstsq return rank: \n' + str(rank))
+    #    # print(('np.linalg.lstsq return s: \n' + str(s))
 
     if rank == 3:
-        tfm = np.float32([
-            [A[0, 0], A[1, 0], A[2, 0]],
-            [A[0, 1], A[1, 1], A[2, 1]]
-        ])
+        tfm = np.float32([[A[0, 0], A[1, 0], A[2, 0]], [A[0, 1], A[1, 1], A[2, 1]]])
     elif rank == 2:
-        tfm = np.float32([
-            [A[0, 0], A[1, 0], 0],
-            [A[0, 1], A[1, 1], 0]
-        ])
+        tfm = np.float32([[A[0, 0], A[1, 0], 0], [A[0, 1], A[1, 1], 0]])
 
     return tfm
 
 
-def warp_and_crop_face(src_img,
-                       facial_pts,
-                       reference_pts=None,
-                       crop_size=(96, 112),
-                       align_type='smilarity'):
+def warp_and_crop_face(
+    src_img, facial_pts, reference_pts=None, crop_size=(96, 112), align_type="smilarity"
+):
     """
     Function:
     ----------
@@ -524,16 +519,14 @@ def warp_and_crop_face(src_img,
             outer_padding = (0, 0)
             output_size = crop_size
 
-            reference_pts = get_reference_facial_points(output_size,
-                                                        inner_padding_factor,
-                                                        outer_padding,
-                                                        default_square)
+            reference_pts = get_reference_facial_points(
+                output_size, inner_padding_factor, outer_padding, default_square
+            )
 
     ref_pts = np.float32(reference_pts)
     ref_pts_shp = ref_pts.shape
     if max(ref_pts_shp) < 3 or min(ref_pts_shp) != 2:
-        raise FaceWarpException(
-            'reference_pts.shape must be (K,2) or (2,K) and K>2')
+        raise FaceWarpException("reference_pts.shape must be (K,2) or (2,K) and K>2")
 
     if ref_pts_shp[0] == 2:
         ref_pts = ref_pts.T
@@ -541,33 +534,31 @@ def warp_and_crop_face(src_img,
     src_pts = np.float32(facial_pts)
     src_pts_shp = src_pts.shape
     if max(src_pts_shp) < 3 or min(src_pts_shp) != 2:
-        raise FaceWarpException(
-            'facial_pts.shape must be (K,2) or (2,K) and K>2')
+        raise FaceWarpException("facial_pts.shape must be (K,2) or (2,K) and K>2")
 
     if src_pts_shp[0] == 2:
         src_pts = src_pts.T
 
-#    # print('--->src_pts:\n', src_pts
-#    # print('--->ref_pts\n', ref_pts
+    #    # print('--->src_pts:\n', src_pts
+    #    # print('--->ref_pts\n', ref_pts
 
     if src_pts.shape != ref_pts.shape:
-        raise FaceWarpException(
-            'facial_pts and reference_pts must have the same shape')
+        raise FaceWarpException("facial_pts and reference_pts must have the same shape")
 
-    if align_type == 'cv2_affine':
+    if align_type == "cv2_affine":
         tfm = cv2.getAffineTransform(src_pts[0:3], ref_pts[0:3])
-#        # print(('cv2.getAffineTransform() returns tfm=\n' + str(tfm))
-    elif align_type == 'affine':
+    #        # print(('cv2.getAffineTransform() returns tfm=\n' + str(tfm))
+    elif align_type == "affine":
         tfm = get_affine_transform_matrix(src_pts, ref_pts)
-#        # print(('get_affine_transform_matrix() returns tfm=\n' + str(tfm))
+    #        # print(('get_affine_transform_matrix() returns tfm=\n' + str(tfm))
     else:
         tfm = get_similarity_transform_for_cv2(src_pts, ref_pts)
-#        # print(('get_similarity_transform_for_cv2() returns tfm=\n' + str(tfm))
+    #        # print(('get_similarity_transform_for_cv2() returns tfm=\n' + str(tfm))
 
-#    # print('--->Transform matrix: '
-#    # print(('type(tfm):' + str(type(tfm)))
-#    # print(('tfm.dtype:' + str(tfm.dtype))
-#    # print( tfm
+    #    # print('--->Transform matrix: '
+    #    # print(('type(tfm):' + str(type(tfm)))
+    #    # print(('tfm.dtype:' + str(tfm.dtype))
+    #    # print( tfm
 
     face_img = cv2.warpAffine(src_img, tfm, (crop_size[0], crop_size[1]))
 

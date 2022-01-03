@@ -1,7 +1,7 @@
 # Copyright (c) 2021 Microsoft Corporation. Licensed under the MIT license.
 import torch
-from torch import nn
 import torch.nn.functional as F
+from torch import nn
 
 from mlmodule.contrib.vinvl.models.structures.bounding_box import BoxList
 
@@ -12,7 +12,7 @@ class AttributePostProcessor(nn.Module):
     """
     From the results of the CNN, post process the attributes
     by taking the attributes corresponding to the class with max
-    probability (which are padded to fixed size) and return the 
+    probability (which are padded to fixed size) and return the
     attributes in the mask field of the BoxList.
     """
 
@@ -49,7 +49,7 @@ class AttributePostProcessor(nn.Module):
             for field in box.fields():
                 boxlist.add_field(field, box.get_field(field))
             if self.output_feature:
-                boxlist.add_field('attr_feature', feature)
+                boxlist.add_field("attr_feature", feature)
             # filter out low probability and redundent boxes
             boxlist = self.filter_results(boxlist, prob, feature, num_classes)
             results.append(boxlist)
@@ -57,8 +57,7 @@ class AttributePostProcessor(nn.Module):
         return results
 
     def filter_results(self, boxlist, prob, feature, num_classes):
-        """Returns feature detection results by thresholding on scores.
-        """
+        """Returns feature detection results by thresholding on scores."""
         boxes = boxlist.bbox.reshape(-1, 4)
         scores = prob.reshape(-1, num_classes)
 
@@ -79,8 +78,7 @@ class AttributePostProcessor(nn.Module):
             )
             scores[scores < attr_thresh.item()] = 0.0
 
-        attr_scores, attr_labels = torch.topk(
-            scores, self.max_num_attr_per_obj, dim=1)
-        boxlist.add_field('attr_labels', attr_labels)
-        boxlist.add_field('attr_scores', attr_scores)
+        attr_scores, attr_labels = torch.topk(scores, self.max_num_attr_per_obj, dim=1)
+        boxlist.add_field("attr_labels", attr_labels)
+        boxlist.add_field("attr_scores", attr_scores)
         return boxlist

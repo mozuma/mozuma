@@ -1,18 +1,16 @@
 from typing import TypeVar
 
-from torch.hub import load_state_dict_from_url
 import torchvision.models as m
+from torch.hub import load_state_dict_from_url
 
 from mlmodule.torch.base import TorchMLModuleFeatures
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 from mlmodule.types import ImageDatasetType
 
-
-_IndexType = TypeVar('_IndexType')
+_IndexType = TypeVar("_IndexType")
 
 
 class BaseResNetImageNetModule(TorchMLModuleFeatures[_IndexType, ImageDatasetType]):
-
     def __init__(self, resnet_arch, device=None):
         super().__init__(device=device)
         self.resnet_arch = resnet_arch

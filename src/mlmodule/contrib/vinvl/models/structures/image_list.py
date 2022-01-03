@@ -74,5 +74,4 @@ def to_image_list(tensors, size_divisible=0):
 
         return ImageList(batched_imgs, image_sizes)
     else:
-        raise TypeError(
-            "Unsupported type for to_image_list: {}".format(type(tensors)))
+        raise TypeError("Unsupported type for to_image_list: {}".format(type(tensors)))

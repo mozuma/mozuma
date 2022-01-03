@@ -3,12 +3,14 @@ from typing import Tuple
 import torch
 import torch.nn.functional as F
 
-from mlmodule.torch.data.images import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 from mlmodule.contrib.densenet.base import BaseDenseNetPretrainedModule
+from mlmodule.torch.data.images import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 from mlmodule.torch.mixins import ResizableImageInputMixin
 
 
-class BaseDenseNetPretrainedFeatures(BaseDenseNetPretrainedModule, ResizableImageInputMixin):
+class BaseDenseNetPretrainedFeatures(
+    BaseDenseNetPretrainedModule, ResizableImageInputMixin
+):
     """
     DenseNet feature extraction for similarity search.
     """
@@ -54,12 +56,10 @@ class BaseDenseNetPretrainedFeatures(BaseDenseNetPretrainedModule, ResizableImag
 
 
 class DenseNet161ImageNetFeatures(BaseDenseNetPretrainedFeatures):
-
     def __init__(self, device=None):
         super().__init__("densenet161", dataset="imagenet", device=device)
 
 
 class DenseNet161PlacesFeatures(BaseDenseNetPretrainedFeatures):
-
     def __init__(self, device=None):
         super().__init__("densenet161", dataset="places365", device=device)

@@ -43,8 +43,7 @@ class LevelMapper(object):
         s = torch.sqrt(cat([boxlist.area() for boxlist in boxlists]))
 
         # Eqn.(1) in FPN paper
-        target_lvls = torch.floor(
-            self.lvl0 + torch.log2(s / self.s0 + self.eps))
+        target_lvls = torch.floor(self.lvl0 + torch.log2(s / self.s0 + self.eps))
         target_lvls = torch.clamp(target_lvls, min=self.k_min, max=self.k_max)
         return target_lvls.to(torch.int64) - self.k_min
 
@@ -78,10 +77,8 @@ class Pooler(nn.Module):
         self.output_size = output_size
         # get the levels in the feature map by leveraging the fact that the network always
         # downsamples by a factor of 2 at each level.
-        lvl_min = - \
-            torch.log2(torch.tensor(scales[0], dtype=torch.float32)).item()
-        lvl_max = - \
-            torch.log2(torch.tensor(scales[-1], dtype=torch.float32)).item()
+        lvl_min = -torch.log2(torch.tensor(scales[0], dtype=torch.float32)).item()
+        lvl_max = -torch.log2(torch.tensor(scales[-1], dtype=torch.float32)).item()
         self.map_levels = LevelMapper(lvl_min, lvl_max)
 
     def convert_to_roi_format(self, boxes):
@@ -123,10 +120,8 @@ class Pooler(nn.Module):
             device=device,
         )
         for level, (per_level_feature, pooler) in enumerate(zip(x, self.poolers)):
-            idx_in_level = torch.nonzero(
-                levels == level, as_tuple=False).squeeze(1)
+            idx_in_level = torch.nonzero(levels == level, as_tuple=False).squeeze(1)
             rois_per_level = rois[idx_in_level]
-            result[idx_in_level] = pooler(
-                per_level_feature, rois_per_level).to(dtype)
+            result[idx_in_level] = pooler(per_level_feature, rois_per_level).to(dtype)
 
         return result

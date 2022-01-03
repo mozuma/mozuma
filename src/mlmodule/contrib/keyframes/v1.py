@@ -1,4 +1,14 @@
-from typing import Any, BinaryIO, Dict, List, Optional, OrderedDict, Tuple, TypeVar, Union
+from typing import (
+    Any,
+    BinaryIO,
+    Dict,
+    List,
+    Optional,
+    OrderedDict,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 import torch
 from torchvision.transforms import Compose
@@ -13,13 +23,15 @@ from mlmodule.v2.torch.datasets import TorchDataset
 from mlmodule.v2.torch.factories import DataLoaderFactory
 from mlmodule.v2.torch.runners import TorchInferenceRunner
 
-
 _IndexType = TypeVar("_IndexType", covariant=True)
 
 
 class TorchMLModuleKeyFrames(
     AbstractTorchMLModule[
-        _IndexType, TorchDataset[Any, BinaryIO], torch.Tensor, List[FrameOutputCollection]
+        _IndexType,
+        TorchDataset[Any, BinaryIO],
+        torch.Tensor,
+        List[FrameOutputCollection],
     ]
 ):
     def __init__(self, device: torch.device = None):
@@ -27,7 +39,9 @@ class TorchMLModuleKeyFrames(
         self.keyframes = ResNet18VideoFrameEncoder()
         self.keyframes.to(self.device)
 
-    def load_state_dict(self, state_dict: 'OrderedDict[str, torch.Tensor]', strict: bool = True):
+    def load_state_dict(
+        self, state_dict: "OrderedDict[str, torch.Tensor]", strict: bool = True
+    ):
         self.keyframes.load_state_dict(state_dict, strict=strict)
 
     def state_dict(self):

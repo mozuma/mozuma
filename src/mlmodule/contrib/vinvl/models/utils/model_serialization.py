@@ -1,7 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-from collections import OrderedDict
 import logging
 import math
+from collections import OrderedDict
 
 import torch
 
@@ -13,7 +13,8 @@ def resize_pos_embed_1d(posemb, shape_new):
         ntok_new = shape_new[1]
         posemb_grid = posemb.permute(0, 2, 1).unsqueeze(dim=-1)
         posemb_grid = torch.nn.functional.interpolate(
-            posemb_grid, size=[ntok_new, 1], mode='bilinear')
+            posemb_grid, size=[ntok_new, 1], mode="bilinear"
+        )
         posemb_grid = posemb_grid.squeeze(dim=-1).permute(0, 2, 1)
         posemb = posemb_grid
     return posemb
@@ -27,12 +28,15 @@ def resize_pos_embed_2d(posemb, shape_new):
     gs_new = int(math.sqrt(ntok_new))  # 2 * w - 1
     posemb_grid = posemb.reshape(1, gs_old, gs_old, -1).permute(0, 3, 1, 2)
     posemb_grid = torch.nn.functional.interpolate(
-        posemb_grid, size=(gs_new, gs_new), mode='bilinear')
+        posemb_grid, size=(gs_new, gs_new), mode="bilinear"
+    )
     posemb_grid = posemb_grid.permute(0, 2, 3, 1).reshape(gs_new * gs_new, -1)
     return posemb_grid
 
 
-def align_and_update_state_dicts(model_state_dict, loaded_state_dict, skip_unmatched_layers=True):
+def align_and_update_state_dicts(
+    model_state_dict, loaded_state_dict, skip_unmatched_layers=True
+):
     """
     Strategy: suppose that the models that we will create will have prefixes appended
     to each of its keys, for example due to an extra level of nesting that the original
@@ -63,51 +67,68 @@ def align_and_update_state_dicts(model_state_dict, loaded_state_dict, skip_unmat
 
     # used for logging
     max_size = max([len(key) for key in current_keys]) if current_keys else 1
-    max_size_loaded = max([len(key)
-                          for key in loaded_keys]) if loaded_keys else 1
+    max_size_loaded = max([len(key) for key in loaded_keys]) if loaded_keys else 1
     log_str_template = "{: <{}} loaded from {: <{}} of shape {}"
     logger = logging.getLogger(__name__)
     # print out no match
-    uninitialized_keys = [current_keys[idx_new] for idx_new,
-                          idx_old in enumerate(idxs.tolist()) if idx_old == -1]
-    logger.info("Parameters not initialized from checkpoint: {}\n".format(
-        ','.join(uninitialized_keys)
-    ))
+    uninitialized_keys = [
+        current_keys[idx_new]
+        for idx_new, idx_old in enumerate(idxs.tolist())
+        if idx_old == -1
+    ]
+    logger.info(
+        "Parameters not initialized from checkpoint: {}\n".format(
+            ",".join(uninitialized_keys)
+        )
+    )
     for idx_new, idx_old in enumerate(idxs.tolist()):
         if idx_old == -1:
             continue
         key = current_keys[idx_new]
         key_old = loaded_keys[idx_old]
-        if model_state_dict[key].shape != loaded_state_dict[
-                key_old].shape and skip_unmatched_layers:
-            if 'x_pos_embed' in key or 'y_pos_embed' in key:
+        if (
+            model_state_dict[key].shape != loaded_state_dict[key_old].shape
+            and skip_unmatched_layers
+        ):
+            if "x_pos_embed" in key or "y_pos_embed" in key:
                 shape_old = loaded_state_dict[key_old].shape
                 shape_new = model_state_dict[key].shape
-                new_val = resize_pos_embed_1d(loaded_state_dict[key_old],
-                                              shape_new)
+                new_val = resize_pos_embed_1d(loaded_state_dict[key_old], shape_new)
                 if shape_new == new_val.shape:
                     model_state_dict[key] = new_val
-                    logger.info("[RESIZE] {} {} -> {} {}".format(
-                        key_old, shape_old, key, shape_new))
+                    logger.info(
+                        "[RESIZE] {} {} -> {} {}".format(
+                            key_old, shape_old, key, shape_new
+                        )
+                    )
                 else:
-                    logger.info("[WARNING]", "{} {} != {} {}, skip".format(
-                        key_old, new_val.shape, key, shape_new))
-            elif 'local_relative_position_bias_table' in key:
+                    logger.info(
+                        "[WARNING]",
+                        "{} {} != {} {}, skip".format(
+                            key_old, new_val.shape, key, shape_new
+                        ),
+                    )
+            elif "local_relative_position_bias_table" in key:
                 shape_old = loaded_state_dict[key_old].shape
                 shape_new = model_state_dict[key].shape
-                new_val = resize_pos_embed_2d(loaded_state_dict[key_old],
-                                              shape_new)
+                new_val = resize_pos_embed_2d(loaded_state_dict[key_old], shape_new)
                 if shape_new == new_val.shape:
                     model_state_dict[key] = new_val
-                    logger.info("[RESIZE] {} {} -> {} {}".format(
-                        key_old, shape_old, key, shape_new))
+                    logger.info(
+                        "[RESIZE] {} {} -> {} {}".format(
+                            key_old, shape_old, key, shape_new
+                        )
+                    )
                 else:
-                    logger.info("[WARNING]", "{} {} != {} {}, skip".format(
-                        key_old, new_val.shape, key, shape_new))
+                    logger.info(
+                        "[WARNING]",
+                        "{} {} != {} {}, skip".format(
+                            key_old, new_val.shape, key, shape_new
+                        ),
+                    )
             else:
                 # if layer weights does not match in size, skip this layer
-                logger.info(
-                    "SKIPPING LAYER {} because of size mis-match".format(key))
+                logger.info("SKIPPING LAYER {} because of size mis-match".format(key))
             continue
         model_state_dict[key] = loaded_state_dict[key_old]
         logger.info(
@@ -136,8 +157,7 @@ def load_state_dict(model, loaded_state_dict):
     # if the state_dict comes from a model that was wrapped in a
     # DataParallel or DistributedDataParallel during serialization,
     # remove the "module" prefix before performing the matching
-    loaded_state_dict = strip_prefix_if_present(
-        loaded_state_dict, prefix="module.")
+    loaded_state_dict = strip_prefix_if_present(loaded_state_dict, prefix="module.")
     align_and_update_state_dicts(model_state_dict, loaded_state_dict)
 
     # use strict loading

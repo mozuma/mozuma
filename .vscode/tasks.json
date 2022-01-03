@@ -1,0 +1,44 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Environment: Recreate dev environment",
+            "type": "shell",
+            "command": "python -m tox --devenv venv -e ${input:flavour} -r",
+            "problemMatcher": []
+        },
+        {
+            "label": "Tox: Run all tests",
+            "type": "shell",
+            "command": "python -m tox -e ${input:flavour}",
+            "problemMatcher": []
+        },
+        {
+            "label": "Tox: Run all tests (recreate)",
+            "type": "shell",
+            "command": "python -m tox -e ${input:flavour} -r",
+            "problemMatcher": []
+        },
+        {
+            "label": "Tox: Run failed tests",
+            "type": "shell",
+            "command": "python -m tox -e ${input:flavour} -- --last-failed",
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "flavour",
+            "description": "Data platform version",
+            "type": "pickString",
+            "options": [
+                "py37",
+                "cuda-py37",
+                "py39",
+                "cuda-py39"
+            ]
+        },
+    ]
+}

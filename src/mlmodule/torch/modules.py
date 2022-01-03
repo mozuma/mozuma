@@ -5,8 +5,16 @@ import torch.nn as nn
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                     padding=dilation, groups=groups, bias=False, dilation=dilation)
+    return nn.Conv2d(
+        in_planes,
+        out_planes,
+        kernel_size=3,
+        stride=stride,
+        padding=dilation,
+        groups=groups,
+        bias=False,
+        dilation=dilation,
+    )
 
 
 def conv1x1(in_planes, out_planes, stride=1):
@@ -17,15 +25,21 @@ def conv1x1(in_planes, out_planes, stride=1):
 class IBasicBlock(nn.Module):
     expansion = 1
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
-                 base_width=64, dilation=1):
+    def __init__(
+        self,
+        inplanes,
+        planes,
+        stride=1,
+        downsample=None,
+        groups=1,
+        base_width=64,
+        dilation=1,
+    ):
         super(IBasicBlock, self).__init__()
         if groups != 1 or base_width != 64:
-            raise ValueError(
-                'BasicBlock only supports groups=1 and base_width=64')
+            raise ValueError("BasicBlock only supports groups=1 and base_width=64")
         if dilation > 1:
-            raise NotImplementedError(
-                "Dilation > 1 not supported in BasicBlock")
+            raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
         # Both self.conv1 and self.downsample layers downsample the input when stride != 1
         self.bn1 = nn.BatchNorm2d(inplanes, eps=2e-05, momentum=0.9)
         self.conv1 = conv3x3(inplanes, planes)
@@ -59,10 +73,12 @@ class SEModule(nn.Module):
         super(SEModule, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.fc1 = nn.Conv2d(
-            channels, channels // reduction, kernel_size=1, padding=0, bias=False)
+            channels, channels // reduction, kernel_size=1, padding=0, bias=False
+        )
         self.relu = nn.ReLU(inplace=True)
         self.fc2 = nn.Conv2d(
-            channels // reduction, channels, kernel_size=1, padding=0, bias=False)
+            channels // reduction, channels, kernel_size=1, padding=0, bias=False
+        )
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -83,14 +99,15 @@ class Bottleneck_IR_SE(nn.Module):
         else:
             self.shortcut_layer = nn.Sequential(
                 nn.Conv2d(in_channel, depth, (1, 1), stride, bias=False),
-                nn.BatchNorm2d(depth))
+                nn.BatchNorm2d(depth),
+            )
         self.res_layer = nn.Sequential(
             nn.BatchNorm2d(in_channel),
             nn.Conv2d(in_channel, depth, (3, 3), (1, 1), 1, bias=False),
             nn.PReLU(depth),
             nn.Conv2d(depth, depth, (3, 3), stride, 1, bias=False),
             nn.BatchNorm2d(depth),
-            SEModule(depth, 16)
+            SEModule(depth, 16),
         )
 
     def forward(self, x):
@@ -99,9 +116,11 @@ class Bottleneck_IR_SE(nn.Module):
         return res + shortcut
 
 
-class Bottleneck(namedtuple('Block', ['in_channel', 'depth', 'stride'])):
-    '''A named tuple describing a ResNet block.'''
+class Bottleneck(namedtuple("Block", ["in_channel", "depth", "stride"])):
+    """A named tuple describing a ResNet block."""
 
 
 def get_block(in_channel, depth, num_units, stride=2):
-    return [Bottleneck(in_channel, depth, stride)] + [Bottleneck(depth, depth, 1) for i in range(num_units - 1)]
+    return [Bottleneck(in_channel, depth, stride)] + [
+        Bottleneck(depth, depth, 1) for i in range(num_units - 1)
+    ]

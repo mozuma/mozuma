@@ -48,10 +48,19 @@ or with directly using `pytest` on an environment with all dependencies installe
 pytest
 ```
 
+## Code quality
+
+We use `black` as formatter. Install pre commit hooks for systematic styling on commits:
+
+```shell
+pip install pre-commit
+pre-commit install
+```
+
 ## Packaging
 
-MLModules is distributed via wheels on the 
-[LSIR public assets](https://github.com/LSIR/dataplatform-infra/tree/main/lsir-public-assets) 
+MLModules is distributed via wheels on the
+[LSIR public assets](https://github.com/LSIR/dataplatform-infra/tree/main/lsir-public-assets)
 bucket.
 
 A wheel can be created with the [`build`](https://pypi.org/project/build/) module
@@ -62,7 +71,7 @@ MLMODULE_BUILD_VERSION=x.y.z python -m build --wheel
 
 ## Requirements
 
-Updating requirements should be done in `setup.cfg`. 
+Updating requirements should be done in `setup.cfg`.
 To update the `requirement.txt` file run:
 
 ```bash
@@ -73,6 +82,6 @@ pip-compile --extra full --upgrade
 
 * Push the new version to the `master` branch
 * Add a tag on the branch with the format `vX.Y.Z`. For instance, `v0.1.1`.
-* Follow the guide in 
+* Follow the guide in
   [dataplatform-infra/build-ml-module](https://github.com/LSIR/dataplatform-infra/tree/main/build-ml-module)
   to build and upload the new release

@@ -1,7 +1,11 @@
 import os
 
-from mlmodule.contrib.densenet import DenseNet161ImageNetFeatures, DenseNet161PlacesFeatures, \
-    DenseNet161ImageNetClassifier, DenseNet161PlacesClassifier
+from mlmodule.contrib.densenet import (
+    DenseNet161ImageNetClassifier,
+    DenseNet161ImageNetFeatures,
+    DenseNet161PlacesClassifier,
+    DenseNet161PlacesFeatures,
+)
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.data.images import ImageDataset
 from mlmodule.utils import list_files_in_dir
@@ -13,10 +17,12 @@ def test_densenet_imagenet_features_inference(torch_device):
     # Pretrained model
     densenet.load()
     base_path = os.path.join("tests", "fixtures", "cats_dogs")
-    file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))[:50]
+    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
     dataset = ImageDataset(file_names)
 
-    file_names_idx, features = densenet.bulk_inference(dataset, data_loader_options={'batch_size': 10})
+    file_names_idx, features = densenet.bulk_inference(
+        dataset, data_loader_options={"batch_size": 10}
+    )
     assert len(features) == 50
     assert len(features[0]) == 2208
     assert type(file_names[0]) == str
@@ -29,10 +35,12 @@ def test_densenet_places365_features_inference(torch_device):
     # Pretrained model
     densenet.load()
     base_path = os.path.join("tests", "fixtures", "cats_dogs")
-    file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))[:50]
+    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
     dataset = ImageDataset(file_names)
 
-    file_names_idx, features = densenet.bulk_inference(dataset, data_loader_options={'batch_size': 10})
+    file_names_idx, features = densenet.bulk_inference(
+        dataset, data_loader_options={"batch_size": 10}
+    )
     assert len(features) == 50
     assert len(features[0]) == 2208
     assert type(file_names[0]) == str
@@ -47,14 +55,16 @@ def test_densenet_imagenet_classifier(torch_device):
 
     # Getting data
     base_path = os.path.join("tests", "fixtures", "cats_dogs")
-    file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))[:50]
+    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
     dataset = ImageDataset(file_names)
 
     # Getting features
-    idx, features = densenet.bulk_inference(dataset, data_loader_options={'batch_size': 10})
+    idx, features = densenet.bulk_inference(
+        dataset, data_loader_options={"batch_size": 10}
+    )
 
     # Creating features dataset
-    features = IndexedDataset(idx, features)   # Zipping indices and features
+    features = IndexedDataset(idx, features)  # Zipping indices and features
 
     # Getting classifier
     densenet_cls = DenseNet161ImageNetClassifier(device=torch_device)
@@ -74,8 +84,8 @@ def test_densenet_imagenet_classifier(torch_device):
     assert set(file_names) == set(file_names_idx)
 
     # Verifying a couple of output labels
-    assert 'cat' in file_class[os.path.join(base_path, "cat_90.jpg")].lower()
-    assert file_class[os.path.join(base_path, "dog_900.jpg")] == 'Labrador retriever'
+    assert "cat" in file_class[os.path.join(base_path, "cat_90.jpg")].lower()
+    assert file_class[os.path.join(base_path, "dog_900.jpg")] == "Labrador retriever"
 
 
 def test_densenet_places365_classifier(torch_device):
@@ -86,14 +96,16 @@ def test_densenet_places365_classifier(torch_device):
 
     # Getting data
     base_path = os.path.join("tests", "fixtures", "cats_dogs")
-    file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))[:50]
+    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
     dataset = ImageDataset(file_names)
 
     # Getting features
-    idx, features = densenet.bulk_inference(dataset, data_loader_options={'batch_size': 10})
+    idx, features = densenet.bulk_inference(
+        dataset, data_loader_options={"batch_size": 10}
+    )
 
     # Creating features dataset
-    features = IndexedDataset(idx, features)   # Zipping indices and features
+    features = IndexedDataset(idx, features)  # Zipping indices and features
 
     # Getting classifier
     densenet_cls = DenseNet161PlacesClassifier(device=torch_device)
@@ -113,5 +125,5 @@ def test_densenet_places365_classifier(torch_device):
     assert set(file_names) == set(file_names_idx)
 
     # Verifying a couple of output labels
-    assert 'veterinarians' in file_class[os.path.join(base_path, "cat_90.jpg")].lower()
-    assert 'veterinarians' in file_class[os.path.join(base_path, "dog_900.jpg")].lower()
+    assert "veterinarians" in file_class[os.path.join(base_path, "cat_90.jpg")].lower()
+    assert "veterinarians" in file_class[os.path.join(base_path, "dog_900.jpg")].lower()

@@ -3,14 +3,14 @@ import os
 from io import BytesIO
 from typing import NoReturn, cast
 
-from typing_extensions import Protocol, runtime_checkable
-
 import boto3
+from typing_extensions import Protocol, runtime_checkable
 
 
 @runtime_checkable
 class ModelWithState(Protocol):
     """Identifies a model that has state that can be set and gotten"""
+
     # Unique identifier for the model
     mlmodule_model_uri: str
 
@@ -51,12 +51,9 @@ class MLModuleModelStore(AbstractModelStore):
         session = boto3.session.Session(
             aws_access_key_id=os.environ.get("MLMODULE_AWS_ACCESS_KEY_ID"),
             aws_secret_access_key=os.environ.get("MLMODULE_AWS_SECRET_ACCESS_KEY"),
-            profile_name=os.environ.get("MLMODULE_AWS_PROFILE_NAME")
+            profile_name=os.environ.get("MLMODULE_AWS_PROFILE_NAME"),
         )
-        s3 = session.resource(
-            "s3",
-            endpoint_url="https://sos-ch-gva-2.exo.io"
-        )
+        s3 = session.resource("s3", endpoint_url="https://sos-ch-gva-2.exo.io")
         # Select lsir-public-assets bucket
         b = s3.Bucket("lsir-public-assets")
 
@@ -70,7 +67,6 @@ class MLModuleModelStore(AbstractModelStore):
 
 
 class ProviderModelStore(AbstractModelStore):
-
     def save(self, model: ModelWithState, **options) -> NoReturn:
         raise ValueError("ProviderModelStore states are read-only")
 

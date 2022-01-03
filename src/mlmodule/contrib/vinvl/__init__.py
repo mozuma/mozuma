@@ -1,4 +1,4 @@
-__all__ = ['VinVLDetector']
+__all__ = ["VinVLDetector"]
 
 
 from mlmodule.contrib.vinvl.detector import VinVLDetector

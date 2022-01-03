@@ -1,7 +1,9 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 # Copyright (c) 2021 Microsoft Corporation. Licensed under the MIT license.
 import torch
+
 from mlmodule.contrib.vinvl.models.structures.bounding_box import BoxList
+
 # transpose
 FLIP_LEFT_RIGHT = 0
 FLIP_TOP_BOTTOM = 1
@@ -18,7 +20,11 @@ class BoxPairList(object):
     """
 
     def __init__(self, bbox_pair, image_size, mode="xyxy"):
-        device = bbox_pair.device if isinstance(bbox_pair, torch.Tensor) else torch.device("cpu")
+        device = (
+            bbox_pair.device
+            if isinstance(bbox_pair, torch.Tensor)
+            else torch.device("cpu")
+        )
         bbox_pair = torch.as_tensor(bbox_pair, dtype=torch.float32, device=device)
         if bbox_pair.ndimension() != 2:
             raise ValueError(
@@ -228,7 +234,9 @@ class BoxPairList(object):
         box = self.bbox
         if self.mode == "xyxy":
             TO_REMOVE = 1
-            area = (box[:, 2] - box[:, 0] + TO_REMOVE) * (box[:, 3] - box[:, 1] + TO_REMOVE)
+            area = (box[:, 2] - box[:, 0] + TO_REMOVE) * (
+                box[:, 3] - box[:, 1] + TO_REMOVE
+            )
         elif self.mode == "xywh":
             area = box[:, 2] * box[:, 3]
         else:

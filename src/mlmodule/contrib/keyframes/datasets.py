@@ -86,7 +86,9 @@ class FPSVideoFrameExtractorTransform:
             )
             frame_indices: List[int] = []
             frame_images: List[Image] = []
-            for frame_idx, frame_img in extract_video_frames(capture, every_n_frames=every_n_frames):
+            for frame_idx, frame_img in extract_video_frames(
+                capture, every_n_frames=every_n_frames
+            ):
                 frame_indices.append(frame_idx)
                 frame_images.append(frame_img)
             return frame_indices, frame_images

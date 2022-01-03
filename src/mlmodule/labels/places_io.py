@@ -1,7 +1,4 @@
-PLACES_IN_OUT_DOOR = [
-    "indoor",
-    "outdoor"
-]
+PLACES_IN_OUT_DOOR = ["indoor", "outdoor"]
 
 PLACES_IO_LABELS = [
     1,
@@ -368,5 +365,5 @@ PLACES_IO_LABELS = [
     1,
     1,
     0,
-    1
+    1,
 ]

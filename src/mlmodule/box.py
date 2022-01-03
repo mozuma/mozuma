@@ -2,7 +2,7 @@
 This file contains classes to help organise complex model outputs such as bounding boxes
 """
 import dataclasses
-from typing import Iterable, Iterator, Tuple, Optional, List, Union, cast
+from typing import Iterable, Iterator, List, Optional, Tuple, Union, cast
 
 import numpy as np
 import torch
@@ -13,6 +13,7 @@ from mlmodule.torch.utils import tensor_to_ndarray
 @dataclasses.dataclass
 class BBoxPoint:
     """Bounding box point coordinates"""
+
     x: float
     y: float
 
@@ -27,7 +28,7 @@ class BBoxPoint:
         elif item == 1:
             return self.y
         else:
-            raise IndexError(f'Index {item} is out of range for BBoxPoint')
+            raise IndexError(f"Index {item} is out of range for BBoxPoint")
 
     def __len__(self) -> int:
         """The length of a BBoxPoint is fixed"""
@@ -37,7 +38,8 @@ class BBoxPoint:
 @dataclasses.dataclass
 class BBoxOutput:
     """Bounding box model output"""
-    bounding_box: Tuple[BBoxPoint, BBoxPoint]   # Point pair
+
+    bounding_box: Tuple[BBoxPoint, BBoxPoint]  # Point pair
     probability: float  # Confidence of the bounding box
     features: Optional[np.ndarray] = None
     labels: Optional[List[int]] = None
@@ -57,6 +59,7 @@ class BBoxOutputArrayFormat:
 
     This type should be used as the return type of the forward function
     """
+
     # Each row contains all the bounding boxes for one image
     bounding_boxes: Iterable[_TensorOrArray]
     # Each row contains the list of probabities for one image
@@ -70,14 +73,26 @@ class BBoxOutputArrayFormat:
     # Each row contains the scores of label attributes associated with all bounding boxes for one image
     attr_scores: Optional[Iterable[_TensorOrArray]] = None
 
-    _iter_bounding_boxes: Iterator[Optional[_TensorOrArray]] = dataclasses.field(init=False)
-    _iter_probabilities: Iterator[Optional[_TensorOrArray]] = dataclasses.field(init=False)
-    _iter_features: Optional[Iterator[Optional[_TensorOrArray]]] = dataclasses.field(init=False, default=None)
-    _iter_labels: Optional[Iterator[Optional[_TensorOrArray]]] = dataclasses.field(init=False, default=None)
-    _iter_attributes: Optional[Iterator[Optional[_TensorOrArray]]] = dataclasses.field(init=False, default=None)
-    _iter_attr_scores: Optional[Iterator[Optional[_TensorOrArray]]] = dataclasses.field(init=False, default=None)
+    _iter_bounding_boxes: Iterator[Optional[_TensorOrArray]] = dataclasses.field(
+        init=False
+    )
+    _iter_probabilities: Iterator[Optional[_TensorOrArray]] = dataclasses.field(
+        init=False
+    )
+    _iter_features: Optional[Iterator[Optional[_TensorOrArray]]] = dataclasses.field(
+        init=False, default=None
+    )
+    _iter_labels: Optional[Iterator[Optional[_TensorOrArray]]] = dataclasses.field(
+        init=False, default=None
+    )
+    _iter_attributes: Optional[Iterator[Optional[_TensorOrArray]]] = dataclasses.field(
+        init=False, default=None
+    )
+    _iter_attr_scores: Optional[Iterator[Optional[_TensorOrArray]]] = dataclasses.field(
+        init=False, default=None
+    )
 
-    def __iter__(self) -> 'BBoxOutputArrayFormat':
+    def __iter__(self) -> "BBoxOutputArrayFormat":
         self._iter_bounding_boxes = iter(self.bounding_boxes)
         self._iter_probabilities = iter(self.probabilities)
         if self.features:
@@ -99,30 +114,45 @@ class BBoxOutputArrayFormat:
 
         ret_bbox_collection: BBoxCollection = []
         bounding_boxes = bounding_boxes_array.tolist()
-        probabilities: List[float] = cast(_TensorOrArray, next(self._iter_probabilities)).tolist()
+        probabilities: List[float] = cast(
+            _TensorOrArray, next(self._iter_probabilities)
+        ).tolist()
         features: Optional[np.ndarray] = None
         labels: Optional[np.ndarray] = None
         attributes: Optional[np.ndarray] = None
         attr_scores: Optional[np.ndarray] = None
         if self._iter_features:
-            features = tensor_to_ndarray(cast(_TensorOrArray, next(self._iter_features)))
+            features = tensor_to_ndarray(
+                cast(_TensorOrArray, next(self._iter_features))
+            )
         if self._iter_labels:
-            labels = tensor_to_ndarray(cast(_TensorOrArray, next(self._iter_labels))).tolist()
+            labels = tensor_to_ndarray(
+                cast(_TensorOrArray, next(self._iter_labels))
+            ).tolist()
         if self._iter_attributes:
-            attributes = tensor_to_ndarray(cast(_TensorOrArray, next(self._iter_attributes)))
+            attributes = tensor_to_ndarray(
+                cast(_TensorOrArray, next(self._iter_attributes))
+            )
         if self._iter_attr_scores:
-            attr_scores = tensor_to_ndarray(cast(_TensorOrArray, next(self._iter_attr_scores)))
+            attr_scores = tensor_to_ndarray(
+                cast(_TensorOrArray, next(self._iter_attr_scores))
+            )
         for i, (bbox, prob) in enumerate(zip(bounding_boxes, probabilities)):
             # Iterating through each bounding box
             if bbox is not None:
                 # We have detected a face/object
-                ret_bbox_collection.append(BBoxOutput(
-                    bounding_box=(BBoxPoint(*bbox[:2]), BBoxPoint(*bbox[2:])),  # Extracting two points
-                    probability=prob,
-                    features=features[i] if features is not None else None,
-                    labels=labels[i] if labels is not None else None,
-                    attributes=attributes[i] if attributes is not None else None,
-                    attr_scores=attr_scores[i] if attr_scores is not None else None,
-                ))
+                ret_bbox_collection.append(
+                    BBoxOutput(
+                        bounding_box=(
+                            BBoxPoint(*bbox[:2]),
+                            BBoxPoint(*bbox[2:]),
+                        ),  # Extracting two points
+                        probability=prob,
+                        features=features[i] if features is not None else None,
+                        labels=labels[i] if labels is not None else None,
+                        attributes=attributes[i] if attributes is not None else None,
+                        attr_scores=attr_scores[i] if attr_scores is not None else None,
+                    )
+                )
 
         return ret_bbox_collection

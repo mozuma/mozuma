@@ -3,7 +3,6 @@ from typing import BinaryIO, Callable, Generic, List, Tuple, TypeVar
 
 from typing_extensions import Protocol
 
-
 _IndicesType = TypeVar("_IndicesType", covariant=True)
 _DatasetType = TypeVar("_DatasetType", covariant=True)
 _NewDatasetType = TypeVar("_NewDatasetType", covariant=True)
@@ -50,7 +49,7 @@ class OpenBinaryFileDataset:
     paths: List[str]
 
     def __getitem__(self, index: int) -> Tuple[str, BinaryIO]:
-        return self.paths[index], open(self.paths[index], mode='rb')
+        return self.paths[index], open(self.paths[index], mode="rb")
 
     def __len__(self) -> int:
         return len(self.paths)

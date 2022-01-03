@@ -9,7 +9,6 @@ from tqdm import tqdm
 from mlmodule.v2.base.runners import AbstractInferenceRunner
 from mlmodule.v2.torch.results import AbstractResultsProcessor
 
-
 logger = getLogger()
 
 
@@ -17,11 +16,7 @@ _DatasetType = TypeVar("_DatasetType")
 _Result = TypeVar("_Result")
 
 
-_BatchTypes = Union[
-    torch.Tensor,
-    tuple,
-    list
-]
+_BatchTypes = Union[torch.Tensor, tuple, list]
 
 
 def send_batch_to_device(batch: _BatchTypes, device: torch.device) -> _BatchTypes:
@@ -29,7 +24,7 @@ def send_batch_to_device(batch: _BatchTypes, device: torch.device) -> _BatchType
         return tuple(send_batch_to_device(b, device) for b in batch)
     elif isinstance(batch, list):
         return [send_batch_to_device(b, device) for b in batch]
-    elif hasattr(batch, 'to'):
+    elif hasattr(batch, "to"):
         return batch.to(device)
     else:
         return batch

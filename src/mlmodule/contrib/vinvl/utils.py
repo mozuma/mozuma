@@ -1,12 +1,32 @@
 # Copyright (c) 2021 Microsoft Corporation. Licensed under the MIT license.
 
+
 def postprocess_attr(dataset_attr_labelmap, label_list, conf_list):
     common_attributes = {
-        'white', 'black', 'blue', 'green', 'red', 'brown', 'yellow', 'small', 'large', 'silver', 'wooden',
-        'wood', 'orange', 'gray', 'grey', 'metal', 'pink', 'tall', 'long', 'dark', 'purple'
+        "white",
+        "black",
+        "blue",
+        "green",
+        "red",
+        "brown",
+        "yellow",
+        "small",
+        "large",
+        "silver",
+        "wooden",
+        "wood",
+        "orange",
+        "gray",
+        "grey",
+        "metal",
+        "pink",
+        "tall",
+        "long",
+        "dark",
+        "purple",
     }
     common_attributes_thresh = 0.1
-    attr_alias_dict = {'blonde': 'blond'}
+    attr_alias_dict = {"blonde": "blond"}
     attr_dict = {}
     for label, conf in zip(label_list, conf_list):
         label = dataset_attr_labelmap[label]

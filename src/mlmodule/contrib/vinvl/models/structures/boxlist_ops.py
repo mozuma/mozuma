@@ -1,10 +1,9 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 # Copyright (c) 2021 Microsoft Corporation. Licensed under the MIT license.
 import torch
+from torchvision.ops import nms as _box_nms
 
 from mlmodule.contrib.vinvl.models.structures.bounding_box import BoxList
-
-from torchvision.ops import nms as _box_nms
 
 
 def boxlist_nms(boxlist, nms_thresh, max_proposals=-1, score_field="scores"):
@@ -27,7 +26,7 @@ def boxlist_nms(boxlist, nms_thresh, max_proposals=-1, score_field="scores"):
     score = boxlist.get_field(score_field)
     keep = _box_nms(boxes, score, nms_thresh)
     if max_proposals > 0:
-        keep = keep[: max_proposals]
+        keep = keep[:max_proposals]
     boxlist = boxlist[keep]
     return boxlist.convert(mode)
 
@@ -43,9 +42,7 @@ def remove_small_boxes(boxlist, min_size):
     # TODO maybe add an API for querying the ws / hs
     xywh_boxes = boxlist.convert("xywh").bbox
     _, _, ws, hs = xywh_boxes.unbind(dim=1)
-    keep = (
-        (ws >= min_size) & (hs >= min_size)
-    ).nonzero(as_tuple=False).squeeze(1)
+    keep = ((ws >= min_size) & (hs >= min_size)).nonzero(as_tuple=False).squeeze(1)
     return boxlist[keep]
 
 
@@ -67,7 +64,10 @@ def boxlist_iou(boxlist1, boxlist2):
     """
     if boxlist1.size != boxlist2.size:
         raise RuntimeError(
-            "boxlists should have same image size, got {}, {}".format(boxlist1, boxlist2))
+            "boxlists should have same image size, got {}, {}".format(
+                boxlist1, boxlist2
+            )
+        )
     boxlist1 = boxlist1.convert("xyxy")
     boxlist2 = boxlist2.convert("xyxy")
     N = len(boxlist1)
@@ -133,7 +133,7 @@ def cat_boxlist(bboxes):
 def cat_boxlist_with_fields(bboxes, fields):
     """
     Concatenates a list of BoxList (having the same image size) into a
-    single BoxList. If fields is None, bboxes need to have same fields. 
+    single BoxList. If fields is None, bboxes need to have same fields.
     If fields is not None, only copy fields.
 
     Arguments:

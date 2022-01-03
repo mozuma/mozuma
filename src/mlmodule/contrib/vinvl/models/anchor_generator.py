@@ -57,7 +57,7 @@ class AnchorGenerator(nn.Module):
                 generate_anchors(
                     anchor_stride,
                     size if isinstance(size, (tuple, list)) else (size,),
-                    aspect_ratios
+                    aspect_ratios,
                 ).float()
                 for anchor_stride, size in zip(anchor_strides, sizes)
             ]
@@ -104,8 +104,7 @@ class AnchorGenerator(nn.Module):
             )
         else:
             device = anchors.device
-            inds_inside = torch.ones(
-                anchors.shape[0], dtype=torch.bool, device=device)
+            inds_inside = torch.ones(anchors.shape[0], dtype=torch.bool, device=device)
         boxlist.add_field("visibility", inds_inside)
 
     def forward(self, image_list, feature_maps):
@@ -116,8 +115,7 @@ class AnchorGenerator(nn.Module):
             anchors_in_image = []
             for anchors_per_feature_map in anchors_over_all_feature_maps:
                 boxlist = BoxList(
-                    anchors_per_feature_map, (image_width,
-                                              image_height), mode="xyxy"
+                    anchors_per_feature_map, (image_width, image_height), mode="xyxy"
                 )
                 self.add_visibility_to(boxlist)
                 anchors_in_image.append(boxlist)
@@ -136,8 +134,7 @@ def make_anchor_generator(config):
             anchor_sizes
         ), "FPN should have len(ANCHOR_STRIDE) == len(ANCHOR_SIZES)"
     else:
-        assert len(
-            anchor_stride) == 1, "Non-FPN should have a single ANCHOR_STRIDE"
+        assert len(anchor_stride) == 1, "Non-FPN should have a single ANCHOR_STRIDE"
     anchor_generator = AnchorGenerator(
         anchor_sizes, aspect_ratios, anchor_stride, straddle_thresh
     )

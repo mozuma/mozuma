@@ -2,12 +2,11 @@ import numpy as np
 from scipy.special import softmax
 
 from mlmodule.base import BaseMLModule
-from mlmodule.labels import PlacesIOLabels, LabelsMixin
-from mlmodule.labels.base import LabelSet, IndoorOutdoorLabels
+from mlmodule.labels import LabelsMixin, PlacesIOLabels
+from mlmodule.labels.base import IndoorOutdoorLabels, LabelSet
 
 
 class PlacesIOClassifier(BaseMLModule, LabelsMixin):
-
     def __init__(self, k=10, **_):
         super().__init__()
         self.labels_io = PlacesIOLabels()
@@ -27,7 +26,9 @@ class PlacesIOClassifier(BaseMLModule, LabelsMixin):
         # Numpy equivalent of _, idx = torch.topk(data)
         # Returns the k indices with the highest values for each row
         idx, probs = list(zip(*data))
-        topk_idx = np.argpartition(softmax(np.array(probs), axis=1), -self.k, axis=1)[:, -self.k:]
+        topk_idx = np.argpartition(softmax(np.array(probs), axis=1), -self.k, axis=1)[
+            :, -self.k :
+        ]
 
         # Map each class in each row to either indoor (0) or outdoor (1)
         def cls_to_io(arr):
@@ -38,7 +39,7 @@ class PlacesIOClassifier(BaseMLModule, LabelsMixin):
         # Compute the mean number for each row
         mean_io = np.apply_along_axis(np.mean, 1, topk_io)
 
-        return idx, np.vstack((1-mean_io, mean_io)).T
+        return idx, np.vstack((1 - mean_io, mean_io)).T
 
     def get_labels(self) -> LabelSet:
         return IndoorOutdoorLabels()

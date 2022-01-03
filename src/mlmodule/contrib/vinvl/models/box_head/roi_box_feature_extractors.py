@@ -3,8 +3,8 @@
 import torch
 from torch import nn
 
-from mlmodule.contrib.vinvl.models.resnet import ResNetHead, StageSpec
 from mlmodule.contrib.vinvl.models.poolers import Pooler
+from mlmodule.contrib.vinvl.models.resnet import ResNetHead, StageSpec
 
 
 class ResNet50Conv5ROIFeatureExtractor(nn.Module):
@@ -25,8 +25,7 @@ class ResNet50Conv5ROIFeatureExtractor(nn.Module):
         # need to add a transit conv layer to make it compatible.
         # The corresponding predictor should be FastRCNNPredictor.
         if in_channels != 1024:
-            self.trans_conv = nn.Conv2d(
-                in_channels, 1024, kernel_size=3, padding=1)
+            self.trans_conv = nn.Conv2d(in_channels, 1024, kernel_size=3, padding=1)
             torch.nn.init.normal_(self.trans_conv.weight, std=0.01)
             torch.nn.init.constant_(self.trans_conv.bias, 0)
         else:
@@ -40,7 +39,7 @@ class ResNet50Conv5ROIFeatureExtractor(nn.Module):
             stride_in_1x1=config.MODEL.RESNETS.STRIDE_IN_1X1,
             stride_init=None,
             res2_out_channels=config.MODEL.RESNETS.RES2_OUT_CHANNELS,
-            dilation=config.MODEL.RESNETS.RES5_DILATION
+            dilation=config.MODEL.RESNETS.RES5_DILATION,
         )
 
         self.pooler = pooler

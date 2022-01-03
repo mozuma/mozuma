@@ -1,5 +1,5 @@
 from mlmodule.contrib.densenet.base import BaseDenseNetPretrainedModule
-from mlmodule.labels import LabelsMixin, ImageNetLabels, PlacesLabels
+from mlmodule.labels import ImageNetLabels, LabelsMixin, PlacesLabels
 
 
 class BaseDenseNetPretrainedClassifier(BaseDenseNetPretrainedModule, LabelsMixin):
@@ -33,12 +33,10 @@ class BaseDenseNetPretrainedClassifier(BaseDenseNetPretrainedModule, LabelsMixin
 
 
 class DenseNet161ImageNetClassifier(BaseDenseNetPretrainedClassifier):
-
     def __init__(self, device=None):
         super().__init__("densenet161", dataset="imagenet", device=device)
 
 
 class DenseNet161PlacesClassifier(BaseDenseNetPretrainedClassifier):
-
     def __init__(self, device=None):
         super().__init__("densenet161", dataset="places365", device=device)

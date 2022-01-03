@@ -6,7 +6,6 @@ from mlmodule.metrics import MetricsCollector
 
 
 class LoadDumpMixin(object):
-
     @classmethod
     def load(cls, fp=None):
         """Loads the model from a file like object
@@ -26,7 +25,6 @@ class LoadDumpMixin(object):
 
 
 class BaseMLModule(object):
-
     @property
     def metrics(self) -> MetricsCollector:
         if not hasattr(self, "_metrics"):

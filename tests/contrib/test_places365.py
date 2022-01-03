@@ -2,7 +2,10 @@ import os
 
 import numpy as np
 
-from mlmodule.contrib.densenet import DenseNet161PlacesFeatures, DenseNet161PlacesClassifier
+from mlmodule.contrib.densenet import (
+    DenseNet161PlacesClassifier,
+    DenseNet161PlacesFeatures,
+)
 from mlmodule.contrib.places365 import PlacesIOClassifier
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.data.images import ImageDataset
@@ -16,13 +19,15 @@ def test_places365_50_images(torch_device):
 
     # Getting data
     base_path = os.path.join("tests", "fixtures", "cats_dogs")
-    file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))[:50]
+    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
     dataset = ImageDataset(file_names)
 
     # Getting features
-    idx, features = densenet.bulk_inference(dataset, data_loader_options={'batch_size': 10})
+    idx, features = densenet.bulk_inference(
+        dataset, data_loader_options={"batch_size": 10}
+    )
     # Creating features dataset
-    features = IndexedDataset(idx, features)   # Zipping indices and features
+    features = IndexedDataset(idx, features)  # Zipping indices and features
 
     # Getting classifier
     densenet_cls = DenseNet161PlacesClassifier(device=torch_device)
@@ -33,7 +38,9 @@ def test_places365_50_images(torch_device):
     # Loading the IO Classifier
     io_classifier = PlacesIOClassifier()
     # Evaluating for each image
-    file_names_idx, probs = io_classifier.bulk_inference(IndexedDataset(file_names_idx, predictions))
+    file_names_idx, probs = io_classifier.bulk_inference(
+        IndexedDataset(file_names_idx, predictions)
+    )
 
     # Collecting classes with filenames
     file_class = dict(zip(file_names_idx, np.argmax(probs, axis=1)))

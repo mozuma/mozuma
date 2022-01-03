@@ -1,21 +1,20 @@
 import dataclasses
-from typing import Dict, Iterable, Optional, Tuple, List, TypeVar, Union, cast
+from typing import Dict, Iterable, List, Optional, Tuple, TypeVar, Union, cast
 
-import torch
 import numpy as np
+import torch
 
-from mlmodule.contrib.mtcnn.mtcnn import MLModuleMTCNN
 from mlmodule.box import BBoxCollection, BBoxOutputArrayFormat
+from mlmodule.contrib.mtcnn.mtcnn import MLModuleMTCNN
 from mlmodule.torch.base import TorchMLModuleBBox
 from mlmodule.torch.data.base import MLModuleDatasetProtocol
+from mlmodule.torch.data.images import transforms
 from mlmodule.torch.mixins import (
     DownloadPretrainedStateFromProvider,
     ResizableImageInputMixin,
 )
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
-from mlmodule.torch.data.images import transforms
 from mlmodule.types import ImageDatasetType
-
 
 _IndexType = TypeVar("_IndexType", contravariant=True)
 
@@ -93,9 +92,13 @@ class MTCNNDetector(
             land * a if land is not None else np.array([])
             for land, a in zip(landmarks, aspect_ratios)
         ]
-        prob_clean: List[np.ndarray] = [cast(np.ndarray, p) if None not in p else np.array([]) for p in prob]
+        prob_clean: List[np.ndarray] = [
+            cast(np.ndarray, p) if None not in p else np.array([]) for p in prob
+        ]
         return BBoxOutputArrayFormat(
-            bounding_boxes=boxes_clean, probabilities=prob_clean, features=landmarks_clean
+            bounding_boxes=boxes_clean,
+            probabilities=prob_clean,
+            features=landmarks_clean,
         )
 
     def bulk_inference(

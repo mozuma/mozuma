@@ -9,12 +9,16 @@ from _pytest.fixtures import SubRequest
 
 from mlmodule.contrib.arcface import ArcFaceFeatures
 from mlmodule.contrib.clip import CLIPViTB32ImageEncoder
-from mlmodule.contrib.densenet import DenseNet161ImageNetFeatures, DenseNet161ImageNetClassifier, \
-    DenseNet161PlacesFeatures, DenseNet161PlacesClassifier
+from mlmodule.contrib.densenet import (
+    DenseNet161ImageNetClassifier,
+    DenseNet161ImageNetFeatures,
+    DenseNet161PlacesClassifier,
+    DenseNet161PlacesFeatures,
+)
 from mlmodule.contrib.keyframes.v1 import TorchMLModuleKeyFrames
 from mlmodule.contrib.magface.features import MagFaceFeatures
 from mlmodule.contrib.mtcnn import MTCNNDetector
-from mlmodule.contrib.resnet import ResNet18ImageNetFeatures, ResNet18ImageNetClassifier
+from mlmodule.contrib.resnet import ResNet18ImageNetClassifier, ResNet18ImageNetFeatures
 from mlmodule.contrib.vinvl import VinVLDetector
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
@@ -23,31 +27,31 @@ from mlmodule.types import StateDict
 from mlmodule.utils import list_files_in_dir
 
 
-@pytest.fixture(scope='session', params=["cpu", "cuda"])
+@pytest.fixture(scope="session", params=["cpu", "cuda"])
 def torch_device(request: SubRequest) -> torch.device:
     """Fixture for the PyTorch device, run GPU only when CUDA is available
 
     :param request:
     :return:
     """
-    if request.param != 'cpu' and not torch.cuda.is_available():
+    if request.param != "cpu" and not torch.cuda.is_available():
         pytest.skip(f"Skipping device {request.param}, CUDA not available")
-    if request.param != 'cpu' and os.environ.get('CPU_ONLY_TESTS') == 'y':
+    if request.param != "cpu" and os.environ.get("CPU_ONLY_TESTS") == "y":
         pytest.skip(f"Skipping device {request.param}, tests are running for CPU only")
     return torch.device(request.param)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def gpu_torch_device() -> torch.device:
     """Fixture to get a GPU torch device. The test will be skipped if not GPU is available"""
     if not torch.cuda.is_available():
         pytest.skip("Skipping test as is CUDA not available")
-    if os.environ.get('CPU_ONLY_TESTS') == 'y':
+    if os.environ.get("CPU_ONLY_TESTS") == "y":
         pytest.skip("Skipping as tests are running for CPU only")
-    return torch.device('cuda')
+    return torch.device("cuda")
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def set_seeds():
     def _set_seeds(val=123):
         torch.manual_seed(val)
@@ -56,23 +60,26 @@ def set_seeds():
         random.seed(val)
         torch.backends.cudnn.enabled = False
         torch.backends.cudnn.deterministic = True
+
     return _set_seeds
 
 
-@pytest.fixture(params=[
-    ResNet18ImageNetFeatures,
-    ResNet18ImageNetClassifier,
-    DenseNet161ImageNetFeatures,
-    DenseNet161ImageNetClassifier,
-    DenseNet161PlacesFeatures,
-    DenseNet161PlacesClassifier,
-    CLIPViTB32ImageEncoder,
-    MTCNNDetector,
-    ArcFaceFeatures,
-    MagFaceFeatures,
-    TorchMLModuleKeyFrames,
-    VinVLDetector,
-])
+@pytest.fixture(
+    params=[
+        ResNet18ImageNetFeatures,
+        ResNet18ImageNetClassifier,
+        DenseNet161ImageNetFeatures,
+        DenseNet161ImageNetClassifier,
+        DenseNet161PlacesFeatures,
+        DenseNet161PlacesClassifier,
+        CLIPViTB32ImageEncoder,
+        MTCNNDetector,
+        ArcFaceFeatures,
+        MagFaceFeatures,
+        TorchMLModuleKeyFrames,
+        VinVLDetector,
+    ]
+)
 def data_platform_scanner(request: SubRequest):
     """Fixture for generic tests of Modules to be used in the data platform
 
@@ -82,34 +89,40 @@ def data_platform_scanner(request: SubRequest):
     return request.param
 
 
-@pytest.fixture(params=[
-    ResNet18ImageNetFeatures,
-    DenseNet161ImageNetFeatures,
-    DenseNet161PlacesFeatures,
-    CLIPViTB32ImageEncoder,
-    MTCNNDetector,
-    VinVLDetector,
-])
+@pytest.fixture(
+    params=[
+        ResNet18ImageNetFeatures,
+        DenseNet161ImageNetFeatures,
+        DenseNet161PlacesFeatures,
+        CLIPViTB32ImageEncoder,
+        MTCNNDetector,
+        VinVLDetector,
+    ]
+)
 def image_module(request: SubRequest) -> Type[BaseTorchMLModule]:
     """MLModules operating on images"""
     return request.param
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def gpu_only_modules() -> Set[Type[BaseTorchMLModule]]:
     """MLModules operating on images"""
     return set()
 
 
-@pytest.fixture(params=[
-    CLIPViTB32ImageEncoder,
-    MTCNNDetector,
-    ArcFaceFeatures,
-    MagFaceFeatures,
-    TorchMLModuleKeyFrames,
-    # VinVLDetector - too slow to download
-])
-def provider_pretrained_module(request: SubRequest) -> DownloadPretrainedStateFromProvider:
+@pytest.fixture(
+    params=[
+        CLIPViTB32ImageEncoder,
+        MTCNNDetector,
+        ArcFaceFeatures,
+        MagFaceFeatures,
+        TorchMLModuleKeyFrames,
+        # VinVLDetector - too slow to download
+    ]
+)
+def provider_pretrained_module(
+    request: SubRequest,
+) -> DownloadPretrainedStateFromProvider:
     """Returns a module that implements DownloadPretrainedStateFromProvider"""
     return request.param
 
@@ -119,18 +132,19 @@ def assert_state_dict_equals() -> Callable[[StateDict, StateDict], None]:
     def _assert_state_dict_equals(sd1: StateDict, sd2: StateDict) -> None:
         for key in sd1:
             np.testing.assert_array_equal(sd1[key], sd2[key])
+
     return _assert_state_dict_equals
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def image_dataset() -> ImageDataset:
     """Sample image dataset"""
     base_path = os.path.join("tests", "fixtures", "faces")
-    file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))
+    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))
     return ImageDataset(file_names)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def video_file():
-    with open(os.path.join("tests", "fixtures", "video", "test.mp4"), mode='rb') as f:
+    with open(os.path.join("tests", "fixtures", "video", "test.mp4"), mode="rb") as f:
         yield f

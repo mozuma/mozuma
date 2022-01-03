@@ -1,4 +1,4 @@
-__all__ = ['MagFaceFeatures']
+__all__ = ["MagFaceFeatures"]
 
 
 from mlmodule.contrib.magface.features import MagFaceFeatures

@@ -4,11 +4,13 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from mlmodule.contrib.vinvl.models.structures.bounding_box import BoxList
-from mlmodule.contrib.vinvl.models.structures.boxlist_ops import boxlist_nms
-from mlmodule.contrib.vinvl.models.structures.boxlist_ops import cat_boxlist
 from mlmodule.contrib.vinvl.models.box_coder import BoxCoder
 from mlmodule.contrib.vinvl.models.layers import nms as box_nms
+from mlmodule.contrib.vinvl.models.structures.bounding_box import BoxList
+from mlmodule.contrib.vinvl.models.structures.boxlist_ops import (
+    boxlist_nms,
+    cat_boxlist,
+)
 
 
 class PostProcessor(nn.Module):
@@ -34,7 +36,7 @@ class PostProcessor(nn.Module):
         self.detections_per_img = cfg.MODEL.ROI_HEADS.DETECTIONS_PER_IMG
         self.min_detections_per_img = cfg.MODEL.ROI_HEADS.MIN_DETECTIONS_PER_IMG
         if box_coder is None:
-            box_coder = BoxCoder(weights=(10., 10., 5., 5.))
+            box_coder = BoxCoder(weights=(10.0, 10.0, 5.0, 5.0))
         self.box_coder = box_coder
         self.cls_agnostic_bbox_reg = cfg.MODEL.CLS_AGNOSTIC_BBOX_REG
         self.bbox_aug_enabled = cfg.TEST.BBOX_AUG.ENABLED
@@ -87,8 +89,9 @@ class PostProcessor(nn.Module):
             proposals = self.box_coder.decode(
                 box_regression.view(sum(boxes_per_image), -1), concat_boxes
             )
-        if (self.cls_agnostic_bbox_reg or self.ignore_box_regression) \
-                and (self.cfg.MODEL.ROI_HEADS.NMS_FILTER != 2):
+        if (self.cls_agnostic_bbox_reg or self.ignore_box_regression) and (
+            self.cfg.MODEL.ROI_HEADS.NMS_FILTER != 2
+        ):
             proposals = proposals.repeat(1, class_prob.shape[1])
 
         num_classes = class_prob.shape[1]
@@ -108,36 +111,42 @@ class PostProcessor(nn.Module):
                     # predict the most likely object in the box
                     # Skip j = 0, because it's the background class
                     scores, labels = torch.max(prob[:, 1:], dim=1)
-                    boxlist.extra_fields['scores'] = scores
-                    boxlist.add_field('labels', labels + 1)
+                    boxlist.extra_fields["scores"] = scores
+                    boxlist.add_field("labels", labels + 1)
                     if self.output_feature:
-                        boxlist.add_field('box_features', feature)
-                        boxlist.add_field('scores_all', prob)
-                        boxlist.add_field('boxes_all',
-                                          boxes_per_img.view(-1, 1, 4))
+                        boxlist.add_field("box_features", feature)
+                        boxlist.add_field("scores_all", prob)
+                        boxlist.add_field("boxes_all", boxes_per_img.view(-1, 1, 4))
                 else:
                     boxlist = self.prepare_empty_boxlist(boxlist)
             else:
-                if not self.bbox_aug_enabled:  # If bbox aug is enabled, we will do it later
+                if (
+                    not self.bbox_aug_enabled
+                ):  # If bbox aug is enabled, we will do it later
                     # to enforce minimum number of detections per image
                     # we will do a binary search on the confidence threshold
-                    new_boxlist = self.filter_method(
-                        boxlist, num_classes, feature)
+                    new_boxlist = self.filter_method(boxlist, num_classes, feature)
 
                     if self.cfg.MODEL.ROI_HEADS.NMS_FILTER == 2:
                         boxlist = new_boxlist
                     else:
                         initial_conf_thresh = self.score_thresh
                         decrease_num = 0
-                        while new_boxlist.bbox.shape[0] < \
-                                self.min_detections_per_img and decrease_num < 10:
+                        while (
+                            new_boxlist.bbox.shape[0] < self.min_detections_per_img
+                            and decrease_num < 10
+                        ):
                             self.score_thresh /= 2.0
-                            print(("\nNumber of proposals {} is too small, "
-                                   "retrying filter_results with score thresh"
-                                   " = {}").format(new_boxlist.bbox.shape[0],
-                                                   self.score_thresh))
+                            print(
+                                (
+                                    "\nNumber of proposals {} is too small, "
+                                    "retrying filter_results with score thresh"
+                                    " = {}"
+                                ).format(new_boxlist.bbox.shape[0], self.score_thresh)
+                            )
                             new_boxlist = self.filter_method(
-                                boxlist, num_classes, feature)
+                                boxlist, num_classes, feature
+                            )
                             decrease_num += 1
                         boxlist = new_boxlist
                         self.score_thresh = initial_conf_thresh
@@ -166,24 +175,22 @@ class PostProcessor(nn.Module):
     def prepare_empty_boxlist(self, boxlist):
         device = boxlist.bbox.device
         # create an empty boxlist on cuda
-        boxlist_empty = BoxList(torch.zeros((0, 4)).to(device),
-                                boxlist.size, mode='xyxy')
+        boxlist_empty = BoxList(
+            torch.zeros((0, 4)).to(device), boxlist.size, mode="xyxy"
+        )
         boxlist_empty.add_field("scores", torch.Tensor([]).to(device))
-        boxlist_empty.add_field("labels", torch.full((0,), -1,
-                                                     dtype=torch.int64,
-                                                     device=device))
+        boxlist_empty.add_field(
+            "labels", torch.full((0,), -1, dtype=torch.int64, device=device)
+        )
         if self.output_feature:
             boxlist_empty.add_field(
-                "box_features",
-                torch.full((0,), -1, dtype=torch.float32, device=device)
+                "box_features", torch.full((0,), -1, dtype=torch.float32, device=device)
             )
             boxlist_empty.add_field(
-                "scores_all",
-                torch.full((0,), -1, dtype=torch.float32, device=device)
+                "scores_all", torch.full((0,), -1, dtype=torch.float32, device=device)
             )
             boxlist_empty.add_field(
-                "boxes_all",
-                torch.full((0,), -1, dtype=torch.float32, device=device)
+                "boxes_all", torch.full((0,), -1, dtype=torch.float32, device=device)
             )
         return boxlist_empty
 
@@ -207,7 +214,7 @@ class PostProcessor(nn.Module):
 
             if len(inds) > 0:
                 scores_j = scores[inds, j]
-                boxes_j = boxes[inds, j * 4: (j + 1) * 4]
+                boxes_j = boxes[inds, j * 4 : (j + 1) * 4]
                 boxlist_for_class = BoxList(boxes_j, boxlist.size, mode="xyxy")
                 boxlist_for_class.add_field("scores", scores_j)
 
@@ -217,16 +224,15 @@ class PostProcessor(nn.Module):
 
                     scores_all = scores[inds]
                     boxlist_for_class.add_field("scores_all", scores_all)
-                    boxlist_for_class.add_field("boxes_all",
-                                                boxes[inds].view(-1, num_classes, 4))
+                    boxlist_for_class.add_field(
+                        "boxes_all", boxes[inds].view(-1, num_classes, 4)
+                    )
 
-                boxlist_for_class = boxlist_nms(
-                    boxlist_for_class, self.nms
-                )
+                boxlist_for_class = boxlist_nms(boxlist_for_class, self.nms)
                 num_labels = len(boxlist_for_class)
                 boxlist_for_class.add_field(
-                    "labels", torch.full(
-                        (num_labels,), j, dtype=torch.int64, device=device)
+                    "labels",
+                    torch.full((num_labels,), j, dtype=torch.int64, device=device),
                 )
                 result.append(boxlist_for_class)
             else:
@@ -262,14 +268,11 @@ class PostProcessor(nn.Module):
         # Skip j = 0, because it's the background class
         for j in range(1, num_classes):
             scores_j = scores[:, j]
-            boxes_j = boxes[:, j * 4: (j + 1) * 4]
+            boxes_j = boxes[:, j * 4 : (j + 1) * 4]
             boxlist_for_class = BoxList(boxes_j, boxlist.size, mode="xyxy")
             boxlist_for_class.add_field("scores", scores_j)
-            boxlist_for_class.add_field("idxs",
-                                        torch.arange(0, scores.shape[0]).long())
-            boxlist_for_class = boxlist_nms(
-                boxlist_for_class, 0.3
-            )
+            boxlist_for_class.add_field("idxs", torch.arange(0, scores.shape[0]).long())
+            boxlist_for_class = boxlist_nms(boxlist_for_class, 0.3)
             nms_mask[:, j][boxlist_for_class.get_field("idxs")] = 1
 
         dists_all = nms_mask * scores
@@ -284,8 +287,9 @@ class PostProcessor(nn.Module):
         scores_pre = scores_pre[inds_pre]
 
         box_inds_pre = inds_pre * scores.shape[1] + labels_pre
-        result = BoxList(boxlist.bbox.view(-1, 4)[box_inds_pre], boxlist.size,
-                         mode="xyxy")
+        result = BoxList(
+            boxlist.bbox.view(-1, 4)[box_inds_pre], boxlist.size, mode="xyxy"
+        )
         result.add_field("labels", labels_pre)
         result.add_field("scores", scores_pre)
         if self.output_feature:
@@ -298,13 +302,12 @@ class PostProcessor(nn.Module):
             result.add_field("boxes_all", boxes_all.view(-1, num_classes, 4))
 
         vs, idx = torch.sort(scores_pre, dim=0, descending=True)
-        keep_boxes = torch.nonzero(
-            scores_pre >= self.score_thresh, as_tuple=True)[0]
+        keep_boxes = torch.nonzero(scores_pre >= self.score_thresh, as_tuple=True)[0]
         num_dets = len(keep_boxes)
         if num_dets < self.min_detections_per_img:
-            keep_boxes = idx[:self.min_detections_per_img]
+            keep_boxes = idx[: self.min_detections_per_img]
         elif num_dets > self.detections_per_img:
-            keep_boxes = idx[:self.detections_per_img]
+            keep_boxes = idx[: self.detections_per_img]
         else:
             keep_boxes = idx[:num_dets]
 
@@ -312,8 +315,7 @@ class PostProcessor(nn.Module):
         return result
 
     def filter_results_fast(self, boxlist, num_classes, feature=None):
-        """ perform only one NMS for all classes.
-        """
+        """perform only one NMS for all classes."""
         assert boxlist.bbox.shape[1] == 4
         scores = boxlist.get_field("scores").reshape(-1, num_classes)
 
@@ -334,8 +336,10 @@ class PostProcessor(nn.Module):
         ws = (x2 - x1).squeeze(1)
         hs = (y2 - y1).squeeze(1)
         keep = (
-            (ws >= 0) & (hs >= 0) & (scores > self.score_thresh * 0.01)
-        ).nonzero(as_tuple=False).squeeze(1)
+            ((ws >= 0) & (hs >= 0) & (scores > self.score_thresh * 0.01))
+            .nonzero(as_tuple=False)
+            .squeeze(1)
+        )
         del ws, hs
 
         # apply nms to the previous low-thresholded results
@@ -349,10 +353,15 @@ class PostProcessor(nn.Module):
         num_dets = (nms_scores >= self.score_thresh).long().sum()
         if not isinstance(num_dets, torch.Tensor):
             num_dets = torch.as_tensor(num_dets, device=scores.device)
-        min_det = torch.stack([num_dets, torch.as_tensor(
-            self.min_detections_per_img, device=scores.device)]).max()
-        max_det = torch.stack([min_det, torch.as_tensor(
-            self.detections_per_img, device=scores.device)]).min()
+        min_det = torch.stack(
+            [
+                num_dets,
+                torch.as_tensor(self.min_detections_per_img, device=scores.device),
+            ]
+        ).max()
+        max_det = torch.stack(
+            [min_det, torch.as_tensor(self.detections_per_img, device=scores.device)]
+        ).min()
 
         keep_boxes = idx[:max_det]
 

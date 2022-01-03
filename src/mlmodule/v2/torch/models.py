@@ -6,13 +6,9 @@ import torch
 
 
 class TorchModel(torch.nn.Module):
-
     def set_state(self, state: bytes, **options) -> None:
-        map_location = options.get('device')
-        state_dict = torch.load(
-            BytesIO(state),
-            map_location=map_location
-        )
+        map_location = options.get("device")
+        state_dict = torch.load(BytesIO(state), map_location=map_location)
         self.load_state_dict(state_dict)
 
     def get_state(self, **options) -> bytes:

@@ -1,22 +1,21 @@
 """CLIP text encoder"""
 __all__ = (
-    'CLIPTextEncoder',
-    'CLIPResNet50TextEncoder',
-    'CLIPResNet101TextEncoder',
-    'CLIPResNet50x4TextEncoder',
-    'CLIPViTB32TextEncoder'
+    "CLIPTextEncoder",
+    "CLIPResNet50TextEncoder",
+    "CLIPResNet101TextEncoder",
+    "CLIPResNet50x4TextEncoder",
+    "CLIPViTB32TextEncoder",
 )
 
-from typing import Optional, List, Callable, TypeVar, Union
-from typing_extensions import Literal
+from typing import Callable, List, Optional, TypeVar, Union
 
 import clip
 import torch
+from typing_extensions import Literal
 
 from mlmodule.contrib.clip.base import BaseCLIPModule
 
-
-_IndexType = TypeVar('_IndexType', covariant=True)
+_IndexType = TypeVar("_IndexType", covariant=True)
 
 
 def tokenize_single(text: str) -> torch.LongTensor:
@@ -26,7 +25,8 @@ def tokenize_single(text: str) -> torch.LongTensor:
 
 class CLIPTextEncoder(BaseCLIPModule[_IndexType, str]):
     """Text encoder of CLIP model"""
-    model_type: Union[Literal['image'], Literal['text']] = "text"
+
+    model_type: Union[Literal["image"], Literal["text"]] = "text"
 
     def __init__(self, device: Optional[torch.device] = None):
         super().__init__(device=device)
@@ -67,19 +67,23 @@ class CLIPTextEncoder(BaseCLIPModule[_IndexType, str]):
 
 class CLIPResNet50TextEncoder(CLIPTextEncoder):
     """CLIP text encoder - ResNet50"""
+
     clip_model_name = "RN50"
 
 
 class CLIPResNet101TextEncoder(CLIPTextEncoder):
     """CLIP text encoder - ResNet101"""
+
     clip_model_name = "RN101"
 
 
 class CLIPResNet50x4TextEncoder(CLIPTextEncoder):
     """CLIP text encoder - ResNet50x4"""
+
     clip_model_name = "RN50x4"
 
 
 class CLIPViTB32TextEncoder(CLIPTextEncoder):
     """CLIP text encoder - ViT-B/32"""
+
     clip_model_name = "ViT-B/32"

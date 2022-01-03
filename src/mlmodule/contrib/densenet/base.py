@@ -4,7 +4,6 @@ from mlmodule.torch.base import BaseTorchMLModule
 
 
 class BaseDenseNetPretrainedModule(BaseTorchMLModule):
-
     def __init__(self, densenet_arch, dataset="imagenet", device=None):
         """
         :param densenet_arch: One of {"densenet121", "densenet161", "densenet169", "densenet201"}
@@ -13,7 +12,12 @@ class BaseDenseNetPretrainedModule(BaseTorchMLModule):
         super().__init__(device=device)
 
         # Check input parameters
-        assert densenet_arch in ["densenet121", "densenet161", "densenet169", "densenet201"]
+        assert densenet_arch in [
+            "densenet121",
+            "densenet161",
+            "densenet169",
+            "densenet201",
+        ]
         assert dataset in ["imagenet", "places365"]
 
         self.densenet_arch = densenet_arch
