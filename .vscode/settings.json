@@ -1,6 +1,13 @@
 {
+    "files.watcherExclude": {
+        "**/.tmp/**": true,
+        "**/.tox/**": true,
+        "**/venv/**": true
+    },
     "githubIssues.issueBranchTitle": "issues/${issueNumber}-${sanitizedIssueTitle}",
+    "githubPullRequests.defaultMergeMethod": "squash",
     "python.linting.flake8Enabled": true,
+    "python.testing.pytestEnabled": true,
     "python.linting.mypyEnabled": true,
     "python.formatting.provider": "black"
 }

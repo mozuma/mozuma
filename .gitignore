@@ -1,6 +1,7 @@
 .idea
 .vscode/*
 !.vscode/settings.json
+!.vscode/tasks.json
 
 .env
 
