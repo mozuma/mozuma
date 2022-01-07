@@ -1,2 +1,3 @@
 include src/mlmodule/contrib/arcface/normalized_faces.npy
 include src/mlmodule/py.typed
+include src/mlmodule/contrib/sentences/distilbert/tokenizer.json
