@@ -10,11 +10,11 @@ from mlmodule.contrib.keyframes.transforms import (
 )
 from mlmodule.contrib.resnet.features import ResNet18ImageNetFeatures
 from mlmodule.torch.base import TorchMLModuleFeatures
-from mlmodule.v2.torch.models import TorchModel
+from mlmodule.v2.torch.modules import TorchMlModule
 
 
-class GenericVideoFramesEncoder(TorchModel):
-    def __init__(self, image_encoder: TorchModel):
+class GenericVideoFramesEncoder(TorchMlModule):
+    def __init__(self, image_encoder: TorchMlModule):
         super().__init__()
         self.image_encoder = image_encoder
 

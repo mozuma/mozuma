@@ -5,7 +5,11 @@ from typing import Callable, List
 import torch
 
 
-class TorchModel(torch.nn.Module):
+class TorchMlModule(torch.nn.Module):
+    """
+    Module for Torch models.
+    """
+
     def set_state(self, state: bytes, **options) -> None:
         map_location = options.get("device")
         state_dict = torch.load(BytesIO(state), map_location=map_location)
@@ -19,3 +23,13 @@ class TorchModel(torch.nn.Module):
     @abc.abstractmethod
     def get_dataset_transforms(self) -> List[Callable]:
         """Returns a callable that will by used to tranform input data into a Tensor passed to the forward function"""
+
+    def batch_to_device(batch_data):
+        if isinstance(batch, tuple):
+            return tuple(send_batch_to_device(b, device) for b in batch)
+        elif isinstance(batch, list):
+            return [send_batch_to_device(b, device) for b in batch]
+        elif hasattr(batch, "to"):
+            return batch.to(device)
+        else:
+            return batch
