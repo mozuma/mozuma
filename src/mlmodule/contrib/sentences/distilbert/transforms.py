@@ -9,6 +9,9 @@ from tokenizers import Encoding, Tokenizer
 class TokenizerTransform:
     tokenizer: Tokenizer
 
-    def __call__(self, text: str) -> Tuple[torch.IntTensor, torch.IntTensor]:
+    def __call__(self, text: str) -> Tuple[torch.LongTensor, torch.FloatTensor]:
         encoding: Encoding = self.tokenizer.encode(text)
-        return (torch.IntTensor(encoding.ids), torch.IntTensor(encoding.attention_mask))
+        return (
+            torch.LongTensor(encoding.ids),
+            torch.FloatTensor(encoding.attention_mask),
+        )

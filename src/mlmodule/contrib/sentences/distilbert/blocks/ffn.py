@@ -1,10 +1,11 @@
 from torch import nn
 
+from mlmodule.contrib.sentences.distilbert.config import DistilBertConfig
 from mlmodule.contrib.sentences.distilbert.utils import apply_chunking_to_forward
 
 
 class FFN(nn.Module):
-    def __init__(self, config):
+    def __init__(self, config: DistilBertConfig):
         super().__init__()
         self.dropout = nn.Dropout(p=config.dropout)
         self.chunk_size_feed_forward = config.chunk_size_feed_forward

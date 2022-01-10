@@ -3,6 +3,8 @@ import torch
 from packaging import version
 from torch import nn
 
+from mlmodule.contrib.sentences.distilbert.config import DistilBertConfig
+
 
 def create_sinusoidal_embeddings(n_pos, dim, out):
     position_enc = np.array(
@@ -18,7 +20,7 @@ def create_sinusoidal_embeddings(n_pos, dim, out):
 
 
 class Embeddings(nn.Module):
-    def __init__(self, config):
+    def __init__(self, config: DistilBertConfig):
         super().__init__()
         self.word_embeddings = nn.Embedding(
             config.vocab_size, config.dim, padding_idx=config.pad_token_id

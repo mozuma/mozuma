@@ -2,7 +2,6 @@ from typing import Union
 
 from torch import nn
 
-from ..outputs import BaseModelOutput
 from .attentions import MultiHeadSelfAttention
 from .ffn import FFN
 
@@ -75,8 +74,7 @@ class Transformer(nn.Module):
         head_mask=None,
         output_attentions=False,
         output_hidden_states=False,
-        return_dict=None,
-    ) -> Union[tuple, BaseModelOutput]:  # docstyle-ignore
+    ) -> tuple:  # docstyle-ignore
         """
         Parameters:
             x: torch.tensor(bs, seq_length, dim) Input sequence embedded.
@@ -118,14 +116,8 @@ class Transformer(nn.Module):
         if output_hidden_states:
             all_hidden_states = all_hidden_states + (hidden_state,)
 
-        if not return_dict:
-            return tuple(
-                v
-                for v in [hidden_state, all_hidden_states, all_attentions]
-                if v is not None
-            )
-        return BaseModelOutput(
-            last_hidden_state=hidden_state,
-            hidden_states=all_hidden_states,
-            attentions=all_attentions,
+        return tuple(
+            v
+            for v in [hidden_state, all_hidden_states, all_attentions]
+            if v is not None
         )

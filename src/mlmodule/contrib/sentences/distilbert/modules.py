@@ -1,11 +1,10 @@
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
 import torch
 from tokenizers import Tokenizer
 
-from mlmodule.contrib.sentences.distilbert.outputs import BaseModelOutput
 from mlmodule.contrib.sentences.distilbert.transforms import TokenizerTransform
 from mlmodule.v2.torch.modules import TorchMlModule
 from mlmodule.v2.torch.utils import add_prefix_to_state_dict
@@ -120,14 +119,13 @@ class BaseDistilBertModule(TorchMlModule):
 
     def forward_transformer(
         self,
-        input_ids=None,
-        attention_mask=None,
-        head_mask=None,
-        inputs_embeds=None,
-        output_attentions=None,
-        output_hidden_states=None,
-        return_dict=None,
-    ) -> BaseModelOutput:
+        input_ids: Optional[torch.LongTensor] = None,
+        attention_mask: Optional[torch.FloatTensor] = None,
+        head_mask: Optional[Union[torch.FloatTensor, List[None]]] = None,
+        inputs_embeds: Optional[torch.FloatTensor] = None,
+        output_attentions: bool = None,
+        output_hidden_states: bool = None,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Args:
             input_ids (`torch.LongTensor` of shape `(batch_size)`):
@@ -161,8 +159,6 @@ class BaseDistilBertModule(TorchMlModule):
             output_hidden_states (`bool`, *optional*):
                 Whether or not to return the hidden states of all layers.
                 See `hidden_states` under returned tensors for more detail.
-            return_dict (`bool`, *optional*):
-                Whether or not to return a [`~file_utils.ModelOutput`] instead of a plain tuple.
         """
         output_attentions = (
             output_attentions
@@ -173,9 +169,6 @@ class BaseDistilBertModule(TorchMlModule):
             output_hidden_states
             if output_hidden_states is not None
             else self.config.output_hidden_states
-        )
-        return_dict = (
-            return_dict if return_dict is not None else self.config.use_return_dict
         )
 
         if input_ids is not None and inputs_embeds is not None:
@@ -205,15 +198,12 @@ class BaseDistilBertModule(TorchMlModule):
             head_mask=head_mask,
             output_attentions=output_attentions,
             output_hidden_states=output_hidden_states,
-            return_dict=return_dict,
         )
 
     def forward(
-        self, input_ids: torch.IntTensor, attention_mask: torch.IntTensor
+        self, input_ids: torch.LongTensor, attention_mask: torch.FloatTensor
     ) -> torch.Tensor:
-        output_tokens, _ = self.forward_transformer(
-            input_ids, attention_mask, return_dict=False
-        )
+        output_tokens, _ = self.forward_transformer(input_ids, attention_mask)
         features = self.pool.forward(
             {"token_embeddings": output_tokens, "attention_mask": attention_mask}
         )
@@ -253,12 +243,10 @@ class DistilUseBaseMultilingualCasedV2Module(BaseDistilBertModule):
             n_heads=12,
             n_layers=6,
             output_hidden_states=True,
-            output_past=True,
             pad_token_id=0,
             qa_dropout=0.1,
             seq_classif_dropout=0.2,
             sinusoidal_pos_embds=False,
-            tie_weights_=True,
         )
         pooling_config = {
             "word_embedding_dimension": 768,

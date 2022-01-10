@@ -3,9 +3,11 @@ import math
 import torch
 from torch import nn
 
+from mlmodule.contrib.sentences.distilbert.config import DistilBertConfig
+
 
 class MultiHeadSelfAttention(nn.Module):
-    def __init__(self, config):
+    def __init__(self, config: DistilBertConfig):
         super().__init__()
 
         self.n_heads = config.n_heads
@@ -18,8 +20,6 @@ class MultiHeadSelfAttention(nn.Module):
         self.k_lin = nn.Linear(in_features=config.dim, out_features=config.dim)
         self.v_lin = nn.Linear(in_features=config.dim, out_features=config.dim)
         self.out_lin = nn.Linear(in_features=config.dim, out_features=config.dim)
-
-        self.pruned_heads = set()
 
     def forward(self, query, key, value, mask, head_mask=None, output_attentions=False):
         """
