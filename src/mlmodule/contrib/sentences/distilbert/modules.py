@@ -1,11 +1,11 @@
 from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Union
 
+import requests
 import torch
 from tokenizers import Tokenizer
 
 from mlmodule.contrib.sentences.distilbert.outputs import BaseModelOutput
-from mlmodule.contrib.sentences.distilbert.tokenizers import get_distil_bert_tokenizer
 from mlmodule.contrib.sentences.distilbert.transforms import TokenizerTransform
 from mlmodule.v2.torch.modules import TorchMlModule
 from mlmodule.v2.torch.utils import add_prefix_to_state_dict
@@ -18,18 +18,10 @@ from .config import DistilBertConfig
 
 
 class BaseDistilBertModule(TorchMlModule):
-    _tokenizer: Optional[Tokenizer] = None
 
-    transformer_weights_url = (
-        "https://cdn-lfs.huggingface.co"
-        "/sentence-transformers/distiluse-base-multilingual-cased-v2"
-        "/0ea26561995c7c873e177e6801bb80f36511281d4d96c0f62aea6c19e85ddb7b"
-    )
-    dense_layer_weights_url = (
-        "https://cdn-lfs.huggingface.co"
-        "/sentence-transformers/distiluse-base-multilingual-cased-v2"
-        "/64fe81485f483cee6c54573686e4117a9e6f32e1579022d3621a1487d5bfea58"
-    )
+    transformer_weights_url: str
+    dense_layer_weights_url: str
+    tokenizer_params_url: str
 
     def __init__(
         self,
@@ -46,24 +38,37 @@ class BaseDistilBertModule(TorchMlModule):
         self.transformer = Transformer(config)  # Encoder
         self.pool = Pooling(**pooling_config)
         self.dense = Dense(**dense_config)
+        self._tokenizer: Optional[Tokenizer] = None
 
-    @classmethod
-    def get_tokenizer(cls) -> Tokenizer:
+    def get_tokenizer(self) -> Tokenizer:
         """Return a tokenizer loaded once and cached on the instance"""
-        if cls._tokenizer is None:
-            cls._tokenizer = get_distil_bert_tokenizer()
-        return cls._tokenizer
+        if self._tokenizer is None:
+            raise ValueError(
+                "The model tokenizer has not been initialised, try to load the model weights first"
+            )
+        return self._tokenizer
 
     def set_state_from_provider(self) -> None:
         """Gets model weigths from HuggingFace and applies them to the current model"""
+        # Loading embeddings and transformer weights
         state: OrderedDict[str, torch.Tensor] = torch.hub.load_state_dict_from_url(
             self.transformer_weights_url, map_location=self.device
         )
+        # Loading dense layer weights
         dense_state = torch.hub.load_state_dict_from_url(
             self.dense_layer_weights_url, map_location=self.device
         )
         state.update(add_prefix_to_state_dict(dense_state, "dense"))
+        # Loading weights
         self.load_state_dict(state)
+        # Loading tokenizer
+        resp = requests.get(self.tokenizer_params_url)
+        if resp.status_code == 200:
+            self._tokenizer = Tokenizer.from_str(resp.text)
+        else:
+            raise ValueError(
+                f"Cannot load tokenizer configuration from {self.tokenizer_params_url}"
+            )
 
     def get_head_mask(
         self,
@@ -219,6 +224,22 @@ class BaseDistilBertModule(TorchMlModule):
 
 
 class DistilUseBaseMultilingualCasedV2Module(BaseDistilBertModule):
+
+    transformer_weights_url: str = (
+        "https://cdn-lfs.huggingface.co"
+        "/sentence-transformers/distiluse-base-multilingual-cased-v2"
+        "/0ea26561995c7c873e177e6801bb80f36511281d4d96c0f62aea6c19e85ddb7b"
+    )
+    dense_layer_weights_url: str = (
+        "https://cdn-lfs.huggingface.co"
+        "/sentence-transformers/distiluse-base-multilingual-cased-v2"
+        "/64fe81485f483cee6c54573686e4117a9e6f32e1579022d3621a1487d5bfea58"
+    )
+    tokenizer_params_url: str = (
+        "https://huggingface.co"
+        "/sentence-transformers/distiluse-base-multilingual-cased-v2/raw/main/tokenizer.json"
+    )
+
     def __init__(self, device: torch.device):
         config = DistilBertConfig(
             vocab_size=119547,
