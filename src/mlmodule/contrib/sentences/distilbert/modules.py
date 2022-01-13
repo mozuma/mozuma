@@ -245,6 +245,9 @@ class DistilUseBaseMultilingualCasedV2Module(BaseDistilBertModule):
         "https://huggingface.co"
         "/sentence-transformers/distiluse-base-multilingual-cased-v2/raw/main/tokenizer.json"
     )
+    mlmodule_model_uri: str = (
+        "pretrained-models/sentences/distiluse-multilingual-cased-v2.pt"
+    )
 
     def __init__(self, device: torch.device):
         config = DistilBertConfig(
