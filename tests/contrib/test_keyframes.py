@@ -29,8 +29,9 @@ def test_compute_every_param_from_target_fps(
     assert compute_every_param_from_target_fps(video_fps, max_target_fps) == result
 
 
-def test_fps_video_extractor(video_file: BinaryIO):
-    frames = FPSVideoFrameExtractorTransform(fps=1)(video_file)
+def test_fps_video_extractor(video_file_path: str):
+    with open(video_file_path, mode="rb") as video_file:
+        frames = FPSVideoFrameExtractorTransform(fps=1)(video_file)
     assert len(frames) == 2
     assert len(frames[0]) == 83
     assert len(frames[1]) == 83

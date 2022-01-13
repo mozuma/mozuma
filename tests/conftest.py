@@ -18,6 +18,7 @@ from mlmodule.contrib.densenet import (
 from mlmodule.contrib.keyframes.v1 import TorchMLModuleKeyFrames
 from mlmodule.contrib.magface.features import MagFaceFeatures
 from mlmodule.contrib.mtcnn import MTCNNDetector
+from mlmodule.contrib.mtcnn.detector_ori import MTCNNDetectorOriginal
 from mlmodule.contrib.resnet import ResNet18ImageNetClassifier, ResNet18ImageNetFeatures
 from mlmodule.contrib.vinvl import VinVLDetector
 from mlmodule.torch.base import BaseTorchMLModule
@@ -74,6 +75,7 @@ def set_seeds():
         DenseNet161PlacesClassifier,
         CLIPViTB32ImageEncoder,
         MTCNNDetector,
+        MTCNNDetectorOriginal,
         ArcFaceFeatures,
         MagFaceFeatures,
         TorchMLModuleKeyFrames,
@@ -96,6 +98,7 @@ def data_platform_scanner(request: SubRequest):
         DenseNet161PlacesFeatures,
         CLIPViTB32ImageEncoder,
         MTCNNDetector,
+        MTCNNDetectorOriginal,
         VinVLDetector,
     ]
 )
@@ -145,6 +148,5 @@ def image_dataset() -> ImageDataset:
 
 
 @pytest.fixture(scope="session")
-def video_file():
-    with open(os.path.join("tests", "fixtures", "video", "test.mp4"), mode="rb") as f:
-        yield f
+def video_file_path() -> str:
+    return os.path.join("tests", "fixtures", "video", "test.mp4")

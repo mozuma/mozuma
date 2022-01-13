@@ -1,68 +1,45 @@
-import dataclasses
 from typing import Dict, Iterable, List, Optional, Tuple, TypeVar, Union, cast
 
 import numpy as np
 import torch
-from torchvision import transforms
 
 from mlmodule.box import BBoxCollection, BBoxOutputArrayFormat
 from mlmodule.contrib.mtcnn.mtcnn import MLModuleMTCNN
 from mlmodule.torch.base import TorchMLModuleBBox
 from mlmodule.torch.data.base import MLModuleDatasetProtocol
-from mlmodule.torch.mixins import (
-    DownloadPretrainedStateFromProvider,
-    ResizableImageInputMixin,
-)
+from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
 from mlmodule.types import ImageDatasetType
 
 _IndexType = TypeVar("_IndexType", contravariant=True)
 
 
-@dataclasses.dataclass
-class ResizeWithAspectRatios:
-    """
-    :param img_size: Desired output size (height, width).
-    """
-
-    img_size: Tuple[int, int]
-
-    def __call__(self, img) -> Tuple[np.ndarray, np.ndarray]:
-        height, width = self.img_size
-        return (
-            np.uint8(transforms.Resize(self.img_size)(img)),
-            np.array([x / target for x, target in zip(img.size, (width, height))]),
-        )
+def pil_to_array(img):
+    return np.array(img, dtype=np.uint8)
 
 
-class MTCNNDetector(
+class MTCNNDetectorOriginal(
     TorchMLModuleBBox[_IndexType, ImageDatasetType],
     DownloadPretrainedStateFromProvider,
-    ResizableImageInputMixin,
 ):
-    """Face detection module"""
+    """Face detection module without support for batch"""
 
     state_dict_key = "pretrained-models/face-detection/mtcnn.pt"
 
     def __init__(
         self,
         thresholds=None,
-        image_size: Tuple[int, int] = (720, 720),
         min_face_size=20,
         device=None,
     ):
         super().__init__(device=device)
         thresholds = thresholds or [0.6, 0.7, 0.7]
-        self.image_size = image_size
         self.mtcnn = MLModuleMTCNN(
             thresholds=thresholds,
             device=self.device,
             min_face_size=min_face_size,
             pretrained=False,
         )
-
-    def shrink_input_image_size(self) -> Tuple[int, int]:
-        return self.image_size
 
     def get_default_pretrained_state_dict_from_provider(
         self,
@@ -77,20 +54,17 @@ class MTCNNDetector(
         }
         return torch_apply_state_to_partial_model(self, pretrained_dict)
 
-    def forward(self, x, aspect_ratios) -> BBoxOutputArrayFormat:
+    def forward(self, x) -> BBoxOutputArrayFormat:
         prob: Iterable[Union[np.ndarray, List[None]]]
         boxes: List[Union[np.ndarray, None]]
         landmarks: List[Union[np.ndarray, None]]
         boxes, prob, landmarks = self.mtcnn.detect(x, landmarks=True)
         # Applying aspect ratios
-        aspect_ratios = aspect_ratios.numpy()
         boxes_clean: List[np.ndarray] = [
-            b * np.hstack((a, a)) if b is not None else np.array([])
-            for b, a in zip(boxes, aspect_ratios)
+            b if b is not None else np.array([]) for b in boxes
         ]
         landmarks_clean: List[np.ndarray] = [
-            land * a if land is not None else np.array([])
-            for land, a in zip(landmarks, aspect_ratios)
+            land if land is not None else np.array([]) for land in landmarks
         ]
         prob_clean: List[np.ndarray] = [
             cast(np.ndarray, p) if None not in p else np.array([]) for p in prob
@@ -112,10 +86,10 @@ class MTCNNDetector(
         """
         # Default batch size
         data_loader_options = options.pop("data_loader_options", {})
-        data_loader_options.setdefault("batch_size", 256)
+        data_loader_options["batch_size"] = 1
         return super().bulk_inference(
             data, data_loader_options=data_loader_options, **options
         )
 
     def get_dataset_transforms(self):
-        return [ResizeWithAspectRatios(self.image_size)]
+        return [pil_to_array]
