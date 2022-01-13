@@ -1,5 +1,5 @@
-from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from io import BytesIO
+from typing import Any, Callable, Dict, List, Optional, OrderedDict, Tuple, Union, cast
 
 import requests
 import torch
@@ -7,7 +7,7 @@ from tokenizers import Tokenizer
 
 from mlmodule.contrib.sentences.distilbert.transforms import TokenizerTransform
 from mlmodule.v2.torch.modules import TorchMlModule
-from mlmodule.v2.torch.utils import add_prefix_to_state_dict
+from mlmodule.v2.torch.utils import add_prefix_to_state_dict, save_state_dict_to_bytes
 
 from .blocks.dense import Dense
 from .blocks.embeddings import Embeddings
@@ -46,6 +46,22 @@ class BaseDistilBertModule(TorchMlModule):
                 "The model tokenizer has not been initialised, try to load the model weights first"
             )
         return self._tokenizer
+
+    def set_state(self, state: bytes, **options) -> None:
+        state_dict: OrderedDict[str, Union[torch.Tensor, str]] = torch.load(
+            BytesIO(state), map_location=self.device
+        )
+        tokenizer_config = cast(str, state_dict.pop("_tokenizer_json"))
+        self._tokenizer = Tokenizer.from_str(tokenizer_config)
+        self.load_state_dict(cast(OrderedDict[str, torch.Tensor], state_dict))
+
+    def get_state(self, **options) -> bytes:
+        # Getting the basic state
+        state = self.state_dict()
+
+        # Adding the tokenizer data
+        state["_tokenizer_json"] = self.get_tokenizer().to_str()
+        return save_state_dict_to_bytes(state)
 
     def set_state_from_provider(self) -> None:
         """Gets model weigths from HuggingFace and applies them to the current model"""
