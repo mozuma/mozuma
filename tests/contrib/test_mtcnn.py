@@ -7,7 +7,7 @@ from facenet_pytorch.models.mtcnn import MTCNN
 from torchvision.transforms import Compose, Resize
 
 from mlmodule.box import BBoxOutput, BBoxPoint
-from mlmodule.contrib.mtcnn import MTCNNDetector
+from mlmodule.contrib.mtcnn import MTCNNDetectorOriginal
 from mlmodule.torch.data.base import IndexedDataset
 from mlmodule.torch.data.images import (
     LoadRGBPILImage,
@@ -19,8 +19,8 @@ from mlmodule.utils import list_files_in_dir
 
 
 @pytest.fixture(scope="session")
-def mtcnn_instance(torch_device) -> MTCNNDetector[str]:
-    return MTCNNDetector[str](device=torch_device, min_face_size=20)
+def mtcnn_instance(torch_device) -> MTCNNDetectorOriginal[str]:
+    return MTCNNDetectorOriginal[str](device=torch_device, min_face_size=20)
 
 
 @pytest.fixture(scope="session")
@@ -35,7 +35,7 @@ def resized_images() -> Tuple[List[str], List[np.ndarray]]:
 
 @pytest.fixture(scope="session")
 def mtcnn_inference_results(
-    mtcnn_instance: MTCNNDetector[str],
+    mtcnn_instance: MTCNNDetectorOriginal[str],
     resized_images: Tuple[List[str], List[np.ndarray]],
 ):
     mtcnn = mtcnn_instance
@@ -66,7 +66,7 @@ def test_mtcnn_detector_inference(mtcnn_inference_results):
     )
 
 
-def test_mtcnn_detector_inference_no_faces(mtcnn_instance: MTCNNDetector[str]):
+def test_mtcnn_detector_inference_no_faces(mtcnn_instance: MTCNNDetectorOriginal[str]):
     base_path = os.path.join("tests", "fixtures", "cats_dogs")
     file_names = sorted(list_files_in_dir(base_path, allowed_extensions=("jpg",)))[:5]
     transforms = Compose([get_pil_image_from_file, convert_to_rgb, Resize((720, 720))])
@@ -127,3 +127,13 @@ def test_mtcnn_serialisation(mtcnn_inference_results, mtcnn_instance):
                 mtcnn_instance.to_binary(bbox.features)
             )
             np.testing.assert_equal(bbox.features, s_features)
+
+
+def test_mtcnn_small_images(mtcnn_instance: MTCNNDetectorOriginal):
+    dataset = IndexedDataset[int, np.ndarray](
+        [0, 1], [np.random.rand(14, 200), np.random.rand(14, 200)]
+    )
+
+    # Should not raise an error
+    _, output = mtcnn_instance.bulk_inference(dataset)
+    assert output == [[], []]
