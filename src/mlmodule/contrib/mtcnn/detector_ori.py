@@ -54,10 +54,21 @@ class MTCNNDetectorOriginal(
         }
         return torch_apply_state_to_partial_model(self, pretrained_dict)
 
-    def forward(self, x) -> BBoxOutputArrayFormat:
+    def forward(self, x: torch.Tensor) -> BBoxOutputArrayFormat:
         prob: Iterable[Union[np.ndarray, List[None]]]
         boxes: List[Union[np.ndarray, None]]
         landmarks: List[Union[np.ndarray, None]]
+
+        # Getting height and width
+        h, w = x.shape[1:3]
+        if h < self.mtcnn.min_face_size or w < self.mtcnn.min_face_size:
+            # Image is too small to detect images
+            return BBoxOutputArrayFormat(
+                bounding_boxes=[np.array([])],
+                probabilities=[np.array([])],
+                features=[np.array([])],
+            )
+
         boxes, prob, landmarks = self.mtcnn.detect(x, landmarks=True)
         # Applying aspect ratios
         boxes_clean: List[np.ndarray] = [
