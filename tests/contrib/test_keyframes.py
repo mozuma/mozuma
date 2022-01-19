@@ -37,30 +37,30 @@ def test_fps_video_extractor(video_file_path: str):
     assert len(frames[1]) == 83
 
 
-def test_keyframes_extractor(torch_device: torch.device, video_file: BinaryIO):
-    video_file.seek(0)
-    dataset = ListDataset([video_file])
+def test_keyframes_extractor(torch_device: torch.device, video_file_path: str):
+    with open(video_file_path, mode="rb") as video_file:
+        dataset = ListDataset([video_file])
 
-    inference_runner = KeyFramesInferenceFactory(
-        options=TorchRunnerOptions(device=torch_device)
-    ).get_runner()
+        inference_runner = KeyFramesInferenceFactory(
+            options=TorchRunnerOptions(device=torch_device)
+        ).get_runner()
 
-    indices, video_keyframes = inference_runner.bulk_inference(dataset)
-    assert len(indices) == 1
-    assert len(video_keyframes) == 1
-    assert len(video_keyframes[0]) > 0 and len(video_keyframes[0]) < 20
+        indices, video_keyframes = inference_runner.bulk_inference(dataset)
+        assert len(indices) == 1
+        assert len(video_keyframes) == 1
+        assert len(video_keyframes[0]) > 0 and len(video_keyframes[0]) < 21
 
 
-def test_keyframes_extractor_v1(torch_device: torch.device, video_file: BinaryIO):
-    video_file.seek(0)
-    dataset = ListDataset([video_file])
+def test_keyframes_extractor_v1(torch_device: torch.device, video_file_path: str):
+    with open(video_file_path, mode="rb") as video_file:
+        dataset = ListDataset([video_file])
 
-    model = TorchMLModuleKeyFrames(device=torch_device).load()
+        model = TorchMLModuleKeyFrames(device=torch_device).load()
 
-    indices, video_keyframes = model.bulk_inference(dataset)
-    assert len(indices) == 1
-    assert len(video_keyframes) == 1
-    assert len(video_keyframes[0]) > 0 and len(video_keyframes[0]) < 20
+        indices, video_keyframes = model.bulk_inference(dataset)
+        assert len(indices) == 1
+        assert len(video_keyframes) == 1
+        assert len(video_keyframes[0]) > 0 and len(video_keyframes[0]) < 20
 
 
 def test_keyframes_extractor_bad_file(torch_device: torch.device):

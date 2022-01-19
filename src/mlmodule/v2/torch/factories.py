@@ -9,13 +9,13 @@ from torchvision.transforms import Compose
 from mlmodule.v2.base.factories import AbstractRunnerFactory
 from mlmodule.v2.base.models import ModelWithState
 from mlmodule.v2.torch.datasets import TorchDatasetTransformsWrapper
-from mlmodule.v2.torch.models import TorchModel
+from mlmodule.v2.torch.modules import TorchMlModule
 from mlmodule.v2.torch.options import TorchRunnerOptions
 from mlmodule.v2.torch.results import AbstractResultsProcessor
 from mlmodule.v2.torch.runners import TorchInferenceRunner
 
 _Input = TypeVar("_Input")
-_Model = TypeVar("_Model", bound=TorchModel)
+_Model = TypeVar("_Model", bound=TorchMlModule)
 _Result = TypeVar("_Result")
 
 
