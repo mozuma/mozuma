@@ -22,6 +22,7 @@ class TorchMLModuleDistiluseV2(
     TorchMLModuleFeatures[_IndexType, TorchDataset[_IndexType, str]]
 ):
     state_dict_key = DistilUseBaseMultilingualCasedV2Module.mlmodule_model_uri
+
     def __init__(self, device: torch.device = None):
         super().__init__(device=device)
         self.transformer = DistilUseBaseMultilingualCasedV2Module(device=self.device)
