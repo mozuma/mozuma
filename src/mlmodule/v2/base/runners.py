@@ -1,7 +1,6 @@
 import abc
 from typing import Generic, TypeVar
 
-
 _Input = TypeVar("_Input")
 _Result = TypeVar("_Result")
 
