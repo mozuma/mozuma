@@ -1,5 +1,5 @@
-import pytest
 import numpy as np
+import pytest
 from sklearn.datasets import make_blobs
 
 from mlmodule.contrib.keyframes.keyframes import KeyFramesExtractor

@@ -1,9 +1,9 @@
 import os
-import requests
 from io import BytesIO
 
 import cv2
 import numpy as np
+import requests
 from PIL import Image
 
 CHUNK_SIZE = 32768
