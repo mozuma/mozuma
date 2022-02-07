@@ -55,6 +55,11 @@ class TorchResNetModule(TorchMlModule):
         )
         self.classifier_module = base_resnet.fc
 
+    @property
+    def mlmodule_model_uri(self) -> str:
+        """URI to download the model weights from MLModule"""
+        return f"image-encoder/{self.resnet_arch}-imagenet.pth"
+
     @classmethod
     def get_resnet_module(cls, resnet_arch: ResNetArchs) -> torchvision.models.ResNet:
         # Getting the ResNet architecture https://pytorch.org/docs/stable/torchvision/models.html

@@ -73,6 +73,24 @@ def module_pretrained_by_provider(
 
 @pytest.fixture(
     params=[
+        lambda: TorchResNetModule("resnet18")
+        # CLIPViTB32ImageEncoder,
+        # MTCNNDetector,
+        # ArcFaceFeatures,
+        # MagFaceFeatures,
+        # TorchMLModuleKeyFrames,
+        # VinVLDetector - too slow to download
+    ]
+)
+def module_pretrained_mlmodule_store(
+    request: SubRequest,
+) -> ModelWithStateFromProvider:
+    """Returns a module that implements DownloadPretrainedStateFromProvider"""
+    return request.param
+
+
+@pytest.fixture(
+    params=[
         ResNet18ImageNetFeatures,
         ResNet18ImageNetClassifier,
         DenseNet161ImageNetFeatures,

@@ -11,6 +11,8 @@ from mlmodule.metrics import MetricsCollector
 from mlmodule.serializers import Serializer
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
+from mlmodule.v2.base.models import ModelWithStateFromProvider
+from mlmodule.v2.base.stores import LocalFileModelStore
 from mlmodule.v2.torch.datasets import OpenBinaryFileDataset, TorchDataset
 
 logger = logging.getLogger(__name__)
@@ -31,17 +33,14 @@ def get_dataset(
 
 
 def download_fun(args: argparse.Namespace, metrics: Optional[dict] = None):
-    model: BaseTorchMLModule = args.module()
-    state_dict = model.get_default_pretrained_state_dict_from_provider()
-    if not hasattr(model, "state_dict_key"):
-        raise ValueError("The given model should have a state_dict_key attribute")
-    model.load_state_dict(state_dict)
-
-    logger.info(f"Writing keys {model.state_dict().keys()}")
-    with open(
-        os.path.join(args.outdir, os.path.basename(model.state_dict_key)), mode="wb"
-    ) as f:
-        model.dump(f)
+    model: ModelWithStateFromProvider = args.module(*args.args)
+    # Getting the model weights from provider
+    model.set_state_from_provider()
+    # Storing the weights in a local file
+    store = LocalFileModelStore(
+        os.path.join(args.outdir, os.path.basename(model.mlmodule_model_uri))
+    )
+    store.save(model)
 
 
 def run_fun(
@@ -127,6 +126,9 @@ def main():
         'and "MLModuleClass" is a class that implements '
         "the method "
         "get_default_pretrained_state_dict_from_provider()",
+    )
+    download.add_argument(
+        "--args", nargs="*", help="Additional arguments to initialize the module"
     )
     download.add_argument("--outdir", type=str, help="Output directory", default=".")
     download.set_defaults(func=download_fun)

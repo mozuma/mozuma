@@ -1,4 +1,8 @@
-__all__ = ["ResNet18ImageNetClassifier", "ResNet18ImageNetFeatures"]
+__all__ = [
+    "ResNet18ImageNetClassifier",
+    "ResNet18ImageNetFeatures",
+    "TorchResNetModule",
+]
 
 
 from mlmodule.contrib.resnet.classifiers import ResNet18ImageNetClassifier
