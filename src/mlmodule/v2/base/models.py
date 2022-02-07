@@ -6,7 +6,9 @@ class ModelWithState(Protocol):
     """Identifies a model that has state that can be set and gotten"""
 
     # Unique identifier for the model
-    mlmodule_model_uri: str
+    @property
+    def mlmodule_model_uri(self) -> str:
+        ...
 
     def set_state(self, state: bytes) -> None:
         ...

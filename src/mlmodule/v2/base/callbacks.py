@@ -1,24 +1,26 @@
-from typing import Any, Callable, Optional, Protocol, TypeVar
+from typing import Any, Callable, Optional, Sequence, TypeVar
+
+from typing_extensions import Protocol
 
 _ArrayType = TypeVar("_ArrayType", contravariant=True)
 
 
 class BaseSaveFeaturesCallback(Protocol[_ArrayType]):
-    def save_features(self, indices: _ArrayType, features: _ArrayType) -> None:
+    def save_features(self, indices: Sequence, features: _ArrayType) -> None:
         """Callback to save features output of a module"""
         pass
 
 
 class BaseSaveLabelsCallback(Protocol[_ArrayType]):
-    def save_labels(self, indices: _ArrayType, labels_scores: _ArrayType) -> None:
+    def save_labels(self, indices: Sequence, labels_scores: _ArrayType) -> None:
         """Callback to save labels scores from a module"""
         pass
 
 
-class BaseSaveBoundingBoxCallback(Protocol[_ArrayType]):
+class BaseSaveBoundingBoxCallback(Protocol):
 
     # TODO: Bounding box type definition
-    def save_bbox(self, indices: _ArrayType, bounding_boxes) -> None:
+    def save_bbox(self, indices: Sequence, bounding_boxes) -> None:
         """Callback to save bounding boxes from a module"""
 
 

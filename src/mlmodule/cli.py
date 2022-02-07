@@ -12,7 +12,7 @@ from mlmodule.serializers import Serializer
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
 from mlmodule.v2.base.models import ModelWithStateFromProvider
-from mlmodule.v2.base.stores import LocalFileModelStore
+from mlmodule.v2.stores import LocalFileModelStore
 from mlmodule.v2.torch.datasets import OpenBinaryFileDataset, TorchDataset
 
 logger = logging.getLogger(__name__)

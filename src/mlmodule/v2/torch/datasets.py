@@ -1,6 +1,8 @@
 import dataclasses
 from typing import BinaryIO, Callable, Generic, List, Tuple, TypeVar
 
+import PIL.Image
+from PIL.Image import Image
 from typing_extensions import Protocol
 
 _IndicesType = TypeVar("_IndicesType", covariant=True)
@@ -58,6 +60,17 @@ class OpenBinaryFileDataset:
 
     def __getitem__(self, index: int) -> Tuple[str, BinaryIO]:
         return self.paths[index], open(self.paths[index], mode="rb")
+
+    def __len__(self) -> int:
+        return len(self.paths)
+
+
+@dataclasses.dataclass
+class OpenImageFileDataset:
+    paths: List[str]
+
+    def __getitem__(self, index: int) -> Tuple[str, Image]:
+        return self.paths[index], PIL.Image.open(self.paths[index])
 
     def __len__(self) -> int:
         return len(self.paths)

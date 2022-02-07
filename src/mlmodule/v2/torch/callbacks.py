@@ -11,5 +11,5 @@ from mlmodule.v2.base.callbacks import (
 TorchRunnerCallbackType = Union[
     BaseSaveFeaturesCallback[torch.Tensor],
     BaseSaveLabelsCallback[torch.Tensor],
-    BaseSaveBoundingBoxCallback[torch.Tensor],
+    BaseSaveBoundingBoxCallback,
 ]

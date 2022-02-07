@@ -1,7 +1,7 @@
 from typing import Callable
 
 from mlmodule.v2.base.models import ModelWithState, ModelWithStateFromProvider
-from mlmodule.v2.base.stores import MLModuleModelStore
+from mlmodule.v2.stores import MLModuleModelStore
 
 
 def test_pretrained_download_from_provider_consistency(
