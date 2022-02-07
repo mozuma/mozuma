@@ -20,9 +20,17 @@ class TorchDataset(Protocol[_IndicesType, _DatasetType]):
 
 @dataclasses.dataclass
 class TorchDatasetTransformsWrapper(
+    TorchDataset[_IndicesType, _NewDatasetType],
     Generic[_IndicesType, _DatasetType, _NewDatasetType],
 ):
+    """Wraps a dataset with transforms
+
+    The returned object is a TorchDataset that can be used in DataLoader
+    """
+
+    # The source dataset
     dataset: TorchDataset[_IndicesType, _DatasetType]
+    # The transform function
     transform_func: Callable[[_DatasetType], _NewDatasetType]
 
     def __getitem__(self, index: int) -> Tuple[_IndicesType, _NewDatasetType]:

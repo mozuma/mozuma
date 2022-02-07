@@ -1,23 +1,20 @@
-from io import BytesIO
-from typing import Callable, Union
+from typing import Callable
 
-from mlmodule.torch.base import BaseTorchMLModule
-from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
-from mlmodule.types import StateDict
+from mlmodule.v2.base.models import ModelWithStateFromProvider
 
 
-def test_pretrained_download_from_provider(
-    provider_pretrained_module: Union[
-        BaseTorchMLModule, DownloadPretrainedStateFromProvider
-    ],
-    assert_state_dict_equals: Callable[[StateDict, StateDict], None],
+def test_pretrained_download_from_provider_consistency(
+    module_pretrained_by_provider: Callable[[], ModelWithStateFromProvider],
 ) -> None:
-    model: BaseTorchMLModule = provider_pretrained_module(device="cpu")
-    model.load_state_dict(model.get_default_pretrained_state_dict_from_provider())
-    buf = BytesIO()
-    model.dump(buf)
-    buf.seek(0)
+    # Making sure the set_state_from_provider changes internal state
+    model1 = module_pretrained_by_provider()
+    inital_state = model1.get_state()
+    model1.set_state_from_provider()
+    state_from_provider1 = model1.get_state()
+    assert inital_state != state_from_provider1
 
-    other_model: BaseTorchMLModule = provider_pretrained_module(device="cpu").load(buf)
-
-    assert_state_dict_equals(model.state_dict(), other_model.state_dict())
+    # Making sure that setting the state on a second model yields the same state
+    model2 = module_pretrained_by_provider()
+    model2.set_state_from_provider()
+    state_from_provider2 = model2.get_state()
+    assert state_from_provider1 == state_from_provider2

@@ -1,5 +1,4 @@
 import os
-import random
 from typing import Callable, Set, Type
 
 import numpy as np
@@ -15,17 +14,19 @@ from mlmodule.contrib.densenet import (
     DenseNet161PlacesClassifier,
     DenseNet161PlacesFeatures,
 )
-from mlmodule.contrib.keyframes.v1 import TorchMLModuleKeyFrames
+
+# from mlmodule.contrib.keyframes.v1 import TorchMLModuleKeyFrames
 from mlmodule.contrib.magface.features import MagFaceFeatures
 from mlmodule.contrib.mtcnn import MTCNNDetector
 from mlmodule.contrib.mtcnn.detector_ori import MTCNNDetectorOriginal
 from mlmodule.contrib.resnet import ResNet18ImageNetClassifier, ResNet18ImageNetFeatures
+from mlmodule.contrib.resnet.modules import TorchResNetModule
 from mlmodule.contrib.vinvl import VinVLDetector
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
-from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.types import StateDict
 from mlmodule.utils import list_files_in_dir
+from mlmodule.v2.base.models import ModelWithStateFromProvider
 
 
 @pytest.fixture(scope="session", params=["cpu", "cuda"])
@@ -52,17 +53,22 @@ def gpu_torch_device() -> torch.device:
     return torch.device("cuda")
 
 
-@pytest.fixture(scope="session")
-def set_seeds():
-    def _set_seeds(val=123):
-        torch.manual_seed(val)
-        torch.cuda.manual_seed(val)
-        np.random.seed(val)
-        random.seed(val)
-        torch.backends.cudnn.enabled = False
-        torch.backends.cudnn.deterministic = True
-
-    return _set_seeds
+@pytest.fixture(
+    params=[
+        lambda: TorchResNetModule("resnet18")
+        # CLIPViTB32ImageEncoder,
+        # MTCNNDetector,
+        # ArcFaceFeatures,
+        # MagFaceFeatures,
+        # TorchMLModuleKeyFrames,
+        # VinVLDetector - too slow to download
+    ]
+)
+def module_pretrained_by_provider(
+    request: SubRequest,
+) -> ModelWithStateFromProvider:
+    """Returns a module that implements DownloadPretrainedStateFromProvider"""
+    return request.param
 
 
 @pytest.fixture(
@@ -78,7 +84,7 @@ def set_seeds():
         MTCNNDetectorOriginal,
         ArcFaceFeatures,
         MagFaceFeatures,
-        TorchMLModuleKeyFrames,
+        # TorchMLModuleKeyFrames,
         VinVLDetector,
     ]
 )
@@ -111,23 +117,6 @@ def image_module(request: SubRequest) -> Type[BaseTorchMLModule]:
 def gpu_only_modules() -> Set[Type[BaseTorchMLModule]]:
     """MLModules operating on images"""
     return set()
-
-
-@pytest.fixture(
-    params=[
-        CLIPViTB32ImageEncoder,
-        MTCNNDetector,
-        ArcFaceFeatures,
-        MagFaceFeatures,
-        TorchMLModuleKeyFrames,
-        # VinVLDetector - too slow to download
-    ]
-)
-def provider_pretrained_module(
-    request: SubRequest,
-) -> DownloadPretrainedStateFromProvider:
-    """Returns a module that implements DownloadPretrainedStateFromProvider"""
-    return request.param
 
 
 @pytest.fixture

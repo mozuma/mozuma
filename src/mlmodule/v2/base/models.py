@@ -1,7 +1,7 @@
 import abc
 import os
 from io import BytesIO
-from typing import NoReturn, cast
+from typing import NoReturn
 
 import boto3
 from typing_extensions import Protocol, runtime_checkable
@@ -14,17 +14,17 @@ class ModelWithState(Protocol):
     # Unique identifier for the model
     mlmodule_model_uri: str
 
-    def set_state(self, state: bytes, **options) -> None:
+    def set_state(self, state: bytes) -> None:
         ...
 
-    def get_state(self, **options) -> bytes:
+    def get_state(self) -> bytes:
         ...
 
 
-class ModelWithStateFromProvider(Protocol):
+class ModelWithStateFromProvider(ModelWithState):
     """Set the model state from data provided by the model author."""
 
-    def set_state_from_provider(self, **options) -> None:
+    def set_state_from_provider(self) -> None:
         ...
 
 
@@ -32,21 +32,21 @@ class AbstractModelStore(abc.ABC):
     """Interface between model state store and the model architecture"""
 
     @abc.abstractmethod
-    def save(self, model: ModelWithState, **options) -> None:
+    def save(self, model: ModelWithState) -> None:
         """Saves the model to the binary file handler"""
 
     @abc.abstractmethod
-    def load(self, model: ModelWithState, **options) -> None:
+    def load(self, model: ModelWithState) -> None:
         """Loads the models weights from the binary file"""
 
 
 class MLModuleModelStore(AbstractModelStore):
     """Default MLModule store with model states stored in a S3 bucket"""
 
-    def save(self, model: ModelWithState, **options) -> NoReturn:
+    def save(self, model: ModelWithState) -> NoReturn:
         raise ValueError("MLModuleStore states are read-only")
 
-    def load(self, model: ModelWithState, **options) -> None:
+    def load(self, model: ModelWithState) -> None:
         """Reads the model weights from LSIR public assets S3"""
         session = boto3.session.Session(
             aws_access_key_id=os.environ.get("MLMODULE_AWS_ACCESS_KEY_ID"),
@@ -63,13 +63,4 @@ class MLModuleModelStore(AbstractModelStore):
 
         # Set the model state
         f.seek(0)
-        model.set_state(f.read(), **options)
-
-
-class ProviderModelStore(AbstractModelStore):
-    def save(self, model: ModelWithState, **options) -> NoReturn:
-        raise ValueError("ProviderModelStore states are read-only")
-
-    def load(self, model: ModelWithState, **options) -> None:
-        """Reads the model weights from LSIR public assets S3"""
-        cast(ModelWithStateFromProvider, model).set_state_from_provider(**options)
+        model.set_state(f.read())
