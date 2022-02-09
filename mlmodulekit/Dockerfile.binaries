@@ -19,6 +19,5 @@ RUN conda create -n app python=$PYTHON_VERSION cudatoolkit=$CUDA_VERSION \
 SHELL ["conda", "run", "-n", "app", "--no-capture-output", "/bin/bash", "-c"]
 
 # Install Pillow-SIMD w/ libjpeg-turbo
-COPY scripts/install-pillow-simd-w-libjpeg-turbo.sh /tmp/install-pillow-simd-w-libjpeg-turbo.sh
-RUN bash /tmp/install-pillow-simd-w-libjpeg-turbo.sh \
-    && rm /tmp/install-pillow-simd-w-libjpeg-turbo.sh
+COPY scripts/install-pillow-simd-w-libjpeg-turbo.sh /opt/scripts/install-pillow-simd-w-libjpeg-turbo.sh
+RUN bash /opt/scripts/install-pillow-simd-w-libjpeg-turbo.sh
