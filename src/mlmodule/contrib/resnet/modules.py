@@ -6,6 +6,8 @@ import torchvision.models
 from torch.hub import load_state_dict_from_url
 from typing_extensions import Literal
 
+from mlmodule.labels.base import LabelSet
+from mlmodule.labels.imagenet import IMAGENET_LABELS
 from mlmodule.v2.base.predictions import BatchModelPrediction
 from mlmodule.v2.torch.modules import TorchMlModule
 from mlmodule.v2.torch.transforms import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
@@ -109,3 +111,6 @@ class TorchResNetModule(TorchMlModule):
 
     def get_dataset_transforms(self) -> List[Callable]:
         return TORCHVISION_STANDARD_IMAGE_TRANSFORMS
+
+    def get_labels(self) -> LabelSet:
+        return IMAGENET_LABELS

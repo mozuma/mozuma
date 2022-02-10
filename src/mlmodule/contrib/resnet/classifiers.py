@@ -1,10 +1,10 @@
 import torch
 
 from mlmodule.contrib.resnet.base import BaseResNetImageNetModule
-from mlmodule.labels import ImageNetLabels, LabelsMixin
+from mlmodule.labels.imagenet import IMAGENET_LABELS
 
 
-class BaseResNetImageNetClassifier(BaseResNetImageNetModule, LabelsMixin):
+class BaseResNetImageNetClassifier(BaseResNetImageNetModule):
     """
     Default fully connected layer for classification before retraining
     """
@@ -25,7 +25,7 @@ class BaseResNetImageNetClassifier(BaseResNetImageNetModule, LabelsMixin):
         return self.fc(x)
 
     def get_labels(self):
-        return ImageNetLabels()
+        return IMAGENET_LABELS
 
     def get_dataset_transforms(self):
         return [torch.from_numpy]

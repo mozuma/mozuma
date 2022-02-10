@@ -2,18 +2,28 @@ from typing import Any, Callable, Optional, Sequence, TypeVar
 
 from typing_extensions import Protocol
 
+from mlmodule.v2.base.models import ModelWithLabels
+
 _ArrayType = TypeVar("_ArrayType", contravariant=True)
 
 
 class BaseSaveFeaturesCallback(Protocol[_ArrayType]):
-    def save_features(self, indices: Sequence, features: _ArrayType) -> None:
+    def save_features(
+        self, model: Any, indices: Sequence, features: _ArrayType
+    ) -> None:
         """Callback to save features output of a module"""
         pass
 
 
 class BaseSaveLabelsCallback(Protocol[_ArrayType]):
-    def save_labels(self, indices: Sequence, labels_scores: _ArrayType) -> None:
-        """Callback to save labels scores from a module"""
+    def save_label_scores(
+        self, model: ModelWithLabels, indices: Sequence, labels_scores: _ArrayType
+    ) -> None:
+        """Callback to save labels scores from a module
+
+        Arguments:
+            - labels_scores: contains the output score/probability for each label
+        """
         pass
 
 

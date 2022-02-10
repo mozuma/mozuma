@@ -41,7 +41,7 @@ class TorchInferenceRunner(
     ) -> None:
         """Apply callback functions save_* to the returned predictions"""
         for key, value in dataclasses.asdict(predictions).items():
-            callbacks_caller(self.callbacks, f"save_{key}", indices, value)
+            callbacks_caller(self.callbacks, f"save_{key}", self.model, indices, value)
 
     def run(self) -> None:
         # Setting model in eval mode

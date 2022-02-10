@@ -1,5 +1,7 @@
 from typing_extensions import Protocol, runtime_checkable
 
+from mlmodule.labels.base import LabelSet
+
 
 @runtime_checkable
 class ModelWithState(Protocol):
@@ -21,4 +23,9 @@ class ModelWithStateFromProvider(ModelWithState):
     """Set the model state from data provided by the model author."""
 
     def set_state_from_provider(self) -> None:
+        ...
+
+
+class ModelWithLabels:
+    def get_labels(self) -> LabelSet:
         ...

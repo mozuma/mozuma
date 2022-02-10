@@ -1,8 +1,9 @@
 from mlmodule.contrib.densenet.base import BaseDenseNetPretrainedModule
-from mlmodule.labels import ImageNetLabels, LabelsMixin, PlacesLabels
+from mlmodule.labels.imagenet import IMAGENET_LABELS
+from mlmodule.labels.places import PLACES_LABELS
 
 
-class BaseDenseNetPretrainedClassifier(BaseDenseNetPretrainedModule, LabelsMixin):
+class BaseDenseNetPretrainedClassifier(BaseDenseNetPretrainedModule):
     """
     Default fully connected layer for classification before retraining
     """
@@ -29,7 +30,7 @@ class BaseDenseNetPretrainedClassifier(BaseDenseNetPretrainedModule, LabelsMixin
         return self.classifier(x)
 
     def get_labels(self):
-        return PlacesLabels() if self.dataset == "places365" else ImageNetLabels()
+        return PLACES_LABELS if self.dataset == "places365" else IMAGENET_LABELS
 
 
 class DenseNet161ImageNetClassifier(BaseDenseNetPretrainedClassifier):
