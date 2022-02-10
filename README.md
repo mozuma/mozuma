@@ -19,9 +19,7 @@ For convenience, we ship a base Docker image https://hub.docker.com/repository/d
 
 ## Getting started code
 
-In this example we run a ResNet trained on ImageNet against an image
-
-TODO
+See [the getting started guide](docs/GETTING_STARTED.md).
 
 ## Run a model from CLI
 
