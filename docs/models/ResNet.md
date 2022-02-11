@@ -1,5 +1,8 @@
 # ResNet
 
+
+TODO: Describe pretrained weight and initialisation parameters.
+
 We are using torchvision to load pretrained models, see https://pytorch.org/docs/stable/torchvision/models.html.
 
 # Feature models
@@ -34,7 +37,3 @@ data = IndexedDataset(file_names, features)
 
 file_names, pred = resnet_classifier.bulk_inference(data)
 ```
-
-# Retrain classifier
-
-TODO

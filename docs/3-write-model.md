@@ -37,10 +37,10 @@ class ExampleResNet18Module(BaseTorchMLModule):
     def __init__(self, device=None):
         # Need to pass arguments to the parent class
         super().__init__(device=device)
-        
+
         # Getting the resnet18 model
         base_resnet = models.resnet18()
-        
+
         # Copying only the necessary layers
         self.conv1 = base_resnet.conv1
         self.bn1 = base_resnet.bn1
@@ -67,13 +67,13 @@ class ExampleResNet18Module(BaseTorchMLModule):
 
     # This is how we handle the pretrain state
     # We need to provide a state dict for the current module
-    # The idea is to download the pretrained model for resnet 
+    # The idea is to download the pretrained model for resnet
     # and filter out the parameters of the layer we have discarded
     def get_default_pretrained_state_dict(self):
         # Getting URL to download model
         pretrained_state_dict = models.resnet18(pretrained=True).state_dict()
-        
-        # This function allows to remove unnecessary parameters 
+
+        # This function allows to remove unnecessary parameters
         # from the pretrained state dict
         return torch_apply_state_to_partial_model(self, pretrained_state_dict)
 
@@ -82,7 +82,7 @@ class ExampleResNet18Module(BaseTorchMLModule):
     # Here we use the ImageDataset which returns PIL images.
     def bulk_inference(self, data: ImageDataset, **data_loader_options):
         return super().bulk_inference(data, **data_loader_options)
-    
+
     # Defining data transforms to be applied in the data loader
     # Here we are using the standard transforms for torchvision
     def get_dataset_transforms(self):

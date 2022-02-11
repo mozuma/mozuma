@@ -1,4 +1,4 @@
-# MLModule developer guide
+# Developer guide
 
 ## Installation
 

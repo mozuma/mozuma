@@ -23,7 +23,16 @@ logger = getLogger()
 class TorchInferenceRunner(
     BaseRunner[TorchMlModule, TorchDataset, TorchRunnerCallbackType, TorchRunnerOptions]
 ):
-    """Runner for inference tasks on PyTorch models"""
+    """Runner for inference tasks on PyTorch models
+
+    Supports CPU or single GPU inference.
+
+    Attributes:
+        model (TorchMlModule): The PyTorch model to run inference
+        dataset (TorchDataset): Input dataset for the runner
+        callbacks (List[TorchRunnerCallbackType]): Callbacks to save features, labels or bounding boxes
+        options (TorchRunnerOptions): PyTorch options
+    """
 
     def get_data_loader(self) -> DataLoader:
         """Creates a data loader from the options, the given dataset and the module transforms"""
@@ -44,6 +53,7 @@ class TorchInferenceRunner(
             callbacks_caller(self.callbacks, f"save_{key}", self.model, indices, value)
 
     def run(self) -> None:
+        """Runs inference"""
         # Setting model in eval mode
         self.model.eval()
 

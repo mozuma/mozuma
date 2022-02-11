@@ -11,12 +11,25 @@ _NewDatasetType = TypeVar("_NewDatasetType", covariant=True)
 
 
 class TorchDataset(Protocol[_IndicesType, _DatasetType]):
-    """Pytorch dataset protocol with __len__"""
+    """Pytorch dataset protocol with `__len__`"""
 
     def __getitem__(self, index: int) -> Tuple[_IndicesType, _DatasetType]:
+        """Get an item by index
+
+        Arguments:
+            index (int): The index of the element to get
+        Returns:
+            Tuple[_IndicesType, _DatasetType]: A tuple of dataset index of the element
+                and value of the element
+        """
         ...
 
     def __len__(self) -> int:
+        """Length of the dataset
+
+        Returns:
+            int: The length of the dataset
+        """
         ...
 
 
@@ -44,7 +57,13 @@ class TorchDatasetTransformsWrapper(
 
 
 @dataclasses.dataclass
-class ListDataset(Generic[_DatasetType]):
+class ListDataset(TorchDataset[int, _DatasetType]):
+    """Simple dataset that contains a list of objects in memory
+
+    Attributes:
+        objects (List[Any]): List of objects of the dataset
+    """
+
     objects: List[_DatasetType]
 
     def __getitem__(self, index: int) -> Tuple[int, _DatasetType]:
@@ -55,7 +74,13 @@ class ListDataset(Generic[_DatasetType]):
 
 
 @dataclasses.dataclass
-class OpenBinaryFileDataset:
+class OpenBinaryFileDataset(TorchDataset[str, BinaryIO]):
+    """Dataset that returns `typing.BinaryIO` from a list of local file names
+
+    Attributes:
+        paths (List[str]): List of paths to files
+    """
+
     paths: List[str]
 
     def __getitem__(self, index: int) -> Tuple[str, BinaryIO]:
@@ -66,7 +91,13 @@ class OpenBinaryFileDataset:
 
 
 @dataclasses.dataclass
-class OpenImageFileDataset:
+class OpenImageFileDataset(TorchDataset[str, Image]):
+    """Dataset that returns `PIL.Image.Image` from a list of local file names
+
+    Attributes:
+        paths (List[str]): List of paths to image files
+    """
+
     paths: List[str]
 
     def __getitem__(self, index: int) -> Tuple[str, Image]:
