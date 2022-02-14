@@ -116,7 +116,7 @@ def parse_key_value_arg(cmd_values: str) -> Tuple[str, Union[str, int]]:
 
 def check_perf_fun(args: argparse.Namespace, metrics: Optional[dict] = None) -> None:
     """Check current setup for recommended performances. """
-    from PIL import features, Image
+    from PIL import Image, features
 
     print("Running performance checks.")
 
