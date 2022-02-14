@@ -33,6 +33,18 @@ class TorchResNetModule(TorchMlModule):
 
     Attributes:
         resnet_arch (ResNetArchs): Identifier for the ResNet architecture to load.
+            Must be one of:
+
+            - `resnet18`
+            - `resnet34`
+            - `resnet50`
+            - `resnet101`
+            - `resnet152`
+            - `resnext50_32x4d`
+            - `resnext101_32x8d`
+            - `wide_resnet50_2`
+            - `wide_resnet101_2`
+
         device (torch.device): Torch device to initialise the model weights
     """
 
@@ -83,7 +95,7 @@ class TorchResNetModule(TorchMlModule):
     def forward_predictions(
         self, batch: torch.Tensor
     ) -> BatchModelPrediction[torch.Tensor]:
-        """Foward pass of the ResNet model
+        """Forward pass of the ResNet model
 
         Returns:
             BatchModelPrediction: Features and labels_scores (ImageNet)

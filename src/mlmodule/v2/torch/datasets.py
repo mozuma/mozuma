@@ -11,10 +11,14 @@ _NewDatasetType = TypeVar("_NewDatasetType", covariant=True)
 
 
 class TorchDataset(Protocol[_IndicesType, _DatasetType]):
-    """Pytorch dataset protocol with `__len__`"""
+    """PyTorch dataset protocol
+
+    In order to be used with the PyTorch runners, a TorchDataset
+    should expose two functions `__getitem__` and `__len__`.
+    """
 
     def __getitem__(self, index: int) -> Tuple[_IndicesType, _DatasetType]:
-        """Get an item by index
+        """Get an item of the dataset by index
 
         Arguments:
             index (int): The index of the element to get
