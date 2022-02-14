@@ -11,6 +11,16 @@ from mlmodule.v2.helpers.utils import convert_numeric_array_like_to_numpy
 
 @dataclasses.dataclass
 class CollectFeaturesInMemory(BaseSaveFeaturesCallback[NumericArrayTypes]):
+    """Callback to collect features in memory
+
+    Attributes:
+        indices (list): List of dataset indices
+        features (numpy.ndarray): Array of features.
+            The first dimension correspond to `self.indices` values.
+
+    Note:
+        This callback works with any array-like features
+    """
     indices: list = dataclasses.field(init=False, default_factory=list)
     features: np.ndarray = dataclasses.field(
         init=False, default_factory=lambda: np.empty(0)
@@ -32,6 +42,16 @@ class CollectFeaturesInMemory(BaseSaveFeaturesCallback[NumericArrayTypes]):
 
 @dataclasses.dataclass
 class CollectLabelsInMemory(BaseSaveLabelsCallback[NumericArrayTypes]):
+    """Callback to collect labels in memory
+
+    Attributes:
+        indices (list): List of dataset indices
+        label_scores (numpy.ndarray): Array of label scores.
+            The first dimension correspond to `self.indices` values.
+
+    Note:
+        This callback works with any array-like features
+    """
     indices: list = dataclasses.field(init=False, default_factory=list)
     label_scores: np.ndarray = dataclasses.field(
         init=False, default_factory=lambda: np.empty(0)

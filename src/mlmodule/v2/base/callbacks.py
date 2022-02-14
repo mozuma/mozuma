@@ -11,7 +11,13 @@ class BaseSaveFeaturesCallback(Protocol[_ArrayType]):
     def save_features(
         self, model: Any, indices: Sequence, features: _ArrayType
     ) -> None:
-        """Callback to save features output of a module"""
+        """Save features output returned by a module
+
+        Arguments:
+            model (Any): The MLModule model that produced the features
+            indices (Sequence): The list of indices as defined by the dataset
+            features (ArrayLike): The feature object as returned by the model
+        """
         pass
 
 
@@ -19,10 +25,12 @@ class BaseSaveLabelsCallback(Protocol[_ArrayType]):
     def save_label_scores(
         self, model: ModelWithLabels, indices: Sequence, labels_scores: _ArrayType
     ) -> None:
-        """Callback to save labels scores from a module
+        """Save labels scores returned by a module
 
         Arguments:
-            - labels_scores: contains the output score/probability for each label
+            model (ModelWithLabels): The MLModule model that produced the label scores
+            indices (Sequence): The list of indices as defined by the dataset
+            labels_scores (ArrayLike): contains the output score/probability for each label
         """
         pass
 
