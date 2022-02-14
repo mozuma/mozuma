@@ -26,10 +26,14 @@ ResNetArchs = Literal[
 
 
 class TorchResNetModule(TorchMlModule):
-    """ResNet architecture.
+    """PyTorch ResNet architecture.
 
     Default MLModuleStore weights have been pretrained on ImageNet.
-    See https://pytorch.org/vision/stable/_modules/torchvision/models/resnet.html.
+    See [PyTorch's documentation](https://pytorch.org/vision/stable/_modules/torchvision/models/resnet.html).
+
+    Attributes:
+        resnet_arch (ResNetArchs): Identifier for the ResNet architecture to load.
+        device (torch.device): Torch device to initialise the model weights
     """
 
     def __init__(
@@ -79,6 +83,11 @@ class TorchResNetModule(TorchMlModule):
     def forward_predictions(
         self, batch: torch.Tensor
     ) -> BatchModelPrediction[torch.Tensor]:
+        """Foward pass of the ResNet model
+
+        Returns:
+            BatchModelPrediction: Features and labels_scores (ImageNet)
+        """
         features = self.forward_features(batch)
         labels_scores = self.forward_classifier(features)
         return BatchModelPrediction(features=features, label_scores=labels_scores)
