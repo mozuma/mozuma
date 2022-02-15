@@ -12,6 +12,9 @@ ARG DISTDIR
 ADD ${DISTDIR} /app/dist/
 RUN pip install -f /app/dist/ mlmodule[test]==${MLMODULE_BUILD_VERSION:-0.0.dev0}
 
+# Re-build Pillow-SIMD since the previous dependancies may have reverted it back to Pillow
+RUN bash /opt/scripts/install-pillow-simd-w-libjpeg-turbo.sh "rebuild-pillow-simd"
+
 # Add tests
 WORKDIR /app
 ADD tests /app/tests
