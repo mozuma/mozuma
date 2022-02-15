@@ -12,7 +12,7 @@ These callbacks control the way the output of a runner is handled
 (i.e. features, labels, model weights...).
 
 We also try to keep as few dependencies as possible.
-Meaning models will be written as much as possible from
+Meaning models will be mostly implemented from
 modules available in deep learning frameworks (such as `PyTorch` or `torchvision`).
 
 Go ahead to the [getting started](1-getting-started.md) guide for an overview of MLModule.
@@ -23,3 +23,15 @@ Go ahead to the [getting started](1-getting-started.md) guide for an overview of
 - [x] PyTorch inference
 - [ ] PyTorch training
 - [ ] Multi-GPU support
+
+## Installation
+
+From the git repository:
+
+```bash
+pip install git+ssh://git@github.com/LSIR/mlmodule.git
+```
+
+For convenience, we ship a base Docker image
+[https://hub.docker.com/repository/docker/lsirepfl/mlmodulekit](https://hub.docker.com/repository/docker/lsirepfl/mlmodulekit)
+which contains dependencies that can be hard to install (for instance PyTorch or MMCV). See [MLModuleKit](3-mlmodulekit.md).

@@ -10,8 +10,8 @@ docker pull lsirepfl/mlmodulekit:<version>
 
 List of image tags and installed libraries.
 
-All versions are available with the suffix `-ca35`. 
-These images are compiled for the CUDA compute ability version 3.5 (see https://en.wikipedia.org/wiki/CUDA), 
+All versions are available with the suffix `-ca35`.
+These images are compiled for the CUDA compute ability version 3.5 (see https://en.wikipedia.org/wiki/CUDA),
 they must be used when using the LSIR PC32 machine.
 
 ### `1`, `1-ca35`

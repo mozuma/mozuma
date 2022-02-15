@@ -1,6 +1,8 @@
 
 # Getting started
 
+## Code-based usage
+
 This guide runs through the inference of a PyTorch ResNet model pretrained on imagenet.
 
 First, we need to create a dataset of images, for this we will be using the `OpenFileDataset`.
@@ -77,4 +79,13 @@ print(features.indices, features.features)
 
 # Printing labels
 print(labels.indices, labels.labels)
+```
+
+## Command-line interface
+
+This only works for models accepting images for now.
+For instance, to run CLIP on all images in a folder:
+
+```bash
+python -m mlmodule.cli run clip.CLIPViTB32ImageEncoder folder/* --batch-size 256 --num-workers 12
 ```
