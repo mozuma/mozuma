@@ -1,5 +1,8 @@
 # MTCNN
 
+!!! warning "Deprecated"
+    This model needs to be migrated to the latest version
+
 We are using `facenet-pytorch` to load pretrained MTCNN model, see `https://github.com/timesler/facenet-pytorch`.
 
 ## Requirements

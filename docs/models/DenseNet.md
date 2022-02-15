@@ -1,5 +1,8 @@
 # DenseNet
 
+!!! warning "Deprecated"
+    This model needs to be migrated to the latest version
+
 We are using torchvision to load pretrained models, see https://pytorch.org/docs/stable/torchvision/models.html.
 
 # Feature Models

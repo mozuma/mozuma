@@ -1,5 +1,8 @@
 # CLIP
 
+!!! warning "Deprecated"
+    This model needs to be migrated to the latest version
+
 See https://github.com/openai/CLIP for the source code and original models.
 
 ## Requirements
