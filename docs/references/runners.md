@@ -17,3 +17,5 @@ They are executed with the `run` function which takes no arguments.
 ::: mlmodule.v2.torch.options.TorchRunnerOptions
 
 ## Write your own runner
+
+::: mlmodule.v2.base.runners.BaseRunner

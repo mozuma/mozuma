@@ -28,6 +28,46 @@ class BaseRunner(
     _AbstractRunner,
     _AbstractRunnerDataClass[_ModelType, _DataType, _CallbackType, _OptionsType],
 ):
-    """A runner takes a model and run an action on it (inference, training...)"""
+    """A runner takes a model and run an action on it (inference, training...)
 
-    pass
+    It must implement the `run` function and call the callbacks
+    to save prediction or model weights.
+
+    Attributes:
+        model (_ModelType): The model object to run the action against
+        dataset (_DataType): The input dataset
+        callbacks (List[_CallbackType]): Callbacks to save model state or predictions
+        options (_OptionsType): Options of the runner (devices...)
+
+    Note:
+        The `_ModelType`, `_DataType`, `_CallbackType` and `_OptionsType`
+        are generic types that should be specified when implementing a runner.
+
+    Example:
+        This is an example of a runner that applies a function to each element of list dataset.
+        It passes the returned data to the save_features callback.
+
+        ```python
+        from mlmodule.v2.base.callbacks import (
+            BaseSaveFeaturesCallback,
+            callbacks_caller
+        )
+        from mlmodule.v2.base.runners import BaseRunner
+
+        class NumpySumRunnerExample(BaseRunner[
+            Callable,                   # _ModelType
+            List,                       # _DataType
+            BaseSaveFeaturesCallback,   # _CallbackType
+            None                        # _OptionType
+        ]):
+            def run(self):
+                for index, data in enumerate(self.dataset):
+                    # Helper function to call all matching callbacks
+                    callbacks_caller(
+                        self.callbacks,
+                        "save_features",
+                        index,
+                        self.model(data)
+                    )
+        ```
+    """
