@@ -1,15 +1,16 @@
-from typing import Any, Callable, Optional, Sequence, TypeVar
-
-from typing_extensions import Protocol
+import abc
+from typing import Any, Callable, Generic, Optional, Sequence, TypeVar
 
 from mlmodule.v2.base.models import ModelWithLabels
+from mlmodule.v2.base.predictions import BatchVideoFramesPrediction
 
-_ArrayType = TypeVar("_ArrayType", contravariant=True)
+_ContraArrayType = TypeVar("_ContraArrayType", contravariant=True)
 
 
-class BaseSaveFeaturesCallback(Protocol[_ArrayType]):
+class BaseSaveFeaturesCallback(Generic[_ContraArrayType]):
+    @abc.abstractmethod
     def save_features(
-        self, model: Any, indices: Sequence, features: _ArrayType
+        self, model: Any, indices: Sequence, features: _ContraArrayType
     ) -> None:
         """Save features output returned by a module
 
@@ -21,21 +22,40 @@ class BaseSaveFeaturesCallback(Protocol[_ArrayType]):
         pass
 
 
-class BaseSaveLabelsCallback(Protocol[_ArrayType]):
+class BaseSaveLabelsCallback(Generic[_ContraArrayType]):
+    @abc.abstractmethod
     def save_label_scores(
-        self, model: ModelWithLabels, indices: Sequence, labels_scores: _ArrayType
+        self, model: ModelWithLabels, indices: Sequence, labels_scores: _ContraArrayType
     ) -> None:
         """Save labels scores returned by a module
 
         Arguments:
             model (ModelWithLabels): The MLModule model that produced the label scores
             indices (Sequence): The list of indices as defined by the dataset
-            labels_scores (ArrayLike): contains the output score/probability for each label
+            labels_scores (ArrayLike): Contains the output score/probability for each label
         """
         pass
 
 
-class BaseSaveBoundingBoxCallback(Protocol):
+class BaseSaveVideoFramesCallback(Generic[_ContraArrayType]):
+    @abc.abstractmethod
+    def save_frames(
+        self,
+        model: Any,
+        indices: Sequence,
+        frames: Sequence[BatchVideoFramesPrediction[_ContraArrayType]],
+    ) -> None:
+        """Save frames extracted from a video
+
+        Arguments:
+            model (Any): The MLModule model that produces the video frames encoding
+            indices (Sequence): The list of indices as defined by the dataset
+            frames (Sequence[BatchVideoFramesPrediction[_ArrayType]]):
+                The sequence on frame features and indices
+        """
+
+
+class BaseSaveBoundingBoxCallback:
 
     # TODO: Bounding box type definition
     def save_bbox(self, indices: Sequence, bounding_boxes) -> None:

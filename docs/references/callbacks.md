@@ -18,10 +18,14 @@ They expose their results via object attributes.
 
 ::: mlmodule.v2.helpers.callbacks.CollectLabelsInMemory
 
+::: mlmodule.v2.helpers.callbacks.CollectVideoFramesInMemory
+
 ## Write your own callbacks
 
 ::: mlmodule.v2.base.callbacks.BaseSaveFeaturesCallback
 
 ::: mlmodule.v2.base.callbacks.BaseSaveLabelsCallback
+
+::: mlmodule.v2.base.callbacks.BaseSaveVideoFramesCallback
 
 ::: mlmodule.v2.base.callbacks.BaseSaveBoundingBoxCallback

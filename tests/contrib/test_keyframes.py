@@ -1,5 +1,4 @@
 from io import BytesIO
-from typing import BinaryIO
 
 import pytest
 import torch
@@ -8,10 +7,13 @@ from mlmodule.contrib.keyframes.datasets import (
     FPSVideoFrameExtractorTransform,
     compute_every_param_from_target_fps,
 )
-from mlmodule.contrib.keyframes.factories import KeyFramesInferenceFactory
-from mlmodule.contrib.keyframes.v1 import TorchMLModuleKeyFrames
+from mlmodule.contrib.keyframes.encoders import GenericVideoFramesEncoder
+from mlmodule.contrib.keyframes.selectors import ResNet18KeyFramesSelector
+from mlmodule.contrib.resnet.modules import TorchResNetModule
+from mlmodule.v2.helpers.callbacks import CollectVideoFramesInMemory
 from mlmodule.v2.torch.datasets import ListDataset
 from mlmodule.v2.torch.options import TorchRunnerOptions
+from mlmodule.v2.torch.runners import TorchInferenceRunner
 
 
 @pytest.mark.parametrize(
@@ -37,41 +39,61 @@ def test_fps_video_extractor(video_file_path: str):
     assert len(frames[1]) == 83
 
 
+def test_video_frame_encoder(video_file_path: str, torch_device: torch.device):
+    with open(video_file_path, mode="rb") as video_file:
+        dataset = ListDataset([video_file])
+
+        model = GenericVideoFramesEncoder(
+            image_encoder=TorchResNetModule("resnet18"), device=torch_device
+        )
+        features = CollectVideoFramesInMemory()
+        runner = TorchInferenceRunner(
+            model=model,
+            dataset=dataset,
+            callbacks=[features],
+            options=TorchRunnerOptions(device=torch_device),
+        )
+        runner.run()
+
+    assert features.frames[0].features is not None
+    assert len(features.frames[0].features) == 83
+
+
 def test_keyframes_extractor(torch_device: torch.device, video_file_path: str):
     with open(video_file_path, mode="rb") as video_file:
         dataset = ListDataset([video_file])
 
-        inference_runner = KeyFramesInferenceFactory(
-            options=TorchRunnerOptions(device=torch_device)
-        ).get_runner()
+        model = ResNet18KeyFramesSelector(device=torch_device)
+        features = CollectVideoFramesInMemory()
+        runner = TorchInferenceRunner(
+            model=model,
+            dataset=dataset,
+            callbacks=[features],
+            options=TorchRunnerOptions(device=torch_device),
+        )
+        runner.run()
 
-        indices, video_keyframes = inference_runner.bulk_inference(dataset)
-        assert len(indices) == 1
-        assert len(video_keyframes) == 1
-        assert len(video_keyframes[0]) > 0 and len(video_keyframes[0]) < 21
-
-
-def test_keyframes_extractor_v1(torch_device: torch.device, video_file_path: str):
-    with open(video_file_path, mode="rb") as video_file:
-        dataset = ListDataset([video_file])
-
-        model = TorchMLModuleKeyFrames(device=torch_device).load()
-
-        indices, video_keyframes = model.bulk_inference(dataset)
-        assert len(indices) == 1
-        assert len(video_keyframes) == 1
-        assert len(video_keyframes[0]) > 0 and len(video_keyframes[0]) < 20
+    assert len(features.indices) == 1
+    assert len(features.frames) == 1
+    assert features.frames[0].features is not None
+    assert len(features.frames[0].features) > 0
+    assert len(features.frames[0].features) < 21
 
 
 def test_keyframes_extractor_bad_file(torch_device: torch.device):
     dataset = ListDataset([BytesIO(b"bbbbbb")])
 
-    inference_runner = KeyFramesInferenceFactory(
-        options=TorchRunnerOptions(device=torch_device)
-    ).get_runner()
+    model = ResNet18KeyFramesSelector(device=torch_device)
+    features = CollectVideoFramesInMemory()
+    runner = TorchInferenceRunner(
+        model=model,
+        dataset=dataset,
+        callbacks=[features],
+        options=TorchRunnerOptions(device=torch_device),
+    )
+    runner.run()
 
-    indices, video_keyframes = inference_runner.bulk_inference(dataset)
-
-    assert len(indices) == 1
-    assert len(video_keyframes) == 1
-    assert len(video_keyframes[0]) == 0
+    assert len(features.indices) == 1
+    assert len(features.frames) == 1
+    assert features.frames[0].features is not None
+    assert len(features.frames[0].features) == 0

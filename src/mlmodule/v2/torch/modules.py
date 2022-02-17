@@ -9,9 +9,10 @@ from mlmodule.v2.torch.utils import save_state_dict_to_bytes
 
 # Type of data of a batch passed to the forward function
 _BatchType = TypeVar("_BatchType")
+_BatchPredictionArrayType = TypeVar("_BatchPredictionArrayType")
 
 
-class TorchMlModule(torch.nn.Module, Generic[_BatchType]):
+class TorchMlModule(torch.nn.Module, Generic[_BatchType, _BatchPredictionArrayType]):
     """
     Base `torch.nn.Module` for PyTorch models implemented in MLModule.
 
@@ -64,7 +65,7 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType]):
     @abc.abstractmethod
     def forward_predictions(
         self, batch: _BatchType
-    ) -> BatchModelPrediction[torch.Tensor]:
+    ) -> BatchModelPrediction[_BatchPredictionArrayType]:
         """Forward pass of the model
 
         Applies the module on a batch and returns all potentially interesting data point (features, labels...)
@@ -73,7 +74,8 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType]):
             batch (_BatchType): the batch of data to process
 
         Returns:
-            BatchModelPrediction: Prediction object with the keys `features`, `label_scores`...
+            BatchModelPrediction[_BatchPredictionArrayType]:
+                Prediction object with the keys `features`, `label_scores`...
 
         Note:
             This method **must** be implemented in subclasses

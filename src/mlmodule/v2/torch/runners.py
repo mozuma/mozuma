@@ -49,8 +49,12 @@ class TorchInferenceRunner(
         self, indices: torch.Tensor, predictions: BatchModelPrediction[torch.Tensor]
     ) -> None:
         """Apply callback functions save_* to the returned predictions"""
-        for key, value in dataclasses.asdict(predictions).items():
-            callbacks_caller(self.callbacks, f"save_{key}", self.model, indices, value)
+        for field in dataclasses.fields(predictions):
+            value = getattr(predictions, field.name)
+            if value is not None:
+                callbacks_caller(
+                    self.callbacks, f"save_{field.name}", self.model, indices, value
+                )
 
     def run(self) -> None:
         """Runs inference"""

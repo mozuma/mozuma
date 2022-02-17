@@ -3,10 +3,18 @@ from typing import Any, List, Sequence
 
 import numpy as np
 
-from mlmodule.v2.base.callbacks import BaseSaveFeaturesCallback, BaseSaveLabelsCallback
+from mlmodule.v2.base.callbacks import (
+    BaseSaveFeaturesCallback,
+    BaseSaveLabelsCallback,
+    BaseSaveVideoFramesCallback,
+)
 from mlmodule.v2.base.models import ModelWithLabels
+from mlmodule.v2.base.predictions import BatchVideoFramesPrediction
 from mlmodule.v2.helpers.types import NumericArrayTypes
-from mlmodule.v2.helpers.utils import convert_numeric_array_like_to_numpy
+from mlmodule.v2.helpers.utils import (
+    convert_batch_video_frames_to_numpy,
+    convert_numeric_array_like_to_numpy,
+)
 
 
 @dataclasses.dataclass
@@ -21,6 +29,7 @@ class CollectFeaturesInMemory(BaseSaveFeaturesCallback[NumericArrayTypes]):
     Note:
         This callback works with any array-like features
     """
+
     indices: list = dataclasses.field(init=False, default_factory=list)
     features: np.ndarray = dataclasses.field(
         init=False, default_factory=lambda: np.empty(0)
@@ -36,7 +45,7 @@ class CollectFeaturesInMemory(BaseSaveFeaturesCallback[NumericArrayTypes]):
             # We stack new features
             self.features = np.vstack((self.features, features_numpy))
         else:
-            # This is the fisrt feature, we replace the default value with size=0
+            # This is the first feature, we replace the default value with size=0
             self.features = features_numpy
 
 
@@ -48,10 +57,12 @@ class CollectLabelsInMemory(BaseSaveLabelsCallback[NumericArrayTypes]):
         indices (list): List of dataset indices
         label_scores (numpy.ndarray): Array of label scores.
             The first dimension correspond to `self.indices` values.
+        labels (list[str]): List of matching labels (label with maximum score)
 
     Note:
         This callback works with any array-like features
     """
+
     indices: list = dataclasses.field(init=False, default_factory=list)
     label_scores: np.ndarray = dataclasses.field(
         init=False, default_factory=lambda: np.empty(0)
@@ -73,9 +84,40 @@ class CollectLabelsInMemory(BaseSaveLabelsCallback[NumericArrayTypes]):
             # We stack new features
             self.label_scores = np.vstack((self.label_scores, scores_numpy))
         else:
-            # This is the fisrt feature, we replace the default value with size=0
+            # This is the first feature, we replace the default value with size=0
             self.label_scores = scores_numpy
 
         # Getting the matching label
         label_idx = scores_numpy.argmax(axis=1)
         self.labels += [label_set[idx] for idx in label_idx]
+
+
+@dataclasses.dataclass
+class CollectVideoFramesInMemory(BaseSaveVideoFramesCallback[NumericArrayTypes]):
+    """Callback to collect video frames in memory
+
+    Attributes:
+        indices (list): List of dataset indices
+        frames (list[BatchVideoFramesPrediction[np.ndarray]]): Sequence of video frames.
+            The first dimension correspond to `self.indices` values.
+
+    Note:
+        This callback works with any array-like features
+    """
+
+    indices: list = dataclasses.field(init=False, default_factory=list)
+    frames: List[BatchVideoFramesPrediction[np.ndarray]] = dataclasses.field(
+        init=False, default_factory=list
+    )
+
+    def save_frames(
+        self,
+        model: Any,
+        indices: Sequence,
+        frames: Sequence[BatchVideoFramesPrediction[NumericArrayTypes]],
+    ) -> None:
+        # Updating indices
+        self.indices += list(indices)
+
+        # Adding frames
+        self.frames += [convert_batch_video_frames_to_numpy(f) for f in frames]
