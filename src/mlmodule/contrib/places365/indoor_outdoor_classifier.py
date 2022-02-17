@@ -2,14 +2,14 @@ import numpy as np
 from scipy.special import softmax
 
 from mlmodule.base import BaseMLModule
-from mlmodule.labels import LabelsMixin, PlacesIOLabels
-from mlmodule.labels.base import IndoorOutdoorLabels, LabelSet
+from mlmodule.labels.base import LabelSet
+from mlmodule.labels.places_io import PLACES_IN_OUT_DOOR, PLACES_IO_LABELS
 
 
-class PlacesIOClassifier(BaseMLModule, LabelsMixin):
+class PlacesIOClassifier(BaseMLModule):
     def __init__(self, k=10, **_):
         super().__init__()
-        self.labels_io = PlacesIOLabels()
+        self.labels_io = PLACES_IO_LABELS
         self.k = k
 
     def bulk_inference(self, data, **_):
@@ -42,4 +42,4 @@ class PlacesIOClassifier(BaseMLModule, LabelsMixin):
         return idx, np.vstack((1 - mean_io, mean_io)).T
 
     def get_labels(self) -> LabelSet:
-        return IndoorOutdoorLabels()
+        return PLACES_IN_OUT_DOOR
