@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Callable, List
+from typing import Callable, List, Optional, Set
 
 import torch
 import torchvision.models
@@ -9,6 +9,7 @@ from typing_extensions import Literal
 from mlmodule.labels.base import LabelSet
 from mlmodule.labels.imagenet import IMAGENET_LABELS
 from mlmodule.v2.base.predictions import BatchModelPrediction
+from mlmodule.v2.helpers.utils import take_unique_element
 from mlmodule.v2.torch.modules import TorchMlModule
 from mlmodule.v2.torch.transforms import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 
@@ -25,10 +26,9 @@ ResNetArchs = Literal[
 ]
 
 
-class TorchResNetModule(TorchMlModule):
-    """PyTorch ResNet architecture.
+class TorchResNetImageNetModule(TorchMlModule[torch.Tensor, torch.Tensor]):
+    """PyTorch ResNet architecture for ImageNet classification.
 
-    Default MLModuleStore weights have been pretrained on ImageNet.
     See [PyTorch's documentation](https://pytorch.org/vision/stable/_modules/torchvision/models/resnet.html).
 
     Attributes:
@@ -73,14 +73,17 @@ class TorchResNetModule(TorchMlModule):
         )
         self.classifier_module = base_resnet.fc
 
-    @property
-    def mlmodule_model_uri(self) -> str:
-        """URI to download the model weights from MLModule"""
-        return f"image-encoder/{self.resnet_arch}-imagenet.pth"
+    def state_architecture(self) -> str:
+        """ResNet for ImageNet architecture identifier
+
+        Returns:
+            str: The ResNet identifier for imagenet classification: `pytorch-{resnet_arch}-imagenet`
+        """
+        return f"pytorch-{self.resnet_arch}-imagenet"
 
     @classmethod
     def get_resnet_module(cls, resnet_arch: ResNetArchs) -> torchvision.models.ResNet:
-        # Getting the ResNet architecture https://pytorch.org/docs/stable/torchvision/models.html
+        # Getting the ResNet architecture https://pytorch.org/vision/stable/models.html
         return getattr(torchvision.models, resnet_arch)()
 
     def forward_features(self, x: torch.Tensor) -> torch.Tensor:
@@ -90,6 +93,7 @@ class TorchResNetModule(TorchMlModule):
         return self.classifier_module(x)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass of the ResNet model"""
         return self.forward_classifier(self.forward_features(x))
 
     def forward_predictions(
@@ -104,8 +108,26 @@ class TorchResNetModule(TorchMlModule):
         labels_scores = self.forward_classifier(features)
         return BatchModelPrediction(features=features, label_scores=labels_scores)
 
-    def set_state_from_provider(self) -> None:
-        """Downloads weights from torchvision's repositories"""
+    def provider_state_architectures(self) -> Set[str]:
+        """Identifiers for torchvision supported pretrained states
+
+        Returns:
+            Set[str]: A single supported architecture for ImageNet: `pytorch-{resnet_arch}-imagenet`
+        """
+        return {self.state_architecture()}
+
+    def set_state_from_provider(self, state_arch: Optional[str] = None) -> None:
+        """Downloads weights from torchvision's repositories
+
+        Arguments:
+            state_arch (Optional[str]): One of `provider_state_architectures`
+        """
+        # Validate provided state_arch
+        provider_architectures = self.provider_state_architectures()
+        state_arch = state_arch or take_unique_element(provider_architectures)
+        if state_arch is None or state_arch not in provider_architectures:
+            raise ValueError(f"Invalid state_arch={state_arch}")
+
         # Getting URL to download model
         url = torchvision.models.resnet.model_urls[self.resnet_arch]
         # Downloading state dictionary
@@ -131,6 +153,7 @@ class TorchResNetModule(TorchMlModule):
         self.classifier_module.load_state_dict(classifier_state_dict)
 
     def get_dataset_transforms(self) -> List[Callable]:
+        """Standard TorchVision image transforms"""
         return TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 
     def get_labels(self) -> LabelSet:

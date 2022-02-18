@@ -1,7 +1,7 @@
 from typing import Callable
 
 from mlmodule.v2.base.models import ModelWithState, ModelWithStateFromProvider
-from mlmodule.v2.stores import MLModuleModelStore
+from mlmodule.v2.stores import LocalFileModelStore, MLModuleModelStore
 
 
 def test_pretrained_download_from_provider_consistency(
@@ -9,10 +9,10 @@ def test_pretrained_download_from_provider_consistency(
 ) -> None:
     # Making sure the set_state_from_provider changes internal state
     model1 = module_pretrained_by_provider()
-    inital_state = model1.get_state()
+    initial_state = model1.get_state()
     model1.set_state_from_provider()
     state_from_provider1 = model1.get_state()
-    assert inital_state != state_from_provider1
+    assert initial_state != state_from_provider1
 
     # Making sure that setting the state on a second model yields the same state
     model2 = module_pretrained_by_provider()
@@ -32,14 +32,15 @@ def test_pretrained_download_from_mlmodule_consistency(
     module_pretrained_mlmodule_store: Callable[[], ModelWithState]
 ) -> None:
     store = MLModuleModelStore()
+    # store = LocalFileModelStore("models")     # For testing new models
 
     # Making sure the set_state_from_provider changes internal state
     model1 = module_pretrained_mlmodule_store()
-    inital_state = model1.get_state()
+    initial_state = model1.get_state()
     # Loading weights from MLModule
     store.load(model1)
     state_from_provider1 = model1.get_state()
-    assert inital_state != state_from_provider1
+    assert initial_state != state_from_provider1
 
     # Making sure that setting the state on a second model yields the same state
     model2 = module_pretrained_mlmodule_store()

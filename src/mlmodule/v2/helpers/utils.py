@@ -1,10 +1,12 @@
-from typing import cast
+from typing import Collection, Optional, TypeVar, cast
 
 import numpy as np
 import torch
 
 from mlmodule.v2.base.predictions import BatchVideoFramesPrediction
 from mlmodule.v2.helpers.types import NumericArrayTypes
+
+T = TypeVar("T")
 
 
 def convert_numeric_array_like_to_numpy(num_array: NumericArrayTypes) -> np.ndarray:
@@ -26,3 +28,10 @@ def convert_batch_video_frames_to_numpy(
         else None,
         frame_indices=video_frames.frame_indices,
     )
+
+
+def take_unique_element(seq: Collection[T]) -> Optional[T]:
+    """Take the only element of a collection or return None if there is more than one element"""
+    if len(seq) != 1:
+        return None
+    return next(seq.__iter__())

@@ -1,7 +1,6 @@
 import argparse
 import json
 import logging
-import os
 from importlib import import_module
 from typing import List, Optional, Tuple, Union
 
@@ -29,7 +28,7 @@ def get_dataset(
     elif input_type == "VI":
         return OpenBinaryFileDataset(input_files)
     else:
-        raise ValueError(f"Uknown type for input : {input_type}")
+        raise ValueError(f"Unknown type for input : {input_type}")
 
 
 def download_fun(args: argparse.Namespace, metrics: Optional[dict] = None):
@@ -37,10 +36,8 @@ def download_fun(args: argparse.Namespace, metrics: Optional[dict] = None):
     # Getting the model weights from provider
     model.set_state_from_provider()
     # Storing the weights in a local file
-    store = LocalFileModelStore(
-        os.path.join(args.outdir, os.path.basename(model.mlmodule_model_uri))
-    )
-    store.save(model)
+    store = LocalFileModelStore(args.outdir)
+    print(store.save(model))
 
 
 def run_fun(
@@ -128,7 +125,10 @@ def main():
         "get_default_pretrained_state_dict_from_provider()",
     )
     download.add_argument(
-        "--args", nargs="*", help="Additional arguments to initialize the module"
+        "--args",
+        nargs="*",
+        help="Additional arguments to initialize the module",
+        default=tuple(),
     )
     download.add_argument("--outdir", type=str, help="Output directory", default=".")
     download.set_defaults(func=download_fun)

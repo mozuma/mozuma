@@ -1,6 +1,6 @@
 import abc
 from io import BytesIO
-from typing import Callable, Generic, List, TypeVar
+from typing import Callable, Generic, List, Set, TypeVar
 
 import torch
 
@@ -61,6 +61,28 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _BatchPredictionArrayTy
     def __init__(self, device: torch.device = torch.device("cpu")):
         super().__init__()
         self.device = device
+
+    @abc.abstractmethod
+    def state_architecture(self) -> str:
+        """Identifier for the current's model state architecture
+
+        Note:
+            PyTorch's model architecture should have the `pytorch-` prefix
+
+        Returns:
+            str: State architecture ID
+        """
+
+    def compatible_state_architectures(self) -> Set[str]:
+        """Set of available pretrained states for the model
+
+        Note:
+            Defaults to the value returned by `state_architecture` method
+
+        Returns:
+            str: All the different architectures that can be used to set state on this model
+        """
+        return {self.state_architecture()}
 
     @abc.abstractmethod
     def forward_predictions(
