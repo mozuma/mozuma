@@ -1,5 +1,11 @@
 import dataclasses
+import re
 from typing import Optional, Tuple
+
+VALID_STATE_ARCH_NAMES = re.compile(r"^[\w\-\d]+$")
+"""The pattern for valid architecture name in
+[`StateType.architecture`][mlmodule.v2.states.StateType].
+It must be alphanumeric characters separated with dashes (i.e. `[\\w\\-\\d]`)"""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -27,7 +33,8 @@ class StateType:
 
     Attributes:
         backend (str): The model backend. For instance `pytorch`.
-        architecture (str): Identifier for the architecture (i.e. `torchresnet18`...)
+        architecture (str): Identifier for the architecture (i.e. `torchresnet18`...).
+            Must match the [`VALID_STATE_ARCH_NAMES`][mlmodule.v2.states.VALID_STATE_ARCH_NAMES] pattern
         extra (Optional[Tuple[str]]): Additional information to identify
             architecture variants (number of output classes...)
     """
