@@ -2,10 +2,17 @@ import dataclasses
 import re
 from typing import Optional, Tuple
 
-VALID_STATE_ARCH_NAMES = re.compile(r"^[\w\-\d]+$")
+VALID_NAMES = re.compile(r"^[\w\-\d]+$")
 """The pattern for valid architecture name in
 [`StateType.architecture`][mlmodule.v2.states.StateType].
 It must be alphanumeric characters separated with dashes (i.e. `[\\w\\-\\d]`)"""
+
+
+def validate_name(val, field_name):
+    if not VALID_NAMES.match(val):
+        raise ValueError(
+            f"Invalid characters found in state type attribute {field_name}={val}"
+        )
 
 
 @dataclasses.dataclass(frozen=True)
@@ -31,17 +38,28 @@ class StateType:
     [`compatible_with`][mlmodule.v2.states.StateType.compatible_with]
     method.
 
+    Warning:
+        All string attributes must match the [`VALID_NAMES`][mlmodule.v2.states.VALID_NAMES] pattern.
+
     Attributes:
         backend (str): The model backend. For instance `pytorch`.
         architecture (str): Identifier for the architecture (i.e. `torchresnet18`...).
-            Must match the [`VALID_STATE_ARCH_NAMES`][mlmodule.v2.states.VALID_STATE_ARCH_NAMES] pattern
         extra (Optional[Tuple[str]]): Additional information to identify
-            architecture variants (number of output classes...)
+            architecture variants (number of output classes...).
     """
 
     backend: str
     architecture: str
     extra: Optional[Tuple[str]] = None
+
+    def __post_init__(self):
+        self.validate()
+
+    def validate(self) -> None:
+        validate_name(self.backend, "backend")
+        validate_name(self.architecture, "architecture")
+        for e in self.extra or []:
+            validate_name(e, "extra")
 
     def compatible_with(self, other: "StateType") -> bool:
         """Tells whether two architecture are compatible with each other.
@@ -59,10 +77,19 @@ class StateType:
 class StateKey:
     """Identifier for a state of a trained model
 
+    Warning:
+        All string attributes must match the [`VALID_NAMES`][mlmodule.v2.states.VALID_NAMES] pattern.
+
     Attributes:
         state_type (StateType): Identifies the [type of state][mlmodule.v2.states.StateType]
-        training_id (str): Identifies the training activity that was used to get to this state
+        training_id (str): Identifies the training activity that was used to get to this state.
     """
 
     state_type: StateType
     training_id: str
+
+    def __post_init__(self):
+        self.validate()
+
+    def validate(self) -> None:
+        validate_name(self.training_id, "training_id")

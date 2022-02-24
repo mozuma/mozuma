@@ -11,4 +11,4 @@ States are managed with two concepts:
 
 ::: mlmodule.v2.states.StateKey
 
-::: mlmodule.v2.states.VALID_STATE_ARCH_NAMES
+::: mlmodule.v2.states.VALID_NAMES
