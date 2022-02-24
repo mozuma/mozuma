@@ -15,14 +15,6 @@ A model with internal state (weights) should at least implement the
 
 ::: mlmodule.v2.base.models.ModelWithState
 
-It can also optionally implement the
-[`ModelWithStateFromProvider`][mlmodule.v2.base.models.ModelWithStateFromProvider]
-to have an extra function to load original weights of the model.
-Usually, these weights are provided by the authors of the original paper or
-by libraries like `torchvision`.
-
-::: mlmodule.v2.base.models.ModelWithStateFromProvider
-
 ## Labels
 
 When a model returns label scores, it must define a

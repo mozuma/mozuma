@@ -33,34 +33,6 @@ class ModelWithState(Protocol):
         """
 
 
-class ModelWithStateFromProvider(ModelWithState):
-    """Protocol of a model that can be initialised from a state provider
-
-    The provider is usually the paper's author or a library such as `torchvision`.
-
-    This is used to trace how we created the state files in MLModule repository.
-    """
-
-    def provider_state_architectures(self) -> Set[StateType]:
-        """State architectures supported by the provider
-
-        Returns:
-            Set[StateType]: A set of `StateType` to identifying the supported states of the provider
-        """
-
-    def set_state_from_provider(
-        self, state_arch: Optional[StateType] = None
-    ) -> StateKey:
-        """Set the model internal state with original weights
-
-        Arguments:
-            state_arch (StateType): Must be one of `provider_state_architectures`
-
-        Returns:
-            StateKey:
-        """
-
-
 class ModelWithLabels:
     """Model that predicts scores for labels
 
