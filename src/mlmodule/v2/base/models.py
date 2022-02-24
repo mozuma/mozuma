@@ -3,37 +3,20 @@ from typing import Optional, Set
 from typing_extensions import Protocol
 
 from mlmodule.labels.base import LabelSet
+from mlmodule.v2.states import StateKey, StateType
 
 
 class ModelWithState(Protocol):
     """Protocol of a model with internal state (weights)
 
-    It defines two functions `set_state` and `get_state`."""
+    It defines two functions `set_state` and `get_state`.
 
-    def state_architecture(self) -> str:
-        """Architecture of the returned state of `get_state` function
+    Attributes:
+        state_type (StateType): Type of the model state,
+            see [states](../references/states.md) for more information.
+    """
 
-        Returns:
-            str: State architecture ID
-        """
-
-    def compatible_state_architectures(self) -> Set[str]:
-        """Set of compatible state architectures.
-
-        This is used to identify model weights that are compatible with this model `set_state` method.
-
-        For instance, key-frames extraction works internally with an image encoder.
-        In this case, there is no key-frames specific model architecture. Therefore,
-        `compatible_state_architectures`
-        should return the architecture of the `image_encoder` (most likely `pytorch-{resnet_arch}`).
-
-        This can also be used for transfer learning. In this case,
-        it returns all other state architectures
-        from which the model can be initialised.
-
-        Returns:
-            Set[str]: An identifier of the compatible state architecture
-        """
+    state_type: StateType
 
     def set_state(self, state: bytes) -> None:
         """Set the model internal state
@@ -58,18 +41,23 @@ class ModelWithStateFromProvider(ModelWithState):
     This is used to trace how we created the state files in MLModule repository.
     """
 
-    def provider_state_architectures(self) -> Set[str]:
+    def provider_state_architectures(self) -> Set[StateType]:
         """State architectures supported by the provider
 
         Returns:
-            Set[str]: A set of string to identifying the supported states of the provider
+            Set[StateType]: A set of `StateType` to identifying the supported states of the provider
         """
 
-    def set_state_from_provider(self, state_arch: Optional[str] = None) -> None:
+    def set_state_from_provider(
+        self, state_arch: Optional[StateType] = None
+    ) -> StateKey:
         """Set the model internal state with original weights
 
         Arguments:
-            state_arch (str): Must be one of `provider_state_architectures`
+            state_arch (StateType): Must be one of `provider_state_architectures`
+
+        Returns:
+            StateKey:
         """
 
 

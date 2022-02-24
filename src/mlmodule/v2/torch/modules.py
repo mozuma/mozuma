@@ -1,10 +1,11 @@
 import abc
 from io import BytesIO
-from typing import Callable, Generic, List, Set, TypeVar
+from typing import Callable, Generic, List, TypeVar
 
 import torch
 
 from mlmodule.v2.base.predictions import BatchModelPrediction
+from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.utils import save_state_dict_to_bytes
 
 # Type of data of a batch passed to the forward function
@@ -20,6 +21,7 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _BatchPredictionArrayTy
     **must** implement the following method:
 
     - [`forward_predictions`][mlmodule.v2.torch.modules.TorchMlModule.forward_predictions]
+    - [`state_type`][mlmodule.v2.torch.modules.TorchMlModule.state_type]
 
     And can optionally implement:
 
@@ -32,6 +34,7 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _BatchPredictionArrayTy
         This would define a simple PyTorch model consisting of fully connected layer.
 
         ```python
+        from mlmodule.v2.states import StateType
         from mlmodule.v2.torch.modules import TorchMlModule
         from torchvision import transforms
 
@@ -46,6 +49,13 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _BatchPredictionArrayTy
                 self, batch: torch.Tensor
             ) -> BatchModelPrediction[torch.Tensor]:
                 return BatchModelPrediction(features=self.fc(batch))
+
+            @property
+            def state_type(self) -> StateType:
+                return StateType(
+                    backend="pytorch",
+                    architecture="fc512x512",
+                )
 
             def get_dataset_transforms(self) -> List[Callable]:
                 return [transforms.ToTensor()]
@@ -62,27 +72,20 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _BatchPredictionArrayTy
         super().__init__()
         self.device = device
 
-    @abc.abstractmethod
-    def state_architecture(self) -> str:
+    @abc.abstractproperty
+    def state_type(self) -> StateType:
         """Identifier for the current's model state architecture
 
         Note:
-            PyTorch's model architecture should have the `pytorch-` prefix
+            PyTorch's model architecture should have the `pytorch` backend
 
         Returns:
-            str: State architecture ID
-        """
-
-    def compatible_state_architectures(self) -> Set[str]:
-        """Set of available pretrained states for the model
+            StateType: State architecture object
 
         Note:
-            Defaults to the value returned by `state_architecture` method
-
-        Returns:
-            str: All the different architectures that can be used to set state on this model
+            This method **must** be implemented in subclasses
         """
-        return {self.state_architecture()}
+        raise NotImplementedError("State architecture should be overridden")
 
     @abc.abstractmethod
     def forward_predictions(
