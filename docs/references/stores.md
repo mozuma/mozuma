@@ -18,7 +18,7 @@ through the [`MLModuleModelStore`][mlmodule.v2.stores.MLModuleModelStore].
 
 ## Write your own store
 
-A store should inherit [`AbstractModelStore`][mlmodule.v2.stores.AbstractModelStore]
-and implement the `save` or `load` methods.
+A store should inherit [`AbstractStateStore`][mlmodule.v2.stores.AbstractStateStore]
+and implement the `save`, `load` and `get_state_keys` methods.
 
-::: mlmodule.v2.stores.AbstractModelStore
+::: mlmodule.v2.stores.AbstractStateStore

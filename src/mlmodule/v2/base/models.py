@@ -16,7 +16,12 @@ class ModelWithState(Protocol):
             see [states](../references/states.md) for more information.
     """
 
-    state_type: StateType
+    @property
+    def state_type(self) -> StateType:
+        """Type of the model state
+
+        See [states](../references/states.md) for more information.
+        """
 
     def set_state(self, state: bytes) -> None:
         """Set the model internal state

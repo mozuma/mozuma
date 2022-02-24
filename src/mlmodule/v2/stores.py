@@ -1,55 +1,70 @@
 import abc
 import dataclasses
 import os
+import warnings
 from io import BytesIO
-from typing import NoReturn, Optional
+from typing import Generic, List, NoReturn, Optional, TypeVar
 
 import boto3
 
 from mlmodule.v2.base.models import ModelWithState
-from mlmodule.v2.states import StateIdentifier
+from mlmodule.v2.states import StateKey, StateType
+
+_ModelType = TypeVar("_ModelType", bound=ModelWithState)
 
 
-class AbstractModelStore(abc.ABC):
-    """Interface between model state store and the model architecture"""
+class AbstractStateStore(abc.ABC, Generic[_ModelType]):
+    """Interface to handle model state loading and saving
 
-    def save(
-        self, model: ModelWithState, training_id: Optional[str] = None
-    ) -> StateIdentifier:
+    See [states reference](states.md) for more information on state management.
+    """
+
+    @abc.abstractmethod
+    def save(self, model: _ModelType, training_id: str) -> StateKey:
         """Saves the model state to the store
 
         Attributes:
             model (ModelWithState): Model to save
-            training_id (Optional[str]): Identifier for the training activity
+            training_id (str): Identifier for the training activity
 
         Returns:
-            StateIdentifier: The identifier for the model state that has been saved
+            StateKey: The identifier for the state that has been created
         """
-        return StateIdentifier(
-            state_architecture=model.state_architecture(), training_id=training_id
-        )
+        return StateKey(state_type=model.state_type, training_id=training_id)
 
     @abc.abstractmethod
-    def load(
-        self, model: ModelWithState, state_id: Optional[StateIdentifier] = None
-    ) -> None:
+    def load(self, model: _ModelType, state_key: StateKey) -> None:
         """Loads the models weights from the store
 
         Attributes:
             model (ModelWithState): Model to update
-            state_id (Optional[StateIdentifier]): Optionally pass the state identifier to load
+            state_key (StateKey): The identifier for the state to load
         """
-        if (
-            state_id is not None
-            and state_id.state_architecture
-            not in model.compatible_state_architectures()
-        ):
-            raise ValueError(
-                f"The state with architecture {state_id.state_architecture} cannot be loaded on {model}."
+        if not model.state_type.is_compatible_with(state_key.state_type):
+            warnings.warn(
+                "The model state type is incompatible with the state key to load "
+                f"{model.state_type} is not compatible with {state_key.state_type}.",
+                RuntimeWarning,
             )
 
+    @abc.abstractmethod
+    def get_state_keys(self, state_type: StateType) -> List[StateKey]:
+        """Lists the available states that are compatible with the given state type.
 
-class MLModuleModelStore(AbstractModelStore):
+        Attributes:
+            state_type (StateType): Used to filter the compatible state keys
+
+        Example:
+            This is used to list the pretrained weights for a given model.
+            The following code gives all available state keys in `store` for the `model`.
+
+            ```python
+            keys = store.get_state_keys(model.state_type)
+            ```
+        """
+
+
+class MLModuleModelStore(AbstractStateStore):
     """Default MLModule store with pretrained model states"""
 
     def _get_bucket(self):
@@ -67,37 +82,27 @@ class MLModuleModelStore(AbstractModelStore):
     ) -> NoReturn:
         raise ValueError("MLModuleStore states are read-only")
 
-    def load(
-        self, model: ModelWithState, state_id: Optional[StateIdentifier] = None
-    ) -> None:
+    def load(self, model: ModelWithState, state_key: StateKey) -> None:
         """Loads the models weights from the store
 
         Attributes:
             model (ModelWithState): Model to update
-            state_id (Optional[StateIdentifier]): Optionally pass the state identifier to load.
+            state_key (StateKey): The state identifier to load.
 
         Warning:
             Setting the `training_id` in the argument `state_id` is not supported and will raise an error.
         """
         # Making sure state_id is compatible with the model
-        super().load(model, state_id=state_id)
-        # Getting a default value for state id if not defined
-        state_id = state_id or StateIdentifier(
-            state_architecture=model.state_architecture()
-        )
-        if state_id.training_id is not None:
-            raise ValueError(
-                "Setting the training_id to load in MLModule store is not supported"
-            )
+        super().load(model, state_key=state_key)
 
         # S3 Bucket
         bucket = self._get_bucket()
 
         # Download state dict into BytesIO file
         f = BytesIO()
-        bucket.Object(
-            f"pretrained-models/{state_id.state_architecture}.pt"
-        ).download_fileobj(f)
+        bucket.Object(f"pretrained-models/{state_key.state_type}.pt").download_fileobj(
+            f
+        )
 
         # Set the model state
         f.seek(0)
@@ -105,7 +110,7 @@ class MLModuleModelStore(AbstractModelStore):
 
 
 @dataclasses.dataclass
-class LocalFileModelStore(AbstractModelStore):
+class LocalFileModelStore(AbstractStateStore):
     """Local filebased store
 
     Attributes:
@@ -123,7 +128,7 @@ class LocalFileModelStore(AbstractModelStore):
 
     def save(
         self, model: ModelWithState, training_id: Optional[str] = None
-    ) -> StateIdentifier:
+    ) -> StateKey:
         """Saves the model state to the local file
 
         Attributes:
@@ -131,9 +136,9 @@ class LocalFileModelStore(AbstractModelStore):
             training_id (Optional[str]): Identifier for the training activity
 
         Returns:
-            StateIdentifier: The identifier for the model state that has been saved
+            StateKey: The identifier for the model state that has been saved
         """
-        filename = self.get_filename(model.state_architecture(), training_id)
+        filename = self.get_filename(model.state_type(), training_id)
         if os.path.exists(filename):
             raise ValueError(f"File {filename} already exists.")
 
@@ -141,20 +146,16 @@ class LocalFileModelStore(AbstractModelStore):
             f.write(model.get_state())
         return super().save(model, training_id)
 
-    def load(
-        self, model: ModelWithState, state_id: Optional[StateIdentifier] = None
-    ) -> None:
+    def load(self, model: ModelWithState, state_key: StateKey) -> None:
         """Loads the models weights from the local file
 
         Attributes:
             model (ModelWithState): Model to update
-            state_id (Optional[StateIdentifier]): Optionally pass the state identifier to load
+            state_key (StateKey): The state identifier to load
         """
-        super().load(model, state_id)
-        state_id = state_id or StateIdentifier(
-            state_architecture=model.state_architecture()
-        )
+        super().load(model, state_key)
+        state_key = state_key or StateKey(state_type=model.state_type())
 
-        filename = self.get_filename(state_id.state_architecture, state_id.training_id)
+        filename = self.get_filename(state_key.state_type, state_key.training_id)
         with open(filename, mode="rb") as f:
             model.set_state(f.read())

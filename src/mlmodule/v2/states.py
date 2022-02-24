@@ -35,7 +35,7 @@ class StateType:
 
     As a convention, two state types are compatible when `backend` and `architecture`
     attributes are the same. This is implemented in the
-    [`compatible_with`][mlmodule.v2.states.StateType.compatible_with]
+    [`is_compatible_with`][mlmodule.v2.states.StateType.is_compatible_with]
     method.
 
     Warning:
@@ -61,7 +61,7 @@ class StateType:
         for e in self.extra or []:
             validate_name(e, "extra")
 
-    def compatible_with(self, other: "StateType") -> bool:
+    def is_compatible_with(self, other: "StateType") -> bool:
         """Tells whether two architecture are compatible with each other.
 
         Arguments:
