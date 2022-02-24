@@ -3,26 +3,26 @@ from typing import Optional, Tuple
 
 
 @dataclasses.dataclass(frozen=True)
-class StateArchitecture:
+class StateType:
     """Definition for a type of state
 
-    A state architecture is used to identify states that can be re-used accross models.
+    A state type is used to identify states that can be re-used accross models.
 
     For instance, the weights from ResNet18 with 1000 classes pretrained on ImageNet
     can be reused to initialised the weights of a ResNet18 for binary classification.
-    In this scenario, the state architecture of the saved weights for the ImageNet ResNet
-    is compatible with the binary classification ResNet18.
+    In this scenario, the state type of the ResNet trained on ImageNet
+    can be re-used to partially initialize the binary classification ResNet18.
 
     This is also used for models like key-frames extraction.
-    Key-frames extraction does not define a new architecture,
+    Key-frames extraction does not define a new weights architecture,
     it is a wrapper around an image encoder.
     Therefore, any state that can be loaded into the image encoder,
     can also be loaded into the key-frame extractor.
-    They share the same state architecture.
+    They share the same state type.
 
-    As a convention, two state architectures are compatible when `backend` and `architecture`
+    As a convention, two state types are compatible when `backend` and `architecture`
     attributes are the same. This is implemented in the
-    [`compatible_with`][mlmodule.v2.states.StateArchitecture.compatible_with]
+    [`compatible_with`][mlmodule.v2.states.StateType.compatible_with]
     method.
 
     Attributes:
@@ -36,11 +36,11 @@ class StateArchitecture:
     architecture: str
     extra: Optional[Tuple[str]] = None
 
-    def compatible_with(self, other: "StateArchitecture") -> bool:
+    def compatible_with(self, other: "StateType") -> bool:
         """Tells whether two architecture are compatible with each other.
 
         Arguments:
-            other (StateArchitecture): The other architecture to compare
+            other (StateType): The other architecture to compare
 
         Returns:
             bool: `true` if `backend` and `architecture` attributes match.
@@ -49,13 +49,13 @@ class StateArchitecture:
 
 
 @dataclasses.dataclass(frozen=True)
-class StateIdentifier:
+class StateKey:
     """Identifier for a state of a trained model
 
     Attributes:
-        state_architecture (StateArchitecture): Identifies the [type of state][mlmodule.v2.states.StateArchitecture]
+        state_type (StateType): Identifies the [type of state][mlmodule.v2.states.StateType]
         training_id (str): Identifies the training activity that was used to get to this state
     """
 
-    state_architecture: StateArchitecture
+    state_type: StateType
     training_id: str
