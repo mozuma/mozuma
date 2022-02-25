@@ -1,17 +1,15 @@
 from collections import OrderedDict
-from typing import Callable, List, Optional, Set
-from urllib.parse import urlparse
+from typing import Callable, List
 
 import torch
 import torchvision.models
-from torch.hub import load_state_dict_from_url
 from typing_extensions import Literal
 
+from mlmodule.contrib.resnet.utils import sanitize_resnet_arch
 from mlmodule.labels.base import LabelSet
 from mlmodule.labels.imagenet import IMAGENET_LABELS
 from mlmodule.v2.base.predictions import BatchModelPrediction
-from mlmodule.v2.helpers.utils import take_unique_element
-from mlmodule.v2.states import StateKey, StateType
+from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 from mlmodule.v2.torch.transforms import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 
@@ -76,6 +74,10 @@ class TorchResNetImageNetModule(TorchMlModule[torch.Tensor, torch.Tensor]):
         self.classifier_module = base_resnet.fc
 
     @property
+    def resnet_arch_safe(self) -> str:
+        return sanitize_resnet_arch(self.resnet_arch)
+
+    @property
     def state_type(self) -> StateType:
         """ResNet for ImageNet architecture
 
@@ -84,7 +86,7 @@ class TorchResNetImageNetModule(TorchMlModule[torch.Tensor, torch.Tensor]):
                 `StateType(backend="pytorch", architecture={resnet_arch}, extra=("imagenet",))`
         """
         return StateType(
-            backend="pytorch", architecture=self.resnet_arch, extra=("imagenet",)
+            backend="pytorch", architecture=self.resnet_arch_safe, extra=("imagenet",)
         )
 
     @classmethod
@@ -113,61 +115,6 @@ class TorchResNetImageNetModule(TorchMlModule[torch.Tensor, torch.Tensor]):
         features = self.forward_features(batch)
         labels_scores = self.forward_classifier(features)
         return BatchModelPrediction(features=features, label_scores=labels_scores)
-
-    def provider_state_architectures(self) -> Set[StateType]:
-        """Identifiers for torchvision supported pretrained states
-
-        Returns:
-            Set[StateType]: A single supported architecture for ImageNet:
-                `{StateType(backend="pytorch", architecture={resnet_arch}, extra=("imagenet",))}`
-        """
-        return {self.state_type()}
-
-    def set_state_from_provider(
-        self, state_arch: Optional[StateType] = None
-    ) -> StateKey:
-        """Downloads weights from torchvision's repositories
-
-        Arguments:
-            state_arch (Optional[str]): One of `provider_state_architectures`
-
-        Returns:
-            StateKey: The identifier for the current loaded state
-        """
-        # Validate provided state_arch
-        provider_architectures = self.provider_state_architectures()
-        state_arch = state_arch or take_unique_element(provider_architectures)
-        if state_arch is None or state_arch not in provider_architectures:
-            raise ValueError(f"Invalid state_arch={state_arch}")
-
-        # Getting URL to download model
-        url = torchvision.models.resnet.model_urls[self.resnet_arch]
-        # Defining the training id (trained by torch on imagenet)
-        tv_weights_hash: str = urlparse(url).path.split("-")[-1].replace(".pth", "")
-        training_id = f"torch-imagenet-{tv_weights_hash}"
-        # Downloading state dictionary
-        pretrained_state_dict: OrderedDict[
-            str, torch.Tensor
-        ] = load_state_dict_from_url(url, map_location=self.device)
-        # Splitting features and classifier layers
-        features_state_dict = OrderedDict(
-            [
-                (key, value)
-                for key, value in pretrained_state_dict.items()
-                if not key.startswith("fc")
-            ]
-        )
-        classifier_state_dict = OrderedDict(
-            [
-                (key[3:], value)
-                for key, value in pretrained_state_dict.items()
-                if key.startswith("fc")
-            ]
-        )
-        self.features_module.load_state_dict(features_state_dict)
-        self.classifier_module.load_state_dict(classifier_state_dict)
-
-        return StateKey(state_type=state_arch, training_id=training_id)
 
     def get_dataset_transforms(self) -> List[Callable]:
         """Standard TorchVision image transforms"""

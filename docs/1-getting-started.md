@@ -26,18 +26,24 @@ The model is initialised with weights provided by the `MLModuleModelStore`.
 
 ```python
 from mlmodule.contrib.resnet import TorchResNetModule
+from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import MLModuleModelStore
 
 # Model definition (1)
 resnet = TorchResNetModule("resnet18")
 
-# Getting pretrained model (2)
+# Getting pre-trained model (2)
 store = MLModuleModelStore()
-store.load(resnet)
+# Getting the state pre-trained on ImageNet (3)
+store.load(
+    resnet,
+    StateKey(state_type=resnet.state_type, training_id="imagenet")
+)
 ```
 
 1. List of all [models](models/index.md)
 2. List of all [stores](references/stores.md)
+3. Description of how states are handled is available is [state's reference](references/states.md)
 
 Once we have a model initialized, we need to define what we want to do with it.
 In this case, we'll run an inference loop using the `TorchInferenceRunner`.
