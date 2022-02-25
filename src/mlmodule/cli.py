@@ -10,8 +10,11 @@ from mlmodule.metrics import MetricsCollector
 from mlmodule.serializers import Serializer
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
-from mlmodule.v2.base.models import ModelWithStateFromProvider
-from mlmodule.v2.stores import LocalFileModelStore
+from mlmodule.v2.base.models import ModelWithState
+from mlmodule.v2.states import StateKey
+from mlmodule.v2.stores import Store
+from mlmodule.v2.stores.abstract import AbstractStateStore
+from mlmodule.v2.stores.local import LocalStateStore
 from mlmodule.v2.torch.datasets import OpenBinaryFileDataset, TorchDataset
 
 logger = logging.getLogger(__name__)
@@ -32,12 +35,25 @@ def get_dataset(
 
 
 def download_fun(args: argparse.Namespace, metrics: Optional[dict] = None):
-    model: ModelWithStateFromProvider = args.module(*args.args)
-    # Getting the model weights from provider
-    model.set_state_from_provider()
+    # Initialize the model
+    model: ModelWithState = args.module(*args.args)
+    # Initialize the model store
+    store: AbstractStateStore = args.store()
+    # Getting the training ID
+    training_id: Optional[str] = args.training_id
+    if training_id is None:
+        # Get it from the store if there is only one possibility
+        training_ids = [s.training_id for s in store.get_state_keys(model.state_type)]
+        if len(training_ids) != 1:
+            raise ValueError(f"Cannot decide which state to load from {training_ids}")
+        training_id = training_ids[0]
+
+    # Getting the model weights from the store
+    store.load(model, StateKey(state_type=model.state_type, training_id=training_id))
+
     # Storing the weights in a local file
-    store = LocalFileModelStore(args.outdir)
-    print(store.save(model))
+    store = LocalStateStore(args.outdir)
+    print(store.save(model, training_id))
 
 
 def run_fun(
@@ -123,6 +139,18 @@ def main():
         'and "MLModuleClass" is a class that implements '
         "the method "
         "get_default_pretrained_state_dict_from_provider()",
+    )
+    download.add_argument(
+        "--training-id", help="The training ID to pass to the store.load function"
+    )
+    download.add_argument(
+        "--store",
+        type=_contrib_module,
+        default=Store,
+        help="Should be in the format <module>.<StateStoreClass> "
+        'where "module" is a module in mlmodule.contrib '
+        'and "StateStoreClass" is a class that implements '
+        "the AbstractStateStore interface.",
     )
     download.add_argument(
         "--args",

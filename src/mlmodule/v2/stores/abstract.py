@@ -3,7 +3,7 @@ import dataclasses
 import os
 import warnings
 from io import BytesIO
-from typing import Generic, List, NoReturn, Optional, TypeVar
+from typing import Generic, List, NoReturn, TypeVar
 
 import boto3
 
@@ -77,10 +77,8 @@ class MLModuleModelStore(AbstractStateStore):
         # Select lsir-public-assets bucket
         return s3.Bucket("lsir-public-assets")
 
-    def save(
-        self, model: ModelWithState, training_id: Optional[str] = None
-    ) -> NoReturn:
-        raise ValueError("MLModuleStore states are read-only")
+    def save(self, model: _ModelType, training_id: str) -> NoReturn:
+        raise NotImplementedError("MLModuleStore states are read-only")
 
     def load(self, model: ModelWithState, state_key: StateKey) -> None:
         """Loads the models weights from the store
@@ -107,55 +105,3 @@ class MLModuleModelStore(AbstractStateStore):
         # Set the model state
         f.seek(0)
         model.set_state(f.read())
-
-
-@dataclasses.dataclass
-class LocalFileModelStore(AbstractStateStore):
-    """Local filebased store
-
-    Attributes:
-        folder (str): Path to the folder to save model's state
-    """
-
-    folder: str
-
-    def get_filename(self, state_arch: str, training_id: Optional[str] = None) -> str:
-        filename = os.path.join(self.folder, f"{state_arch}")
-        if training_id is not None:
-            return f"{filename}-{training_id}.pt"
-        else:
-            return f"{filename}.pt"
-
-    def save(
-        self, model: ModelWithState, training_id: Optional[str] = None
-    ) -> StateKey:
-        """Saves the model state to the local file
-
-        Attributes:
-            model (ModelWithState): Model to save
-            training_id (Optional[str]): Identifier for the training activity
-
-        Returns:
-            StateKey: The identifier for the model state that has been saved
-        """
-        filename = self.get_filename(model.state_type(), training_id)
-        if os.path.exists(filename):
-            raise ValueError(f"File {filename} already exists.")
-
-        with open(filename, mode="wb") as f:
-            f.write(model.get_state())
-        return super().save(model, training_id)
-
-    def load(self, model: ModelWithState, state_key: StateKey) -> None:
-        """Loads the models weights from the local file
-
-        Attributes:
-            model (ModelWithState): Model to update
-            state_key (StateKey): The state identifier to load
-        """
-        super().load(model, state_key)
-        state_key = state_key or StateKey(state_type=model.state_type())
-
-        filename = self.get_filename(state_key.state_type, state_key.training_id)
-        with open(filename, mode="rb") as f:
-            model.set_state(f.read())

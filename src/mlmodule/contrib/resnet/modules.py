@@ -86,7 +86,7 @@ class TorchResNetImageNetModule(TorchMlModule[torch.Tensor, torch.Tensor]):
                 `StateType(backend="pytorch", architecture={resnet_arch}, extra=("imagenet",))`
         """
         return StateType(
-            backend="pytorch", architecture=self.resnet_arch_safe, extra=("imagenet",)
+            backend="pytorch", architecture=self.resnet_arch_safe, extra=("cls1000",)
         )
 
     @classmethod

@@ -8,7 +8,7 @@ from torchvision.models import resnet
 from mlmodule.contrib.resnet.modules import TorchResNetImageNetModule
 from mlmodule.contrib.resnet.utils import sanitize_resnet_arch
 from mlmodule.v2.states import StateKey, StateType
-from mlmodule.v2.stores import AbstractStateStore
+from mlmodule.v2.stores.abstract import AbstractStateStore
 
 RESNET_ARCHITECTURES_MAP = {sanitize_resnet_arch(a): a for a in resnet.model_urls}
 
