@@ -23,7 +23,9 @@ class LocalStateStore(AbstractStateStore[_ModelType]):
         return f"{state_type.backend}.{state_type.architecture}"
 
     def _get_state_type_prefix_with_extra(self, state_type: StateType) -> str:
-        extra = ".".join(state_type.extra or [])
+        if not state_type.extra:
+            return self._get_state_type_prefix(state_type)
+        extra = ".".join(state_type.extra)
         return f"{self._get_state_type_prefix(state_type)}.{extra}"
 
     def get_filename(self, state_key: StateKey) -> str:

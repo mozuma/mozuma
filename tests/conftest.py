@@ -8,6 +8,7 @@ from _pytest.fixtures import SubRequest
 
 from mlmodule.contrib.arcface import ArcFaceFeatures
 from mlmodule.contrib.clip.image import CLIPImageModule
+from mlmodule.contrib.clip.stores import CLIPStore
 from mlmodule.contrib.clip.text import CLIPTextModule
 from mlmodule.contrib.densenet import (
     DenseNet161ImageNetClassifier,
@@ -16,12 +17,11 @@ from mlmodule.contrib.densenet import (
     DenseNet161PlacesFeatures,
 )
 from mlmodule.contrib.keyframes.selectors import ResNet18KeyFramesSelector
-
-# from mlmodule.contrib.keyframes.v1 import TorchMLModuleKeyFrames
 from mlmodule.contrib.magface.features import MagFaceFeatures
 from mlmodule.contrib.mtcnn import MTCNNDetector
 from mlmodule.contrib.mtcnn.detector_ori import MTCNNDetectorOriginal
 from mlmodule.contrib.resnet.modules import TorchResNetModule
+from mlmodule.contrib.resnet.stores import ResNetTorchVisionStore
 from mlmodule.contrib.vinvl import VinVLDetector
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
@@ -35,6 +35,23 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
         TorchResNetModule,
         ["resnet18"],
         batch_input_shape=[2, 3, 224, 224],  # batch, channels, width, height
+        provider_store=ResNetTorchVisionStore(),
+        provider_store_training_ids={"imagenet"},
+    ),
+    ModuleTestConfiguration(
+        CLIPImageModule,
+        ["RN50"],
+        batch_input_shape=[2, 3, 224, 224],  # batch, channels, width, height
+        provider_store=CLIPStore(),
+        provider_store_training_ids={"clip"},
+    ),
+    ModuleTestConfiguration(
+        CLIPTextModule,
+        ["RN50"],
+        batch_input_shape=[2, 77],  # batch, ctx_len
+        batch_input_type=lambda *s: torch.randint(10, size=s),
+        provider_store=CLIPStore(),
+        provider_store_training_ids={"clip"},
     ),
 ]
 
@@ -85,7 +102,7 @@ def cats_and_dogs_images() -> List[str]:
     return list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
 
 
-## OLD
+# OLD
 
 
 @pytest.fixture(

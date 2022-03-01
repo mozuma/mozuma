@@ -12,26 +12,80 @@ def local_store() -> LocalStateStore:
     return LocalStateStore(folder="test")
 
 
-def test_parse_state_key(local_store: LocalStateStore):
-    filename = "pytorch.resnet18.cls1000.imagenet.pt"
-
-    assert local_store._filename_to_state_key(filename) == StateKey(
-        state_type=StateType(
-            backend="pytorch", architecture="resnet18", extra=("cls1000",)
+@pytest.mark.parametrize(
+    ("filename", "state_key"),
+    [
+        (
+            "pytorch.resnet18.cls1000.imagenet.pt",
+            StateKey(
+                state_type=StateType(
+                    backend="pytorch", architecture="resnet18", extra=("cls1000",)
+                ),
+                training_id="imagenet",
+            ),
         ),
-        training_id="imagenet",
-    )
+        (
+            "pytorch.resnet18.imagenet.pt",
+            StateKey(
+                state_type=StateType(
+                    backend="pytorch", architecture="resnet18", extra=None
+                ),
+                training_id="imagenet",
+            ),
+        ),
+        (
+            "pytorch.resnet18.cls1000.extra1.imagenet.pt",
+            StateKey(
+                state_type=StateType(
+                    backend="pytorch",
+                    architecture="resnet18",
+                    extra=("cls1000", "extra1"),
+                ),
+                training_id="imagenet",
+            ),
+        ),
+    ],
+)
+def test_parse_state_key(
+    local_store: LocalStateStore, filename: str, state_key: StateKey
+):
+    assert local_store._filename_to_state_key(filename) == state_key
 
 
-def test_state_type_prefix(local_store: LocalStateStore):
-    state_type = StateType(
-        backend="pytorch", architecture="resnet18", extra=("cls1000",)
-    )
-
-    assert local_store._get_state_type_prefix(state_type) == "pytorch.resnet18"
+@pytest.mark.parametrize(
+    ("state_type", "prefix", "extra_str"),
+    [
+        (
+            StateType(backend="pytorch", architecture="resnet18", extra=("cls1000",)),
+            "pytorch.resnet18",
+            ".cls1000",
+        ),
+        (
+            StateType(
+                backend="pytorch",
+                architecture="resnet18",
+                extra=(
+                    "cls1000",
+                    "extra1",
+                ),
+            ),
+            "pytorch.resnet18",
+            ".cls1000.extra1",
+        ),
+        (
+            StateType(backend="pytorch", architecture="resnet18", extra=None),
+            "pytorch.resnet18",
+            "",
+        ),
+    ],
+)
+def test_state_type_prefix(
+    local_store: LocalStateStore, state_type: StateType, prefix: str, extra_str: str
+):
+    assert local_store._get_state_type_prefix(state_type) == prefix
     assert (
         local_store._get_state_type_prefix_with_extra(state_type)
-        == "pytorch.resnet18.cls1000"
+        == f"{prefix}{extra_str}"
     )
 
 

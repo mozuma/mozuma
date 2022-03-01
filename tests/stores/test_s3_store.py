@@ -23,15 +23,38 @@ def test_parse_state_key(s3_store: S3StateStore):
     )
 
 
-def test_state_type_prefix(s3_store: S3StateStore):
-    state_type = StateType(
-        backend="pytorch", architecture="resnet18", extra=("cls1000",)
-    )
-
-    assert s3_store._state_type_prefix(state_type) == "pytorch/resnet18"
-    assert (
-        s3_store._state_type_prefix_with_extra(state_type) == "pytorch/resnet18.cls1000"
-    )
+@pytest.mark.parametrize(
+    ("state_type", "prefix", "extra_str"),
+    [
+        (
+            StateType(backend="pytorch", architecture="resnet18", extra=("cls1000",)),
+            "pytorch/resnet18",
+            ".cls1000",
+        ),
+        (
+            StateType(
+                backend="pytorch",
+                architecture="resnet18",
+                extra=(
+                    "cls1000",
+                    "extra1",
+                ),
+            ),
+            "pytorch/resnet18",
+            ".cls1000.extra1",
+        ),
+        (
+            StateType(backend="pytorch", architecture="resnet18", extra=None),
+            "pytorch/resnet18",
+            "",
+        ),
+    ],
+)
+def test_state_type_prefix(
+    s3_store: S3StateStore, state_type: StateType, prefix: str, extra_str: str
+):
+    assert s3_store._state_type_prefix(state_type) == prefix
+    assert s3_store._state_type_prefix_with_extra(state_type) == f"{prefix}{extra_str}"
 
 
 def test_get_state_keys(s3_store: S3StateStore):

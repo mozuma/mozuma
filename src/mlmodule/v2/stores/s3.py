@@ -47,7 +47,9 @@ class S3StateStore(AbstractStateStore[_ModelType]):
         return f"{state_type.backend}/{state_type.architecture}"
 
     def _state_type_prefix_with_extra(self, state_type: StateType) -> str:
-        state_type_extra_str = ".".join(state_type.extra or [])
+        if not state_type.extra:
+            return self._state_type_prefix(state_type)
+        state_type_extra_str = ".".join(state_type.extra)
         return f"{self._state_type_prefix(state_type)}.{state_type_extra_str}"
 
     def _parse_state_key(self, bucket_key: str) -> StateKey:
@@ -97,7 +99,10 @@ class S3StateStore(AbstractStateStore[_ModelType]):
         bucket = self._get_bucket()
 
         # S3 object key for the model state
-        s3_state_key = f"{self.base_path}{self._state_type_prefix_with_extra(state_key.state_type)}.{state_key.training_id}.pt"
+        s3_state_key = (
+            f"{self.base_path}{self._state_type_prefix_with_extra(state_key.state_type)}"
+            f".{state_key.training_id}.pt"
+        )
 
         # Download state dict into BytesIO file
         f = BytesIO()

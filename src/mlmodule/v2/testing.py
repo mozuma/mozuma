@@ -1,5 +1,9 @@
 import dataclasses
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
+from typing import Any, Callable, Dict, Generic, List, Optional, Set, Type, TypeVar
+
+import torch
+
+from mlmodule.v2.stores.abstract import AbstractStateStore
 
 _Module = TypeVar("_Module")
 
@@ -16,6 +20,10 @@ class ModuleTestConfiguration(Generic[_Module]):
     is_pytorch: bool = True
     # The shape of the input tensor to forward
     batch_input_shape: Optional[List[int]] = None
+    batch_input_type: Callable = torch.Tensor
+    # Model provider store
+    provider_store: Optional[AbstractStateStore] = None
+    provider_store_training_ids: Set[str] = dataclasses.field(default_factory=set)
 
     def get_module(self) -> _Module:
         return self.module_class(*self.module_args, **self.module_kwargs)
