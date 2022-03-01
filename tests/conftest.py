@@ -1,5 +1,5 @@
 import os
-from typing import Callable, Set, Type
+from typing import Callable, List, Set, Type
 
 import numpy as np
 import pytest
@@ -7,13 +7,15 @@ import torch
 from _pytest.fixtures import SubRequest
 
 from mlmodule.contrib.arcface import ArcFaceFeatures
-from mlmodule.contrib.clip import CLIPViTB32ImageEncoder
+from mlmodule.contrib.clip.image import CLIPImageModule
+from mlmodule.contrib.clip.text import CLIPTextModule
 from mlmodule.contrib.densenet import (
     DenseNet161ImageNetClassifier,
     DenseNet161ImageNetFeatures,
     DenseNet161PlacesClassifier,
     DenseNet161PlacesFeatures,
 )
+from mlmodule.contrib.keyframes.selectors import ResNet18KeyFramesSelector
 
 # from mlmodule.contrib.keyframes.v1 import TorchMLModuleKeyFrames
 from mlmodule.contrib.magface.features import MagFaceFeatures
@@ -26,7 +28,32 @@ from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
 from mlmodule.types import StateDict
 from mlmodule.utils import list_files_in_dir
-from mlmodule.v2.base.models import ModelWithStateFromProvider
+from mlmodule.v2.testing import ModuleTestConfiguration
+from mlmodule.v2.torch.modules import TorchMlModule
+
+MODULE_TO_TEST: List[ModuleTestConfiguration] = [
+    ModuleTestConfiguration(
+        TorchResNetModule,
+        ["resnet18"],
+        batch_input_shape=[2, 3, 224, 224],  # batch, channels, width, height
+    ),
+]
+
+
+@pytest.fixture(params=MODULE_TO_TEST, ids=[str(m) for m in MODULE_TO_TEST])
+def ml_module(request: SubRequest) -> ModuleTestConfiguration:
+    """All modules that are part of the MLModule library"""
+    return request.param
+
+
+@pytest.fixture
+def torch_ml_module(
+    ml_module: ModuleTestConfiguration,
+) -> ModuleTestConfiguration[TorchMlModule]:
+    """All modules implemented in Torch"""
+    if not ml_module.is_pytorch:
+        pytest.skip(f"Skipping {ml_module} as it is not a PyTorch module")
+    return ml_module
 
 
 @pytest.fixture(scope="session", params=["cpu", "cuda"])
@@ -55,37 +82,54 @@ def gpu_torch_device() -> torch.device:
 
 @pytest.fixture(
     params=[
-        lambda: TorchResNetModule("resnet18")
+        lambda: TorchResNetModule("resnet18"),
+        lambda: ResNet18KeyFramesSelector(),
+        lambda: CLIPImageModule("ViT-B/32"),
+        lambda: CLIPTextModule("ViT-B/32"),
         # CLIPViTB32ImageEncoder,
         # MTCNNDetector,
         # ArcFaceFeatures,
         # MagFaceFeatures,
         # TorchMLModuleKeyFrames,
         # VinVLDetector - too slow to download
-    ]
+    ],
+    ids=[
+        "torch-resnet-18",
+        "torch-keyframes",
+        "torch-clip-vit-image",
+        "torch-clip-vit-text",
+    ],
 )
 def module_pretrained_by_provider(
     request: SubRequest,
-) -> ModelWithStateFromProvider:
+):
     """Returns a module that implements DownloadPretrainedStateFromProvider"""
     return request.param
 
 
 @pytest.fixture(
     params=[
-        lambda: TorchResNetModule("resnet18")
+        lambda: TorchResNetModule("resnet18"),
+        lambda: ResNet18KeyFramesSelector(),
+        lambda: CLIPImageModule("ViT-B/32"),
+        lambda: CLIPTextModule("ViT-B/32"),
         # CLIPViTB32ImageEncoder,
         # MTCNNDetector,
         # ArcFaceFeatures,
         # MagFaceFeatures,
         # TorchMLModuleKeyFrames,
         # VinVLDetector - too slow to download
-    ]
+    ],
+    ids=[
+        "torch-resnet-18",
+        "torch-keyframes",
+        "torch-clip-vit-image",
+        "torch-clip-vit-text",
+    ],
 )
 def module_pretrained_mlmodule_store(
     request: SubRequest,
-) -> ModelWithStateFromProvider:
-    """Returns a module that implements DownloadPretrainedStateFromProvider"""
+):
     return request.param
 
 
@@ -97,7 +141,6 @@ def module_pretrained_mlmodule_store(
         DenseNet161ImageNetClassifier,
         DenseNet161PlacesFeatures,
         DenseNet161PlacesClassifier,
-        CLIPViTB32ImageEncoder,
         MTCNNDetector,
         MTCNNDetectorOriginal,
         ArcFaceFeatures,
@@ -120,7 +163,6 @@ def data_platform_scanner(request: SubRequest):
         ResNet18ImageNetFeatures,
         DenseNet161ImageNetFeatures,
         DenseNet161PlacesFeatures,
-        CLIPViTB32ImageEncoder,
         MTCNNDetector,
         MTCNNDetectorOriginal,
         VinVLDetector,
