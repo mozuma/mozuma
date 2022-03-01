@@ -80,6 +80,7 @@ class S3StateStore(AbstractStateStore[_ModelType]):
         return [self._parse_state_key(s) for s in available_states]
 
     def save(self, model: _ModelType, training_id: str) -> NoReturn:
+        """Not implemented"""
         raise NotImplementedError("MLModuleStore states are read-only")
 
     def load(self, model: _ModelType, state_key: StateKey) -> None:
@@ -88,9 +89,6 @@ class S3StateStore(AbstractStateStore[_ModelType]):
         Attributes:
             model (_ModelType): Model to update
             state_key (StateKey): The state identifier to load.
-
-        Warning:
-            Setting the `training_id` in the argument `state_id` is not supported and will raise an error.
         """
         # Making sure state_id is compatible with the model
         super().load(model, state_key=state_key)
