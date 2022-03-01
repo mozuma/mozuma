@@ -12,7 +12,9 @@ class ModuleTestConfiguration(Generic[_Module]):
     module_args: List = dataclasses.field(default_factory=list)
     module_kwargs: Dict[str, Any] = dataclasses.field(default_factory=dict)
     has_state: bool = True
+    # Is it a Pytorch model
     is_pytorch: bool = True
+    # The shape of the input tensor to forward
     batch_input_shape: Optional[List[int]] = None
 
     def get_module(self) -> _Module:

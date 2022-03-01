@@ -21,7 +21,6 @@ from mlmodule.contrib.keyframes.selectors import ResNet18KeyFramesSelector
 from mlmodule.contrib.magface.features import MagFaceFeatures
 from mlmodule.contrib.mtcnn import MTCNNDetector
 from mlmodule.contrib.mtcnn.detector_ori import MTCNNDetectorOriginal
-from mlmodule.contrib.resnet import ResNet18ImageNetClassifier, ResNet18ImageNetFeatures
 from mlmodule.contrib.resnet.modules import TorchResNetModule
 from mlmodule.contrib.vinvl import VinVLDetector
 from mlmodule.torch.base import BaseTorchMLModule
@@ -80,6 +79,15 @@ def gpu_torch_device() -> torch.device:
     return torch.device("cuda")
 
 
+@pytest.fixture
+def cats_and_dogs_images() -> List[str]:
+    base_path = os.path.join("tests", "fixtures", "cats_dogs")
+    return list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
+
+
+## OLD
+
+
 @pytest.fixture(
     params=[
         lambda: TorchResNetModule("resnet18"),
@@ -135,8 +143,6 @@ def module_pretrained_mlmodule_store(
 
 @pytest.fixture(
     params=[
-        ResNet18ImageNetFeatures,
-        ResNet18ImageNetClassifier,
         DenseNet161ImageNetFeatures,
         DenseNet161ImageNetClassifier,
         DenseNet161PlacesFeatures,
@@ -160,7 +166,6 @@ def data_platform_scanner(request: SubRequest):
 
 @pytest.fixture(
     params=[
-        ResNet18ImageNetFeatures,
         DenseNet161ImageNetFeatures,
         DenseNet161PlacesFeatures,
         MTCNNDetector,

@@ -97,7 +97,7 @@ class S3StateStore(AbstractStateStore[_ModelType]):
         bucket = self._get_bucket()
 
         # S3 object key for the model state
-        s3_state_key = f"{self.base_path}{self._state_type_prefix(state_key.state_type)}.{state_key.training_id}.pt"
+        s3_state_key = f"{self.base_path}{self._state_type_prefix_with_extra(state_key.state_type)}.{state_key.training_id}.pt"
 
         # Download state dict into BytesIO file
         f = BytesIO()

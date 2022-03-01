@@ -45,22 +45,24 @@ class TorchResNetModule(TorchMlModule[torch.Tensor, torch.Tensor]):
             - `wide_resnet50_2`
             - `wide_resnet101_2`
 
-        num_classes (int, optional): The number of output classes. Defaults to 1000 (ImageNet).
+        label_set (LabelSet, optional): The output labels. Defaults to ImageNet 1000 labels.
         device (torch.device): Torch device to initialise the model weights
     """
 
     def __init__(
         self,
         resnet_arch: ResNetArchs,
-        num_classes: int = 1000,
+        label_set: LabelSet = None,
         device: torch.device = torch.device("cpu"),
     ):
         super().__init__(device)
         self.resnet_arch = resnet_arch
-        self.num_classes = num_classes
+        self.label_set = label_set or IMAGENET_LABELS
 
         # Getting the resnet architecture from torchvision
-        base_resnet = self.get_resnet_module(resnet_arch, num_classes=num_classes)
+        base_resnet = self.get_resnet_module(
+            resnet_arch, num_classes=len(self.label_set)
+        )
         self.features_module = torch.nn.Sequential(
             OrderedDict(
                 [
@@ -88,12 +90,12 @@ class TorchResNetModule(TorchMlModule[torch.Tensor, torch.Tensor]):
 
         Returns:
             StateType: The ResNet identifier for imagenet classification:
-                `StateType(backend="pytorch", architecture={resnet_arch}, extra=("imagenet",))`
+                `StateType(backend="pytorch", architecture={resnet_arch}, extra=("cls1000",))`
         """
         return StateType(
             backend="pytorch",
             architecture=self.resnet_arch_safe,
-            extra=(f"cls{self.num_classes}",),
+            extra=(f"cls{len(self.label_set)}",),
         )
 
     @classmethod
