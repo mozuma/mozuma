@@ -26,7 +26,7 @@ ResNetArchs = Literal[
 ]
 
 
-class TorchResNetImageNetModule(TorchMlModule[torch.Tensor, torch.Tensor]):
+class TorchResNetModule(TorchMlModule[torch.Tensor, torch.Tensor]):
     """PyTorch ResNet architecture for ImageNet classification.
 
     See [PyTorch's documentation](https://pytorch.org/vision/stable/_modules/torchvision/models/resnet.html).
@@ -45,17 +45,22 @@ class TorchResNetImageNetModule(TorchMlModule[torch.Tensor, torch.Tensor]):
             - `wide_resnet50_2`
             - `wide_resnet101_2`
 
+        num_classes (int, optional): The number of output classes. Defaults to 1000 (ImageNet).
         device (torch.device): Torch device to initialise the model weights
     """
 
     def __init__(
-        self, resnet_arch: ResNetArchs, device: torch.device = torch.device("cpu")
+        self,
+        resnet_arch: ResNetArchs,
+        num_classes: int = 1000,
+        device: torch.device = torch.device("cpu"),
     ):
         super().__init__(device)
         self.resnet_arch = resnet_arch
+        self.num_classes = num_classes
 
         # Getting the resnet architecture from torchvision
-        base_resnet = self.get_resnet_module(resnet_arch)
+        base_resnet = self.get_resnet_module(resnet_arch, num_classes=num_classes)
         self.features_module = torch.nn.Sequential(
             OrderedDict(
                 [
@@ -86,13 +91,17 @@ class TorchResNetImageNetModule(TorchMlModule[torch.Tensor, torch.Tensor]):
                 `StateType(backend="pytorch", architecture={resnet_arch}, extra=("imagenet",))`
         """
         return StateType(
-            backend="pytorch", architecture=self.resnet_arch_safe, extra=("cls1000",)
+            backend="pytorch",
+            architecture=self.resnet_arch_safe,
+            extra=(f"cls{self.num_classes}",),
         )
 
     @classmethod
-    def get_resnet_module(cls, resnet_arch: ResNetArchs) -> torchvision.models.ResNet:
+    def get_resnet_module(
+        cls, resnet_arch: ResNetArchs, **kwargs
+    ) -> torchvision.models.ResNet:
         # Getting the ResNet architecture https://pytorch.org/vision/stable/models.html
-        return getattr(torchvision.models, resnet_arch)()
+        return getattr(torchvision.models, resnet_arch)(**kwargs)
 
     def forward_features(self, x: torch.Tensor) -> torch.Tensor:
         return torch.flatten(self.features_module(x), 1)

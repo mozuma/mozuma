@@ -5,7 +5,7 @@ import torch
 from torch.hub import load_state_dict_from_url
 from torchvision.models import resnet
 
-from mlmodule.contrib.resnet.modules import TorchResNetImageNetModule
+from mlmodule.contrib.resnet.modules import TorchResNetModule
 from mlmodule.contrib.resnet.utils import sanitize_resnet_arch
 from mlmodule.v2.states import StateKey, StateType
 from mlmodule.v2.stores.abstract import AbstractStateStore
@@ -13,7 +13,7 @@ from mlmodule.v2.stores.abstract import AbstractStateStore
 RESNET_ARCHITECTURES_MAP = {sanitize_resnet_arch(a): a for a in resnet.model_urls}
 
 
-class ResNetTorchVisionStore(AbstractStateStore[TorchResNetImageNetModule]):
+class ResNetTorchVisionStore(AbstractStateStore[TorchResNetModule]):
     """Model store to load ResNet weights pretrained on ImageNet from TorchVision"""
 
     def _valid_resnet_state_type(self, state_type: StateType) -> None:
@@ -24,15 +24,15 @@ class ResNetTorchVisionStore(AbstractStateStore[TorchResNetImageNetModule]):
                 f"ResNet state type architecture {state_type.architecture} not found in TorchVision"
             )
 
-    def save(self, model: TorchResNetImageNetModule, training_id: str) -> NoReturn:
+    def save(self, model: TorchResNetModule, training_id: str) -> NoReturn:
         """Not implemented for this store"""
         raise NotImplementedError("Saving a model to TorchVision is not possible")
 
-    def load(self, model: TorchResNetImageNetModule, state_key: StateKey) -> None:
+    def load(self, model: TorchResNetModule, state_key: StateKey) -> None:
         """Downloads weights from torchvision's repositories
 
         Arguments:
-            model (TorchResNetImageNetModule): The Torch ResNet module to load weights
+            model (TorchResNetModule): The Torch ResNet module to load weights
             state_key (StateKey): Identifier of the weights to load
         """
         # Making sure the requested state has been trained on imagenet
@@ -76,7 +76,7 @@ class ResNetTorchVisionStore(AbstractStateStore[TorchResNetImageNetModule]):
         Attributes:
             state_type (StateType): Filter state keys by type,
                 valid state types are given by the
-                [`TorchResNetImageNetModule.state_type`][mlmodule.contrib.resnet.TorchResNetImageNetModule.state_type]
+                [`TorchResNetModule.state_type`][mlmodule.contrib.resnet.TorchResNetModule.state_type]
         """
         self._valid_resnet_state_type(state_type)
         return [StateKey(state_type=state_type, training_id="imagenet")]
