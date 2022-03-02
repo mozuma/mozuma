@@ -7,7 +7,7 @@ It aims at providing high-level abstractions called [runners](references/runners
 on top of inference and training loops
 while allowing extensions via [callbacks](references/callbacks.md).
 These callbacks control the way the output of a runner is handled
-(i.e. features, labels, model weights...).
+(e.g. features, labels, model weights...).
 
 We also try to keep as few dependencies as possible.
 Meaning models will be mostly implemented from
