@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Sequence, Tuple
 
 import torch
 from torchvision.transforms import Compose
@@ -16,8 +16,10 @@ from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 
 
-class GenericVideoFramesEncoder(
-    TorchMlModule[Tuple[torch.LongTensor, torch.Tensor], torch.Tensor]
+class VideoFramesEncoder(
+    TorchMlModule[
+        Tuple[Sequence[torch.LongTensor], Sequence[torch.Tensor]], torch.Tensor
+    ]
 ):
     """Video frames encoder
 
@@ -45,58 +47,104 @@ class GenericVideoFramesEncoder(
     def state_type(self) -> StateType:
         return self.image_encoder.state_type
 
-    def forward_predictions(
-        self, batch: Tuple[torch.LongTensor, torch.Tensor]
-    ) -> BatchModelPrediction[torch.Tensor]:
-        """Encodes video frames
-
-        Arguments:
-            batch (Tuple[torch.LongTensor, torch.Tensor]): A tuple of (`frame index array`, `stacked frame images`)
-
-        Returns:
-            BatchModelPrediction[torch.Tensor]: With the `frames` attribute only
-        """
-        frame_indices, frame_features = self.forward(batch)
-        return BatchModelPrediction(
-            frames=[
-                BatchVideoFramesPrediction(
-                    features=frame_features, frame_indices=frame_indices[0].tolist()
-                )
-            ]
-        )
-
-    def forward(
+    def forward_single(
         self, batch: Tuple[torch.LongTensor, torch.Tensor]
     ) -> Tuple[torch.LongTensor, torch.Tensor]:
         """Applies image encoder to a batch of frames
 
-
         Arguments:
-            batch (Tuple[torch.LongTensor, torch.Tensor]): A tuple of (`frame index array`, `stacked frame images`)
+            batch (Tuple[torch.LongTensor, torch.Tensor]): A tuple of
+
+                - frame index array `torch.LongTensor, shape=(n_frames,)`
+                - stacked frame images `torch.Tensor, shape=(n_frames, channel, width, height,)`
 
         Returns:
-            Tuple[torch.LongTensor, torch.Tensor]: A tuple of (`frame index array`, `stacked frame features`)
-        """
-        frame_indices, frame_images = batch
-        if len(frame_images) > 1:
-            raise ValueError(
-                f"Unexpected len(frame_images)={len(frame_images)}, should be 1. "
-                "Make sure that batch size is set to 1"
-            )
-        frames: Optional[torch.Tensor]
-        if len(frame_images.shape) == 4:
-            frames = self.image_encoder.forward_predictions(frame_images).features
-        elif len(frame_images[0]) > 0:
-            frames = self.image_encoder.forward_predictions(frame_images[0]).features
-        else:
-            frames = torch.Tensor(0)
+            Tuple[torch.LongTensor, torch.Tensor]: A tuple of
 
-        if frames is None:
+                - frame index array `torch.LongTensor, shape=(n_frames,)`
+                - stacked frame images `torch.Tensor, shape=(n_frames, feature_length,)`
+        """
+        # Getting indices and images
+        frame_indices, frame_images = batch
+
+        # Checking input dimensions
+        if len(frame_indices.shape) != 1:
+            raise ValueError(
+                f"Expecting 1 dimension for the frame index array, got {len(frame_indices.shape)}"
+            )
+        if len(frame_indices) == 0:
+            # In this scenario, the list of frames is empty, so we return an empty result
+            return torch.LongTensor(0), torch.Tensor(0)
+        if len(frame_images.shape) != 4:
+            raise ValueError(
+                f"Expecting 4 dimensions for the frame images, got {len(frame_images.shape)}"
+            )
+
+        # Encoding the frames images in a batch
+        frame_features = self.image_encoder.forward_predictions(frame_images).features
+
+        # In case the provided image encoder does not return the features attribute
+        if frame_features is None:
             raise ValueError(
                 "Cannot encode video frames, the image encoder does not return features."
             )
 
-        return frame_indices, frames
+        return frame_indices, frame_features
+
+    def forward(
+        self, batch: Tuple[Sequence[torch.LongTensor], Sequence[torch.Tensor]]
+    ) -> Tuple[List[torch.LongTensor], List[torch.Tensor]]:
+        """Applies image encoder to a batch of frames
+
+        Arguments:
+            batch (Tuple[Sequence[torch.LongTensor], Sequence[torch.Tensor]]): A tuple of
+
+                - Sequence of frame index array `torch.LongTensor, shape=(n_frames,)`
+                - Sequence of stacked frame images `torch.Tensor, shape=(n_frames, channel, width, height,)`
+
+                Both sequences should have the same number of elements
+
+        Returns:
+            Tuple[List[torch.LongTensor], List[torch.Tensor]]: A tuple of
+
+                - List of frame index array `torch.LongTensor, shape=(n_frames,)`
+                - List of stacked frame images `torch.Tensor, shape=(n_frames, feature_length,)`
+        """
+        # Produce features for all videos
+        collected_features = [self.forward_single(element) for element in zip(*batch)]
+
+        # From a list of tuple[LongTensor, Tensor] to a tuple of lists of LongTensor and Tensor
+        return_value: Tuple[List[torch.LongTensor], List[torch.Tensor]] = ([], [])
+        for frame_indices, frame_features in collected_features:
+            return_value[0].append(frame_indices)
+            return_value[1].append(frame_features)
+        return return_value
+
+    def forward_predictions(
+        self, batch: Tuple[Sequence[torch.LongTensor], Sequence[torch.Tensor]]
+    ) -> BatchModelPrediction[torch.Tensor]:
+        """Encodes video frames
+
+        Arguments:
+            batch (Tuple[Sequence[torch.LongTensor], Sequence[torch.Tensor]]): A tuple of
+
+                - Sequence of frame index array `torch.LongTensor, shape=(n_frames,)`
+                - Sequence of stacked frame images `torch.Tensor, shape=(n_frames, channel, width, height,)`
+
+                Both sequences should have the same number of elements
+
+        Returns:
+            BatchModelPrediction[torch.Tensor]: With the `frames` attribute only
+        """
+        forward_ret = self.forward(batch)
+        return BatchModelPrediction(
+            frames=[
+                BatchVideoFramesPrediction(
+                    features=frame_features, frame_indices=frame_indices.tolist()
+                )
+                for frame_indices, frame_features in zip(*forward_ret)
+            ]
+        )
 
     def get_dataset_transforms(self) -> List[Callable]:
         """Video pre-processing transforms

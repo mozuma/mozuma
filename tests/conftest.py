@@ -16,8 +16,8 @@ from mlmodule.contrib.densenet import (
     DenseNet161PlacesClassifier,
     DenseNet161PlacesFeatures,
 )
-from mlmodule.contrib.keyframes.encoders import GenericVideoFramesEncoder
-from mlmodule.contrib.keyframes.selectors import ResNet18KeyFramesSelector
+from mlmodule.contrib.keyframes.encoders import VideoFramesEncoder
+from mlmodule.contrib.keyframes.selectors import KeyFrameSelector
 from mlmodule.contrib.magface.features import MagFaceFeatures
 from mlmodule.contrib.mtcnn import MTCNNDetector
 from mlmodule.contrib.mtcnn.detector_ori import MTCNNDetectorOriginal
@@ -62,10 +62,24 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
     # Key-frames
     ModuleTestConfiguration(
         "frames-encoder-rn18",
-        lambda: GenericVideoFramesEncoder(TorchResNetModule("resnet18")),
+        lambda: VideoFramesEncoder(TorchResNetModule("resnet18")),
         batch_factory=lambda: (
-            torch.range(0, 1),  # Frame indices
-            torch.rand([1, 3, 224, 224]),  # batch, channels, width, height
+            [torch.range(0, 1), torch.range(0, 3)],  # Frame indices
+            [
+                torch.rand([1, 3, 224, 224]),  # frame_idx, channels, width, height
+                torch.rand([3, 3, 224, 224]),  # frame_idx, channels, width, height
+            ],
+        ),
+    ),
+    ModuleTestConfiguration(
+        "frames-selector-rn18",
+        lambda: KeyFrameSelector(TorchResNetModule("resnet18")),
+        batch_factory=lambda: (
+            [torch.range(0, 1), torch.range(0, 3)],  # Frame indices
+            [
+                torch.rand([1, 3, 224, 224]),  # frame_idx, channels, width, height
+                torch.rand([3, 3, 224, 224]),  # frame_idx, channels, width, height
+            ],
         ),
     ),
 ]
@@ -123,7 +137,6 @@ def cats_and_dogs_images() -> List[str]:
 @pytest.fixture(
     params=[
         lambda: TorchResNetModule("resnet18"),
-        lambda: ResNet18KeyFramesSelector(),
         lambda: CLIPImageModule("ViT-B/32"),
         lambda: CLIPTextModule("ViT-B/32"),
         # CLIPViTB32ImageEncoder,
@@ -150,7 +163,6 @@ def module_pretrained_by_provider(
 @pytest.fixture(
     params=[
         lambda: TorchResNetModule("resnet18"),
-        lambda: ResNet18KeyFramesSelector(),
         lambda: CLIPImageModule("ViT-B/32"),
         lambda: CLIPTextModule("ViT-B/32"),
         # CLIPViTB32ImageEncoder,
