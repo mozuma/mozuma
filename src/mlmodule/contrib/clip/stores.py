@@ -7,6 +7,12 @@ from mlmodule.contrib.clip.utils import CLIP_SAFE_NAME_MAPPING
 from mlmodule.v2.states import StateKey, StateType
 from mlmodule.v2.stores.abstract import AbstractStateStore
 
+VALID_CLIP_STATE_TYPE = {
+    StateType(backend="pytorch", architecture=f"clip-{model_type}-{model_name}")
+    for model_type in ("text", "image")
+    for model_name in CLIP_SAFE_NAME_MAPPING
+}
+
 
 class CLIPStore(AbstractStateStore[BaseCLIPModule]):
     """Pre-trained model states by OpenAI CLIP
@@ -15,6 +21,8 @@ class CLIPStore(AbstractStateStore[BaseCLIPModule]):
     """
 
     def get_state_keys(self, state_type: StateType) -> List[StateKey]:
+        if state_type not in VALID_CLIP_STATE_TYPE:
+            return []
         return [StateKey(state_type=state_type, training_id="clip")]
 
     def save(self, model: BaseCLIPModule, training_id: str) -> NoReturn:

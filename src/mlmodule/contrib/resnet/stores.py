@@ -78,5 +78,9 @@ class ResNetTorchVisionStore(AbstractStateStore[TorchResNetModule]):
                 valid state types are given by the
                 [`TorchResNetModule.state_type`][mlmodule.contrib.resnet.TorchResNetModule.state_type]
         """
-        self._valid_resnet_state_type(state_type)
-        return [StateKey(state_type=state_type, training_id="imagenet")]
+        try:
+            self._valid_resnet_state_type(state_type)
+        except ValueError:
+            return []
+        else:
+            return [StateKey(state_type=state_type, training_id="imagenet")]

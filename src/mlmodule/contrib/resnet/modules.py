@@ -45,7 +45,7 @@ class TorchResNetModule(TorchMlModule[torch.Tensor, torch.Tensor]):
             - `wide_resnet50_2`
             - `wide_resnet101_2`
 
-        label_set (LabelSet, optional): The output labels. Defaults to ImageNet 1000 labels.
+        label_set (LabelSet): The output labels. Defaults to ImageNet 1000 labels.
         device (torch.device): Torch device to initialise the model weights
     """
 

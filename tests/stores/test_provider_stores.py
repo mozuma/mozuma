@@ -1,3 +1,5 @@
+import dataclasses
+
 import pytest
 
 from mlmodule.v2.base.models import ModelWithState
@@ -48,3 +50,19 @@ def test_provider_store_get_state_keys(
     # Make sure the returned training ids are the ones expected
     training_ids = {s.training_id for s in state_keys}
     assert ml_module.provider_store_training_ids == training_ids
+
+
+def test_provider_unknown_state_type(
+    ml_module: ModuleTestConfiguration[ModelWithState],
+):
+    if ml_module.provider_store is None:
+        pytest.skip("Model test config does not provide a store")
+    store = ml_module.provider_store
+    model = ml_module.get_module()
+
+    # Getting state keys for an unknown type
+    state_keys = store.get_state_keys(
+        dataclasses.replace(model.state_type, architecture="unknown")
+    )
+    # Should be empty
+    assert len(state_keys) == 0
