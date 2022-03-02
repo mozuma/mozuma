@@ -1,13 +1,10 @@
 # MTCNN
 
-!!! warning "Deprecated"
-    This model needs to be migrated to the latest version
-
-We are using `facenet-pytorch` to load pretrained MTCNN model, see `https://github.com/timesler/facenet-pytorch`.
+We are using `facenet-pytorch` to load pre-trained MTCNN model, see <https://github.com/timesler/facenet-pytorch>.
 
 ## Requirements
 
-This needs mlmodule with the mtcnn and torch extra requirements:
+This needs mlmodule with the `mtcnn` and `torch` extra requirements:
 
 ```bash
 pip install git+ssh://git@github.com/LSIR/mlmodule.git#egg=mlmodule[torch,mtcnn]
@@ -15,30 +12,18 @@ pip install git+ssh://git@github.com/LSIR/mlmodule.git#egg=mlmodule[torch,mtcnn]
 pip install mlmodule[torch,mtcnn]
 ```
 
+## Model
 
-## Face Detection
+The MTCNN model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
 
-Usage:
+::: mlmodule.contrib.mtcnn.modules.TorchMTCNNModule
+    selection:
+        members: none
 
-```python
-import torch
-from mlmodule.contrib.mtcnn import MTCNNDetector
-from mlmodule.torch.data.images import ImageDataset
-from mlmodule.utils import list_files_in_dir
+## Provider store
 
-# We need a list of files
-file_list = list_files_in_dir('mlmodule/tests/fixtures/faces', allowed_extensions='jpg')
+See the [stores documentation](../references/stores.md) for usage.
 
-mtcnn = MTCNNDetector(device=torch.device('cpu')).load()
-data = ImageDataset(file_list)
-
-file_list, detected_faces = mtcnn.bulk_inference(data)
-```
-
-## Download the model weights on PC32
-
-```bash
-export PUBLIC_ASSETS=/mnt/storage01/lsir-public-assets/pretrained-models
-# For text encoders
-python -m mlmodule.cli download mtcnn.MTCNNDetector "$PUBLIC_ASSETS/face-detection/mtcnn.pt"
-```
+::: mlmodule.contrib.mtcnn.stores.FaceNetMTCNNStore
+    selection:
+        members: none

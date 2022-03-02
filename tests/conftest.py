@@ -21,6 +21,8 @@ from mlmodule.contrib.keyframes.selectors import KeyFrameSelector
 from mlmodule.contrib.magface.features import MagFaceFeatures
 from mlmodule.contrib.mtcnn import MTCNNDetector
 from mlmodule.contrib.mtcnn.detector_ori import MTCNNDetectorOriginal
+from mlmodule.contrib.mtcnn.modules import TorchMTCNNModule
+from mlmodule.contrib.mtcnn.stores import FaceNetMTCNNStore
 from mlmodule.contrib.resnet.modules import TorchResNetModule
 from mlmodule.contrib.resnet.stores import ResNetTorchVisionStore
 from mlmodule.contrib.vinvl import VinVLDetector
@@ -58,6 +60,14 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
         batch_factory=lambda: torch.randint(10, size=(2, 77)),  # batch, ctx_len
         provider_store=CLIPStore(),
         provider_store_training_ids={"clip"},
+    ),
+    # MTCNN
+    ModuleTestConfiguration(
+        "mtcnn",
+        lambda: TorchMTCNNModule(),
+        batch_factory=lambda: [torch.rand([720 + i * 10, 720, 3]) for i in range(5)],
+        provider_store=FaceNetMTCNNStore(),
+        provider_store_training_ids={"facenet"},
     ),
     # Key-frames
     ModuleTestConfiguration(
