@@ -12,26 +12,19 @@ _Module = TypeVar("_Module")
 class ModuleTestConfiguration(Generic[_Module]):
     """Identifies a MLModule configuration for generic tests"""
 
-    module_class: Type[_Module]
-    module_args: List = dataclasses.field(default_factory=list)
-    module_kwargs: Dict[str, Any] = dataclasses.field(default_factory=dict)
+    name: str
+    module_factory: Callable[[], _Module]
     has_state: bool = True
     # Is it a Pytorch model
     is_pytorch: bool = True
     # The shape of the input tensor to forward
-    batch_input_shape: Optional[List[int]] = None
-    batch_input_type: Callable = torch.Tensor
+    batch_factory: Optional[Callable] = None
     # Model provider store
     provider_store: Optional[AbstractStateStore] = None
     provider_store_training_ids: Set[str] = dataclasses.field(default_factory=set)
 
     def get_module(self) -> _Module:
-        return self.module_class(*self.module_args, **self.module_kwargs)
+        return self.module_factory()
 
     def __repr__(self) -> str:
-        attributes: list = (
-            [self.module_class.__name__]
-            + self.module_args
-            + list(self.module_kwargs.values())
-        )
-        return "-".join(str(a) for a in attributes)
+        return self.name

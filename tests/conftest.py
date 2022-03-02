@@ -16,6 +16,7 @@ from mlmodule.contrib.densenet import (
     DenseNet161PlacesClassifier,
     DenseNet161PlacesFeatures,
 )
+from mlmodule.contrib.keyframes.encoders import GenericVideoFramesEncoder
 from mlmodule.contrib.keyframes.selectors import ResNet18KeyFramesSelector
 from mlmodule.contrib.magface.features import MagFaceFeatures
 from mlmodule.contrib.mtcnn import MTCNNDetector
@@ -31,27 +32,41 @@ from mlmodule.v2.testing import ModuleTestConfiguration
 from mlmodule.v2.torch.modules import TorchMlModule
 
 MODULE_TO_TEST: List[ModuleTestConfiguration] = [
+    # ResNet
     ModuleTestConfiguration(
-        TorchResNetModule,
-        ["resnet18"],
-        batch_input_shape=[2, 3, 224, 224],  # batch, channels, width, height
+        "torchresnet18",
+        lambda: TorchResNetModule("resnet18"),
+        batch_factory=lambda: torch.rand(
+            [2, 3, 224, 224]
+        ),  # batch, channels, width, height
         provider_store=ResNetTorchVisionStore(),
         provider_store_training_ids={"imagenet"},
     ),
+    # CLIP
     ModuleTestConfiguration(
-        CLIPImageModule,
-        ["RN50"],
-        batch_input_shape=[2, 3, 224, 224],  # batch, channels, width, height
+        "clip-image-rn50",
+        lambda: CLIPImageModule("RN50"),
+        batch_factory=lambda: torch.rand(
+            [2, 3, 224, 224]
+        ),  # batch, channels, width, height
         provider_store=CLIPStore(),
         provider_store_training_ids={"clip"},
     ),
     ModuleTestConfiguration(
-        CLIPTextModule,
-        ["RN50"],
-        batch_input_shape=[2, 77],  # batch, ctx_len
-        batch_input_type=lambda *s: torch.randint(10, size=s),
+        "clip-text-rn50",
+        lambda: CLIPTextModule("RN50"),
+        batch_factory=lambda: torch.randint(10, size=(2, 77)),  # batch, ctx_len
         provider_store=CLIPStore(),
         provider_store_training_ids={"clip"},
+    ),
+    # Key-frames
+    ModuleTestConfiguration(
+        "frames-encoder-rn18",
+        lambda: GenericVideoFramesEncoder(TorchResNetModule("resnet18")),
+        batch_factory=lambda: (
+            torch.range(0, 1),  # Frame indices
+            torch.rand([1, 3, 224, 224]),  # batch, channels, width, height
+        ),
     ),
 ]
 

@@ -12,12 +12,12 @@ from mlmodule.v2.base.predictions import (
     BatchModelPrediction,
     BatchVideoFramesPrediction,
 )
-from mlmodule.v2.stores import MLModuleModelStore
+from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 
 
 class GenericVideoFramesEncoder(
-    TorchMlModule[Tuple[torch.Tensor, torch.Tensor], torch.Tensor]
+    TorchMlModule[Tuple[torch.LongTensor, torch.Tensor], torch.Tensor]
 ):
     """Video frames encoder
 
@@ -41,16 +41,41 @@ class GenericVideoFramesEncoder(
         self.fps = fps
         self.image_encoder = image_encoder
 
+    @property
+    def state_type(self) -> StateType:
+        return self.image_encoder.state_type
+
     def forward_predictions(
-        self, batch: Tuple[torch.Tensor, torch.Tensor]
+        self, batch: Tuple[torch.LongTensor, torch.Tensor]
     ) -> BatchModelPrediction[torch.Tensor]:
         """Encodes video frames
 
         Arguments:
-            batch (Tuple[torch.Tensor, torch.Tensor]): A tuple of video (frame index, frame content)
+            batch (Tuple[torch.LongTensor, torch.Tensor]): A tuple of (`frame index array`, `stacked frame images`)
 
         Returns:
-            BatchModelPrediction[torch.Tensor]: Fills the `frames` attribute only
+            BatchModelPrediction[torch.Tensor]: With the `frames` attribute only
+        """
+        frame_indices, frame_features = self.forward(batch)
+        return BatchModelPrediction(
+            frames=[
+                BatchVideoFramesPrediction(
+                    features=frame_features, frame_indices=frame_indices[0].tolist()
+                )
+            ]
+        )
+
+    def forward(
+        self, batch: Tuple[torch.LongTensor, torch.Tensor]
+    ) -> Tuple[torch.LongTensor, torch.Tensor]:
+        """Applies image encoder to a batch of frames
+
+
+        Arguments:
+            batch (Tuple[torch.LongTensor, torch.Tensor]): A tuple of (`frame index array`, `stacked frame images`)
+
+        Returns:
+            Tuple[torch.LongTensor, torch.Tensor]: A tuple of (`frame index array`, `stacked frame features`)
         """
         frame_indices, frame_images = batch
         if len(frame_images) > 1:
@@ -71,13 +96,7 @@ class GenericVideoFramesEncoder(
                 "Cannot encode video frames, the image encoder does not return features."
             )
 
-        return BatchModelPrediction(
-            frames=[
-                BatchVideoFramesPrediction(
-                    features=frames, frame_indices=frame_indices[0].tolist()
-                )
-            ]
-        )
+        return frame_indices, frames
 
     def get_dataset_transforms(self) -> List[Callable]:
         """Video pre-processing transforms
@@ -98,6 +117,3 @@ class GenericVideoFramesEncoder(
             ),
             stack_and_squeeze_video_frames,
         ]
-
-    def set_state_from_provider(self) -> None:
-        MLModuleModelStore().load(self.image_encoder)
