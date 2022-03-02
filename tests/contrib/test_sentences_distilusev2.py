@@ -6,7 +6,8 @@ from mlmodule.contrib.sentences.distilbert.modules import (
     DistilUseBaseMultilingualCasedV2Module,
 )
 from mlmodule.contrib.sentences.distilbert.transforms import TokenizerTransform
-from mlmodule.v2.stores import MLModuleModelStore
+
+# from mlmodule.v2.stores import MLModuleModelStore
 
 
 @pytest.mark.parametrize("weights_src", ["provider", "mlmodule"])
