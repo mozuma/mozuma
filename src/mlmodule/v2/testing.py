@@ -1,7 +1,5 @@
 import dataclasses
-from typing import Any, Callable, Dict, Generic, List, Optional, Set, Type, TypeVar
-
-import torch
+from typing import Callable, Generic, Optional, Set, TypeVar
 
 from mlmodule.v2.stores.abstract import AbstractStateStore
 
