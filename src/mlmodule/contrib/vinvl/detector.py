@@ -9,7 +9,8 @@ from mlmodule.contrib.vinvl.models import AttrRCNN
 from mlmodule.contrib.vinvl.models.config import cfg
 from mlmodule.contrib.vinvl.models.structures.bounding_box import BoxList
 from mlmodule.contrib.vinvl.transforms import Normalize, Resize, ToTensor
-from mlmodule.labels import LabelsMixin, VinVLAttributeLabels, VinVLLabels
+from mlmodule.labels.vinvl import VINVL_LABELS
+from mlmodule.labels.vinvl_attributes import VINVL_ATTRIBUTE_LABELS
 from mlmodule.torch.base import MLModuleDatasetProtocol, TorchMLModuleBBox
 from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.torch.utils import torch_apply_state_to_partial_model
@@ -23,7 +24,6 @@ STATE_DICT_URL = "https://penzhanwu2.blob.core.windows.net/sgg/sgg_benchmark/vin
 class VinVLDetector(
     TorchMLModuleBBox[_IndexType, ImageDatasetType],
     DownloadPretrainedStateFromProvider,
-    LabelsMixin,
 ):
     """Face detection module"""
 
@@ -155,7 +155,7 @@ class VinVLDetector(
         ]
 
     def get_labels(self):
-        return VinVLLabels()
+        return VINVL_LABELS
 
     def get_attribute_labels(self):
-        return VinVLAttributeLabels()
+        return VINVL_ATTRIBUTE_LABELS

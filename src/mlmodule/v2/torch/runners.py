@@ -1,72 +1,83 @@
 import dataclasses
 from logging import getLogger
-from typing import Any, Callable, Tuple, TypeVar, Union
+from typing import cast
 
 import torch
 from torch.utils.data.dataloader import DataLoader
+from torch.utils.data.dataset import Dataset
+from torchvision import transforms
 from tqdm import tqdm
 
-from mlmodule.v2.base.runners import AbstractInferenceRunner
-from mlmodule.v2.torch.results import AbstractResultsProcessor
+from mlmodule.v2.base.callbacks import callbacks_caller
+from mlmodule.v2.base.predictions import BatchModelPrediction
+from mlmodule.v2.base.runners import BaseRunner
+from mlmodule.v2.torch.callbacks import TorchRunnerCallbackType
+from mlmodule.v2.torch.datasets import TorchDataset, TorchDatasetTransformsWrapper
+from mlmodule.v2.torch.modules import TorchMlModule
+from mlmodule.v2.torch.options import TorchRunnerOptions
+from mlmodule.v2.torch.utils import send_batch_to_device
 
 logger = getLogger()
 
 
-_DatasetType = TypeVar("_DatasetType")
-_Result = TypeVar("_Result")
+class TorchInferenceRunner(
+    BaseRunner[TorchMlModule, TorchDataset, TorchRunnerCallbackType, TorchRunnerOptions]
+):
+    """Runner for inference tasks on PyTorch models
 
+    Supports CPU or single GPU inference.
 
-_BatchTypes = Union[torch.Tensor, tuple, list]
+    Attributes:
+        model (TorchMlModule): The PyTorch model to run inference
+        dataset (TorchDataset): Input dataset for the runner
+        callbacks (List[TorchRunnerCallbackType]): Callbacks to save features, labels or bounding boxes
+        options (TorchRunnerOptions): PyTorch options
+    """
 
+    def get_data_loader(self) -> DataLoader:
+        """Creates a data loader from the options, the given dataset and the module transforms"""
+        data_with_transforms = TorchDatasetTransformsWrapper(
+            dataset=self.dataset,
+            transform_func=transforms.Compose(self.model.get_dataset_transforms()),
+        )
+        return DataLoader(
+            dataset=cast(Dataset, data_with_transforms),
+            **self.options.data_loader_options,
+        )
 
-def send_batch_to_device(batch: _BatchTypes, device: torch.device) -> _BatchTypes:
-    if isinstance(batch, tuple):
-        return tuple(send_batch_to_device(b, device) for b in batch)
-    elif isinstance(batch, list):
-        return [send_batch_to_device(b, device) for b in batch]
-    elif hasattr(batch, "to"):
-        return batch.to(device)
-    else:
-        return batch
+    def apply_predictions_callbacks(
+        self, indices: torch.Tensor, predictions: BatchModelPrediction[torch.Tensor]
+    ) -> None:
+        """Apply callback functions save_* to the returned predictions"""
+        for field in dataclasses.fields(predictions):
+            value = getattr(predictions, field.name)
+            if value is not None:
+                callbacks_caller(
+                    self.callbacks, f"save_{field.name}", self.model, indices, value
+                )
 
-
-@dataclasses.dataclass
-class TorchInferenceRunner(AbstractInferenceRunner[_DatasetType, Tuple[list, _Result]]):
-    # Model architecture with weitghts
-    model: torch.nn.Module
-    # PyTorch data loader factory, builds a data loader from a dataset
-    data_loader_factory: Callable[[_DatasetType], DataLoader]
-    # After each batch collects and processes the results
-    results_processor: AbstractResultsProcessor[Any, _Result]
-    # Torch device to execute the module
-    device: torch.device
-    # Whether to display a tqdm progress bar
-    tqdm_enabled: bool = False
-
-    def bulk_inference(self, data: _DatasetType) -> Tuple[list, _Result]:
+    def run(self) -> None:
+        """Runs inference"""
         # Setting model in eval mode
         self.model.eval()
 
         # Sending model on device
-        self.model.to(self.device)
+        self.model.to(self.options.device)
 
         # Disabling gradient computation
         with torch.no_grad():
             # Building data loader
-            data_loader = self.data_loader_factory(data)
+            data_loader = self.get_data_loader()
             # Looping through batches
             # Assume dataset is composed of tuples (item index, batch)
             n_batches = len(data_loader)
-            loader = tqdm(data_loader) if self.tqdm_enabled else data_loader
+            loader = tqdm(data_loader) if self.options.tqdm_enabled else data_loader
             for batch_n, (indices, batch) in enumerate(loader):
                 logger.debug(f"Sending batch number: {batch_n}/{n_batches}")
                 # Sending data on device
-                batch_on_device = send_batch_to_device(batch, self.device)
+                batch_on_device = send_batch_to_device(batch, self.options.device)
                 # Running the model forward
-                res = self.model(batch_on_device)
-                # Processing the results
-                self.results_processor.process(indices, batch, res)
+                predictions = self.model.forward_predictions(batch_on_device)
+                # Applying callbacks on results
+                self.apply_predictions_callbacks(indices, predictions)
                 logger.debug(f"Collecting results: {batch_n}/{n_batches}")
-
-        # Returning accumulated results
-        return self.results_processor.get_results()

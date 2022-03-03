@@ -5,7 +5,6 @@ import torch
 
 from mlmodule.box import BBoxOutput
 from mlmodule.contrib.arcface import ArcFaceFeatures
-from mlmodule.contrib.mtcnn import MTCNNDetector
 from mlmodule.torch.data.box import BoundingBoxDataset
 from mlmodule.torch.data.images import ImageDataset
 from mlmodule.utils import list_files_in_dir

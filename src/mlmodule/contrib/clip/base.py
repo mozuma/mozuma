@@ -1,56 +1,54 @@
-"""
-Base classes for CLIP implementation
-"""
-from typing import Dict, TypeVar, Union
+import abc
+from typing import OrderedDict
 
-import clip
 import torch
-from clip.model import CLIP
 from torch import nn
 from typing_extensions import Literal
 
-from mlmodule.contrib.clip.parameters import PARAMETERS
-from mlmodule.torch.base import TorchMLModuleFeatures
-from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
-from mlmodule.torch.utils import torch_apply_state_to_partial_model
-
-_IndexType = TypeVar("_IndexType", covariant=True)
-_InputDataType = TypeVar("_InputDataType", covariant=True)
+from mlmodule.contrib.clip.utils import sanitize_clip_model_name
+from mlmodule.v2.states import StateType
+from mlmodule.v2.torch.modules import TorchMlModule
 
 
-class BaseCLIPModule(
-    TorchMLModuleFeatures[_IndexType, _InputDataType],
-    DownloadPretrainedStateFromProvider,
-):
+class BaseCLIPModule(TorchMlModule[torch.Tensor, torch.Tensor]):
+    """Base class for CLIP modules
+
+    Attributes:
+        clip_model_name (str): Name of the model to load
+            (see [CLIP doc](https://github.com/openai/CLIP#clipavailable_models))
+        model_type (Literal["image", "text"]): Load text or image encoder
+        device (torch.device, optional): The PyTorch device to initialise the model weights.
+            Defaults to `torch.device("cpu")`.
     """
-    Base class for CLIP modules
-    """
 
-    clip_model_name: str
-    model_type: Union[Literal["image"], Literal["text"]]  # image or text
-
-    def __init__(self, device: torch.device = None):
+    def __init__(
+        self,
+        clip_model_name: str,
+        model_type: Literal["image", "text"],
+        device: torch.device = torch.device("cpu"),
+    ):
         super().__init__(device=device)
+        self.clip_model_name = clip_model_name
+        self.model_type = model_type
+
+        # Setting dtype depending on device
         if self.device == torch.device("cpu"):
             self._dtype = torch.float32
         else:
             self._dtype = torch.float16
 
     @property
-    def url_safe_clip_model_name(self) -> str:
-        """Clip model name used in lsir public assets"""
-        return self.clip_model_name.lower().replace("/", "")
+    def clip_model_name_safe(self) -> str:
+        return sanitize_clip_model_name(self.clip_model_name)
 
     @property
-    def state_dict_key(self) -> str:
-        """Key in LSIR public asset bucket to download model"""
-        return (
-            f"pretrained-models/"
-            f"{self.model_type}-encoder/"
-            f"clip-{self.url_safe_clip_model_name}-{self.model_type}.pt"
+    def state_type(self) -> StateType:
+        return StateType(
+            backend="pytorch",
+            architecture=f"clip-{self.model_type}-{self.clip_model_name_safe}",
         )
 
-    def convert_weights(self: nn.Module):
+    def convert_weights(self):
         """
         Convert applicable model parameters to fp16
 
@@ -58,7 +56,7 @@ class BaseCLIPModule(
 
         This makes the layer work as float16 as this is the default when GPU is enabled.
 
-        See https://github.com/openai/CLIP/issues/30
+        See [OpenAI/CLIP#30](https://github.com/openai/CLIP/issues/30)
         """
 
         if self.device != torch.device("cpu"):
@@ -70,42 +68,33 @@ class BaseCLIPModule(
                         layer.bias.data = layer.bias.data.half()
 
                 if isinstance(layer, nn.MultiheadAttention):
-                    for attr in [
+                    for attr_name in [
                         *[f"{s}_proj_weight" for s in ["in", "q", "k", "v"]],
                         "in_proj_bias",
                         "bias_k",
                         "bias_v",
                     ]:
-                        tensor = getattr(layer, attr)
+                        tensor: torch.Tensor = getattr(layer, attr_name)
                         if tensor is not None:
                             tensor.data = tensor.data.half()
 
                 for name in ["text_projection", "proj"]:
                     if hasattr(layer, name):
-                        attr = getattr(layer, name)
+                        attr: torch.Tensor = getattr(layer, name)
                         if attr is not None:
                             attr.data = attr.data.half()
 
             self.apply(_convert_weights_to_fp16)
 
-    @classmethod
-    def _get_clip_module(cls) -> CLIP:
-        """Returns the CLIP architecture
+    def forward(self, images: torch.Tensor) -> torch.Tensor:
+        """Apply the image encoder"""
+        features = self.forward_predictions(images).features
+        if features is None:
+            raise ValueError(
+                "features attribute of forward_predictions should not be None"
+            )
+        return features
 
-        :return:
-        """
-        return CLIP(*PARAMETERS[cls.clip_model_name].values())
-
-    def get_default_pretrained_state_dict_from_provider(
-        self,
-    ) -> Dict[str, torch.Tensor]:
-        """Get the pretrained state dictionary directly from CLIP repository
-
-        :return:
-        """
-        clip_pretrained, _ = clip.load(self.clip_model_name, jit=False)
-        partial_state_dict = torch_apply_state_to_partial_model(
-            self, clip_pretrained.state_dict()
-        )
-
-        return partial_state_dict
+    @abc.abstractmethod
+    def load_full_clip_state_dict(self, state_dict: OrderedDict[str, torch.Tensor]):
+        """Loads the model weights from the original CLIP model weights"""

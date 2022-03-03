@@ -1,37 +1,29 @@
-"""CLIP text encoder"""
-__all__ = (
-    "CLIPTextEncoder",
-    "CLIPResNet50TextEncoder",
-    "CLIPResNet101TextEncoder",
-    "CLIPResNet50x4TextEncoder",
-    "CLIPViTB32TextEncoder",
-)
+from collections import OrderedDict
+from typing import Callable, List, cast
 
-from typing import Callable, List, Optional, TypeVar, Union
-
-import clip
 import torch
-from typing_extensions import Literal
 
 from mlmodule.contrib.clip.base import BaseCLIPModule
-
-_IndexType = TypeVar("_IndexType", covariant=True)
-
-
-def tokenize_single(text: str) -> torch.LongTensor:
-    """Takes a str and returns its tokenized version"""
-    return clip.tokenize(text)[0]
+from mlmodule.contrib.clip.utils import clip_tokenize_single, get_clip_module
+from mlmodule.v2.base.predictions import BatchModelPrediction
 
 
-class CLIPTextEncoder(BaseCLIPModule[_IndexType, str]):
-    """Text encoder of CLIP model"""
+class CLIPTextModule(BaseCLIPModule):
+    """Text encoder of the CLIP model
 
-    model_type: Union[Literal["image"], Literal["text"]] = "text"
+    Attributes:
+        clip_model_name (str): Name of the model to load
+            (see [CLIP doc](https://github.com/openai/CLIP#clipavailable_models))
+        device (torch.device, optional): The PyTorch device to initialise the model weights.
+            Defaults to `torch.device("cpu")`.
+    """
 
-    def __init__(self, device: Optional[torch.device] = None):
-        super().__init__(device=device)
+    def __init__(
+        self, clip_model_name: str, device: torch.device = torch.device("cpu")
+    ):
+        super().__init__(clip_model_name, model_type="text", device=device)
 
-        clip_module = self._get_clip_module()
+        clip_module = get_clip_module(self.clip_model_name)
 
         # Populating with text encoder attributes
         self.context_length = clip_module.context_length
@@ -44,46 +36,57 @@ class CLIPTextEncoder(BaseCLIPModule[_IndexType, str]):
 
         self.convert_weights()
 
-    def forward(self, text: torch.Tensor) -> torch.Tensor:
-        """Apply text encoder on tokens"""
-        x = self.token_embedding(text).type(self._dtype)  # [batch_size, n_ctx, d_model]
+    def forward_predictions(
+        self, batch: torch.Tensor
+    ) -> BatchModelPrediction[torch.Tensor]:
+        """Forward pass of the text encoder
+
+        Arguments:
+            batch (torch.Tensor): Batch of texts
+
+        Returns:
+            BatchModelPrediction[torch.Tensor]: A prediction object with `features` attribute
+        """
+        x = cast(torch.Tensor, self.token_embedding(batch)).type(
+            self._dtype
+        )  # [batch_size, n_ctx, d_model]
 
         x = x + self.positional_embedding.type(self._dtype)
         x = x.permute(1, 0, 2)  # NLD -> LND
-        x = self.transformer(x)
+        x = cast(torch.Tensor, self.transformer(x))
         x = x.permute(1, 0, 2)  # LND -> NLD
-        x = self.ln_final(x).type(self._dtype)
+        x = cast(torch.Tensor, self.ln_final(x)).type(self._dtype)
 
         # x.shape = [batch_size, n_ctx, transformer.width]
         # take features from the eot embedding (eot_token is the highest number in each sequence)
-        x = x[torch.arange(x.shape[0]), text.argmax(dim=-1)] @ self.text_projection
+        x = x[torch.arange(x.shape[0]), batch.argmax(dim=-1)] @ self.text_projection
 
-        return x
+        return BatchModelPrediction(features=x)
 
     def get_dataset_transforms(self) -> List[Callable]:
         """Dataset transforms (tokenizer)"""
-        return [tokenize_single]
+        return [clip_tokenize_single]
 
+    def load_full_clip_state_dict(self, state_dict: "OrderedDict[str, torch.Tensor]"):
+        # Filtering the text modules keys
+        text_module_fields = (
+            "context_length",
+            "vocab_size",
+            "token_embedding",
+            "positional_embedding",
+            "transformer",
+            "ln_final",
+            "text_projection",
+        )
+        text_state = OrderedDict(
+            [
+                (key, value)
+                for key, value in state_dict.items()
+                if any(
+                    key.startswith(field_prefix) for field_prefix in text_module_fields
+                )
+            ]
+        )
 
-class CLIPResNet50TextEncoder(CLIPTextEncoder):
-    """CLIP text encoder - ResNet50"""
-
-    clip_model_name = "RN50"
-
-
-class CLIPResNet101TextEncoder(CLIPTextEncoder):
-    """CLIP text encoder - ResNet101"""
-
-    clip_model_name = "RN101"
-
-
-class CLIPResNet50x4TextEncoder(CLIPTextEncoder):
-    """CLIP text encoder - ResNet50x4"""
-
-    clip_model_name = "RN50x4"
-
-
-class CLIPViTB32TextEncoder(CLIPTextEncoder):
-    """CLIP text encoder - ViT-B/32"""
-
-    clip_model_name = "ViT-B/32"
+        # Loading the state weights
+        self.load_state_dict(text_state)

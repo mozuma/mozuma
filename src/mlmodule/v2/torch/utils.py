@@ -1,6 +1,5 @@
-from collections import OrderedDict
 from io import BytesIO
-from typing import Mapping
+from typing import Mapping, OrderedDict
 
 import torch
 
@@ -21,4 +20,16 @@ def add_prefix_to_state_dict(
 def save_state_dict_to_bytes(obj) -> bytes:
     f = BytesIO()
     torch.save(obj, f)
+    f.seek(0)
     return f.read()
+
+
+def send_batch_to_device(batch, device: torch.device):
+    if isinstance(batch, tuple):
+        return tuple(send_batch_to_device(b, device) for b in batch)
+    elif isinstance(batch, list):
+        return [send_batch_to_device(b, device) for b in batch]
+    elif hasattr(batch, "to"):
+        return batch.to(device)
+    else:
+        return batch

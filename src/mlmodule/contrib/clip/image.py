@@ -1,85 +1,63 @@
-"""CLIP image encoders"""
-__all__ = (
-    "CLIPImageEncoder",
-    "CLIPResNet50ImageEncoder",
-    "CLIPResNet101ImageEncoder",
-    "CLIPResNet50x4ImageEncoder",
-    "CLIPViTB32ImageEncoder",
-)
-
-from typing import Callable, List, Optional, TypeVar, Union
+from collections import OrderedDict
+from typing import Callable, List
 
 import torch
-from PIL import Image
-from torchvision.transforms import CenterCrop, Compose, Normalize, Resize, ToTensor
-from typing_extensions import Literal
 
 from mlmodule.contrib.clip.base import BaseCLIPModule
-from mlmodule.torch.data.images import convert_to_rgb
-from mlmodule.types import ImageDatasetType
-
-_IndexType = TypeVar("_IndexType", covariant=True)
-
-
-def get_image_transform(src_pixel_size: int):
-    """Image transforms for CLIP Image encoder"""
-    return Compose(
-        [
-            Resize(src_pixel_size, interpolation=Image.BICUBIC),
-            CenterCrop(src_pixel_size),
-            convert_to_rgb,
-            ToTensor(),
-            Normalize(
-                (0.48145466, 0.4578275, 0.40821073),
-                (0.26862954, 0.26130258, 0.27577711),
-            ),
-        ]
-    )
+from mlmodule.contrib.clip.transforms import get_image_transform
+from mlmodule.contrib.clip.utils import get_clip_module
+from mlmodule.v2.base.predictions import BatchModelPrediction
 
 
-class CLIPImageEncoder(BaseCLIPModule[_IndexType, ImageDatasetType]):
-    """Image encoder of the CLIP model"""
+class CLIPImageModule(BaseCLIPModule):
+    """Image encoder of the CLIP model
 
-    model_type: Union[Literal["image"], Literal["text"]] = "image"
+    Attributes:
+        clip_model_name (str): Name of the model to load
+            (see [CLIP doc](https://github.com/openai/CLIP#clipavailable_models))
+        device (torch.device, optional): The PyTorch device to initialise the model weights.
+            Defaults to `torch.device("cpu")`.
+    """
 
-    def __init__(self, device: Optional[torch.device] = None):
-        super().__init__(device=device)
+    def __init__(
+        self, clip_model_name: str, device: torch.device = torch.device("cpu")
+    ):
+        super().__init__(clip_model_name, "image", device=device)
 
-        clip_module = self._get_clip_module()
+        # Loading CLIP module
+        clip_module = get_clip_module(self.clip_model_name)
 
         # Populating image encoder attributes
         self.visual = clip_module.visual
 
         self.convert_weights()
 
-    def forward(self, images: torch.Tensor) -> torch.Tensor:
-        """Apply the image encoder"""
-        return self.visual(images.type(self._dtype))
+    def forward_predictions(
+        self, batch: torch.Tensor
+    ) -> BatchModelPrediction[torch.Tensor]:
+        """Forward pass of image encoder
+
+        Arguments:
+            batch (torch.Tensor): Batch of images
+
+        Returns:
+            BatchModelPrediction[torch.Tensor]: A prediction object with `features` attribute
+        """
+        return BatchModelPrediction(features=self.visual(batch.type(self._dtype)))
 
     def get_dataset_transforms(self) -> List[Callable]:
         """Dataset transform to resize and preprocess images"""
         return [get_image_transform(self.visual.input_resolution)]
 
+    def load_full_clip_state_dict(self, state_dict: "OrderedDict[str, torch.Tensor]"):
+        # Filtering the visual modules keys
+        visual_state = OrderedDict(
+            [
+                (key, value)
+                for key, value in state_dict.items()
+                if key.startswith("visual")
+            ]
+        )
 
-class CLIPResNet50ImageEncoder(CLIPImageEncoder):
-    """CLIP Image encoder - ResNet50"""
-
-    clip_model_name = "RN50"
-
-
-class CLIPResNet101ImageEncoder(CLIPImageEncoder):
-    """CLIP Image encoder - ResNet101"""
-
-    clip_model_name = "RN101"
-
-
-class CLIPResNet50x4ImageEncoder(CLIPImageEncoder):
-    """CLIP Image encoder - ResNet50x4"""
-
-    clip_model_name = "RN50x4"
-
-
-class CLIPViTB32ImageEncoder(CLIPImageEncoder):
-    """CLIP Image encoder - ViT-B/32"""
-
-    clip_model_name = "ViT-B/32"
+        # Loading the state weights
+        self.load_state_dict(visual_state)

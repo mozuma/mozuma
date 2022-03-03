@@ -1,6 +1,9 @@
 # ArcFace
 
-We are using an implementation of InsightFace in Pytorch (https://github.com/TreB1eN/InsightFace_Pytorch)
+!!! warning "Deprecated"
+    This model needs to be migrated to the latest version
+
+We are using an implementation of InsightFace in PyTorch (https://github.com/TreB1eN/InsightFace_Pytorch)
 
 
 ## Usage

@@ -1,6 +1,5 @@
 import os
-import random
-from typing import Callable, Set, Type
+from typing import Callable, List, Set, Type
 
 import numpy as np
 import pytest
@@ -8,24 +7,106 @@ import torch
 from _pytest.fixtures import SubRequest
 
 from mlmodule.contrib.arcface import ArcFaceFeatures
-from mlmodule.contrib.clip import CLIPViTB32ImageEncoder
+from mlmodule.contrib.clip.image import CLIPImageModule
+from mlmodule.contrib.clip.stores import CLIPStore
+from mlmodule.contrib.clip.text import CLIPTextModule
 from mlmodule.contrib.densenet import (
     DenseNet161ImageNetClassifier,
     DenseNet161ImageNetFeatures,
     DenseNet161PlacesClassifier,
     DenseNet161PlacesFeatures,
 )
-from mlmodule.contrib.keyframes.v1 import TorchMLModuleKeyFrames
+from mlmodule.contrib.keyframes.encoders import VideoFramesEncoder
+from mlmodule.contrib.keyframes.selectors import KeyFrameSelector
 from mlmodule.contrib.magface.features import MagFaceFeatures
-from mlmodule.contrib.mtcnn import MTCNNDetector
-from mlmodule.contrib.mtcnn.detector_ori import MTCNNDetectorOriginal
-from mlmodule.contrib.resnet import ResNet18ImageNetClassifier, ResNet18ImageNetFeatures
+from mlmodule.contrib.mtcnn.modules import TorchMTCNNModule
+from mlmodule.contrib.mtcnn.stores import FaceNetMTCNNStore
+from mlmodule.contrib.resnet.modules import TorchResNetModule
+from mlmodule.contrib.resnet.stores import ResNetTorchVisionStore
 from mlmodule.contrib.vinvl import VinVLDetector
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
-from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.types import StateDict
 from mlmodule.utils import list_files_in_dir
+from mlmodule.v2.testing import ModuleTestConfiguration
+from mlmodule.v2.torch.modules import TorchMlModule
+
+MODULE_TO_TEST: List[ModuleTestConfiguration] = [
+    # ResNet
+    ModuleTestConfiguration(
+        "torchresnet18",
+        lambda: TorchResNetModule("resnet18"),
+        batch_factory=lambda: torch.rand(
+            [2, 3, 224, 224]
+        ),  # batch, channels, width, height
+        provider_store=ResNetTorchVisionStore(),
+        provider_store_training_ids={"imagenet"},
+    ),
+    # CLIP
+    ModuleTestConfiguration(
+        "clip-image-rn50",
+        lambda: CLIPImageModule("RN50"),
+        batch_factory=lambda: torch.rand(
+            [2, 3, 224, 224]
+        ),  # batch, channels, width, height
+        provider_store=CLIPStore(),
+        provider_store_training_ids={"clip"},
+    ),
+    ModuleTestConfiguration(
+        "clip-text-rn50",
+        lambda: CLIPTextModule("RN50"),
+        batch_factory=lambda: torch.randint(10, size=(2, 77)),  # batch, ctx_len
+        provider_store=CLIPStore(),
+        provider_store_training_ids={"clip"},
+    ),
+    # MTCNN
+    ModuleTestConfiguration(
+        "mtcnn",
+        lambda: TorchMTCNNModule(),
+        batch_factory=lambda: [torch.rand([720 + i * 10, 720, 3]) for i in range(5)],
+        provider_store=FaceNetMTCNNStore(),
+        provider_store_training_ids={"facenet"},
+    ),
+    # Key-frames
+    ModuleTestConfiguration(
+        "frames-encoder-rn18",
+        lambda: VideoFramesEncoder(TorchResNetModule("resnet18")),
+        batch_factory=lambda: (
+            [torch.range(0, 1), torch.range(0, 3)],  # Frame indices
+            [
+                torch.rand([1, 3, 224, 224]),  # frame_idx, channels, width, height
+                torch.rand([3, 3, 224, 224]),  # frame_idx, channels, width, height
+            ],
+        ),
+    ),
+    ModuleTestConfiguration(
+        "frames-selector-rn18",
+        lambda: KeyFrameSelector(TorchResNetModule("resnet18")),
+        batch_factory=lambda: (
+            [torch.range(0, 1), torch.range(0, 3)],  # Frame indices
+            [
+                torch.rand([1, 3, 224, 224]),  # frame_idx, channels, width, height
+                torch.rand([3, 3, 224, 224]),  # frame_idx, channels, width, height
+            ],
+        ),
+    ),
+]
+
+
+@pytest.fixture(params=MODULE_TO_TEST, ids=[str(m) for m in MODULE_TO_TEST])
+def ml_module(request: SubRequest) -> ModuleTestConfiguration:
+    """All modules that are part of the MLModule library"""
+    return request.param
+
+
+@pytest.fixture
+def torch_ml_module(
+    ml_module: ModuleTestConfiguration,
+) -> ModuleTestConfiguration[TorchMlModule]:
+    """All modules implemented in Torch"""
+    if not ml_module.is_pytorch:
+        pytest.skip(f"Skipping {ml_module} as it is not a PyTorch module")
+    return ml_module
 
 
 @pytest.fixture(scope="session", params=["cpu", "cuda"])
@@ -52,33 +133,73 @@ def gpu_torch_device() -> torch.device:
     return torch.device("cuda")
 
 
-@pytest.fixture(scope="session")
-def set_seeds():
-    def _set_seeds(val=123):
-        torch.manual_seed(val)
-        torch.cuda.manual_seed(val)
-        np.random.seed(val)
-        random.seed(val)
-        torch.backends.cudnn.enabled = False
-        torch.backends.cudnn.deterministic = True
+@pytest.fixture
+def cats_and_dogs_images() -> List[str]:
+    base_path = os.path.join("tests", "fixtures", "cats_dogs")
+    return list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
 
-    return _set_seeds
+
+# OLD
 
 
 @pytest.fixture(
     params=[
-        ResNet18ImageNetFeatures,
-        ResNet18ImageNetClassifier,
+        lambda: TorchResNetModule("resnet18"),
+        lambda: CLIPImageModule("ViT-B/32"),
+        lambda: CLIPTextModule("ViT-B/32"),
+        # CLIPViTB32ImageEncoder,
+        # ArcFaceFeatures,
+        # MagFaceFeatures,
+        # TorchMLModuleKeyFrames,
+        # VinVLDetector - too slow to download
+    ],
+    ids=[
+        "torch-resnet-18",
+        "torch-keyframes",
+        "torch-clip-vit-image",
+        "torch-clip-vit-text",
+    ],
+)
+def module_pretrained_by_provider(
+    request: SubRequest,
+):
+    """Returns a module that implements DownloadPretrainedStateFromProvider"""
+    return request.param
+
+
+@pytest.fixture(
+    params=[
+        lambda: TorchResNetModule("resnet18"),
+        lambda: CLIPImageModule("ViT-B/32"),
+        lambda: CLIPTextModule("ViT-B/32"),
+        # CLIPViTB32ImageEncoder,
+        # ArcFaceFeatures,
+        # MagFaceFeatures,
+        # TorchMLModuleKeyFrames,
+        # VinVLDetector - too slow to download
+    ],
+    ids=[
+        "torch-resnet-18",
+        "torch-keyframes",
+        "torch-clip-vit-image",
+        "torch-clip-vit-text",
+    ],
+)
+def module_pretrained_mlmodule_store(
+    request: SubRequest,
+):
+    return request.param
+
+
+@pytest.fixture(
+    params=[
         DenseNet161ImageNetFeatures,
         DenseNet161ImageNetClassifier,
         DenseNet161PlacesFeatures,
         DenseNet161PlacesClassifier,
-        CLIPViTB32ImageEncoder,
-        MTCNNDetector,
-        MTCNNDetectorOriginal,
         ArcFaceFeatures,
         MagFaceFeatures,
-        TorchMLModuleKeyFrames,
+        # TorchMLModuleKeyFrames,
         VinVLDetector,
     ]
 )
@@ -93,12 +214,8 @@ def data_platform_scanner(request: SubRequest):
 
 @pytest.fixture(
     params=[
-        ResNet18ImageNetFeatures,
         DenseNet161ImageNetFeatures,
         DenseNet161PlacesFeatures,
-        CLIPViTB32ImageEncoder,
-        MTCNNDetector,
-        MTCNNDetectorOriginal,
         VinVLDetector,
     ]
 )
@@ -111,23 +228,6 @@ def image_module(request: SubRequest) -> Type[BaseTorchMLModule]:
 def gpu_only_modules() -> Set[Type[BaseTorchMLModule]]:
     """MLModules operating on images"""
     return set()
-
-
-@pytest.fixture(
-    params=[
-        CLIPViTB32ImageEncoder,
-        MTCNNDetector,
-        ArcFaceFeatures,
-        MagFaceFeatures,
-        TorchMLModuleKeyFrames,
-        # VinVLDetector - too slow to download
-    ]
-)
-def provider_pretrained_module(
-    request: SubRequest,
-) -> DownloadPretrainedStateFromProvider:
-    """Returns a module that implements DownloadPretrainedStateFromProvider"""
-    return request.param
 
 
 @pytest.fixture

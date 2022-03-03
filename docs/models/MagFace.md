@@ -1,5 +1,9 @@
 # MagFace
 
+!!! warning "Deprecated"
+    This model needs to be migrated to the latest version
+
+
 We are using the official implementation of MagFace in Pytorch (https://github.com/IrvingMeng/MagFace)
 
 

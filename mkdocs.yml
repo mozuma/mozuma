@@ -1,0 +1,52 @@
+site_name: MLModule
+theme:
+  name: material
+  features:
+    - content.code.annotate
+    - navigation.instant
+    - navigation.indexes
+    - navigation.tracking
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to light mode
+repo_url: https://github.com/LSIR/mlmodule
+repo_name: LSIR/mlmodule
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+extra_css:
+  - css/mkdocstring.css
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          rendering:
+            heading_level: 3
+            show_root_heading: true
+            show_signature_annotations: true
+            show_bases: false
+            show_source: false
+      watch:
+        - src/mlmodule

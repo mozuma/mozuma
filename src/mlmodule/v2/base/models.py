@@ -1,75 +1,52 @@
-import abc
-import os
-from io import BytesIO
-from typing import NoReturn, cast
+from typing import Optional, Set
 
-import boto3
-from typing_extensions import Protocol, runtime_checkable
+from typing_extensions import Protocol
+
+from mlmodule.labels.base import LabelSet
+from mlmodule.v2.states import StateKey, StateType
 
 
-@runtime_checkable
 class ModelWithState(Protocol):
-    """Identifies a model that has state that can be set and gotten"""
+    """Protocol of a model with internal state (weights)
 
-    # Unique identifier for the model
-    mlmodule_model_uri: str
+    It defines two functions `set_state` and `get_state`.
 
-    def set_state(self, state: bytes, **options) -> None:
-        ...
+    Attributes:
+        state_type (StateType): Type of the model state,
+            see [states](../references/states.md) for more information.
+    """
 
-    def get_state(self, **options) -> bytes:
-        ...
+    @property
+    def state_type(self) -> StateType:
+        """Type of the model state
 
+        See [states](../references/states.md) for more information.
+        """
 
-class ModelWithStateFromProvider(Protocol):
-    """Set the model state from data provided by the model author."""
+    def set_state(self, state: bytes) -> None:
+        """Set the model internal state
 
-    def set_state_from_provider(self, **options) -> None:
-        ...
+        Arguments:
+            state (bytes): Serialised state as bytes
+        """
 
+    def get_state(self) -> bytes:
+        """Get the model internal state
 
-class AbstractModelStore(abc.ABC):
-    """Interface between model state store and the model architecture"""
-
-    @abc.abstractmethod
-    def save(self, model: ModelWithState, **options) -> None:
-        """Saves the model to the binary file handler"""
-
-    @abc.abstractmethod
-    def load(self, model: ModelWithState, **options) -> None:
-        """Loads the models weights from the binary file"""
-
-
-class MLModuleModelStore(AbstractModelStore):
-    """Default MLModule store with model states stored in a S3 bucket"""
-
-    def save(self, model: ModelWithState, **options) -> NoReturn:
-        raise ValueError("MLModuleStore states are read-only")
-
-    def load(self, model: ModelWithState, **options) -> None:
-        """Reads the model weights from LSIR public assets S3"""
-        session = boto3.session.Session(
-            aws_access_key_id=os.environ.get("MLMODULE_AWS_ACCESS_KEY_ID"),
-            aws_secret_access_key=os.environ.get("MLMODULE_AWS_SECRET_ACCESS_KEY"),
-            profile_name=os.environ.get("MLMODULE_AWS_PROFILE_NAME"),
-        )
-        s3 = session.resource("s3", endpoint_url="https://sos-ch-gva-2.exo.io")
-        # Select lsir-public-assets bucket
-        b = s3.Bucket("lsir-public-assets")
-
-        # Download state dict into BytesIO file
-        f = BytesIO()
-        b.Object(f"pretrained-models/{model.mlmodule_model_uri}").download_fileobj(f)
-
-        # Set the model state
-        f.seek(0)
-        model.set_state(f.read(), **options)
+        Returns:
+            bytes: Serialised state as bytes
+        """
 
 
-class ProviderModelStore(AbstractModelStore):
-    def save(self, model: ModelWithState, **options) -> NoReturn:
-        raise ValueError("ProviderModelStore states are read-only")
+class ModelWithLabels:
+    """Model that predicts scores for labels
 
-    def load(self, model: ModelWithState, **options) -> None:
-        """Reads the model weights from LSIR public assets S3"""
-        cast(ModelWithStateFromProvider, model).set_state_from_provider(**options)
+    It defines the `get_labels` function
+    """
+
+    def get_labels(self) -> LabelSet:
+        """Getter for the model's [`LabelSet`][mlmodule.labels.base.LabelSet]
+
+        Returns:
+            LabelSet: The label set corresponding to returned label scores
+        """

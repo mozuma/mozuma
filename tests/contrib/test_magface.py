@@ -6,7 +6,6 @@ import torch
 
 from mlmodule.box import BBoxCollection, BBoxOutput
 from mlmodule.contrib.magface import MagFaceFeatures
-from mlmodule.contrib.mtcnn import MTCNNDetector
 from mlmodule.torch.data.box import BoundingBoxDataset
 from mlmodule.torch.data.images import ImageDataset
 from mlmodule.utils import list_files_in_dir

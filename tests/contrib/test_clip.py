@@ -1,118 +1,83 @@
 import os
-from typing import Dict, Mapping, Type
+from typing import Tuple
 
 import clip
 import numpy as np
 import pytest
 import torch
-from _pytest.fixtures import SubRequest
 from PIL import Image
 
-from mlmodule.contrib.clip import (
-    CLIPResNet50ImageEncoder,
-    CLIPResNet50TextEncoder,
-    CLIPResNet50x4ImageEncoder,
-    CLIPResNet50x4TextEncoder,
-    CLIPResNet101ImageEncoder,
-    CLIPResNet101TextEncoder,
-    CLIPViTB32ImageEncoder,
-    CLIPViTB32TextEncoder,
-)
-from mlmodule.contrib.clip.base import BaseCLIPModule
-from mlmodule.torch.data.base import IndexedDataset
-from mlmodule.torch.data.images import ImageDataset
-from mlmodule.types import ImageDatasetType
-
-CLIP_MODULE_MAP: Dict[str, Dict[str, Type[BaseCLIPModule]]] = {
-    "text": {
-        x.clip_model_name: x
-        for x in (
-            CLIPResNet50TextEncoder,
-            CLIPResNet101TextEncoder,
-            CLIPResNet50x4TextEncoder,
-            CLIPViTB32TextEncoder,
-        )
-    },
-    "image": {
-        x.clip_model_name: x
-        for x in (
-            CLIPResNet50ImageEncoder,
-            CLIPResNet101ImageEncoder,
-            CLIPResNet50x4ImageEncoder,
-            CLIPViTB32ImageEncoder,
-        )
-    },
-}
+from mlmodule.contrib.clip.image import CLIPImageModule
+from mlmodule.contrib.clip.text import CLIPTextModule
+from mlmodule.v2.helpers.callbacks import CollectFeaturesInMemory
+from mlmodule.v2.states import StateKey
+from mlmodule.v2.stores import Store
+from mlmodule.v2.torch.datasets import ListDataset, OpenImageFileDataset
+from mlmodule.v2.torch.options import TorchRunnerOptions
+from mlmodule.v2.torch.runners import TorchInferenceRunner
 
 
-@pytest.fixture(params=clip.available_models())
-def clip_model_name(request: SubRequest) -> str:
-    """List all available CLIP model names"""
-    model_name: str = request.param
-    if model_name in CLIP_MODULE_MAP["text"]:
-        return model_name
-    pytest.skip(
-        f"Skipping CLIP model {request.param} as it is not implemented in MLModule"
-    )
+@pytest.fixture(params=["RN50", "ViT-B/32"])
+def clip_test_models(
+    request,
+    torch_device: torch.device,
+) -> Tuple[CLIPImageModule, CLIPTextModule]:
+    image = CLIPImageModule(request.param, device=torch_device)
+    text = CLIPTextModule(request.param, device=torch_device)
+
+    # Loading model pre-trained states
+    store = Store()
+    store.load(image, StateKey(image.state_type, "clip"))
+    store.load(text, StateKey(text.state_type, "clip"))
+
+    return image, text
 
 
-@pytest.mark.parametrize("encoder_type", CLIP_MODULE_MAP.keys())
-def test_state_dict(
-    torch_device: torch.device, clip_model_name: str, encoder_type: str
-):
-    model: torch.nn.Module
-    model, _ = clip.load(clip_model_name, device=torch_device, jit=False)
-    ml_clip: BaseCLIPModule = CLIP_MODULE_MAP[encoder_type][clip_model_name](
-        device=torch_device
-    )
-    ml_clip.load_state_dict(ml_clip.get_default_pretrained_state_dict_from_provider())
-    ml_clip.to(torch_device)
-
-    dict1: Mapping[str, torch.Tensor] = model.state_dict()
-    dict2 = ml_clip.state_dict()
-    dict1 = {key: dict1[key] for key in dict2}
-
-    assert {k: v.sum() for k, v in dict1.items()} == {
-        k: v.sum() for k, v in dict2.items()
-    }
-
-
-def test_text_encoding(torch_device: torch.device, clip_model_name: str):
+def test_text_encoding(clip_test_models: Tuple[CLIPImageModule, CLIPTextModule]):
     data = ["a dog", "a cat"]
+    _, ml_clip = clip_test_models
 
     # Getting the encoded data from Clip
-    model, preprocess = clip.load(clip_model_name, device=torch_device, jit=False)
-    text = clip.tokenize(data).to(torch_device)
+    model, _ = clip.load(ml_clip.clip_model_name, device=ml_clip.device, jit=False)
+    text = clip.tokenize(data).to(ml_clip.device)
     with torch.no_grad():
         clip_output = model.encode_text(text).cpu().numpy()
 
     # Getting encoded data from MLModule CLIP
-    ml_clip: BaseCLIPModule[int, str] = CLIP_MODULE_MAP["text"][clip_model_name](
-        device=torch_device
-    ).load()
-    ret = ml_clip.bulk_inference(IndexedDataset[int, str](list(range(len(data))), data))
-    assert ret is not None
-    idx, ml_clip_output = ret
+    dataset = ListDataset(data)
+    features = CollectFeaturesInMemory()
+    runner = TorchInferenceRunner(
+        dataset=dataset,
+        model=ml_clip,
+        callbacks=[features],
+        options=TorchRunnerOptions(device=ml_clip.device),
+    )
+    runner.run()
 
-    np.testing.assert_allclose(clip_output, ml_clip_output, rtol=1e-2)
+    np.testing.assert_allclose(clip_output, features.features, rtol=1e-2)
 
 
-def test_image_encoding(torch_device: torch.device, clip_model_name: str):
+def test_image_encoding(clip_test_models: Tuple[CLIPImageModule, CLIPTextModule]):
+    ml_model, _ = clip_test_models
     file_names = [os.path.join("tests", "fixtures", "cats_dogs", "cat_0.jpg")]
-    dataset = ImageDataset(file_names)
 
     # Getting the encoded data from CLIP
-    model, preprocess = clip.load(clip_model_name, device=torch_device, jit=False)
-    image = preprocess(Image.open(file_names[0])).unsqueeze(0).to(torch_device)
+    model, preprocess = clip.load(
+        ml_model.clip_model_name, device=ml_model.device, jit=False
+    )
+    image = preprocess(Image.open(file_names[0])).unsqueeze(0).to(ml_model.device)
     with torch.no_grad():
         clip_output = model.encode_image(image).cpu().numpy()
 
     # Getting the encoded data from MLModule CLIP
-    ml_clip: BaseCLIPModule[str, ImageDatasetType] = CLIP_MODULE_MAP["image"][
-        clip_model_name
-    ](device=torch_device).load()
-    ret = ml_clip.bulk_inference(dataset)
-    assert ret is not None
-    idx, ml_clip_output = ret
+    dataset = OpenImageFileDataset(file_names)
+    features = CollectFeaturesInMemory()
+    runner = TorchInferenceRunner(
+        dataset=dataset,
+        model=ml_model,
+        callbacks=[features],
+        options=TorchRunnerOptions(device=ml_model.device),
+    )
+    runner.run()
 
-    np.testing.assert_allclose(clip_output, ml_clip_output, rtol=1e-2)
+    np.testing.assert_allclose(clip_output, features.features, rtol=1e-2)

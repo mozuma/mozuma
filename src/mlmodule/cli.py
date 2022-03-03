@@ -1,7 +1,6 @@
 import argparse
 import json
 import logging
-import os
 import re
 from importlib import import_module
 from typing import List, Optional, Tuple, Union
@@ -12,6 +11,11 @@ from mlmodule.metrics import MetricsCollector
 from mlmodule.serializers import Serializer
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
+from mlmodule.v2.base.models import ModelWithState
+from mlmodule.v2.states import StateKey
+from mlmodule.v2.stores import Store
+from mlmodule.v2.stores.abstract import AbstractStateStore
+from mlmodule.v2.stores.local import LocalStateStore
 from mlmodule.v2.torch.datasets import OpenBinaryFileDataset, TorchDataset
 
 logger = logging.getLogger(__name__)
@@ -28,21 +32,29 @@ def get_dataset(
     elif input_type == "VI":
         return OpenBinaryFileDataset(input_files)
     else:
-        raise ValueError(f"Uknown type for input : {input_type}")
+        raise ValueError(f"Unknown type for input : {input_type}")
 
 
 def download_fun(args: argparse.Namespace, metrics: Optional[dict] = None):
-    model: BaseTorchMLModule = args.module()
-    state_dict = model.get_default_pretrained_state_dict_from_provider()
-    if not hasattr(model, "state_dict_key"):
-        raise ValueError("The given model should have a state_dict_key attribute")
-    model.load_state_dict(state_dict)
+    # Initialize the model
+    model: ModelWithState = args.module(*args.args)
+    # Initialize the model store
+    store: AbstractStateStore = args.store()
+    # Getting the training ID
+    training_id: Optional[str] = args.training_id
+    if training_id is None:
+        # Get it from the store if there is only one possibility
+        training_ids = [s.training_id for s in store.get_state_keys(model.state_type)]
+        if len(training_ids) != 1:
+            raise ValueError(f"Cannot decide which state to load from {training_ids}")
+        training_id = training_ids[0]
 
-    logger.info(f"Writing keys {model.state_dict().keys()}")
-    with open(
-        os.path.join(args.outdir, os.path.basename(model.state_dict_key)), mode="wb"
-    ) as f:
-        model.dump(f)
+    # Getting the model weights from the store
+    store.load(model, StateKey(state_type=model.state_type, training_id=training_id))
+
+    # Storing the weights in a local file
+    store = LocalStateStore(args.outdir)
+    print(store.save(model, training_id))
 
 
 def run_fun(
@@ -155,6 +167,24 @@ def main():
         'and "MLModuleClass" is a class that implements '
         "the method "
         "get_default_pretrained_state_dict_from_provider()",
+    )
+    download.add_argument(
+        "--training-id", help="The training ID to pass to the store.load function"
+    )
+    download.add_argument(
+        "--store",
+        type=_contrib_module,
+        default=Store,
+        help="Should be in the format <module>.<StateStoreClass> "
+        'where "module" is a module in mlmodule.contrib '
+        'and "StateStoreClass" is a class that implements '
+        "the AbstractStateStore interface.",
+    )
+    download.add_argument(
+        "--args",
+        nargs="*",
+        help="Additional arguments to initialize the module",
+        default=tuple(),
     )
     download.add_argument("--outdir", type=str, help="Output directory", default=".")
     download.set_defaults(func=download_fun)
