@@ -3,137 +3,155 @@ from typing import List, Tuple
 
 import numpy as np
 import pytest
+import torch
 from facenet_pytorch.models.mtcnn import MTCNN
-from torchvision.transforms import Compose, Resize
+from PIL.Image import Image
 
-from mlmodule.box import BBoxOutput, BBoxPoint
-from mlmodule.contrib.mtcnn import MTCNNDetectorOriginal
-from mlmodule.torch.data.base import IndexedDataset
-from mlmodule.torch.data.images import (
-    LoadRGBPILImage,
-    convert_to_rgb,
-    get_pil_image_from_file,
-)
-from mlmodule.types import ImageDatasetType
+from mlmodule.contrib.mtcnn.modules import TorchMTCNNModule
 from mlmodule.utils import list_files_in_dir
+from mlmodule.v2.helpers.callbacks import CollectBoundingBoxesInMemory
+from mlmodule.v2.states import StateKey
+from mlmodule.v2.stores import Store
+from mlmodule.v2.torch.datasets import ListDataset, OpenImageFileDataset
+from mlmodule.v2.torch.options import TorchRunnerOptions
+from mlmodule.v2.torch.runners import TorchInferenceRunner
 
 
 @pytest.fixture(scope="session")
-def mtcnn_instance(torch_device) -> MTCNNDetectorOriginal[str]:
-    return MTCNNDetectorOriginal[str](device=torch_device, min_face_size=20)
+def mtcnn_instance(torch_device: torch.device) -> TorchMTCNNModule:
+    return TorchMTCNNModule(device=torch_device)
 
 
 @pytest.fixture(scope="session")
-def resized_images() -> Tuple[List[str], List[np.ndarray]]:
+def resized_images() -> Tuple[List[str], List[Image]]:
     base_path = os.path.join("tests", "fixtures", "berset")
     file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))
-    transforms = Compose(
-        [LoadRGBPILImage(shrink_image_size=(1440, 1440)), Resize((1440, 1440))]
-    )
-    return file_names, [transforms(f) for f in file_names]
+    dataset = OpenImageFileDataset(file_names, resize_image_size=((1440, 1440)))
+    image_arr = [dataset[i][1] for i in range(len(dataset))]
+    return file_names, image_arr
 
 
-@pytest.fixture(scope="session")
-def mtcnn_inference_results(
-    mtcnn_instance: MTCNNDetectorOriginal[str],
-    resized_images: Tuple[List[str], List[np.ndarray]],
-):
-    mtcnn = mtcnn_instance
+def _run_mtcnn_inference(
+    image_paths: List[str], torch_device: torch.device
+) -> CollectBoundingBoxesInMemory:
+    mtcnn = TorchMTCNNModule(device=torch_device)
     # Pretrained model
-    mtcnn.load()
-    indices, images = resized_images
-    dataset = IndexedDataset[str, ImageDatasetType](indices=indices, items=images)
-    dataset.__getitem__
-    return mtcnn.bulk_inference(dataset)
+    Store().load(
+        mtcnn,
+        state_key=StateKey(state_type=mtcnn.state_type, training_id="facenet"),
+    )
+
+    # Dataset
+    dataset = OpenImageFileDataset(image_paths, resize_image_size=(1440, 1440))
+
+    # Callbacks
+    result = CollectBoundingBoxesInMemory()
+
+    # Runner
+    runner = TorchInferenceRunner(
+        dataset=dataset,
+        model=mtcnn,
+        callbacks=[result],
+        options=TorchRunnerOptions(device=mtcnn.device),
+    )
+    runner.run()
+
+    return result
 
 
-def assert_bbox_equals(first: BBoxOutput, second: BBoxOutput):
-    assert first.bounding_box == second.bounding_box
-    assert first.probability == second.probability
-    np.testing.assert_equal(first.features, second.features)
-
-
-def test_mtcnn_detector_inference(mtcnn_inference_results):
-    file_names, outputs = mtcnn_inference_results
-
-    output_by_file = dict(zip(file_names, outputs))
-    assert len(outputs) == 3
-    # It should be a BBoxOutput
-    assert type(outputs[0][0]) == BBoxOutput
+def test_mtcnn_detector_inference(torch_device: torch.device):
+    base_path = os.path.join("tests", "fixtures", "berset")
+    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))
+    results = _run_mtcnn_inference(file_names, torch_device)
+    output_by_file = dict(zip(results.indices, results.bounding_boxes))
+    assert len(results.bounding_boxes) == 3
     assert (
-        len(output_by_file[os.path.join("tests", "fixtures", "berset", "berset2.jpg")])
+        len(
+            output_by_file[
+                os.path.join("tests", "fixtures", "berset", "berset2.jpg")
+            ].bounding_boxes
+        )
         == 8
     )
 
 
-def test_mtcnn_detector_inference_no_faces(mtcnn_instance: MTCNNDetectorOriginal[str]):
+def test_mtcnn_detector_inference_no_faces(torch_device: torch.device):
     base_path = os.path.join("tests", "fixtures", "cats_dogs")
-    file_names = sorted(list_files_in_dir(base_path, allowed_extensions=("jpg",)))[:5]
-    transforms = Compose([get_pil_image_from_file, convert_to_rgb, Resize((720, 720))])
-    data = [transforms(f) for f in file_names]
-    mtcnn = mtcnn_instance
-    # Pretrained model
-    mtcnn.load()
-    dataset = IndexedDataset[str, np.ndarray](file_names, data)
-    ret = mtcnn.bulk_inference(dataset)
-    assert ret is not None
-    file_names, bbox = ret
+    file_names = sorted(list_files_in_dir(base_path, allowed_extensions=("jpg",)))[:2]
+    results = _run_mtcnn_inference(file_names, torch_device)
 
-    for b in bbox:
-        assert len(b) == 0
+    for f, b in zip(results.indices, results.bounding_boxes):
+        assert (
+            len(b.bounding_boxes) == 0
+        ), f"Unexpected bounding box {b.bounding_boxes, b.scores} in {f}"
 
 
 def test_mtcnn_detector_correctness(
-    mtcnn_inference_results, torch_device, resized_images
+    torch_device: torch.device, resized_images: Tuple[List[str], List[Image]]
 ):
-    file_names, outputs = mtcnn_inference_results
+    # MlModule implementation
+    base_path = os.path.join("tests", "fixtures", "berset")
+    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))
+    results = _run_mtcnn_inference(file_names, torch_device)
+
+    # Original implementation
     mtcnn_orig = MTCNN(device=torch_device, min_face_size=20)
 
     # Testing first image
     f, images = resized_images
-    assert f == file_names
+    assert f == results.indices
 
+    all_boxes: List[np.ndarray]
+    all_probs: List[np.ndarray]
+    all_landmarks: List[np.ndarray]
     all_boxes, all_probs, all_landmarks = mtcnn_orig.detect(images, landmarks=True)
     for f, bbox_col, (boxes, probs, landmarks) in zip(
-        file_names, outputs, zip(all_boxes, all_probs, all_landmarks)
+        file_names, results.bounding_boxes, zip(all_boxes, all_probs, all_landmarks)
     ):
         # Ordering bounding boxes for comparison
-        for bbox, (box, prob, features) in zip(
-            sorted(bbox_col, key=lambda b: b.bounding_box[0][0]),
-            sorted(zip(boxes, probs, landmarks), key=lambda b: b[0][0]),
-        ):
-            expected_bbox = BBoxOutput(
-                bounding_box=(BBoxPoint(*box[:2]), BBoxPoint(*box[2:])),
-                probability=prob,
-                features=features,
-            )
-            np.testing.assert_allclose(
-                np.array(bbox.bounding_box),
-                np.array(expected_bbox.bounding_box),
-                rtol=0.5,
-            )
-            np.testing.assert_allclose(
-                np.array(bbox.features), np.array(expected_bbox.features), rtol=0.5
-            )
+        sort_idx_mlm = np.argsort(bbox_col.bounding_boxes[:, 0])
+        sort_idx_ori = np.argsort(boxes[:, 0])
+        np.testing.assert_allclose(
+            bbox_col.bounding_boxes[sort_idx_mlm, :],
+            boxes[sort_idx_ori, :],
+            rtol=0.5,
+        )
+        assert bbox_col.scores is not None
+        np.testing.assert_allclose(
+            bbox_col.scores[sort_idx_mlm],
+            probs[sort_idx_ori],
+            rtol=0.5,
+        )
+        assert bbox_col.features is not None
+        np.testing.assert_allclose(
+            bbox_col.features[sort_idx_mlm],
+            landmarks[sort_idx_ori],
+            rtol=0.5,
+        )
 
 
-def test_mtcnn_serialisation(mtcnn_inference_results, mtcnn_instance):
-    file_names, outputs = mtcnn_inference_results
-
-    # Checking we can recover the same data
-    for bounding_boxes in outputs:
-        for bbox in bounding_boxes:
-            s_features = mtcnn_instance.from_binary(
-                mtcnn_instance.to_binary(bbox.features)
-            )
-            np.testing.assert_equal(bbox.features, s_features)
-
-
-def test_mtcnn_small_images(mtcnn_instance: MTCNNDetectorOriginal):
-    dataset = IndexedDataset[int, np.ndarray](
-        [0, 1], [np.random.rand(14, 200), np.random.rand(14, 200)]
+def test_mtcnn_small_images(torch_device: torch.device):
+    dataset = ListDataset(
+        [np.random.randint(255, size=(14, 200, 3), dtype=np.uint8) for _ in range(2)]
     )
 
-    # Should not raise an error
-    _, output = mtcnn_instance.bulk_inference(dataset)
-    assert output == [[], []]
+    mtcnn = TorchMTCNNModule(device=torch_device)
+    # Pretrained model
+    Store().load(
+        mtcnn,
+        state_key=StateKey(state_type=mtcnn.state_type, training_id="facenet"),
+    )
+
+    # Callbacks
+    result = CollectBoundingBoxesInMemory()
+
+    # Runner
+    runner = TorchInferenceRunner(
+        dataset=dataset,
+        model=mtcnn,
+        callbacks=[result],
+        options=TorchRunnerOptions(device=mtcnn.device),
+    )
+    runner.run()
+
+    assert all(len(b.bounding_boxes) == 0 for b in result.bounding_boxes)

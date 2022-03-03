@@ -1,5 +1,5 @@
 import dataclasses
-from typing import BinaryIO, Callable, Generic, List, Tuple, TypeVar
+from typing import BinaryIO, Callable, Generic, List, Optional, Sequence, Tuple, TypeVar
 
 import PIL.Image
 from PIL.Image import Image
@@ -68,10 +68,28 @@ class ListDataset(TorchDataset[int, _DatasetType]):
         objects (List[Any]): List of objects of the dataset
     """
 
-    objects: List[_DatasetType]
+    objects: Sequence[_DatasetType]
 
     def __getitem__(self, index: int) -> Tuple[int, _DatasetType]:
         return index, self.objects[index]
+
+    def __len__(self) -> int:
+        return len(self.objects)
+
+
+@dataclasses.dataclass
+class ListDatasetIndexed(TorchDataset[_IndicesType, _DatasetType]):
+    """Simple dataset that contains a list of objects in memory
+
+    Attributes:
+        objects (List[Any]): List of objects of the dataset
+    """
+
+    indices: Sequence[_IndicesType]
+    objects: Sequence[_DatasetType]
+
+    def __getitem__(self, index: int) -> Tuple[_IndicesType, _DatasetType]:
+        return self.indices[index], self.objects[index]
 
     def __len__(self) -> int:
         return len(self.objects)
@@ -100,12 +118,23 @@ class OpenImageFileDataset(TorchDataset[str, Image]):
 
     Attributes:
         paths (List[str]): List of paths to image files
+        resize_image_size (tuple[int, int] | None): Optionally reduce the image size on load
     """
 
     paths: List[str]
+    resize_image_size: Optional[Tuple[int, int]] = None
+
+    def _open_image(self, path: str) -> Image:
+        image = PIL.Image.open(path)
+        if self.resize_image_size:
+            # For shrink on load
+            # See https://stackoverflow.com/questions/57663734/how-to-speed-up-image-loading-in-pillow-python
+            image.draft(None, self.resize_image_size)
+            return image.resize(self.resize_image_size)
+        return image
 
     def __getitem__(self, index: int) -> Tuple[str, Image]:
-        return self.paths[index], PIL.Image.open(self.paths[index])
+        return self.paths[index], self._open_image(self.paths[index])
 
     def __len__(self) -> int:
         return len(self.paths)

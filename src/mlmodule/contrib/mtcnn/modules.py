@@ -3,7 +3,7 @@ from typing import List, Sequence, Tuple, Union, cast
 import numpy as np
 import torch
 
-from mlmodule.contrib.mtcnn.mtcnn import MLModuleMTCNN
+from mlmodule.contrib.mtcnn._mtcnn import MLModuleMTCNN
 from mlmodule.v2.base.predictions import (
     BatchBoundingBoxesPrediction,
     BatchModelPrediction,
@@ -46,6 +46,11 @@ class TorchMTCNNModule(TorchMlModule[Sequence[torch.Tensor], np.ndarray]):
     def state_type(self) -> StateType:
         return StateType(backend="pytorch", architecture="facenet-mtcnn")
 
+    def _array_or(self, arr: Union[np.ndarray, None], other: np.ndarray) -> np.ndarray:
+        if arr is None:
+            return other
+        return arr
+
     def forward_single(
         self, image: torch.Tensor
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -72,7 +77,7 @@ class TorchMTCNNModule(TorchMlModule[Sequence[torch.Tensor], np.ndarray]):
                 np.empty(0, dtype=np.float64),
             )
 
-        raw_probabilities: Union[np.ndarray, List[None]]
+        raw_probabilities: Union[np.ndarray, None]
         raw_boxes: Union[np.ndarray, None]
         raw_landmarks: Union[np.ndarray, None]
         raw_boxes, raw_probabilities, raw_landmarks = self.mtcnn.detect(
@@ -80,11 +85,9 @@ class TorchMTCNNModule(TorchMlModule[Sequence[torch.Tensor], np.ndarray]):
         )
 
         # Replacing None values
-        boxes = raw_boxes or np.empty((0, 4), dtype=np.float64)
-        landmarks = raw_landmarks or np.empty(0, dtype=np.float64)
-        probabilities = raw_probabilities
-        if probabilities == [None]:
-            probabilities = np.empty(0, dtype=np.float64)
+        boxes = self._array_or(raw_boxes, np.empty((0, 4), dtype=np.float64))
+        landmarks = self._array_or(raw_landmarks, np.empty(0, dtype=np.float64))
+        probabilities = self._array_or(raw_probabilities, np.empty(0, dtype=np.float64))
 
         return boxes, cast(np.ndarray, probabilities), landmarks
 

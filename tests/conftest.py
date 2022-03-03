@@ -19,8 +19,6 @@ from mlmodule.contrib.densenet import (
 from mlmodule.contrib.keyframes.encoders import VideoFramesEncoder
 from mlmodule.contrib.keyframes.selectors import KeyFrameSelector
 from mlmodule.contrib.magface.features import MagFaceFeatures
-from mlmodule.contrib.mtcnn import MTCNNDetector
-from mlmodule.contrib.mtcnn.detector_ori import MTCNNDetectorOriginal
 from mlmodule.contrib.mtcnn.modules import TorchMTCNNModule
 from mlmodule.contrib.mtcnn.stores import FaceNetMTCNNStore
 from mlmodule.contrib.resnet.modules import TorchResNetModule
@@ -150,7 +148,6 @@ def cats_and_dogs_images() -> List[str]:
         lambda: CLIPImageModule("ViT-B/32"),
         lambda: CLIPTextModule("ViT-B/32"),
         # CLIPViTB32ImageEncoder,
-        # MTCNNDetector,
         # ArcFaceFeatures,
         # MagFaceFeatures,
         # TorchMLModuleKeyFrames,
@@ -176,7 +173,6 @@ def module_pretrained_by_provider(
         lambda: CLIPImageModule("ViT-B/32"),
         lambda: CLIPTextModule("ViT-B/32"),
         # CLIPViTB32ImageEncoder,
-        # MTCNNDetector,
         # ArcFaceFeatures,
         # MagFaceFeatures,
         # TorchMLModuleKeyFrames,
@@ -201,8 +197,6 @@ def module_pretrained_mlmodule_store(
         DenseNet161ImageNetClassifier,
         DenseNet161PlacesFeatures,
         DenseNet161PlacesClassifier,
-        MTCNNDetector,
-        MTCNNDetectorOriginal,
         ArcFaceFeatures,
         MagFaceFeatures,
         # TorchMLModuleKeyFrames,
@@ -222,8 +216,6 @@ def data_platform_scanner(request: SubRequest):
     params=[
         DenseNet161ImageNetFeatures,
         DenseNet161PlacesFeatures,
-        MTCNNDetector,
-        MTCNNDetectorOriginal,
         VinVLDetector,
     ]
 )

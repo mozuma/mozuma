@@ -2,12 +2,15 @@ import abc
 from typing import Any, Callable, Generic, Optional, Sequence, TypeVar
 
 from mlmodule.v2.base.models import ModelWithLabels
-from mlmodule.v2.base.predictions import BatchVideoFramesPrediction
+from mlmodule.v2.base.predictions import (
+    BatchBoundingBoxesPrediction,
+    BatchVideoFramesPrediction,
+)
 
 _ContraArrayType = TypeVar("_ContraArrayType", contravariant=True)
 
 
-class BaseSaveFeaturesCallback(Generic[_ContraArrayType]):
+class BaseSaveFeaturesCallback(abc.ABC, Generic[_ContraArrayType]):
     @abc.abstractmethod
     def save_features(
         self, model: Any, indices: Sequence, features: _ContraArrayType
@@ -22,7 +25,7 @@ class BaseSaveFeaturesCallback(Generic[_ContraArrayType]):
         pass
 
 
-class BaseSaveLabelsCallback(Generic[_ContraArrayType]):
+class BaseSaveLabelsCallback(abc.ABC, Generic[_ContraArrayType]):
     @abc.abstractmethod
     def save_label_scores(
         self, model: ModelWithLabels, indices: Sequence, labels_scores: _ContraArrayType
@@ -37,7 +40,7 @@ class BaseSaveLabelsCallback(Generic[_ContraArrayType]):
         pass
 
 
-class BaseSaveVideoFramesCallback(Generic[_ContraArrayType]):
+class BaseSaveVideoFramesCallback(abc.ABC, Generic[_ContraArrayType]):
     @abc.abstractmethod
     def save_frames(
         self,
@@ -51,15 +54,26 @@ class BaseSaveVideoFramesCallback(Generic[_ContraArrayType]):
             model (Any): The MLModule model that produces the video frames encoding
             indices (Sequence): The list of indices as defined by the dataset
             frames (Sequence[BatchVideoFramesPrediction[_ArrayType]]):
-                The sequence on frame features and indices
+                The sequence of frame features and indices
         """
 
 
-class BaseSaveBoundingBoxCallback:
+class BaseSaveBoundingBoxCallback(abc.ABC, Generic[_ContraArrayType]):
+    @abc.abstractmethod
+    def save_bounding_boxes(
+        self,
+        model: Any,
+        indices: Sequence,
+        bounding_boxes: Sequence[BatchBoundingBoxesPrediction[_ContraArrayType]],
+    ) -> None:
+        """Save bounding boxes output of a module
 
-    # TODO: Bounding box type definition
-    def save_bbox(self, indices: Sequence, bounding_boxes) -> None:
-        """Callback to save bounding boxes from a module"""
+        Arguments:
+            model (Any): The MLModule model that produces the bounding boxes
+            indices (Sequence): The list of indices as defined by the dataset
+            bounding_boxes (Sequence[BatchBoundingBoxesPrediction[_ContraArrayType]]):
+                The sequence bounding predictions
+        """
 
 
 def callbacks_caller(

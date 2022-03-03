@@ -1,8 +1,8 @@
 from collections import OrderedDict
 from typing import List, NoReturn
 
+from mlmodule.contrib.mtcnn._mtcnn import MLModuleMTCNN
 from mlmodule.contrib.mtcnn.modules import TorchMTCNNModule
-from mlmodule.contrib.mtcnn.mtcnn import MLModuleMTCNN
 from mlmodule.v2.states import StateKey, StateType
 from mlmodule.v2.stores.abstract import AbstractStateStore
 
