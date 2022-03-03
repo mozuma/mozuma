@@ -18,6 +18,7 @@ class TorchRunnerOptions:
         data_loader_options (dict): Options passed to `torch.utils.dataloader.DataLoader`.
         tqdm_enabled (bool): Whether to print a `tqdm` progress bar
     """
+
     device: torch.device = dataclasses.field(
         default_factory=resolve_default_torch_device
     )
