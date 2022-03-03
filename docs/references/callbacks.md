@@ -7,7 +7,8 @@ They are classes implementing a pre-defined set of functions:
 
 - [`save_features`][mlmodule.v2.base.callbacks.BaseSaveFeaturesCallback.save_features]
 - [`save_label_scores`][mlmodule.v2.base.callbacks.BaseSaveLabelsCallback.save_label_scores]
-- [`save_bbox`][mlmodule.v2.base.callbacks.BaseSaveBoundingBoxCallback.save_bbox]
+- [`save_bounding_boxes`][mlmodule.v2.base.callbacks.BaseSaveBoundingBoxCallback.save_bounding_boxes]
+- [`save_frames`][mlmodule.v2.base.callbacks.BaseSaveVideoFramesCallback.save_frames]
 
 ## In memory callbacks
 
@@ -18,6 +19,8 @@ They expose their results via object attributes.
 
 ::: mlmodule.v2.helpers.callbacks.CollectLabelsInMemory
 
+::: mlmodule.v2.helpers.callbacks.CollectBoundingBoxesInMemory
+
 ::: mlmodule.v2.helpers.callbacks.CollectVideoFramesInMemory
 
 ## Write your own callbacks
@@ -26,6 +29,6 @@ They expose their results via object attributes.
 
 ::: mlmodule.v2.base.callbacks.BaseSaveLabelsCallback
 
-::: mlmodule.v2.base.callbacks.BaseSaveVideoFramesCallback
-
 ::: mlmodule.v2.base.callbacks.BaseSaveBoundingBoxCallback
+
+::: mlmodule.v2.base.callbacks.BaseSaveVideoFramesCallback
