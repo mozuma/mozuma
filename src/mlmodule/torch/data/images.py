@@ -47,7 +47,11 @@ def get_pil_image_from_file(file: Union[str, Path, IO]) -> Image.Image:
 
 
 def convert_to_rgb(pil_image: Image.Image) -> Image.Image:
-    """PIL convert to RGB function"""
+    """PIL convert to RGB function.
+    Returns the same image object if the image is already RGB.
+    """
+    if pil_image.mode == "RGB":
+        return pil_image
     return pil_image.convert("RGB")
 
 

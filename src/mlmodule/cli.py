@@ -1,6 +1,7 @@
 import argparse
 import json
 import logging
+import re
 from importlib import import_module
 from typing import List, Optional, Tuple, Union
 
@@ -125,10 +126,37 @@ def parse_key_value_arg(cmd_values: str) -> Tuple[str, Union[str, int]]:
     return key, value
 
 
+def check_perf_fun(args: argparse.Namespace, metrics: Optional[dict] = None) -> None:
+    """Check current setup for recommended performances."""
+    from PIL import Image, features
+
+    print("Running performance checks.")
+
+    # libjpeg_turbo check
+    # see https://fastai1.fast.ai/performance.html#libjpeg-turbo
+    print("*** libjpeg-turbo status")
+    if features.check_feature("libjpeg_turbo"):
+        print("✔ libjpeg-turbo is on")
+    else:
+        print("✘ libjpeg-turbo is not on")
+
+    # Pillow-SIMD check
+    # see https://fastai1.fast.ai/performance.html#pillow-simd
+    print("*** Pillow-SIMD status")
+    pil_version = Image.__version__
+    if re.search(r"\.post\d+", pil_version):
+        print(f"✔ Running Pillow-SIMD {pil_version}")
+    else:
+        print(f"✘ Running Pillow {pil_version}")
+
+
 def main():
     parser = argparse.ArgumentParser(fromfile_prefix_chars="@")
 
     subparsers = parser.add_subparsers(dest="cmd", required=True)
+
+    check_perf = subparsers.add_parser("check")
+    check_perf.set_defaults(func=check_perf_fun)
 
     download = subparsers.add_parser("download")
     download.add_argument(

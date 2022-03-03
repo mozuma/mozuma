@@ -13,7 +13,11 @@ ARG CUDA_VERSION=11.1
 ARG TORCH_VERSION=1.9.1
 ARG TORCHVISION_VERSION=0.10.1
 RUN conda create -n app python=$PYTHON_VERSION cudatoolkit=$CUDA_VERSION \
-      pytorch==${TORCH_VERSION} torchvision==${TORCHVISION_VERSION} -c pytorch -c nvidia
+    pytorch==${TORCH_VERSION} torchvision==${TORCHVISION_VERSION} -c pytorch -c nvidia
 
 # Make sure the shell commands run inside the environment
 SHELL ["conda", "run", "-n", "app", "--no-capture-output", "/bin/bash", "-c"]
+
+# Install Pillow-SIMD w/ libjpeg-turbo
+COPY scripts/install-pillow-simd-w-libjpeg-turbo.sh /opt/scripts/install-pillow-simd-w-libjpeg-turbo.sh
+RUN bash /opt/scripts/install-pillow-simd-w-libjpeg-turbo.sh
