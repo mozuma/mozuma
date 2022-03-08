@@ -24,6 +24,10 @@ class FaceNetMTCNNStore(AbstractStateStore[TorchMTCNNModule]):
     def load(self, model: TorchMTCNNModule, state_key: StateKey) -> None:
         # Checking model compatibility
         super().load(model, state_key)
+        if state_key.training_id != "facenet":
+            raise ValueError(
+                f"Cannot find training_id = {state_key.training_id} for FaceNet MTCNN store"
+            )
 
         # Getting a pretrained MTCNN from facenet
         pretrained_mtcnn = MLModuleMTCNN(pretrained=True)

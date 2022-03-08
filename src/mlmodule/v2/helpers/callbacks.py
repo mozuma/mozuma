@@ -43,8 +43,17 @@ class CollectFeaturesInMemory(BaseSaveFeaturesCallback[NumericArrayTypes]):
     def save_features(
         self, model: Any, indices: Sequence, features: NumericArrayTypes
     ) -> None:
-        self.indices += list(indices)
+        # Convert features to numpy
         features_numpy = convert_numeric_array_like_to_numpy(features)
+
+        # Indices to skip (features with only NaNs on dimensions != 0)
+        keep_indices = ~np.isnan(features_numpy).all(
+            axis=tuple(range(1, len(features_numpy.shape)))
+        )
+
+        # Removing elements
+        features_numpy = features_numpy[keep_indices]
+        self.indices += list(i for i, k in zip(indices, keep_indices) if k)
 
         if self.features.size > 0:
             # We stack new features

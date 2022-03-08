@@ -1,39 +1,39 @@
-from collections import OrderedDict
-from typing import Callable, Dict, List, Optional, Tuple, TypeVar
+from typing import Callable, List
 
-import numpy as np
 import torch
-import torch.nn as nn
+from torch import nn
+from torchvision import transforms
 
-from mlmodule.box import BBoxOutput
 from mlmodule.contrib.arcface.transforms import ArcFaceAlignment
-from mlmodule.torch.base import TorchMLModuleFeatures
-from mlmodule.torch.data.base import MLModuleDatasetProtocol
-from mlmodule.torch.data.images import transforms
-from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
 from mlmodule.torch.modules import IBasicBlock, conv1x1
-from mlmodule.torch.utils import torch_apply_state_to_partial_model
-from mlmodule.types import ImageDatasetType
-from mlmodule.utils import download_file_from_google_drive
-
-_IndexType = TypeVar("_IndexType", contravariant=True)
-
-# See https://arxiv.org/pdf/2103.06627.pdf (Figure 5)
-MAGFACE_MAGNITUDE_THRESHOLD = 22.5
-GOOGLE_DRIVE_FILE_ID = "1Bd87admxOZvbIOAyTkGEntsEz3fyMt7H"
+from mlmodule.v2.base.predictions import BatchModelPrediction
+from mlmodule.v2.states import StateType
+from mlmodule.v2.torch.modules import TorchMlModule
 
 
-class MagFaceFeatures(
-    TorchMLModuleFeatures[_IndexType, Tuple[ImageDatasetType, BBoxOutput]],
-    DownloadPretrainedStateFromProvider,
-):
-    """Creates face embeddings from MTCNN output"""
+class TorchMagFaceModule(TorchMlModule[torch.Tensor, torch.Tensor]):
+    """MagFace face embeddings from MTCNN detected faces
 
-    state_dict_key = "pretrained-models/face-detection/magface_epoch_00025.pth"
-    fc_scale = 7 * 7
+    The input dataset should return a tuple of image data and bounding box information
 
-    def __init__(self, device: torch.device = None, zero_init_residual: bool = False):
+    Attributes:
+        device (torch.device): Torch device to initialise the model weights
+        remove_bad_faces (bool): Whether to remove the faces with bad quality from the output
+        magnitude_threshold (float): Threshold to remove bad quality faces.
+            The higher the stricter. Defaults to `22.5`.
+    """
+
+    def __init__(
+        self,
+        device: torch.device = torch.device("cpu"),
+        zero_init_residual: bool = False,
+        remove_bad_faces: bool = True,
+        magnitude_threshold: float = 22.5,
+    ):
         super().__init__(device=device)
+        self.fc_scale = 7 * 7
+        self.magnitude_threshold = magnitude_threshold
+        self.remove_bad_faces = remove_bad_faces
 
         self.inplanes = 64
         self.dilation = 1
@@ -105,7 +105,20 @@ class MagFaceFeatures(
 
         return nn.Sequential(*layers)
 
-    def forward(self, x):
+    @property
+    def state_type(self) -> StateType:
+        return StateType(backend="pytorch", architecture="magface")
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass of the MagFace model
+
+        Arguments:
+            x (torch.Tensor): Batch of cropped and aligned faces
+
+        Returns:
+            torch.Tensor: The features for each input crop.
+                A feature can be set to `nan` if the face is of bad quality and `self.remove_bad_faces == True`.
+        """
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.prelu(x)
@@ -121,46 +134,25 @@ class MagFaceFeatures(
         x = self.fc(x)
         x = self.features(x)
 
+        if self.remove_bad_faces:
+            # Remove bad quality faces, setting them to NaN
+            x[torch.norm(x, dim=1) < self.magnitude_threshold] = float("nan")
+
         return x
 
-    def get_default_pretrained_state_dict_from_provider(
-        self,
-    ) -> Dict[str, torch.Tensor]:
-        """Gets the pretrained state dir from GoogleDrive
-        URL: https://github.com/IrvingMeng/MagFace#model-zoo
-        Model: iResNet100
+    def forward_predictions(
+        self, batch: torch.Tensor
+    ) -> BatchModelPrediction[torch.Tensor]:
+        """Forward pass
+
+        Arguments:
+            batch (torch.Tensor): The face cropped and aligned with `ArcFaceAlignment`
+
+        Returns:
+            torch.Tensor: A `BatchModelPrediction` with `features` attribute as face embeddings.
+                A feature can be set to `nan` if the face is of bad quality and `self.remove_bad_faces == True`.
         """
-        # Downloading state dict from Google Drive
-        pretrained_state_dict = torch.load(
-            download_file_from_google_drive(GOOGLE_DRIVE_FILE_ID),
-            map_location=self.device,
-        )
-        cleaned_state_dict = OrderedDict()
-        for k, v in pretrained_state_dict["state_dict"].items():
-            if k[0:16] == "features.module.":
-                new_k = ".".join(k.split(".")[2:])
-                cleaned_state_dict[new_k] = v
-
-        # Removing deleted layers from state dict and updating the other with pretrained data
-        return torch_apply_state_to_partial_model(self, cleaned_state_dict)
-
-    def bulk_inference(
-        self,
-        data: MLModuleDatasetProtocol[_IndexType, Tuple[ImageDatasetType, BBoxOutput]],
-        **options
-    ) -> Optional[Tuple[List[_IndexType], np.ndarray]]:
-        remove_bad_quality_faces: bool = options.pop("remove_bad_quality_faces", True)
-        ret = super().bulk_inference(data, **options)
-        if ret is None:
-            return None
-        else:
-            indices, features = ret
-        if remove_bad_quality_faces:
-            # Filter for faces with good quality
-            good_faces = np.linalg.norm(features, axis=1) > MAGFACE_MAGNITUDE_THRESHOLD
-            return np.array(indices)[good_faces].tolist(), features[good_faces]
-        else:
-            return indices, features
+        return BatchModelPrediction(features=self.forward(batch))
 
     def get_dataset_transforms(self) -> List[Callable]:
         """Returns transforms to be applied on bulk_inference input data"""

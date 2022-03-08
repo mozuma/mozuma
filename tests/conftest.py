@@ -18,7 +18,8 @@ from mlmodule.contrib.densenet import (
 )
 from mlmodule.contrib.keyframes.encoders import VideoFramesEncoder
 from mlmodule.contrib.keyframes.selectors import KeyFrameSelector
-from mlmodule.contrib.magface.features import MagFaceFeatures
+from mlmodule.contrib.magface.modules import TorchMagFaceModule
+from mlmodule.contrib.magface.stores import MagFaceStore
 from mlmodule.contrib.mtcnn.modules import TorchMTCNNModule
 from mlmodule.contrib.mtcnn.stores import FaceNetMTCNNStore
 from mlmodule.contrib.resnet.modules import TorchResNetModule
@@ -66,6 +67,16 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
         batch_factory=lambda: [torch.rand([720 + i * 10, 720, 3]) for i in range(5)],
         provider_store=FaceNetMTCNNStore(),
         provider_store_training_ids={"facenet"},
+    ),
+    # MagFace
+    ModuleTestConfiguration(
+        "magface",
+        lambda: TorchMagFaceModule(),
+        batch_factory=lambda: torch.rand(
+            (2, 3, 112, 112)
+        ),  # batch, channels, width, height
+        provider_store=MagFaceStore(),
+        provider_store_training_ids={"magface"},
     ),
     # Key-frames
     ModuleTestConfiguration(
@@ -198,7 +209,6 @@ def module_pretrained_mlmodule_store(
         DenseNet161PlacesFeatures,
         DenseNet161PlacesClassifier,
         ArcFaceFeatures,
-        MagFaceFeatures,
         # TorchMLModuleKeyFrames,
         VinVLDetector,
     ]

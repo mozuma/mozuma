@@ -29,12 +29,16 @@ def download_file_from_google_drive(id):
 
     session = requests.Session()
 
-    response = session.get(URL, params={"id": id}, stream=True)
-    token = get_confirm_token(response)
+    response = session.get(
+        URL, params={"id": id, "confirm": "t"}, allow_redirects=True, stream=True
+    )
+    response.raise_for_status()
+    # token = get_confirm_token(response)
 
-    if token:
-        params = {"id": id, "confirm": token}
-        response = session.get(URL, params=params, stream=True)
+    # if token:
+    #     params = {"id": id, "confirm": token}
+    #     response = session.get(URL, params=params, stream=True)
+    #     response.raise_for_status()
 
     f = BytesIO()
     for chunk in response.iter_content(CHUNK_SIZE):
