@@ -1,9 +1,12 @@
 import dataclasses
 from typing import BinaryIO, Callable, Generic, List, Optional, Sequence, Tuple, TypeVar
 
+import numpy as np
 import PIL.Image
 from PIL.Image import Image
 from typing_extensions import Protocol
+
+from mlmodule.v2.base.predictions import BatchBoundingBoxesPrediction
 
 _IndicesType = TypeVar("_IndicesType", covariant=True)
 _DatasetType = TypeVar("_DatasetType", covariant=True)
@@ -117,11 +120,11 @@ class OpenImageFileDataset(TorchDataset[str, Image]):
     """Dataset that returns `PIL.Image.Image` from a list of local file names
 
     Attributes:
-        paths (List[str]): List of paths to image files
+        paths (Sequence[str]): List of paths to image files
         resize_image_size (tuple[int, int] | None): Optionally reduce the image size on load
     """
 
-    paths: List[str]
+    paths: Sequence[str]
     resize_image_size: Optional[Tuple[int, int]] = None
 
     def _open_image(self, path: str) -> Image:
@@ -138,3 +141,55 @@ class OpenImageFileDataset(TorchDataset[str, Image]):
 
     def __len__(self) -> int:
         return len(self.paths)
+
+
+@dataclasses.dataclass
+class OpenImageBoundingBoxDataset(
+    TorchDataset[
+        Tuple[str, int], Tuple[Image, BatchBoundingBoxesPrediction[np.ndarray]]
+    ]
+):
+    """Dataset that returns tuple of `Image` and bounding box data from a list of file names and bounding box information
+
+    Attributes:
+        paths (Sequence[str]): List of paths to image files
+        bounding_boxes (Sequence[BatchBoundingBoxesPrediction[np.ndarray]]):
+            The bounding boxes predictions for all given images
+        resize_image_size (tuple[int, int] | None): Optionally reduce the image size on load
+    """
+
+    paths: Sequence[str]
+    bounding_boxes: Sequence[BatchBoundingBoxesPrediction[np.ndarray]]
+    resize_image_size: Optional[Tuple[int, int]] = None
+
+    def __post_init__(self):
+        # Flatten all bounding box for all images
+        self.flat_indices: List[Tuple[str, int]] = [
+            (path, box_index)
+            for path, boxes in zip(self.paths, self.bounding_boxes)
+            for box_index in range(len(boxes.bounding_boxes))
+        ]
+
+        # Dataset to retrieve images
+        self.open_image_dataset = OpenImageFileDataset(
+            self.paths, resize_image_size=self.resize_image_size
+        )
+
+    def __getitem__(
+        self, index: int
+    ) -> Tuple[Tuple[str, int], Tuple[Image, BatchBoundingBoxesPrediction[np.ndarray]]]:
+        # Getting the path + bounding index
+        path, box_index = self.flat_indices[index]
+
+        # Getting the index of the path
+        path_index = self.paths.index(path)
+
+        return (path, box_index), (
+            # Image data
+            self.open_image_dataset[path_index][1],
+            # Bounding box data
+            self.bounding_boxes[path_index].get_by_index(box_index),
+        )
+
+    def __len__(self) -> int:
+        return len(self.flat_indices)
