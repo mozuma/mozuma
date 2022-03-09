@@ -16,5 +16,5 @@ class TorchMlModuleCollateFn:
         dataset_payload: List[tuple] = []
         for d in data:
             indices.append(d[0])
-            dataset_payload.append(d[1:])
-        return (indices, *self.collate_fn(dataset_payload))
+            dataset_payload.append(d[1])
+        return (indices, self.collate_fn(dataset_payload))

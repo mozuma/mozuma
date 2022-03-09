@@ -24,7 +24,8 @@ from mlmodule.contrib.mtcnn.modules import TorchMTCNNModule
 from mlmodule.contrib.mtcnn.stores import FaceNetMTCNNStore
 from mlmodule.contrib.resnet.modules import TorchResNetModule
 from mlmodule.contrib.resnet.stores import ResNetTorchVisionStore
-from mlmodule.contrib.vinvl import VinVLDetector
+from mlmodule.contrib.vinvl.modules import TorchVinVLDetectorModule
+from mlmodule.contrib.vinvl.stores import VinVLStore
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
 from mlmodule.types import StateDict
@@ -100,6 +101,17 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
                 torch.rand([3, 3, 224, 224]),  # frame_idx, channels, width, height
             ],
         ),
+    ),
+    # VinVL
+    ModuleTestConfiguration(
+        "vinvl",
+        lambda: TorchVinVLDetectorModule(),
+        batch_factory=lambda: (
+            torch.rand(5, 3, 60, 56),  # batch, channels, width, height
+            [(56, 56)] * 5,  # width, height
+        ),
+        provider_store=VinVLStore(),
+        provider_store_training_ids={"vinvl"},
     ),
 ]
 
@@ -210,7 +222,6 @@ def module_pretrained_mlmodule_store(
         DenseNet161PlacesClassifier,
         ArcFaceFeatures,
         # TorchMLModuleKeyFrames,
-        VinVLDetector,
     ]
 )
 def data_platform_scanner(request: SubRequest):
@@ -226,7 +237,6 @@ def data_platform_scanner(request: SubRequest):
     params=[
         DenseNet161ImageNetFeatures,
         DenseNet161PlacesFeatures,
-        VinVLDetector,
     ]
 )
 def image_module(request: SubRequest) -> Type[BaseTorchMLModule]:

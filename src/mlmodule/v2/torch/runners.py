@@ -1,6 +1,6 @@
 import dataclasses
 from logging import getLogger
-from typing import cast
+from typing import Any, Dict, cast
 
 import torch
 from torch.utils.data.dataloader import DataLoader
@@ -12,6 +12,7 @@ from mlmodule.v2.base.callbacks import callbacks_caller
 from mlmodule.v2.base.predictions import BatchModelPrediction
 from mlmodule.v2.base.runners import BaseRunner
 from mlmodule.v2.torch.callbacks import TorchRunnerCallbackType
+from mlmodule.v2.torch.collate import TorchMlModuleCollateFn
 from mlmodule.v2.torch.datasets import TorchDataset, TorchDatasetTransformsWrapper
 from mlmodule.v2.torch.modules import TorchMlModule
 from mlmodule.v2.torch.options import TorchRunnerOptions
@@ -34,6 +35,29 @@ class TorchInferenceRunner(
         options (TorchRunnerOptions): PyTorch options
     """
 
+    @classmethod
+    def validate_data_loader_options(
+        self, model: TorchMlModule, data_loader_options: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Makes sure the collate function is properly defined"""
+        # Default collate function
+        model_collate_fn = model.get_dataloader_collate_fn()
+        if model_collate_fn:
+            default_collate = TorchMlModuleCollateFn(model_collate_fn)
+        else:
+            default_collate = TorchMlModuleCollateFn()
+        # Sets the collate_fn if not defined
+        data_loader_options.setdefault("collate_fn", default_collate)
+
+        # Checking that if set the collate_fn is an instance of TorchMlModuleCollateFn
+        if not isinstance(data_loader_options["collate_fn"], TorchMlModuleCollateFn):
+            logger.warning(
+                "The given collate_fn is not an instance of TorchMlModuleCollateFn "
+                "which could lead to type errors on callbacks"
+            )
+
+        return data_loader_options
+
     def get_data_loader(self) -> DataLoader:
         """Creates a data loader from the options, the given dataset and the module transforms"""
         data_with_transforms = TorchDatasetTransformsWrapper(
@@ -42,7 +66,9 @@ class TorchInferenceRunner(
         )
         return DataLoader(
             dataset=cast(Dataset, data_with_transforms),
-            **self.options.data_loader_options,
+            **self.validate_data_loader_options(
+                self.model, self.options.data_loader_options
+            ),
         )
 
     def apply_predictions_callbacks(

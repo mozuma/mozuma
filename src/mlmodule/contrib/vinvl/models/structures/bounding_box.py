@@ -1,4 +1,6 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+from typing import Tuple
+
 import torch
 
 # transpose
@@ -88,7 +90,7 @@ class BoxList(object):
         else:
             raise RuntimeError("Should not be here")
 
-    def resize(self, size, *args, **kwargs):
+    def resize(self, size: Tuple[int, int], *args, **kwargs):
         """
         Returns a resized copy of this bounding box
 
