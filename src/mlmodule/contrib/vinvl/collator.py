@@ -1,3 +1,7 @@
+from typing import Iterable, List, Tuple
+
+import torch
+
 from mlmodule.contrib.vinvl.models.structures.image_list import to_image_list
 
 
@@ -11,9 +15,17 @@ class BatchCollator(object):
     def __init__(self, size_divisible=0):
         self.size_divisible = size_divisible
 
-    def __call__(self, batch):
-        transposed_batch = list(zip(*batch))
-        paths = transposed_batch[0]
-        images = to_image_list(transposed_batch[1], self.size_divisible)
-        sizes = transposed_batch[2]
-        return paths, images, sizes
+    def transpose_batch(
+        self, batch: Iterable[Tuple[torch.Tensor, Tuple[int, int]]]
+    ) -> Tuple[List[torch.Tensor], List[Tuple[int, int]]]:
+        tensors: List[torch.Tensor] = []
+        sizes: List[Tuple[int, int]] = []
+        for t, s in batch:
+            tensors.append(t)
+            sizes.append(s)
+        return tensors, sizes
+
+    def __call__(self, batch: List[Tuple[torch.Tensor, Tuple[int, int]]]):
+        image_tensors, sizes = self.transpose_batch(batch)
+        images = to_image_list(image_tensors, self.size_divisible)
+        return (images, sizes)

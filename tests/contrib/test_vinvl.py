@@ -1,45 +1,53 @@
 import os
 
-from mlmodule.contrib.vinvl import VinVLDetector
-from mlmodule.torch.data.images import ImageDataset
+from mlmodule.contrib.vinvl.modules import TorchVinVLDetectorModule
 from mlmodule.utils import list_files_in_dir
+from mlmodule.v2.helpers.callbacks import CollectBoundingBoxesInMemory
+from mlmodule.v2.states import StateKey
+from mlmodule.v2.stores import Store
+from mlmodule.v2.torch.datasets import OpenImageFileDataset
+from mlmodule.v2.torch.options import TorchRunnerOptions
+from mlmodule.v2.torch.runners import TorchInferenceRunner
 
 
 def test_vinvl_object_detection(torch_device):
-    vinvl = VinVLDetector(device=torch_device, score_threshold=0.5)
-
+    vinvl = TorchVinVLDetectorModule(device=torch_device, score_threshold=0.5)
     # Pretrained model
-    vinvl.load()
+    Store().load(vinvl, StateKey(vinvl.state_type, training_id="vinvl"))
 
     # Getting data
     base_path = os.path.join("tests", "fixtures", "objects")
     file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
-    dataset = ImageDataset(file_names)
+    dataset = OpenImageFileDataset(file_names)
 
     # Get labels and attributes
-    labels = vinvl.get_labels()
-    attribute_labels = vinvl.get_attribute_labels()
+    # labels = vinvl.get_labels()
+    # attribute_labels = vinvl.get_attribute_labels()
 
     # Getting features
-    img_paths, detections = vinvl.bulk_inference(
-        dataset, data_loader_options={"batch_size": 10}
-    )
+    bb = CollectBoundingBoxesInMemory()
 
-    idx_icrc = next(
-        i
-        for i, path in enumerate(img_paths)
-        if os.path.basename(path) == "icrc_vehicle.jpg"
+    # Runner
+    runner = TorchInferenceRunner(
+        model=vinvl,
+        dataset=dataset,
+        callbacks=[bb],
+        options=TorchRunnerOptions(
+            device=torch_device, data_loader_options={"batch_size": 10}
+        ),
     )
-    idx_sol = next(
-        i
-        for i, path in enumerate(img_paths)
-        if os.path.basename(path) == "soldiers.jpg"
-    )
+    runner.run()
 
-    assert len(detections) == len(file_names)
-    assert len(detections[idx_icrc]) == 10
-    assert labels[detections[idx_icrc][0].labels[0]] == "sign"
-    assert attribute_labels[detections[idx_icrc][0].attributes[0]] == "black"
-    assert len(detections[idx_sol]) == 19
-    assert labels[detections[idx_sol][0].labels[0]] == "gun"
-    assert attribute_labels[detections[idx_sol][4].attributes[0]] == "blue"
+    # filename of source images
+    img_names = [os.path.basename(p) for p in bb.indices]
+
+    # Index of icrc vehicle image
+    idx_icrc = img_names.index("icrc_vehicle.jpg")
+    idx_sol = img_names.index("soldiers.jpg")
+
+    assert 8 < len(bb.bounding_boxes[idx_icrc].bounding_boxes) < 12
+    # assert labels[detections[idx_icrc][0].labels[0]] == "sign"
+    # assert attribute_labels[detections[idx_icrc][0].attributes[0]] == "black"
+    assert 17 < len(bb.bounding_boxes[idx_sol].bounding_boxes) < 22
+    # assert labels[detections[idx_sol][0].labels[0]] == "gun"
+    # assert attribute_labels[detections[idx_sol][4].attributes[0]] == "blue"

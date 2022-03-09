@@ -1,7 +1,8 @@
 import abc
 from io import BytesIO
-from typing import Callable, Generic, List, TypeVar
+from typing import Any, Callable, Generic, List, Optional, TypeVar, Union
 
+import numpy as np
 import torch
 
 from mlmodule.v2.base.predictions import BatchModelPrediction
@@ -10,7 +11,9 @@ from mlmodule.v2.torch.utils import save_state_dict_to_bytes
 
 # Type of data of a batch passed to the forward function
 _BatchType = TypeVar("_BatchType")
-_BatchPredictionArrayType = TypeVar("_BatchPredictionArrayType")
+_BatchPredictionArrayType = TypeVar(
+    "_BatchPredictionArrayType", bound=Union[torch.Tensor, np.ndarray]
+)
 
 
 class TorchMlModule(torch.nn.Module, Generic[_BatchType, _BatchPredictionArrayType]):
@@ -26,6 +29,7 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _BatchPredictionArrayTy
     And can optionally implement:
 
     - [`get_dataset_transforms`][mlmodule.v2.torch.modules.TorchMlModule.get_dataset_transforms]
+    - [`get_dataloader_collate_fn`][mlmodule.v2.torch.modules.TorchMlModule.get_dataloader_collate_fn]
 
     Attributes:
         device (torch.device): Mandatory PyTorch device attribute to initialise model.
@@ -124,3 +128,16 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _BatchPredictionArrayTy
             List[Callable]: A list of callables that will be used to transform the input data.
         """
         return []
+
+    def get_dataloader_collate_fn(self) -> Optional[Callable[[Any], Any]]:
+        """Optionally returns a collate function to be passed to the data loader
+
+        Note:
+            This collate function will be wrapped in `mlmodule.v2.torch.collate.TorchMlModuleCollateFn`.
+            This means that the first argument `batch` will not contain
+            the indices of the dataset but only the data element.
+
+        Returns:
+            Callable[[Any], Any] | None: The collate function to be passed to `TorchMlModuleCollateFn`.
+        """
+        return None
