@@ -1,5 +1,4 @@
 import abc
-import dataclasses
 import os
 import warnings
 from io import BytesIO

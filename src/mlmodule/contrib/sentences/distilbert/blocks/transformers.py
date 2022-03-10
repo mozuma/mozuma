@@ -1,5 +1,3 @@
-from typing import Union
-
 from torch import nn
 
 from .attentions import MultiHeadSelfAttention

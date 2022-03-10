@@ -1,5 +1,8 @@
 import abc
-from typing import Any, Callable, Generic, Optional, Sequence, TypeVar
+from typing import Any, Callable, Generic, Optional, Sequence, TypeVar, Union
+
+import numpy as np
+import torch
 
 from mlmodule.v2.base.models import ModelWithLabels
 from mlmodule.v2.base.predictions import (
@@ -7,7 +10,9 @@ from mlmodule.v2.base.predictions import (
     BatchVideoFramesPrediction,
 )
 
-_ContraArrayType = TypeVar("_ContraArrayType", contravariant=True)
+_ContraArrayType = TypeVar(
+    "_ContraArrayType", bound=Union[torch.Tensor, np.ndarray], contravariant=True
+)
 
 
 class BaseSaveFeaturesCallback(abc.ABC, Generic[_ContraArrayType]):
@@ -73,6 +78,20 @@ class BaseSaveBoundingBoxCallback(abc.ABC, Generic[_ContraArrayType]):
             indices (Sequence): The list of indices as defined by the dataset
             bounding_boxes (Sequence[BatchBoundingBoxesPrediction[_ContraArrayType]]):
                 The sequence bounding predictions
+        """
+
+
+class BaseRunnerEndCallback(abc.ABC):
+    @abc.abstractmethod
+    def on_runner_end(self, model: Any) -> None:
+        """Called when the runner finishes
+
+        This can be used to do clean up.
+        For instance if the data is being processed by a thread,
+        this function can wait for the thread to finish.$
+
+        Arguments:
+            model (Any): The MLModule model
         """
 
 

@@ -1,9 +1,7 @@
-from typing import Optional, Set
-
 from typing_extensions import Protocol
 
 from mlmodule.labels.base import LabelSet
-from mlmodule.v2.states import StateKey, StateType
+from mlmodule.v2.states import StateType
 
 
 class ModelWithState(Protocol):
