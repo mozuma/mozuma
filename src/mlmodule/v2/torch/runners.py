@@ -107,3 +107,6 @@ class TorchInferenceRunner(
                 # Applying callbacks on results
                 self.apply_predictions_callbacks(indices, predictions)
                 logger.debug(f"Collecting results: {batch_n}/{n_batches}")
+
+        # Notify the end of the runner
+        callbacks_caller(self.callbacks, "on_runner_end", self.model)

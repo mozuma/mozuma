@@ -32,3 +32,5 @@ They expose their results via object attributes.
 ::: mlmodule.v2.base.callbacks.BaseSaveBoundingBoxCallback
 
 ::: mlmodule.v2.base.callbacks.BaseSaveVideoFramesCallback
+
+::: mlmodule.v2.base.callbacks.BaseRunnerEndCallback
