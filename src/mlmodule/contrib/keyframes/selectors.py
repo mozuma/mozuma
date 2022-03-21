@@ -41,6 +41,12 @@ class KeyFrameSelector(
     def state_type(self) -> StateType:
         return self.frames_encoder.state_type
 
+    def get_state(self) -> bytes:
+        return self.frames_encoder.get_state()
+
+    def set_state(self, state: bytes) -> None:
+        return self.frames_encoder.set_state(state)
+
     def _filter_keyframes(
         self,
         frame_indices: Sequence[int],
