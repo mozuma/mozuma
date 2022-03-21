@@ -1,5 +1,6 @@
 import dataclasses
-from typing import BinaryIO, Callable, Generic, List, Optional, Sequence, Tuple, TypeVar
+from io import BytesIO
+from typing import Callable, Generic, List, Optional, Sequence, Tuple, TypeVar
 
 import numpy as np
 import PIL.Image
@@ -19,6 +20,15 @@ class TorchDataset(Protocol[_IndicesType, _DatasetType]):
     In order to be used with the PyTorch runners, a TorchDataset
     should expose two functions `__getitem__` and `__len__`.
     """
+
+    def getitem_indices(self, index: int) -> _IndicesType:
+        """The value of dataset indices at index position
+
+        Arguments:
+            index (int): The position of the element to get
+        Returns:
+            _IndicesType: The value of the indices at the position
+        """
 
     def __getitem__(self, index: int) -> Tuple[_IndicesType, _DatasetType]:
         """Get an item of the dataset by index
@@ -55,6 +65,9 @@ class TorchDatasetTransformsWrapper(
     # The transform function
     transform_func: Callable[[_DatasetType], _NewDatasetType]
 
+    def getitem_indices(self, index: int) -> _IndicesType:
+        return self.dataset.getitem_indices(index)
+
     def __getitem__(self, index: int) -> Tuple[_IndicesType, _NewDatasetType]:
         ret_index, data = self.dataset.__getitem__(index)
         return ret_index, self.transform_func(data)
@@ -68,10 +81,13 @@ class ListDataset(TorchDataset[int, _DatasetType]):
     """Simple dataset that contains a list of objects in memory
 
     Attributes:
-        objects (List[Any]): List of objects of the dataset
+        objects (Sequence[_DatasetType]): List of objects of the dataset
     """
 
     objects: Sequence[_DatasetType]
+
+    def getitem_indices(self, index: int) -> int:
+        return index
 
     def __getitem__(self, index: int) -> Tuple[int, _DatasetType]:
         return index, self.objects[index]
@@ -82,14 +98,18 @@ class ListDataset(TorchDataset[int, _DatasetType]):
 
 @dataclasses.dataclass
 class ListDatasetIndexed(TorchDataset[_IndicesType, _DatasetType]):
-    """Simple dataset that contains a list of objects in memory
+    """Simple dataset that contains a list of objects in memory with custom indices
 
     Attributes:
-        objects (List[Any]): List of objects of the dataset
+        indices (Sequence[_IndicesType]): Indices to track objects in results
+        objects (Sequence[_DatasetType]): List of objects of the dataset
     """
 
     indices: Sequence[_IndicesType]
     objects: Sequence[_DatasetType]
+
+    def getitem_indices(self, index: int) -> _IndicesType:
+        return self.indices[index]
 
     def __getitem__(self, index: int) -> Tuple[_IndicesType, _DatasetType]:
         return self.indices[index], self.objects[index]
@@ -99,36 +119,44 @@ class ListDatasetIndexed(TorchDataset[_IndicesType, _DatasetType]):
 
 
 @dataclasses.dataclass
-class OpenBinaryFileDataset(TorchDataset[str, BinaryIO]):
-    """Dataset that returns `typing.BinaryIO` from a list of local file names
+class LocalBinaryFilesDataset(TorchDataset[str, bytes]):
+    """Dataset that reads a list of local file names and returns their content as bytes
 
     Attributes:
-        paths (List[str]): List of paths to files
+        paths (Sequence[str]): List of paths to files
     """
 
-    paths: List[str]
+    paths: Sequence[str]
 
-    def __getitem__(self, index: int) -> Tuple[str, BinaryIO]:
-        return self.paths[index], open(self.paths[index], mode="rb")
+    def getitem_indices(self, index: int) -> str:
+        return self.paths[index]
+
+    def __getitem__(self, index: int) -> Tuple[str, bytes]:
+        with open(self.paths[index], mode="rb") as f:
+            return self.paths[index], f.read()
 
     def __len__(self) -> int:
         return len(self.paths)
 
 
 @dataclasses.dataclass
-class OpenImageFileDataset(TorchDataset[str, Image]):
-    """Dataset that returns `PIL.Image.Image` from a list of local file names
+class ImageDataset(TorchDataset[_IndicesType, Image]):
+    """Dataset that returns `PIL.Image.Image` from a dataset of images in bytes format
 
     Attributes:
-        paths (Sequence[str]): List of paths to image files
+        binary_files_dataset (TorchDataset[_IndicesType, bytes]): Dataset to load images.
+            Usually a [`LocalBinaryFilesDataset`][mlmodule.v2.torch.datasets.LocalBinaryFilesDataset].
         resize_image_size (tuple[int, int] | None): Optionally reduce the image size on load
     """
 
-    paths: Sequence[str]
+    binary_files_dataset: TorchDataset[_IndicesType, bytes]
     resize_image_size: Optional[Tuple[int, int]] = None
 
-    def _open_image(self, path: str) -> Image:
-        image = PIL.Image.open(path)
+    def getitem_indices(self, index: int) -> _IndicesType:
+        return self.binary_files_dataset.getitem_indices(index)
+
+    def _open_image(self, bin_image: bytes) -> Image:
+        image = PIL.Image.open(BytesIO(bin_image))
         if self.resize_image_size:
             # For shrink on load
             # See https://stackoverflow.com/questions/57663734/how-to-speed-up-image-loading-in-pillow-python
@@ -136,59 +164,68 @@ class OpenImageFileDataset(TorchDataset[str, Image]):
             return image.resize(self.resize_image_size)
         return image
 
-    def __getitem__(self, index: int) -> Tuple[str, Image]:
-        return self.paths[index], self._open_image(self.paths[index])
+    def __getitem__(self, index: int) -> Tuple[_IndicesType, Image]:
+        image_index, bin_image = self.binary_files_dataset[index]
+        return image_index, self._open_image(bin_image)
 
     def __len__(self) -> int:
-        return len(self.paths)
+        return len(self.binary_files_dataset)
 
 
 @dataclasses.dataclass
-class OpenImageBoundingBoxDataset(
+class ImageBoundingBoxDataset(
     TorchDataset[
-        Tuple[str, int], Tuple[Image, BatchBoundingBoxesPrediction[np.ndarray]]
+        Tuple[_IndicesType, int], Tuple[Image, BatchBoundingBoxesPrediction[np.ndarray]]
     ]
 ):
     """Dataset that returns tuple of `Image` and bounding box data from a list of file names and bounding box information
 
     Attributes:
-        paths (Sequence[str]): List of paths to image files
+        image_dataset (TorchDataset[_IndicesType, Image]): The dataset of images
         bounding_boxes (Sequence[BatchBoundingBoxesPrediction[np.ndarray]]):
             The bounding boxes predictions for all given images
-        resize_image_size (tuple[int, int] | None): Optionally reduce the image size on load
+        crop_image (bool): Whether to crop the image at the bounding box when loading it
     """
 
-    paths: Sequence[str]
+    image_dataset: TorchDataset[_IndicesType, Image]
     bounding_boxes: Sequence[BatchBoundingBoxesPrediction[np.ndarray]]
-    resize_image_size: Optional[Tuple[int, int]] = None
+    crop_image: bool = False
 
     def __post_init__(self):
         # Flatten all bounding box for all images
-        self.flat_indices: List[Tuple[str, int]] = [
-            (path, box_index)
-            for path, boxes in zip(self.paths, self.bounding_boxes)
+        self.flat_indices: List[Tuple[int, _IndicesType, int]] = [
+            (
+                image_position,
+                self.image_dataset.getitem_indices(image_position),
+                box_index,
+            )
+            for image_position, boxes in enumerate(self.bounding_boxes)
             for box_index in range(len(boxes.bounding_boxes))
         ]
 
-        # Dataset to retrieve images
-        self.open_image_dataset = OpenImageFileDataset(
-            self.paths, resize_image_size=self.resize_image_size
-        )
+    def getitem_indices(self, index: int) -> Tuple[_IndicesType, int]:
+        return self.flat_indices[index][1:]
+
+    def get_image(self, image_position: int, box_index: int) -> Image:
+        image = self.image_dataset[image_position][1]
+        if not self.crop_image:
+            return image
+
+        return image.crop(self.bounding_boxes[image_position].bounding_boxes[box_index])
 
     def __getitem__(
         self, index: int
-    ) -> Tuple[Tuple[str, int], Tuple[Image, BatchBoundingBoxesPrediction[np.ndarray]]]:
-        # Getting the path + bounding index
-        path, box_index = self.flat_indices[index]
+    ) -> Tuple[
+        Tuple[_IndicesType, int], Tuple[Image, BatchBoundingBoxesPrediction[np.ndarray]]
+    ]:
+        # Getting the image position (int), image index and bounding box index
+        image_position, image_index, box_index = self.flat_indices[index]
 
-        # Getting the index of the path
-        path_index = self.paths.index(path)
-
-        return (path, box_index), (
+        return (image_index, box_index), (
             # Image data
-            self.open_image_dataset[path_index][1],
+            self.get_image(image_position, box_index),
             # Bounding box data
-            self.bounding_boxes[path_index].get_by_index(box_index),
+            self.bounding_boxes[image_position].get_by_index(box_index),
         )
 
     def __len__(self) -> int:

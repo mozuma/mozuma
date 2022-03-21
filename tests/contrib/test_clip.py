@@ -12,7 +12,11 @@ from mlmodule.contrib.clip.text import CLIPTextModule
 from mlmodule.v2.helpers.callbacks import CollectFeaturesInMemory
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import Store
-from mlmodule.v2.torch.datasets import ListDataset, OpenImageFileDataset
+from mlmodule.v2.torch.datasets import (
+    ImageDataset,
+    ListDataset,
+    LocalBinaryFilesDataset,
+)
 from mlmodule.v2.torch.options import TorchRunnerOptions
 from mlmodule.v2.torch.runners import TorchInferenceRunner
 
@@ -70,7 +74,7 @@ def test_image_encoding(clip_test_models: Tuple[CLIPImageModule, CLIPTextModule]
         clip_output = model.encode_image(image).cpu().numpy()
 
     # Getting the encoded data from MLModule CLIP
-    dataset = OpenImageFileDataset(file_names)
+    dataset = ImageDataset(LocalBinaryFilesDataset(file_names))
     features = CollectFeaturesInMemory()
     runner = TorchInferenceRunner(
         dataset=dataset,

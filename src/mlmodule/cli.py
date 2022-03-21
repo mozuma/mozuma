@@ -16,7 +16,7 @@ from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import Store
 from mlmodule.v2.stores.abstract import AbstractStateStore
 from mlmodule.v2.stores.local import LocalStateStore
-from mlmodule.v2.torch.datasets import OpenBinaryFileDataset, TorchDataset
+from mlmodule.v2.torch.datasets import LocalBinaryFilesDataset, TorchDataset
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ def get_dataset(
             shrink_input = model.shrink_input_image_size()
         return ImageDataset(input_files, shrink_img_size=shrink_input)
     elif input_type == "VI":
-        return OpenBinaryFileDataset(input_files)
+        return LocalBinaryFilesDataset(input_files)
     else:
         raise ValueError(f"Unknown type for input : {input_type}")
 
