@@ -5,7 +5,7 @@ from mlmodule.utils import list_files_in_dir
 from mlmodule.v2.helpers.callbacks import CollectBoundingBoxesInMemory
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import Store
-from mlmodule.v2.torch.datasets import OpenImageFileDataset
+from mlmodule.v2.torch.datasets import ImageDataset, LocalBinaryFilesDataset
 from mlmodule.v2.torch.options import TorchRunnerOptions
 from mlmodule.v2.torch.runners import TorchInferenceRunner
 
@@ -18,7 +18,7 @@ def test_vinvl_object_detection(torch_device):
     # Getting data
     base_path = os.path.join("tests", "fixtures", "objects")
     file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
-    dataset = OpenImageFileDataset(file_names)
+    dataset = ImageDataset(LocalBinaryFilesDataset(file_names))
 
     # Get labels and attributes
     # labels = vinvl.get_labels()

@@ -14,7 +14,11 @@ from mlmodule.v2.helpers.callbacks import (
 )
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import Store
-from mlmodule.v2.torch.datasets import OpenImageBoundingBoxDataset, OpenImageFileDataset
+from mlmodule.v2.torch.datasets import (
+    ImageBoundingBoxDataset,
+    ImageDataset,
+    LocalBinaryFilesDataset,
+)
 from mlmodule.v2.torch.options import TorchRunnerOptions
 from mlmodule.v2.torch.runners import TorchInferenceRunner
 
@@ -32,7 +36,7 @@ def _face_detection_for_folder(
     file_names = list_files_in_dir(folder, allowed_extensions=("jpg", "png"))
 
     # Load image dataset
-    dataset = OpenImageFileDataset(file_names)
+    dataset = ImageDataset(LocalBinaryFilesDataset(file_names))
 
     # Callbacks
     bb = CollectBoundingBoxesInMemory()
@@ -62,8 +66,9 @@ def _face_features_for_folder(
     Store().load(model, StateKey(model.state_type, "magface"))
 
     # Dataset
-    dataset = OpenImageBoundingBoxDataset(
-        bounding_boxes.indices, bounding_boxes.bounding_boxes
+    dataset = ImageBoundingBoxDataset(
+        image_dataset=ImageDataset(LocalBinaryFilesDataset(bounding_boxes.indices)),
+        bounding_boxes=bounding_boxes.bounding_boxes,
     )
 
     # Callbacks

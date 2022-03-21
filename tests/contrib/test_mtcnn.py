@@ -12,7 +12,11 @@ from mlmodule.utils import list_files_in_dir
 from mlmodule.v2.helpers.callbacks import CollectBoundingBoxesInMemory
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import Store
-from mlmodule.v2.torch.datasets import ListDataset, OpenImageFileDataset
+from mlmodule.v2.torch.datasets import (
+    ImageDataset,
+    ListDataset,
+    LocalBinaryFilesDataset,
+)
 from mlmodule.v2.torch.options import TorchRunnerOptions
 from mlmodule.v2.torch.runners import TorchInferenceRunner
 
@@ -26,7 +30,9 @@ def mtcnn_instance(torch_device: torch.device) -> TorchMTCNNModule:
 def resized_images() -> Tuple[List[str], List[Image]]:
     base_path = os.path.join("tests", "fixtures", "berset")
     file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))
-    dataset = OpenImageFileDataset(file_names, resize_image_size=((1440, 1440)))
+    dataset = ImageDataset(
+        LocalBinaryFilesDataset(file_names), resize_image_size=((1440, 1440))
+    )
     image_arr = [dataset[i][1] for i in range(len(dataset))]
     return file_names, image_arr
 
@@ -42,7 +48,9 @@ def _run_mtcnn_inference(
     )
 
     # Dataset
-    dataset = OpenImageFileDataset(image_paths, resize_image_size=(1440, 1440))
+    dataset = ImageDataset(
+        LocalBinaryFilesDataset(image_paths), resize_image_size=(1440, 1440)
+    )
 
     # Callbacks
     result = CollectBoundingBoxesInMemory()

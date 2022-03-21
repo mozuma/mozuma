@@ -7,7 +7,7 @@ from mlmodule.contrib.resnet.modules import TorchResNetModule
 from mlmodule.v2.helpers.callbacks import CollectLabelsInMemory
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import Store
-from mlmodule.v2.torch.datasets import OpenImageFileDataset
+from mlmodule.v2.torch.datasets import ImageDataset, LocalBinaryFilesDataset
 from mlmodule.v2.torch.options import TorchRunnerOptions
 from mlmodule.v2.torch.runners import TorchInferenceRunner
 
@@ -16,7 +16,7 @@ def test_resnet_cats_dogs(cats_and_dogs_images: List[str], torch_device: torch.d
     """Test ResNet classification of cats and dogs images"""
     # Creating a dataset
     dataset_dir = os.path.dirname(cats_and_dogs_images[0])
-    dataset = OpenImageFileDataset(cats_and_dogs_images)
+    dataset = ImageDataset(LocalBinaryFilesDataset(cats_and_dogs_images))
 
     # Loading model
     model = TorchResNetModule("resnet18")
