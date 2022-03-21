@@ -47,6 +47,12 @@ class VideoFramesEncoder(
     def state_type(self) -> StateType:
         return self.image_encoder.state_type
 
+    def get_state(self) -> bytes:
+        return self.image_encoder.get_state()
+
+    def set_state(self, state: bytes) -> None:
+        return self.image_encoder.set_state(state)
+
     def forward_single(
         self, batch: Tuple[torch.LongTensor, torch.Tensor]
     ) -> Tuple[torch.LongTensor, torch.Tensor]:
