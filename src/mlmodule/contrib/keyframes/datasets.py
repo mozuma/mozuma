@@ -50,8 +50,11 @@ class BinaryVideoCapture:
     _tmp_video_file: IO[bytes] = dataclasses.field(init=False)
 
     def __enter__(self) -> cv2.VideoCapture:
+        # Creating a temporary file
         self._tmp_video_file = tempfile.NamedTemporaryFile()
+        # Copying the video to temporary file
         shutil.copyfileobj(self.video_bin, self._tmp_video_file)
+        # Re-opening the local file
         self._video_capture = cv2.VideoCapture(self._tmp_video_file.name)
         return self._video_capture
 
@@ -80,15 +83,16 @@ class FPSVideoFrameExtractorTransform:
     fps: int
 
     def __call__(self, video_file: BinaryIO) -> FrameSequenceType:
-        with BinaryVideoCapture(video_file) as capture:
-            every_n_frames = compute_every_param_from_target_fps(
-                capture.get(cv2.CAP_PROP_FPS), self.fps
-            )
-            frame_indices: List[int] = []
-            frame_images: List[Image] = []
-            for frame_idx, frame_img in extract_video_frames(
-                capture, every_n_frames=every_n_frames
-            ):
-                frame_indices.append(frame_idx)
-                frame_images.append(frame_img)
-            return frame_indices, frame_images
+        with video_file:
+            with BinaryVideoCapture(video_file) as capture:
+                every_n_frames = compute_every_param_from_target_fps(
+                    capture.get(cv2.CAP_PROP_FPS), self.fps
+                )
+                frame_indices: List[int] = []
+                frame_images: List[Image] = []
+                for frame_idx, frame_img in extract_video_frames(
+                    capture, every_n_frames=every_n_frames
+                ):
+                    frame_indices.append(frame_idx)
+                    frame_images.append(frame_img)
+                return frame_indices, frame_images
