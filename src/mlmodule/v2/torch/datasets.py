@@ -1,6 +1,5 @@
 import dataclasses
-from io import BytesIO
-from typing import Callable, Generic, List, Optional, Sequence, Tuple, TypeVar
+from typing import BinaryIO, Callable, Generic, List, Optional, Sequence, Tuple, TypeVar
 
 import numpy as np
 import PIL.Image
@@ -119,7 +118,7 @@ class ListDatasetIndexed(TorchDataset[_IndicesType, _DatasetType]):
 
 
 @dataclasses.dataclass
-class LocalBinaryFilesDataset(TorchDataset[str, bytes]):
+class LocalBinaryFilesDataset(TorchDataset[str, BinaryIO]):
     """Dataset that reads a list of local file names and returns their content as bytes
 
     Attributes:
@@ -131,9 +130,8 @@ class LocalBinaryFilesDataset(TorchDataset[str, bytes]):
     def getitem_indices(self, index: int) -> str:
         return self.paths[index]
 
-    def __getitem__(self, index: int) -> Tuple[str, bytes]:
-        with open(self.paths[index], mode="rb") as f:
-            return self.paths[index], f.read()
+    def __getitem__(self, index: int) -> Tuple[str, BinaryIO]:
+        return self.paths[index], open(self.paths[index], mode="rb")
 
     def __len__(self) -> int:
         return len(self.paths)
@@ -149,19 +147,22 @@ class ImageDataset(TorchDataset[_IndicesType, Image]):
         resize_image_size (tuple[int, int] | None): Optionally reduce the image size on load
     """
 
-    binary_files_dataset: TorchDataset[_IndicesType, bytes]
+    binary_files_dataset: TorchDataset[_IndicesType, BinaryIO]
     resize_image_size: Optional[Tuple[int, int]] = None
 
     def getitem_indices(self, index: int) -> _IndicesType:
         return self.binary_files_dataset.getitem_indices(index)
 
-    def _open_image(self, bin_image: bytes) -> Image:
-        image = PIL.Image.open(BytesIO(bin_image))
-        if self.resize_image_size:
-            # For shrink on load
-            # See https://stackoverflow.com/questions/57663734/how-to-speed-up-image-loading-in-pillow-python
-            image.draft(None, self.resize_image_size)
-            return image.resize(self.resize_image_size)
+    def _open_image(self, bin_image: BinaryIO) -> Image:
+        with bin_image:
+            image = PIL.Image.open(bin_image)
+            if self.resize_image_size:
+                # For shrink on load
+                # See https://stackoverflow.com/questions/57663734/how-to-speed-up-image-loading-in-pillow-python
+                image.draft(None, self.resize_image_size)
+                return image.resize(self.resize_image_size)
+            # Loading image in-memory to allow close bin_image
+            image.load()
         return image
 
     def __getitem__(self, index: int) -> Tuple[_IndicesType, Image]:

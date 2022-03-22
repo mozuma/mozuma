@@ -31,6 +31,8 @@ def test_image_dataset(cats_and_dogs_images: List[str], resize: bool):
     assert index == cats_and_dogs_images[0]
     if resize:
         assert image.size == (120, 120)
+    # Make sure that the image can be read as an array
+    assert np.array(image).shape == image.size[::-1] + (3,)
 
 
 @pytest.mark.parametrize("crop_image", [True, False], ids=["crop", "no-crop"])
@@ -57,6 +59,8 @@ def test_bounding_box_dataset(cats_and_dogs_images: List[str], crop_image: bool)
         assert crop.size == (10, 10)
     else:
         assert crop.size != (10, 10)
+    # Make sure that the image can be read as an array
+    assert np.array(crop).shape == crop.size[::-1] + (3,)
     np.testing.assert_equal(bbox.bounding_boxes, np.array([[0, 0, 10, 10]]))
 
     # Getting the first sample, second box
