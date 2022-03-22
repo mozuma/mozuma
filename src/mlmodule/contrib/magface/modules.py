@@ -18,7 +18,8 @@ class TorchMagFaceModule(TorchMlModule[torch.Tensor, torch.Tensor]):
 
     Attributes:
         device (torch.device): Torch device to initialise the model weights
-        remove_bad_faces (bool): Whether to remove the faces with bad quality from the output
+        remove_bad_faces (bool): Whether to remove the faces with bad quality from the output.
+            This will replace features of bad faces with `float("nan")`. Defaults to `False`.
         magnitude_threshold (float): Threshold to remove bad quality faces.
             The higher the stricter. Defaults to `22.5`.
     """
@@ -27,7 +28,7 @@ class TorchMagFaceModule(TorchMlModule[torch.Tensor, torch.Tensor]):
         self,
         device: torch.device = torch.device("cpu"),
         zero_init_residual: bool = False,
-        remove_bad_faces: bool = True,
+        remove_bad_faces: bool = False,
         magnitude_threshold: float = 22.5,
     ):
         super().__init__(device=device)
