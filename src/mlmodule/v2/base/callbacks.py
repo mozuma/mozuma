@@ -16,6 +16,8 @@ _ContraArrayType = TypeVar(
 
 
 class BaseSaveFeaturesCallback(abc.ABC, Generic[_ContraArrayType]):
+    PREDICTION_TYPE: str = "features"
+
     @abc.abstractmethod
     def save_features(
         self, model: Any, indices: Sequence, features: _ContraArrayType
@@ -31,6 +33,8 @@ class BaseSaveFeaturesCallback(abc.ABC, Generic[_ContraArrayType]):
 
 
 class BaseSaveLabelsCallback(abc.ABC, Generic[_ContraArrayType]):
+    PREDICTION_TYPE: str = "label_scores"
+
     @abc.abstractmethod
     def save_label_scores(
         self, model: ModelWithLabels, indices: Sequence, labels_scores: _ContraArrayType
@@ -46,6 +50,8 @@ class BaseSaveLabelsCallback(abc.ABC, Generic[_ContraArrayType]):
 
 
 class BaseSaveVideoFramesCallback(abc.ABC, Generic[_ContraArrayType]):
+    PREDICTION_TYPE: str = "frames"
+
     @abc.abstractmethod
     def save_frames(
         self,
@@ -64,6 +70,8 @@ class BaseSaveVideoFramesCallback(abc.ABC, Generic[_ContraArrayType]):
 
 
 class BaseSaveBoundingBoxCallback(abc.ABC, Generic[_ContraArrayType]):
+    PREDICTION_TYPE: str = "bounding_boxes"
+
     @abc.abstractmethod
     def save_bounding_boxes(
         self,

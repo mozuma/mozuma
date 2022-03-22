@@ -41,3 +41,15 @@ class BatchModelPrediction(Generic[_ArrayType]):
     label_scores: Optional[_ArrayType] = None
     frames: Optional[Sequence[BatchVideoFramesPrediction[_ArrayType]]] = None
     bounding_boxes: Optional[Sequence[BatchBoundingBoxesPrediction]] = None
+
+    def __iter__(self):
+        if self.features is not None:
+            return iter(self.features)
+        elif self.label_scores is not None:
+            return iter(self.label_scores)
+        elif self.frames is not None:
+            return iter(self.frames)
+        elif self.bounding_boxes is not None:
+            return iter(self.bounding_boxes)
+        else:
+            raise StopIteration()
