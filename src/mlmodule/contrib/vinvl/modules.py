@@ -144,7 +144,7 @@ class TorchVinVLDetectorModule(
         boxes, scores, features, _, _, _ = self.forward(batch)
         return BatchModelPrediction(
             bounding_boxes=[
-                BatchBoundingBoxesPrediction(bounding_boxes=b, scores=f, features=f)
+                BatchBoundingBoxesPrediction(bounding_boxes=b, scores=s, features=f)
                 for b, s, f in zip(boxes, scores, features)
             ]
         )
