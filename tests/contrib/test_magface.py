@@ -3,6 +3,7 @@ import os
 from typing import Dict, List, Optional, Sequence
 
 import numpy as np
+import pytest
 import torch
 
 from mlmodule.contrib.magface.modules import TorchMagFaceModule
@@ -57,12 +58,13 @@ def _face_features_for_folder(
     torch_device: torch.device,
     folder: str,
     bounding_boxes: Optional[CollectBoundingBoxesInMemory] = None,
+    remove_bad_faces: bool = False,
 ) -> CollectFeaturesInMemory:
     # Face detection
     bounding_boxes = bounding_boxes or _face_detection_for_folder(torch_device, folder)
 
     # Loading model with pre-trained state
-    model = TorchMagFaceModule(device=torch_device)
+    model = TorchMagFaceModule(device=torch_device, remove_bad_faces=remove_bad_faces)
     Store().load(model, StateKey(model.state_type, "magface"))
 
     # Dataset
@@ -129,7 +131,10 @@ def test_magface_features_inference(torch_device: torch.device):
     )
 
 
-def test_bad_quality_face_filter():
+@pytest.mark.parametrize(
+    "remove_bad_faces", [True, False], ids=["remove-bad", "keep-bad"]
+)
+def test_bad_quality_face_filter(remove_bad_faces: bool):
     # Defining variables
     base_path = os.path.join("tests", "fixtures", "faces")
     device = torch.device("cpu")
@@ -138,19 +143,28 @@ def test_bad_quality_face_filter():
     # Getting face detection output
     bb = _face_detection_for_folder(device, base_path)
     # Getting face features
-    ff = _face_features_for_folder(device, base_path, bb)
+    ff = _face_features_for_folder(
+        device, base_path, bb, remove_bad_faces=remove_bad_faces
+    )
 
     # COunting the number of bounding boxes for the blurry picture
     detect_index_blur = bb.indices.index(blurry_picture_name)
     count_bbox = len(bb.bounding_boxes[detect_index_blur].bounding_boxes)
 
-    # Counting the number of features for the same picture
+    # Counting the number of features without NaN for the blurry_picture_name
     features_index_blur = [
-        box_index for path, box_index in ff.indices if path == blurry_picture_name
+        box_index
+        for (path, box_index), nan_features in zip(
+            ff.indices, np.isnan(ff.features).all(axis=1)
+        )
+        if path == blurry_picture_name and not nan_features
     ]
     count_features = len(features_index_blur)
 
-    # Blurry face picture has 1 visible faces
-    assert count_features == 1
+    if remove_bad_faces:
+        # Blurry face picture has 1 visible faces
+        assert count_features == 1
+    else:
+        assert count_features == count_bbox
     # But more detected faces
     assert count_bbox > 1
