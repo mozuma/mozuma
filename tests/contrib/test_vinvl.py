@@ -45,7 +45,11 @@ def test_vinvl_object_detection(torch_device):
     idx_icrc = img_names.index("icrc_vehicle.jpg")
     idx_sol = img_names.index("soldiers.jpg")
 
-    assert 8 < len(bb.bounding_boxes[idx_icrc].bounding_boxes) < 12
+    icrc_bbox = bb.bounding_boxes[idx_icrc]
+    assert 8 < len(icrc_bbox.bounding_boxes) < 12
+    assert icrc_bbox.bounding_boxes.shape[1] == 4
+    assert icrc_bbox.scores is not None
+    assert icrc_bbox.scores.shape == (len(icrc_bbox.bounding_boxes),)
     # assert labels[detections[idx_icrc][0].labels[0]] == "sign"
     # assert attribute_labels[detections[idx_icrc][0].attributes[0]] == "black"
     assert 17 < len(bb.bounding_boxes[idx_sol].bounding_boxes) < 22
