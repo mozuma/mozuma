@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Generic, Optional, Sequence, TypeVar, Union
+from typing import Generic, NamedTuple, Optional, Sequence, TypeVar, Union
 
 import numpy as np
 import torch
@@ -43,13 +43,4 @@ class BatchModelPrediction(Generic[_ArrayType]):
     bounding_boxes: Optional[Sequence[BatchBoundingBoxesPrediction]] = None
 
     def __iter__(self):
-        if self.features is not None:
-            return iter(self.features)
-        elif self.label_scores is not None:
-            return iter(self.label_scores)
-        elif self.frames is not None:
-            return iter(self.frames)
-        elif self.bounding_boxes is not None:
-            return iter(self.bounding_boxes)
-        else:
-            raise StopIteration()
+        return iter(dataclasses.astuple(self, tuple_factory=NamedTuple))
