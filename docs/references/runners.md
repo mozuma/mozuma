@@ -12,9 +12,16 @@ They are executed with the `run` function which takes no arguments.
       members:
         - run
 
+::: mlmodule.v2.torch.runners.TorchInferenceMultiGPURunner
+    selection:
+      members:
+        - run
+
 ## Options
 
 ::: mlmodule.v2.torch.options.TorchRunnerOptions
+
+::: mlmodule.v2.torch.options.TorchMultiGPURunnerOptions
 
 ## Write your own runner
 

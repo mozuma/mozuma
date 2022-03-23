@@ -134,6 +134,20 @@ class TorchInferenceMultiGPURunner(
         TorchMlModule, TorchDataset, TorchRunnerCallbackType, TorchMultiGPURunnerOptions
     ]
 ):
+    """Runner for inference tasks on PyTorch models
+
+    Supports CPU, single and multi-GPU inference with multiple backends.
+
+    Warning:
+        Only `nccl` and `gloo` backends are supported at the moment.
+
+    Attributes:
+        model (TorchMlModule): The PyTorch model to run inference
+        dataset (TorchDataset): Input dataset for the runner
+        callbacks (List[TorchRunnerCallbackType]): Callbacks to save features, labels or bounding boxes
+        options (TorchMultiGPURunnerOptions): PyTorch multi-gpu options
+    """
+
     _queue: mp.Queue = None
     _is_reduced: bool = False
 
@@ -268,6 +282,10 @@ class TorchInferenceMultiGPURunner(
         # Setup dataflow
         data_loader = self.get_data_loader()
 
+        # If data has zero size stop here, otherwise engine will raise an error
+        if len(data_loader) == 0:
+            return
+
         # Adapt model for distributed settings
         if logger.level >= logging.INFO:
             logging.getLogger("ignite.distributed.auto.auto_model").setLevel(
@@ -308,7 +326,6 @@ class TorchInferenceMultiGPURunner(
                 )
 
                 # Running the model forward
-                # predictions = model.forward_predictions(batch_on_device)
                 predictions = model(batch_on_device)
 
                 # Applying callbacks on results
