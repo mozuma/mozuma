@@ -47,3 +47,29 @@ def test_on_runner_end_callback(tensor_features_dataset: ListDataset[torch.Tenso
     runner.run()
 
     assert callback.on_runner_end.called
+
+
+def test_validate_data_loader_options_copy(
+    tensor_features_dataset: ListDataset[torch.Tensor],
+):
+    """Makes sure that the options are not directly modified by the inference runner"""
+    # Getting a test model
+    model = TorchTestFeaturesModule()
+
+    # Mock callback
+    callback = MagicMock()
+
+    # Options
+    options = TorchRunnerOptions()
+    assert options.data_loader_options == {}
+
+    # Inference runner
+    runner = TorchInferenceRunner(
+        model=model,
+        callbacks=[callback],
+        dataset=tensor_features_dataset,
+        options=options,
+    )
+    runner.run()
+
+    assert options.data_loader_options == {}

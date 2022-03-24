@@ -40,6 +40,9 @@ class TorchInferenceRunner(
         self, model: TorchMlModule, data_loader_options: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Makes sure the collate function is properly defined"""
+        # Making a copy of options
+        data_loader_options = data_loader_options.copy()
+
         # Default collate function
         model_collate_fn = model.get_dataloader_collate_fn()
         if model_collate_fn:
