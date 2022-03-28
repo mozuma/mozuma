@@ -1,10 +1,13 @@
 import dataclasses
-from typing import Generic, NamedTuple, Optional, Sequence, TypeVar, Union
+from logging import getLogger
+from typing import Generic, Optional, Sequence, TypeVar, Union
 
 import numpy as np
 import torch
 
 _ArrayType = TypeVar("_ArrayType", bound=Union[np.ndarray, torch.Tensor])
+
+logger = getLogger()
 
 
 @dataclasses.dataclass
@@ -42,5 +45,36 @@ class BatchModelPrediction(Generic[_ArrayType]):
     frames: Optional[Sequence[BatchVideoFramesPrediction[_ArrayType]]] = None
     bounding_boxes: Optional[Sequence[BatchBoundingBoxesPrediction]] = None
 
+    def __post_init__(self):
+        # Workaround for PyTorch' gather (from DataParallel):
+        # the gather of all model's output, as a mapping, is stored as features.
+        # https://github.com/pytorch/pytorch/blob/master/torch/nn/parallel/scatter_gather.py#L55=
+        if (
+            isinstance(self.features, map)
+            and not self.label_scores
+            and not self.frames
+            and not self.bounding_boxes
+        ):
+            # try to unpack the mapping and handle if it doesn't work
+            try:
+                _features, _label_scores, _frames, _bounding_boxes = self.features
+
+            except ValueError:
+                logger.warning(
+                    "It wasn't possible to unpack BatchModelPrediction "
+                    "fields after a gather"
+                )
+                _features, _label_scores, _frames, _bounding_boxes = (
+                    None,
+                    None,
+                    None,
+                    None,
+                )
+
+            self.features = _features
+            self.label_scores = _label_scores
+            self.frames = _frames
+            self.bounding_boxes = _bounding_boxes
+
     def __iter__(self):
-        return iter(dataclasses.astuple(self, tuple_factory=NamedTuple))
+        yield from dataclasses.astuple(self)
