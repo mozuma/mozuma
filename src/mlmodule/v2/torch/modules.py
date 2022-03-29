@@ -1,8 +1,7 @@
 import abc
 from io import BytesIO
-from typing import Any, Callable, Generic, List, Optional, TypeVar, Union
+from typing import Any, Callable, Generic, List, Optional, Sequence, TypeVar, Union
 
-import numpy as np
 import torch
 
 from mlmodule.v2.base.predictions import BatchModelPrediction
@@ -11,19 +10,20 @@ from mlmodule.v2.torch.utils import save_state_dict_to_bytes
 
 # Type of data of a batch passed to the forward function
 _BatchType = TypeVar("_BatchType")
-_BatchPredictionArrayType = TypeVar(
-    "_BatchPredictionArrayType", bound=Union[torch.Tensor, np.ndarray]
+_ForwardOutputType = TypeVar(
+    "_ForwardOutputType", bound=Union[torch.Tensor, Sequence[torch.Tensor]]
 )
 
 
-class TorchMlModule(torch.nn.Module, Generic[_BatchType, _BatchPredictionArrayType]):
+class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
     """
     Base `torch.nn.Module` for PyTorch models implemented in MLModule.
 
     A valid subclass of [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule]
     **must** implement the following method:
 
-    - [`forward_predictions`][mlmodule.v2.torch.modules.TorchMlModule.forward_predictions]
+    - [`forward`][mlmodule.v2.torch.modules.TorchMlModule.forward]
+    - [`to_predictions`][mlmodule.v2.torch.modules.TorchMlModule.to_predictions]
     - [`state_type`][mlmodule.v2.torch.modules.TorchMlModule.state_type]
 
     And can optionally implement:
@@ -43,16 +43,21 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _BatchPredictionArrayTy
         from torchvision import transforms
 
 
-        class FC(TorchMlModule[torch.Tensor]):
+        class FC(TorchMlModule[torch.Tensor, torch.Tensor]):
 
             def __init__(self, device: torch.device = torch.device("cpu")):
                 super().__init__(device=device)
                 self.fc = nn.Linear(512, 512)
 
-            def forward_predictions(
+            def forward(
                 self, batch: torch.Tensor
+            ) -> torch.Tensor:
+                return self.fc(batch)
+
+            def to_predictions(
+                self, forward_output: torch.Tensor
             ) -> BatchModelPrediction[torch.Tensor]:
-                return BatchModelPrediction(features=self.fc(batch))
+                return BatchModelPrediction(features=forward_output)
 
             @property
             def state_type(self) -> StateType:
@@ -92,9 +97,7 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _BatchPredictionArrayTy
         raise NotImplementedError("State architecture should be overridden")
 
     @abc.abstractmethod
-    def forward_predictions(
-        self, batch: _BatchType
-    ) -> BatchModelPrediction[_BatchPredictionArrayType]:
+    def forward(self, batch: _BatchType) -> _ForwardOutputType:
         """Forward pass of the model
 
         Applies the module on a batch and returns all potentially interesting data point (features, labels...)
@@ -103,7 +106,24 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _BatchPredictionArrayTy
             batch (_BatchType): the batch of data to process
 
         Returns:
-            BatchModelPrediction[_BatchPredictionArrayType]:
+            _ForwardOutputType: A tensor or a sequence of tensor with relevant information
+                (features, labels, bounding boxes...)
+
+        Note:
+            This method **must** be implemented in subclasses
+        """
+
+    @abc.abstractmethod
+    def to_predictions(
+        self, forward_output: _ForwardOutputType
+    ) -> BatchModelPrediction[torch.Tensor]:
+        """Modifies the output of the forward pass to create the standard BatchModelPrediction object
+
+        Arguments:
+            forward_output (_ForwardOutputType): the batch of data to process
+
+        Returns:
+            BatchModelPrediction[torch.Tensor]:
                 Prediction object with the keys `features`, `label_scores`...
 
         Note:
