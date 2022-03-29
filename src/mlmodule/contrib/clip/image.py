@@ -6,7 +6,6 @@ import torch
 from mlmodule.contrib.clip.base import BaseCLIPModule
 from mlmodule.contrib.clip.transforms import get_image_transform
 from mlmodule.contrib.clip.utils import get_clip_module
-from mlmodule.v2.base.predictions import BatchModelPrediction
 
 
 class CLIPImageModule(BaseCLIPModule):
@@ -32,18 +31,16 @@ class CLIPImageModule(BaseCLIPModule):
 
         self.convert_weights()
 
-    def forward_predictions(
-        self, batch: torch.Tensor
-    ) -> BatchModelPrediction[torch.Tensor]:
+    def forward(self, batch: torch.Tensor) -> torch.Tensor:
         """Forward pass of image encoder
 
         Arguments:
             batch (torch.Tensor): Batch of images
 
         Returns:
-            BatchModelPrediction[torch.Tensor]: A prediction object with `features` attribute
+            torch.Tensor: The image features
         """
-        return BatchModelPrediction(features=self.visual(batch.type(self._dtype)))
+        return self.visual(batch.type(self._dtype))
 
     def get_dataset_transforms(self) -> List[Callable]:
         """Dataset transform to resize and preprocess images"""
