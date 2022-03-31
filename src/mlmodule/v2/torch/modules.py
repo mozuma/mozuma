@@ -1,6 +1,6 @@
 import abc
 from io import BytesIO
-from typing import Any, Callable, Generic, List, Optional, Sequence, TypeVar, Union
+from typing import Any, Callable, Generic, List, Optional, TypeVar
 
 import torch
 
@@ -10,9 +10,7 @@ from mlmodule.v2.torch.utils import save_state_dict_to_bytes
 
 # Type of data of a batch passed to the forward function
 _BatchType = TypeVar("_BatchType")
-_ForwardOutputType = TypeVar(
-    "_ForwardOutputType", bound=Union[torch.Tensor, Sequence[torch.Tensor]]
-)
+_ForwardOutputType = TypeVar("_ForwardOutputType")
 
 
 class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):

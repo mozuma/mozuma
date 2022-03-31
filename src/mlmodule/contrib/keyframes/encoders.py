@@ -1,4 +1,4 @@
-from typing import Callable, List, Sequence, Tuple
+from typing import Any, Callable, List, Sequence, Tuple
 
 import torch
 from torchvision.transforms import Compose
@@ -18,7 +18,8 @@ from mlmodule.v2.torch.modules import TorchMlModule
 
 class VideoFramesEncoder(
     TorchMlModule[
-        Tuple[Sequence[torch.LongTensor], Sequence[torch.Tensor]], torch.Tensor
+        Tuple[Sequence[torch.LongTensor], Sequence[torch.Tensor]],
+        Tuple[List[torch.LongTensor], List[torch.Tensor]],
     ]
 ):
     """Video frames encoder
@@ -35,7 +36,7 @@ class VideoFramesEncoder(
 
     def __init__(
         self,
-        image_encoder: TorchMlModule[torch.Tensor, torch.Tensor],
+        image_encoder: TorchMlModule[torch.Tensor, Any],
         fps: int = 1,
         device: torch.device = torch.device("cpu"),
     ):
@@ -87,7 +88,9 @@ class VideoFramesEncoder(
             )
 
         # Encoding the frames images in a batch
-        frame_features = self.image_encoder.forward_predictions(frame_images).features
+        frame_features = self.image_encoder.to_predictions(
+            self.image_encoder(frame_images)
+        ).features
 
         # In case the provided image encoder does not return the features attribute
         if frame_features is None:
@@ -126,29 +129,15 @@ class VideoFramesEncoder(
             return_value[1].append(frame_features)
         return return_value
 
-    def forward_predictions(
-        self, batch: Tuple[Sequence[torch.LongTensor], Sequence[torch.Tensor]]
+    def to_predictions(
+        self, forward_output: Tuple[List[torch.LongTensor], List[torch.Tensor]]
     ) -> BatchModelPrediction[torch.Tensor]:
-        """Encodes video frames
-
-        Arguments:
-            batch (Tuple[Sequence[torch.LongTensor], Sequence[torch.Tensor]]): A tuple of
-
-                - Sequence of frame index array `torch.LongTensor, shape=(n_frames,)`
-                - Sequence of stacked frame images `torch.Tensor, shape=(n_frames, channel, width, height,)`
-
-                Both sequences should have the same number of elements
-
-        Returns:
-            BatchModelPrediction[torch.Tensor]: With the `frames` attribute only
-        """
-        forward_ret = self.forward(batch)
         return BatchModelPrediction(
             frames=[
                 BatchVideoFramesPrediction(
                     features=frame_features, frame_indices=frame_indices.tolist()
                 )
-                for frame_indices, frame_features in zip(*forward_ret)
+                for frame_indices, frame_features in zip(*forward_output)
             ]
         )
 
