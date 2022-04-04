@@ -1,4 +1,4 @@
-from typing import List, Sequence, Tuple, Union, cast
+from typing import List, Sequence, Tuple, Union
 
 import numpy as np
 import torch
@@ -11,12 +11,26 @@ from mlmodule.v2.base.predictions import (
 from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 
+_SingleBoundingBoxTupleForm = Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+_MultiBoundingBoxTupleForm = Tuple[
+    List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]
+]
+
 
 def pil_to_array(img):
     return np.array(img, dtype=np.uint8)
 
 
-class TorchMTCNNModule(TorchMlModule[Sequence[torch.Tensor], np.ndarray]):
+def _array_or(arr: Union[np.ndarray, None], other: np.ndarray) -> np.ndarray:
+    """If the `arr` argument is None, returns `other`"""
+    if arr is None:
+        return other
+    return arr
+
+
+class TorchMTCNNModule(
+    TorchMlModule[Sequence[torch.Tensor], _MultiBoundingBoxTupleForm]
+):
     """MTCNN face detection module
 
     Attributes:
@@ -46,35 +60,28 @@ class TorchMTCNNModule(TorchMlModule[Sequence[torch.Tensor], np.ndarray]):
     def state_type(self) -> StateType:
         return StateType(backend="pytorch", architecture="facenet-mtcnn")
 
-    def _array_or(self, arr: Union[np.ndarray, None], other: np.ndarray) -> np.ndarray:
-        if arr is None:
-            return other
-        return arr
-
-    def forward_single(
-        self, image: torch.Tensor
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def forward_single(self, image: torch.Tensor) -> _SingleBoundingBoxTupleForm:
         """Runs MTCNN face detection on a single image
 
         Arguments:
             image (torch.Tensor): A single image with channel dimension last `(height, width, channels)`
 
         Returns:
-            Tuple[np.ndarray, np.ndarray, np.ndarray]:
+            tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
                 Returns three values in a tuple:
 
-                - bounding boxes stacked in a `np.ndarray, dtype=float64, shape=(n_boxes, 4,)`
-                - bounding boxes probabilities stacked in a `np.ndarray, dtype=float64 ,shape=(n_boxes,)`
-                - landmarks stacked in a `np.ndarray, dtype=float64`
+                - bounding boxes stacked in a `torch.Tensor, dtype=float64, shape=(n_boxes, 4,)`
+                - bounding boxes probabilities stacked in a `torch.Tensor, dtype=float64 ,shape=(n_boxes,)`
+                - landmarks stacked in a `torch.Tensor, dtype=float64`
         """
         # Getting height and width
         height, width, _channels = image.shape
         if height < self.mtcnn.min_face_size or width < self.mtcnn.min_face_size:
             # Image is too small to detect images
             return (
-                np.empty((0, 4), dtype=np.float64),
-                np.empty(0, dtype=np.float64),
-                np.empty(0, dtype=np.float64),
+                torch.empty((0, 4), dtype=torch.float64),
+                torch.empty(0, dtype=torch.float64),
+                torch.empty(0, dtype=torch.float64),
             )
 
         raw_probabilities: Union[np.ndarray, None]
@@ -85,31 +92,31 @@ class TorchMTCNNModule(TorchMlModule[Sequence[torch.Tensor], np.ndarray]):
         )
 
         # Replacing None values
-        boxes = self._array_or(raw_boxes, np.empty((0, 4), dtype=np.float64))
-        landmarks = self._array_or(raw_landmarks, np.empty(0, dtype=np.float64))
-        probabilities = self._array_or(raw_probabilities, np.empty(0, dtype=np.float64))
+        boxes = _array_or(raw_boxes, np.empty((0, 4), dtype=np.float64))
+        landmarks = _array_or(raw_landmarks, np.empty(0, dtype=np.float64))
+        probabilities = _array_or(raw_probabilities, np.empty(0, dtype=np.float64))
 
-        return boxes, cast(np.ndarray, probabilities), landmarks
+        return torch.Tensor(boxes), torch.Tensor(probabilities), torch.Tensor(landmarks)
 
-    def forward(
-        self, batch: Sequence[torch.Tensor]
-    ) -> Tuple[List[np.ndarray], List[np.ndarray], List[np.ndarray]]:
+    def forward(self, batch: Sequence[torch.Tensor]) -> _MultiBoundingBoxTupleForm:
         """Runs MTCNN face detection
 
         Arguments:
             batch (Sequence[torch.Tensor]): A sequence of images
 
         Returns:
-            Tuple[List[np.ndarray], List[np.ndarray], List[np.ndarray]]:
+            tuple[list[torch.Tensor], list[torch.Tensor], list[torch.Tensor]]:
                 Returns three values in a tuple:
 
-                - List of bounding boxes stacked in a `np.ndarray, shape=(n_boxes, 4,)`
-                - List of bounding boxes probabilities stacked in a `np.ndarray, shape=(n_boxes,)`
-                - List of landmarks stacked in a `np.ndarray`
+                - List of bounding boxes stacked in a `torch.Tensor, shape=(n_boxes, 4,)`
+                - List of bounding boxes probabilities stacked in a `torch.Tensor, shape=(n_boxes,)`
+                - List of landmarks stacked in a `torch.Tensor`
         """
         results = [self.forward_single(img) for img in batch]
 
-        return_value: Tuple[List[np.ndarray], List[np.ndarray], List[np.ndarray]] = (
+        return_value: Tuple[
+            List[torch.Tensor], List[torch.Tensor], List[torch.Tensor]
+        ] = (
             [],
             [],
             [],
@@ -120,13 +127,14 @@ class TorchMTCNNModule(TorchMlModule[Sequence[torch.Tensor], np.ndarray]):
             return_value[2].append(landmarks)
         return return_value
 
-    def forward_predictions(
-        self, batch: Sequence[torch.Tensor]
-    ) -> BatchModelPrediction[np.ndarray]:
-        """Runs MTCNN face detection
+    def to_predictions(
+        self, forward_output: _MultiBoundingBoxTupleForm
+    ) -> BatchModelPrediction[torch.Tensor]:
+        """Transforms MTCNN face detection output
 
         Arguments:
-            batch (Sequence[torch.Tensor]): A sequence of images
+            forward_output (tuple[list[torch.Tensor], list[torch.Tensor], list[torch.Tensor]]):
+                A tuple containing the bounding box, probabilities and landmarks.
 
         Returns:
             BatchModelPrediction[np.ndarray]: A batch prediction with the attribute `bounding_boxes`
@@ -136,7 +144,7 @@ class TorchMTCNNModule(TorchMlModule[Sequence[torch.Tensor], np.ndarray]):
                 BatchBoundingBoxesPrediction(
                     bounding_boxes=boxes, scores=probabilities, features=landmarks
                 )
-                for boxes, probabilities, landmarks in zip(*self.forward(batch))
+                for boxes, probabilities, landmarks in zip(*forward_output)
             ]
         )
 

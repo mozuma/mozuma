@@ -110,7 +110,7 @@ class TorchMagFaceModule(TorchMlModule[torch.Tensor, torch.Tensor]):
     def state_type(self) -> StateType:
         return StateType(backend="pytorch", architecture="magface")
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, batch: torch.Tensor) -> torch.Tensor:
         """Forward pass of the MagFace model
 
         Arguments:
@@ -120,7 +120,7 @@ class TorchMagFaceModule(TorchMlModule[torch.Tensor, torch.Tensor]):
             torch.Tensor: The features for each input crop.
                 A feature can be set to `nan` if the face is of bad quality and `self.remove_bad_faces == True`.
         """
-        x = self.conv1(x)
+        x = self.conv1(batch)
         x = self.bn1(x)
         x = self.prelu(x)
 
@@ -141,19 +141,19 @@ class TorchMagFaceModule(TorchMlModule[torch.Tensor, torch.Tensor]):
 
         return x
 
-    def forward_predictions(
-        self, batch: torch.Tensor
+    def to_predictions(
+        self, forward_output: torch.Tensor
     ) -> BatchModelPrediction[torch.Tensor]:
-        """Forward pass
+        """Formats forward output into a prediction object
 
         Arguments:
-            batch (torch.Tensor): The face cropped and aligned with `ArcFaceAlignment`
+            forward_output (torch.Tensor): The features from the forward pass
 
         Returns:
             torch.Tensor: A `BatchModelPrediction` with `features` attribute as face embeddings.
                 A feature can be set to `nan` if the face is of bad quality and `self.remove_bad_faces == True`.
         """
-        return BatchModelPrediction(features=self.forward(batch))
+        return BatchModelPrediction(features=forward_output)
 
     def get_dataset_transforms(self) -> List[Callable]:
         """Returns transforms to be applied on bulk_inference input data"""
