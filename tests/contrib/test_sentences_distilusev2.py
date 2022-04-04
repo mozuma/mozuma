@@ -10,6 +10,7 @@ from mlmodule.contrib.sentences.distilbert.transforms import TokenizerTransform
 # from mlmodule.v2.stores import MLModuleModelStore
 
 
+@pytest.mark.skip("Sentence embedding needs to be migrated to v2")
 @pytest.mark.parametrize("weights_src", ["provider", "mlmodule"])
 def test_embeddings(torch_device: torch.device, weights_src: str):
     try:
