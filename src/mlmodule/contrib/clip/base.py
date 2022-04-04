@@ -6,6 +6,7 @@ from torch import nn
 from typing_extensions import Literal
 
 from mlmodule.contrib.clip.utils import sanitize_clip_model_name
+from mlmodule.v2.base.predictions import BatchModelPrediction
 from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 
@@ -86,14 +87,11 @@ class BaseCLIPModule(TorchMlModule[torch.Tensor, torch.Tensor]):
 
             self.apply(_convert_weights_to_fp16)
 
-    def forward(self, images: torch.Tensor) -> torch.Tensor:
-        """Apply the image encoder"""
-        features = self.forward_predictions(images).features
-        if features is None:
-            raise ValueError(
-                "features attribute of forward_predictions should not be None"
-            )
-        return features
+    def to_predictions(
+        self, forward_output: torch.Tensor
+    ) -> BatchModelPrediction[torch.Tensor]:
+        """CLIP forward returns features for the image or text module"""
+        return BatchModelPrediction(features=forward_output)
 
     @abc.abstractmethod
     def load_full_clip_state_dict(self, state_dict: OrderedDict[str, torch.Tensor]):

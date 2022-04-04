@@ -106,7 +106,8 @@ class TorchInferenceRunner(
                 # Sending data on device
                 batch_on_device = send_batch_to_device(batch, self.options.device)
                 # Running the model forward
-                predictions = self.model.forward_predictions(batch_on_device)
+                output = self.model(batch_on_device)
+                predictions = self.model.to_predictions(output)
                 # Applying callbacks on results
                 self.apply_predictions_callbacks(indices, predictions)
                 logger.debug(f"Collecting results: {batch_n}/{n_batches}")

@@ -1,4 +1,4 @@
-from typing import Callable, List, Sequence, Tuple
+from typing import Any, Callable, List, Sequence, Tuple
 
 import numpy as np
 import torch
@@ -14,7 +14,10 @@ from mlmodule.v2.torch.modules import TorchMlModule
 
 
 class KeyFrameSelector(
-    TorchMlModule[Tuple[Sequence[torch.LongTensor], Sequence[torch.Tensor]], np.ndarray]
+    TorchMlModule[
+        Tuple[Sequence[torch.LongTensor], Sequence[torch.Tensor]],
+        Tuple[List[torch.LongTensor], List[torch.Tensor]],
+    ]
 ):
     """Video key-frames selector
 
@@ -28,7 +31,7 @@ class KeyFrameSelector(
 
     def __init__(
         self,
-        image_encoder: TorchMlModule[torch.Tensor, torch.Tensor],
+        image_encoder: TorchMlModule[torch.Tensor, Any],
         fps: int = 1,
         device: torch.device = torch.device("cpu"),
     ):
@@ -63,7 +66,7 @@ class KeyFrameSelector(
 
     def forward(
         self, batch: Tuple[Sequence[torch.LongTensor], Sequence[torch.Tensor]]
-    ) -> Tuple[List[List[int]], List[np.ndarray]]:
+    ) -> Tuple[List[torch.LongTensor], List[torch.Tensor]]:
         """Selects the key-frames from a sequence of frames
 
         Arguments:
@@ -75,28 +78,29 @@ class KeyFrameSelector(
                 Both sequences should have the same number of elements
 
         Returns:
-            Tuple[List[List[int]], List[np.ndarray]]: A tuple for the selected frames with:
+            Tuple[List[torch.LongTensor], List[torch.Tensor]]: A tuple for the selected frames with:
 
-                - List of frame index array `List[int], length=n_frames`
-                - List of stacked frame images `np.ndarray, shape=(n_frames, features_length,)`
+                - List of frame index array `torch.LongTensor, shape=(n_frames,)`
+                - List of stacked frame images `torch.Tensor, shape=(n_frames, features_length,)`
         """
         # Encoding frames
         ret_encoder = self.frames_encoder.forward(batch)
 
-        return_value: Tuple[List[List[int]], List[np.ndarray]] = ([], [])
+        ret_indices: List[torch.LongTensor] = []
+        ret_frames: List[torch.Tensor] = []
         for frame_indices, frame_features in zip(*ret_encoder):
             # Selecting the key frames
             selected_indices, selected_features = self._filter_keyframes(
                 frame_indices.tolist(), frame_features.cpu().numpy()
             )
-            return_value[0].append(selected_indices)
-            return_value[1].append(selected_features)
+            ret_indices.append(torch.LongTensor(selected_indices))
+            ret_frames.append(torch.tensor(selected_features))
 
-        return return_value
+        return ret_indices, ret_frames
 
-    def forward_predictions(
-        self, batch: Tuple[Sequence[torch.LongTensor], Sequence[torch.Tensor]]
-    ) -> BatchModelPrediction[np.ndarray]:
+    def to_predictions(
+        self, forward_output: Tuple[List[torch.LongTensor], List[torch.Tensor]]
+    ) -> BatchModelPrediction[torch.Tensor]:
         """Selects the key-frames from a sequence of frames
 
         Arguments:
@@ -110,14 +114,12 @@ class KeyFrameSelector(
         Returns:
             BatchModelPrediction[np.ndarray]: Fills the `frames` attribute with features of ndarray type
         """
-        selected_frames = self.forward(batch)
-
         return BatchModelPrediction(
             frames=[
                 BatchVideoFramesPrediction(
-                    features=selected_features, frame_indices=selected_indices
+                    features=selected_features, frame_indices=selected_indices.tolist()
                 )
-                for selected_indices, selected_features in zip(*selected_frames)
+                for selected_indices, selected_features in zip(*forward_output)
             ]
         )
 

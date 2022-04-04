@@ -5,7 +5,6 @@ import torch
 
 from mlmodule.contrib.clip.base import BaseCLIPModule
 from mlmodule.contrib.clip.utils import clip_tokenize_single, get_clip_module
-from mlmodule.v2.base.predictions import BatchModelPrediction
 
 
 class CLIPTextModule(BaseCLIPModule):
@@ -36,16 +35,14 @@ class CLIPTextModule(BaseCLIPModule):
 
         self.convert_weights()
 
-    def forward_predictions(
-        self, batch: torch.Tensor
-    ) -> BatchModelPrediction[torch.Tensor]:
+    def forward(self, batch: torch.Tensor) -> torch.Tensor:
         """Forward pass of the text encoder
 
         Arguments:
             batch (torch.Tensor): Batch of texts
 
         Returns:
-            BatchModelPrediction[torch.Tensor]: A prediction object with `features` attribute
+            torch.Tensor: The features of the text encoder
         """
         x = cast(torch.Tensor, self.token_embedding(batch)).type(
             self._dtype
@@ -61,7 +58,7 @@ class CLIPTextModule(BaseCLIPModule):
         # take features from the eot embedding (eot_token is the highest number in each sequence)
         x = x[torch.arange(x.shape[0]), batch.argmax(dim=-1)] @ self.text_projection
 
-        return BatchModelPrediction(features=x)
+        return x
 
     def get_dataset_transforms(self) -> List[Callable]:
         """Dataset transforms (tokenizer)"""

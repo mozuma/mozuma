@@ -30,7 +30,7 @@ STATE_DICT_URL = "https://penzhanwu2.blob.core.windows.net/sgg/sgg_benchmark/vin
 
 
 class TorchVinVLDetectorModule(
-    TorchMlModule[Tuple[torch.Tensor, Sequence[Tuple[int, int]]], torch.Tensor]
+    TorchMlModule[Tuple[torch.Tensor, Sequence[Tuple[int, int]]], _ForwardOutput]
 ):
     """[VinVL](https://github.com/pzzhang/VinVL) object detection model
 
@@ -113,6 +113,22 @@ class TorchVinVLDetectorModule(
     def forward(
         self, batch: Tuple[torch.Tensor, Sequence[Tuple[int, int]]]
     ) -> _ForwardOutput:
+        """VinVL forward pass
+
+        Arguments:
+            batch (tuple[torch.Tensor, Sequence[tuple[int, int]]]):
+                Tuple of image data and image resize tuple.
+
+        Returns:
+            tuple[Sequence[torch.Tensor] * 6]: A tuple of 6 sequence of torch.Tensor. Containing:
+
+                - boxes
+                - scores
+                - features
+                - classes
+                - attr_labels
+                - attr_scores
+        """
         x, sizes = batch
 
         predictions: List[BoxList] = self.vinvl(x)
@@ -137,11 +153,11 @@ class TorchVinVLDetectorModule(
             attr_scores,
         )
 
-    def forward_predictions(
-        self, batch: Tuple[torch.Tensor, Sequence[Tuple[int, int]]]
+    def to_predictions(
+        self, forward_output: _ForwardOutput
     ) -> BatchModelPrediction[torch.Tensor]:
         # For now we ignore the classes and attributes
-        boxes, scores, features, _, _, _ = self.forward(batch)
+        boxes, scores, features, _, _, _ = forward_output
         return BatchModelPrediction(
             bounding_boxes=[
                 BatchBoundingBoxesPrediction(bounding_boxes=b, scores=s, features=f)

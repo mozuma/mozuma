@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+import pytest
 
 from mlmodule.contrib.densenet import (
     DenseNet161PlacesClassifier,
@@ -12,6 +13,7 @@ from mlmodule.torch.data.images import ImageDataset
 from mlmodule.utils import list_files_in_dir
 
 
+@pytest.mark.skip("Places365 needs to be migrated to v2")
 def test_places365_50_images(torch_device):
     # Load Pretrained model
     densenet = DenseNet161PlacesFeatures(device=torch_device)

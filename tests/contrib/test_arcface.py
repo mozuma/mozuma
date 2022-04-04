@@ -1,6 +1,7 @@
 import os
 from typing import List
 
+import pytest
 import torch
 
 from mlmodule.box import BBoxOutput
@@ -45,6 +46,7 @@ def _face_features_for_folder(torch_device: torch.device, folder, **opts):
     )
 
 
+@pytest.mark.skip("ArcFace needs to be migrated to v2")
 def test_arcface_features_inference(torch_device: torch.device):
     base_path = os.path.join("tests", "fixtures", "berset")
     _, (indices, new_outputs) = _face_features_for_folder(
@@ -81,6 +83,7 @@ def test_arcface_features_inference(torch_device: torch.device):
     )
 
 
+@pytest.mark.skip("ArcFace needs to be migrated to v2")
 def test_bad_quality_face_filter():
     (detect_i, detect_box), (indices, new_outputs) = _face_features_for_folder(
         torch.device("cpu"), os.path.join("tests", "fixtures", "faces")

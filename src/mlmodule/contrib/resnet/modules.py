@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 import torch
 import torchvision.models
@@ -26,7 +26,7 @@ ResNetArchs = Literal[
 ]
 
 
-class TorchResNetModule(TorchMlModule[torch.Tensor, torch.Tensor]):
+class TorchResNetModule(TorchMlModule[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]):
     """PyTorch ResNet architecture for ImageNet classification.
 
     See [PyTorch's documentation](https://pytorch.org/vision/stable/_modules/torchvision/models/resnet.html).
@@ -111,20 +111,21 @@ class TorchResNetModule(TorchMlModule[torch.Tensor, torch.Tensor]):
     def forward_classifier(self, x: torch.Tensor) -> torch.Tensor:
         return self.classifier_module(x)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, batch: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """Forward pass of the ResNet model"""
-        return self.forward_classifier(self.forward_features(x))
+        features = self.forward_features(batch)
+        labels_scores = self.forward_classifier(features)
+        return features, labels_scores
 
-    def forward_predictions(
-        self, batch: torch.Tensor
+    def to_predictions(
+        self, forward_output: Tuple[torch.Tensor, torch.Tensor]
     ) -> BatchModelPrediction[torch.Tensor]:
         """Forward pass of the ResNet model
 
         Returns:
             BatchModelPrediction: Features and labels_scores (ImageNet)
         """
-        features = self.forward_features(batch)
-        labels_scores = self.forward_classifier(features)
+        features, labels_scores = forward_output
         return BatchModelPrediction(features=features, label_scores=labels_scores)
 
     def get_dataset_transforms(self) -> List[Callable]:
