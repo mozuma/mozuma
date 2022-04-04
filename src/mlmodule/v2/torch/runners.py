@@ -1,12 +1,9 @@
 import dataclasses
 import logging
-from collections import abc
 from typing import Any, Dict, Tuple, cast
 
 import ignite.distributed as idist
 import torch
-import torch.distributed as dist
-import torch.multiprocessing as mp
 from ignite.contrib.handlers import ProgressBar
 from ignite.distributed.utils import one_rank_only
 from ignite.engine import Engine, Events
@@ -19,6 +16,7 @@ from tqdm import tqdm
 from mlmodule.v2.base.callbacks import callbacks_caller
 from mlmodule.v2.base.predictions import BatchModelPrediction
 from mlmodule.v2.base.runners import BaseRunner
+from mlmodule.v2.helpers.distributed import ResultsCollector
 from mlmodule.v2.torch.callbacks import TorchRunnerCallbackType
 from mlmodule.v2.torch.collate import TorchMlModuleCollateFn
 from mlmodule.v2.torch.datasets import (
@@ -137,9 +135,12 @@ class TorchInferenceMultiGPURunner(
     """Runner for inference tasks on PyTorch models
 
     Supports CPU, single and multi-GPU inference with multiple backends.
+    For the supported backends, visit
+    [PyTorch Ignite's documentation](https://pytorch.org/ignite/v0.4.8/distributed.htm).
 
     Warning:
-        Only `nccl` and `gloo` backends are supported at the moment.
+        Only backends for native torch distributed configuration are supported:
+        `nccl`, `gloo` and `mpi`.
 
     Attributes:
         model (TorchMlModule): The PyTorch model to run inference
@@ -147,9 +148,6 @@ class TorchInferenceMultiGPURunner(
         callbacks (List[TorchRunnerCallbackType]): Callbacks to save features, labels or bounding boxes
         options (TorchMultiGPURunnerOptions): PyTorch multi-gpu options
     """
-
-    _queue: mp.Queue = None
-    _is_reduced: bool = False
 
     def get_data_loader(self) -> DataLoader:
         """Creates a data loader from the options, the given dataset and the module transforms"""
@@ -177,74 +175,14 @@ class TorchInferenceMultiGPURunner(
         self, indices: torch.Tensor, predictions: BatchModelPrediction[torch.Tensor]
     ) -> None:
         """Apply callback functions save_* to the returned predictions"""
-        for field in dataclasses.fields(predictions):
-            value = getattr(predictions, field.name)
-            if value is not None:
-                if not isinstance(value, abc.Iterator):
-                    value = [value]
-
-                # Pytorch's DataParallel returns a mapping from all model outputs.
-                # If som apply the callback each time
-                for val in value:
+        rank = idist.get_rank()
+        if rank == 0:
+            for field in dataclasses.fields(predictions):
+                value = getattr(predictions, field.name)
+                if value is not None:
                     callbacks_caller(
-                        self.callbacks,
-                        f"save_{field.name}",
-                        self.model,
-                        indices,
-                        val,
+                        self.callbacks, f"save_{field.name}", self.model, indices, value
                     )
-
-    def apply_collected_predictions_results(self) -> None:
-        """Apply predictions results computed for a subset of the initial dataset,
-        such as when spawning multiple subprocesses"""
-        # Collect indices and predictions from the queue, sent by group (sub)process with rank 0
-        while not self._queue.empty():
-            indices, predictions = self._queue.get()
-
-            # Each message is from a (sub)process, within a group, and should contain
-            # indices and predictions for all the callbacks
-            if len(indices) != len(predictions) == len(self.callbacks):
-                logger.warning(
-                    "There a problem with the length of indices and predictions"
-                )
-                continue
-
-            # Apply the callback 'save_*' function
-            for c in self.callbacks:
-                callbacks_caller(
-                    [c],
-                    f"save_{c.PREDICTION_TYPE}",
-                    self.model,
-                    indices.pop(0) if indices else indices,
-                    predictions.pop(0) if predictions else predictions,
-                )
-
-    def gather_predictions_results(self, engine: Engine) -> None:
-        """Gather predictions results among (sub)processes in a group,
-        then from rank 0 send them in the internal queue
-        """
-        ws = idist.get_world_size()
-
-        # Gather indices andz predictions from all (sub)processes
-        # in the group and for all callbacks
-        if ws > 1 and not self._is_reduced:
-            _gather_objects = [None for _ in range(0, ws)]
-            _indices = [c.indices for c in self.callbacks]
-            dist.all_gather_object(_gather_objects, _indices)
-            _indices = _gather_objects
-
-            _gather_objects = [None for _ in range(0, ws)]
-            _predictions = [getattr(c, c.PREDICTION_TYPE, None) for c in self.callbacks]
-            dist.all_gather_object(_gather_objects, _predictions)
-            _predictions = _gather_objects
-
-        self._is_reduced = True
-
-        # From (sub)process with rank 0, send results to the queue
-        # so the master process can fetch them later
-        if idist.get_rank() == 0:
-            for idx, preds in zip(_indices, _predictions):
-                self._queue.put((idx, preds))
 
     def run(self) -> None:
         """Runs inference"""
@@ -256,22 +194,8 @@ class TorchInferenceMultiGPURunner(
                 logging.WARNING
             )
 
-        # If backend is enabled, setup queue for master<-processes comunication
-        backend_setting = self.options.dist_options.get("backend", None)
-        if backend_setting:
-            manager = mp.Manager()
-            self._queue = manager.Queue()
-
         with idist.Parallel(**self.options.dist_options) as parallel:
             parallel.run(self.inference)
-
-        # If backend is enabled, apply collected results from sub-processes
-        if backend_setting:
-            logger.debug("Apply results from sub-processes callbacks")
-            self.apply_collected_predictions_results()
-
-        # Notify the end of the runner
-        callbacks_caller(self.callbacks, "on_runner_end", self.model)
 
     def inference(self, local_rank: int) -> None:
         """Inference function to be executed in a distributed fashion"""
@@ -284,6 +208,7 @@ class TorchInferenceMultiGPURunner(
 
         # If data has zero size stop here, otherwise engine will raise an error
         if len(data_loader) == 0:
+            logger.warning("Input data has zero size. Please provide non-empty data.")
             return
 
         # Adapt model for distributed settings
@@ -293,13 +218,25 @@ class TorchInferenceMultiGPURunner(
             )
         ddp_model = idist.auto_model(self.model)
 
-        # Create inference engine (similar to an evaluator)
+        # Create inference engine
         inference_engine = self.create_engine(
             model=ddp_model,
             data_loader=data_loader,
-            # metrics=,
             device=device,
             non_blocking=True,
+        )
+
+        # Register handler to manage predictions results
+        collector = ResultsCollector(
+            output_transform=self.model.to_predictions,
+            callback_fn=self.apply_predictions_callbacks,
+        )
+        collector.attach(inference_engine)
+
+        # Register handler to notify the end of the runner
+        inference_engine.add_event_handler(
+            Events.COMPLETED,
+            lambda: callbacks_caller(self.callbacks, "on_runner_end", self.model),
         )
 
         inference_engine.run(data_loader)
@@ -326,23 +263,13 @@ class TorchInferenceMultiGPURunner(
                 )
 
                 # Running the model forward
-                predictions = model(batch_on_device)
+                output = model(batch_on_device)
 
-                # Applying callbacks on results
-                self.apply_predictions_callbacks(indices, predictions)
-
-                # Predictions are stored in the callbacks,
-                # thus there's no need to return something here (= engine state)
-                return
+                # Store data in engine's state and let the handlers
+                # manage the results
+                return indices, output
 
         engine = Engine(inference_step)
-
-        # Gather prediction results
-        ws = idist.get_world_size()
-        if ws > 1:
-            engine.add_event_handler(
-                Events.EPOCH_COMPLETED, self.gather_predictions_results
-            )
 
         # Logs basic messages, just like TorchInferenceRunner
         @engine.on(Events.EPOCH_STARTED)

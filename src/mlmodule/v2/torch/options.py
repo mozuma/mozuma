@@ -1,5 +1,6 @@
 import dataclasses
 import logging
+from typing import List
 
 import torch
 
@@ -31,21 +32,21 @@ class TorchMultiGPURunnerOptions:
 
     Attributes:
         data_loader_options (dict): Options passed to `torch.utils.dataloader.DataLoader`.
-        tqdm_enabled (bool): Whether to print a `tqdm` progress bar
-        seed (int): random state seed to set. Default, 543.
+        tqdm_enabled (bool): Whether to print a `tqdm` progress bar. Default, False.
         dist_options (dict): Options passed to `ignite.distributed.Parallel`.
+        seed (int): random state seed to set. Default, 543.
 
     Note:
         `data_loader_options`'s options `batch_size` and `num_worker`
         will be automatically scaled according to `world_size` and `nprocs` respectively.
-        For more info visit [`auto_dataloader` documentation](https://pytorch.org/ignite/v0.4.8/generated/ignite.distributed.auto.auto_dataloader.html#ignite.distributed.auto.auto_dataloader).
+        For more info visit [`auto_dataloader` documentation](https://pytorch.org/ignite/v0.4.8/generated/ignite.distributed.auto.auto_dataloader.html).
 
     Note:
         `dist_options` usually include `backend` and `nproc_per_node` parameters, sometimes also `start_method`.
-        For more info check [PyTorch Ignite's distributed documentation](https://pytorch.org/ignite/v0.4.8/distributed.html).
+        For more info check [PyTorch Ignite's distributed documentation](https://pytorch.org/ignite/distributed.html).
     """  # noqa: E501
 
     data_loader_options: dict = dataclasses.field(default_factory=dict)
     tqdm_enabled: bool = False
-    seed: int = 543
     dist_options: dict = dataclasses.field(default_factory=dict)
+    seed: int = 543

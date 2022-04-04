@@ -115,14 +115,6 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
         """
         raise NotImplementedError("State architecture should be overridden")
 
-    # TODO: check if this:
-    #   - breaks mlmodule polices
-    #   - training
-    def __call__(
-        self, batch: _BatchType
-    ) -> BatchModelPrediction[_BatchPredictionArrayType]:
-        return self.forward_predictions(batch)
-
     @abc.abstractmethod
     def forward(self, batch: _BatchType) -> _ForwardOutputType:
         """Forward pass of the model
