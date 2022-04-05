@@ -45,7 +45,7 @@ class TorchMTCNNModule(
         thresholds: Tuple[float, float, float] = (0.6, 0.7, 0.7),
         image_size: Tuple[int, int] = (720, 720),
         min_face_size: int = 20,
-        device=None,
+        device: torch.device = torch.device("cpu"),
     ):
         super().__init__(device=device)
         self.image_size = image_size
@@ -55,6 +55,11 @@ class TorchMTCNNModule(
             min_face_size=min_face_size,
             pretrained=False,
         )
+
+    def to(self, *args, **kwargs):
+        device = self._extract_device_from_args(*args, **kwargs)
+        self.mtcnn.device = device
+        return super().to(*args, **kwargs)
 
     @property
     def state_type(self) -> StateType:
