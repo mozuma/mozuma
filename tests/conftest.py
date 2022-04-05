@@ -270,3 +270,11 @@ def image_dataset() -> ImageDataset:
 @pytest.fixture(scope="session")
 def video_file_path() -> str:
     return os.path.join("tests", "fixtures", "video", "test.mp4")
+
+
+def pytest_collection_modifyitems(config, items):
+    if not config.getoption("-m"):
+        skip_me = pytest.mark.skip(reason="use `-m slow` to run this test")
+        for item in items:
+            if "slow" in item.keywords:
+                item.add_marker(skip_me)

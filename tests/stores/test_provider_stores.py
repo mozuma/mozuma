@@ -7,6 +7,7 @@ from mlmodule.v2.stores import Store
 from mlmodule.v2.testing import ModuleTestConfiguration
 
 
+@pytest.mark.slow
 def test_provider_stores_load(ml_module: ModuleTestConfiguration[ModelWithState]):
     if ml_module.provider_store is None:
         pytest.skip("Model test config does not provide a store")

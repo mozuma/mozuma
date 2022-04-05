@@ -21,4 +21,4 @@ def test_forward_predictions_random_tensor(
     model.eval()
     batch = torch_ml_module.batch_factory()  # type: ignore
     with torch.no_grad():
-        assert model.forward_predictions(batch) is not None
+        assert model.to_predictions(model.forward(batch)) is not None
