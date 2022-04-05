@@ -1,5 +1,5 @@
 import os
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pytest
@@ -38,7 +38,9 @@ def resized_images() -> Tuple[List[str], List[Image]]:
 
 
 def _run_mtcnn_inference(
-    image_paths: List[str], torch_device: torch.device
+    image_paths: List[str],
+    torch_device: torch.device,
+    inference_device: Optional[torch.device] = None,
 ) -> CollectBoundingBoxesInMemory:
     mtcnn = TorchMTCNNModule(device=torch_device)
     # Pretrained model
@@ -60,7 +62,7 @@ def _run_mtcnn_inference(
         dataset=dataset,
         model=mtcnn,
         callbacks=[result],
-        options=TorchRunnerOptions(device=mtcnn.device),
+        options=TorchRunnerOptions(device=inference_device or mtcnn.device),
     )
     runner.run()
 
@@ -163,3 +165,15 @@ def test_mtcnn_small_images(torch_device: torch.device):
     runner.run()
 
     assert all(len(b.bounding_boxes) == 0 for b in result.bounding_boxes)
+
+
+def test_mtcnn_to_device():
+    """Tests that if initializing the model on CPU does not prevent it to run later on CUDA"""
+    if not torch.cuda.is_available():
+        pytest.skip("Need CUDA to run this test")
+
+    base_path = os.path.join("tests", "fixtures", "berset")
+    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))
+    _run_mtcnn_inference(
+        file_names, torch.device("cpu"), inference_device=torch.device("cuda")
+    )

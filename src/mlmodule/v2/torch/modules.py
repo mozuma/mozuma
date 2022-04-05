@@ -79,6 +79,27 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
         super().__init__()
         self.device = device
 
+    @staticmethod
+    def _extract_device_from_args(*args, **kwargs) -> Optional[torch.device]:
+        """Extracts the device argument from the `to` method arguments"""
+        if "device" in kwargs:
+            return kwargs["device"]
+        # Otherwise find the first argument matching the expected type of a device torch.device | int
+        return next(
+            (
+                torch.device(a)
+                for a in args
+                if isinstance(a, int) or isinstance(a, torch.device)
+            ),
+            None,
+        )
+
+    def to(self, *args, **kwargs):
+        device = self._extract_device_from_args(*args, **kwargs)
+        if device:
+            self.device = device
+        return super().to(*args, **kwargs)
+
     @abc.abstractproperty
     def state_type(self) -> StateType:
         """Identifier for the current's model state architecture

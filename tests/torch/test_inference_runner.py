@@ -19,10 +19,10 @@ class TorchTestFeaturesModule(TorchMlModule[torch.Tensor, torch.Tensor]):
     def forward(self, batch: torch.Tensor) -> torch.Tensor:
         return batch
 
-    def forward_predictions(
-        self, batch: torch.Tensor
+    def to_predictions(
+        self, forward_output: torch.Tensor
     ) -> BatchModelPrediction[torch.Tensor]:
-        return BatchModelPrediction(features=self.forward(batch))
+        return BatchModelPrediction(features=forward_output)
 
 
 @pytest.fixture
