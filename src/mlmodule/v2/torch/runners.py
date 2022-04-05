@@ -1,11 +1,10 @@
 import dataclasses
 import logging
-from typing import Any, Dict, Tuple, cast
+from typing import Any, Dict, List, Tuple, cast
 
 import ignite.distributed as idist
 import torch
 from ignite.contrib.handlers import ProgressBar
-from ignite.distributed.utils import one_rank_only
 from ignite.engine import Engine, Events
 from ignite.utils import manual_seed
 from torch.utils.data.dataloader import DataLoader
@@ -16,7 +15,10 @@ from tqdm import tqdm
 from mlmodule.v2.base.callbacks import callbacks_caller
 from mlmodule.v2.base.predictions import BatchModelPrediction
 from mlmodule.v2.base.runners import BaseRunner
-from mlmodule.v2.helpers.distributed import ResultsCollector
+from mlmodule.v2.helpers.distributed import (
+    ResultsCollector,
+    register_multi_gpu_runner_logger,
+)
 from mlmodule.v2.torch.callbacks import TorchRunnerCallbackType
 from mlmodule.v2.torch.collate import TorchMlModuleCollateFn
 from mlmodule.v2.torch.datasets import (
@@ -134,13 +136,10 @@ class TorchInferenceMultiGPURunner(
 ):
     """Runner for inference tasks on PyTorch models
 
-    Supports CPU, single and multi-GPU inference with multiple backends.
-    For the supported backends, visit
-    [PyTorch Ignite's documentation](https://pytorch.org/ignite/v0.4.8/distributed.htm).
+    Supports multi-GPU inference with `nccl` backend.
 
     Warning:
-        Only backends for native torch distributed configuration are supported:
-        `nccl`, `gloo` and `mpi`.
+        Only `nccl` backend is supported at the moment.
 
     Attributes:
         model (TorchMlModule): The PyTorch model to run inference
@@ -148,6 +147,19 @@ class TorchInferenceMultiGPURunner(
         callbacks (List[TorchRunnerCallbackType]): Callbacks to save features, labels or bounding boxes
         options (TorchMultiGPURunnerOptions): PyTorch multi-gpu options
     """
+
+    def __init__(
+        self,
+        model: TorchMlModule,
+        dataset: TorchDataset,
+        callbacks: List[TorchRunnerCallbackType],
+        options: TorchMultiGPURunnerOptions,
+    ):
+        options.dist_options.setdefault("backend", "nccl")
+        if options.dist_options["backend"] != "nccl":
+            raise ValueError("Only nccl backend is supported at the moment")
+
+        super().__init__(model, dataset, callbacks, options)
 
     def get_data_loader(self) -> DataLoader:
         """Creates a data loader from the options, the given dataset and the module transforms"""
@@ -221,7 +233,6 @@ class TorchInferenceMultiGPURunner(
         # Create inference engine
         inference_engine = self.create_engine(
             model=ddp_model,
-            data_loader=data_loader,
             device=device,
             non_blocking=True,
         )
@@ -229,7 +240,7 @@ class TorchInferenceMultiGPURunner(
         # Register handler to manage predictions results
         collector = ResultsCollector(
             output_transform=self.model.to_predictions,
-            callback_fn=self.apply_predictions_callbacks,
+            callbacks_fn=self.apply_predictions_callbacks,
         )
         collector.attach(inference_engine)
 
@@ -239,14 +250,21 @@ class TorchInferenceMultiGPURunner(
             lambda: callbacks_caller(self.callbacks, "on_runner_end", self.model),
         )
 
+        # Logs basic messages, just like TorchInferenceRunner
+        register_multi_gpu_runner_logger(inference_engine, data_loader, logger)
+
+        # Setup tqdm
+        if self.options.tqdm_enabled and idist.get_rank() == 0:
+            pbar = ProgressBar(persist=True, bar_format=None)
+            pbar.attach(inference_engine)
+
         inference_engine.run(data_loader)
 
     def create_engine(
         self,
         model: TorchMlModule,
-        data_loader: DataLoader,
         device: torch.device,
-        non_blocking: bool = False,
+        non_blocking: bool = True,
     ) -> Engine:
         """Utility to create a PyTorch Ignite's Engine."""
 
@@ -270,27 +288,5 @@ class TorchInferenceMultiGPURunner(
                 return indices, output
 
         engine = Engine(inference_step)
-
-        # Logs basic messages, just like TorchInferenceRunner
-        @engine.on(Events.EPOCH_STARTED)
-        @one_rank_only()
-        def on_start(engine):
-            engine.state.n_batches = len(data_loader)
-
-        @engine.on(Events.ITERATION_STARTED)
-        @one_rank_only()
-        def on_itertation_started(engine):
-            s = engine.state
-            logger.debug(f"Sending batch number: {s.iteration}/{s.n_batches}")
-
-        @engine.on(Events.ITERATION_COMPLETED)
-        @one_rank_only()
-        def on_itertation_completed(engine):
-            s = engine.state
-            logger.debug(f"Collecting results: {s.iteration}/{s.n_batches}")
-
-        if self.options.tqdm_enabled and idist.get_rank() == 0:
-            pbar = ProgressBar(persist=True, bar_format=None)
-            pbar.attach(engine)
 
         return engine

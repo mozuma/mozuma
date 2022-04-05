@@ -1,32 +1,33 @@
+import dataclasses
+from logging import Logger
 from typing import Callable
 
 import ignite.distributed as idist
 import torch
 import torch.distributed as dist
 from ignite.engine import Engine, Events
+from torch.utils.data.dataloader import DataLoader
 
 from mlmodule.v2.base.predictions import BatchModelPrediction
 from mlmodule.v2.torch.modules import _ForwardOutputType
 
 
+@dataclasses.dataclass
 class ResultsCollector:
     """Helper object used to collect results from each process
     after every iteration.
     """
 
-    def __init__(
-        self,
-        output_transform: Callable[
-            [_ForwardOutputType], BatchModelPrediction[torch.Tensor]
-        ],
-        callback_fn: Callable[[torch.Tensor, BatchModelPrediction[torch.Tensor]], None],
-        dst_rank: int = 0,
-    ) -> None:
-        self.output_transform = output_transform
-        self.callback_fn = callback_fn
-        self.dst_rank = dst_rank
+    output_transform: Callable[[_ForwardOutputType], BatchModelPrediction[torch.Tensor]]
+    callbacks_fn: Callable[[torch.Tensor, BatchModelPrediction[torch.Tensor]], None]
+    dst_rank: int = 0
+    world_size: int = dataclasses.field(
+        default_factory=lambda: idist.get_world_size(),
+        init=False,
+    )
+    _is_reduced: bool = dataclasses.field(default=False, init=False)
 
-        self.world_size = idist.get_world_size()
+    def __post_init__(self):
         self.reset()
 
     def reset(self) -> None:
@@ -47,7 +48,7 @@ class ResultsCollector:
         predictions = self.output_transform(output)
 
         # Applying callbacks on results
-        self.callback_fn(indices, predictions)
+        self.callbacks_fn(indices, predictions)
 
     def _collect_dist(self, engine: Engine) -> None:
         rank = idist.get_rank()
@@ -76,7 +77,7 @@ class ResultsCollector:
                 predictions = self.output_transform(output)
 
                 # Aplly predictions to callbacks
-                self.callback_fn(indices, predictions)
+                self.callbacks_fn(indices, predictions)
 
         else:
             # Free some memory
@@ -88,3 +89,26 @@ class ResultsCollector:
     def attach(self, engine: Engine) -> None:
         engine.add_event_handler(Events.ITERATION_STARTED, self.reset)
         engine.add_event_handler(Events.ITERATION_COMPLETED, self.collect)
+
+
+def register_multi_gpu_runner_logger(
+    engine: Engine, data_loader: DataLoader, logger: Logger
+):
+    # Logs basic messages, just like TorchInferenceRunner
+    @idist.utils.one_rank_only()
+    def on_start(engine):
+        engine.state.n_batches = len(data_loader)
+
+    @idist.utils.one_rank_only()
+    def on_itertation_started(engine):
+        s = engine.state
+        logger.debug(f"Sending batch number: {s.iteration}/{s.n_batches}")
+
+    @idist.utils.one_rank_only()
+    def on_itertation_completed(engine):
+        s = engine.state
+        logger.debug(f"Collecting results: {s.iteration}/{s.n_batches}")
+
+    engine.add_event_handler(Events.EPOCH_STARTED, on_start)
+    engine.add_event_handler(Events.ITERATION_STARTED, on_itertation_started)
+    engine.add_event_handler(Events.ITERATION_COMPLETED, on_itertation_completed)

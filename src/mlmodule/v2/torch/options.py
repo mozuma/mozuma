@@ -1,6 +1,5 @@
 import dataclasses
 import logging
-from typing import List
 
 import torch
 
@@ -42,8 +41,8 @@ class TorchMultiGPURunnerOptions:
         For more info visit [`auto_dataloader` documentation](https://pytorch.org/ignite/v0.4.8/generated/ignite.distributed.auto.auto_dataloader.html).
 
     Note:
-        `dist_options` usually include `backend` and `nproc_per_node` parameters, sometimes also `start_method`.
-        For more info check [PyTorch Ignite's distributed documentation](https://pytorch.org/ignite/distributed.html).
+        `dist_options` usually include `backend` and `nproc_per_node` parameters.
+        For more info visit [PyTorch Ignite's distributed documentation](https://pytorch.org/ignite/distributed.html).
     """  # noqa: E501
 
     data_loader_options: dict = dataclasses.field(default_factory=dict)
