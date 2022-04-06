@@ -1,7 +1,9 @@
+import os
 from typing import List
 
 import numpy as np
 import pytest
+from torchvision.transforms import ToTensor
 
 from mlmodule.v2.base.predictions import BatchBoundingBoxesPrediction
 from mlmodule.v2.torch.datasets import (
@@ -33,6 +35,25 @@ def test_image_dataset(cats_and_dogs_images: List[str], resize: bool):
         assert image.size == (120, 120)
     # Make sure that the image can be read as an array
     assert np.array(image).shape == image.size[::-1] + (3,)
+
+
+@pytest.mark.parametrize("to_rgb", (True, False))
+def test_image_dataset_rgba(to_rgb: bool):
+    dataset = ImageDataset(
+        binary_files_dataset=LocalBinaryFilesDataset(
+            paths=[os.path.join("tests", "fixtures", "rgba", "alpha.png")]
+        ),
+        mode="RGB" if to_rgb else None,
+    )
+
+    # Getting the image
+    _, image = dataset[0]
+    image_shape = ToTensor()(image).shape
+    assert len(image_shape) == 3
+    if to_rgb:
+        assert image_shape[:1] == (3,)
+    else:
+        assert image_shape[:1] == (4,)
 
 
 @pytest.mark.parametrize("crop_image", [True, False], ids=["crop", "no-crop"])
