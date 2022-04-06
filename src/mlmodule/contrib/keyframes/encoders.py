@@ -6,7 +6,7 @@ from torchvision.transforms import Compose
 from mlmodule.contrib.keyframes.datasets import FPSVideoFrameExtractorTransform
 from mlmodule.contrib.keyframes.transforms import (
     ApplyImageTransformToVideoFrames,
-    stack_and_squeeze_video_frames,
+    stack_video_frames,
 )
 from mlmodule.v2.base.predictions import (
     BatchModelPrediction,
@@ -28,7 +28,7 @@ class VideoFramesEncoder(
 
     Attributes:
         image_encoder (TorchMlModule[torch.Tensor]): The PyTorch module to encode frames
-        fps (int, optional): The number of frames per seconds to extract from the video.
+        fps (float, optional): The number of frames per seconds to extract from the video.
             Defaults to 1.
         device (torch.device, optional): The PyTorch device to initialise the model weights.
             Defaults to `torch.device("cpu")`.
@@ -37,7 +37,7 @@ class VideoFramesEncoder(
     def __init__(
         self,
         image_encoder: TorchMlModule[torch.Tensor, Any],
-        fps: int = 1,
+        fps: float = 1,
         device: torch.device = torch.device("cpu"),
     ):
         super().__init__(device=device)
@@ -158,5 +158,5 @@ class VideoFramesEncoder(
                     self.image_encoder.get_dataset_transforms()
                 )
             ),
-            stack_and_squeeze_video_frames,
+            stack_video_frames,
         ]

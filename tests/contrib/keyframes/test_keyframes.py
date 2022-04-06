@@ -39,24 +39,31 @@ def test_fps_video_extractor(video_file_path: str):
     assert len(frames[1]) == 83
 
 
-def test_video_frame_encoder(video_file_path: str, torch_device: torch.device):
+@pytest.mark.parametrize(
+    ("fps", "expected_n_frames"), [(1, 83), (0.001, 1)], ids=["1fps", "1/1000fps"]
+)
+def test_video_frame_encoder(
+    video_file_path: str, torch_device: torch.device, fps: float, expected_n_frames: int
+):
     with open(video_file_path, mode="rb") as video_file:
         dataset = ListDataset([video_file])
 
         model = VideoFramesEncoder(
-            image_encoder=TorchResNetModule("resnet18"), device=torch_device
+            image_encoder=TorchResNetModule("resnet18"), device=torch_device, fps=fps
         )
         features = CollectVideoFramesInMemory()
         runner = TorchInferenceRunner(
             model=model,
             dataset=dataset,
             callbacks=[features],
-            options=TorchRunnerOptions(device=torch_device),
+            options=TorchRunnerOptions(
+                device=torch_device, data_loader_options={"batch_size": 1}
+            ),
         )
         runner.run()
 
     assert features.frames[0].features is not None
-    assert len(features.frames[0].features) == 83
+    assert len(features.frames[0].features) == expected_n_frames
 
 
 def test_keyframes_extractor(torch_device: torch.device, video_file_path: str):
