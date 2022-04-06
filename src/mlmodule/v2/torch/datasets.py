@@ -7,6 +7,7 @@ from PIL.Image import Image
 from typing_extensions import Protocol
 
 from mlmodule.v2.base.predictions import BatchBoundingBoxesPrediction
+from mlmodule.v2.torch.utils import apply_mode_to_image
 
 _IndicesType = TypeVar("_IndicesType", covariant=True)
 _DatasetType = TypeVar("_DatasetType", covariant=True)
@@ -145,25 +146,40 @@ class ImageDataset(TorchDataset[_IndicesType, Image]):
         binary_files_dataset (TorchDataset[_IndicesType, bytes]): Dataset to load images.
             Usually a [`LocalBinaryFilesDataset`][mlmodule.v2.torch.datasets.LocalBinaryFilesDataset].
         resize_image_size (tuple[int, int] | None): Optionally reduce the image size on load
+        mode (str | None): Optional mode to apply when loading the image. See PIL `Image.draft` parameters.
     """
 
     binary_files_dataset: TorchDataset[_IndicesType, BinaryIO]
     resize_image_size: Optional[Tuple[int, int]] = None
+    mode: Optional[str] = "RGB"
 
     def getitem_indices(self, index: int) -> _IndicesType:
         return self.binary_files_dataset.getitem_indices(index)
 
+    def transform_image_on_load(self, image: Image) -> Image:
+        if self.resize_image_size is None and self.mode is None:
+            return image
+
+        # For shrink on load
+        # See https://stackoverflow.com/questions/57663734/how-to-speed-up-image-loading-in-pillow-python
+        image.draft(mode=self.mode, size=self.resize_image_size)
+
+        # Applying transforms to ensure we have the right size and mode
+        if self.resize_image_size:
+            image = image.resize(self.resize_image_size)
+        if self.mode:
+            image = apply_mode_to_image(image, self.mode)
+
+        return image
+
     def _open_image(self, bin_image: BinaryIO) -> Image:
         with bin_image:
             image = PIL.Image.open(bin_image)
-            if self.resize_image_size:
-                # For shrink on load
-                # See https://stackoverflow.com/questions/57663734/how-to-speed-up-image-loading-in-pillow-python
-                image.draft(None, self.resize_image_size)
-                return image.resize(self.resize_image_size)
+            # Optionally transform and load the image
+            image = self.transform_image_on_load(image)
             # Loading image in-memory to allow close bin_image
             image.load()
-        return image
+            return image
 
     def __getitem__(self, index: int) -> Tuple[_IndicesType, Image]:
         image_index, bin_image = self.binary_files_dataset[index]

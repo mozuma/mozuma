@@ -2,6 +2,7 @@ from io import BytesIO
 from typing import Mapping, OrderedDict
 
 import torch
+from PIL.Image import Image
 
 
 def resolve_default_torch_device() -> torch.device:
@@ -33,3 +34,9 @@ def send_batch_to_device(batch, device: torch.device):
         return batch.to(device)
     else:
         return batch
+
+
+def apply_mode_to_image(image: Image, mode: str) -> Image:
+    if image.mode == mode:
+        return image
+    return image.convert(mode)
