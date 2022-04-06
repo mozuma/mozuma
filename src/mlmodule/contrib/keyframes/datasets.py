@@ -63,7 +63,7 @@ class BinaryVideoCapture:
         self._tmp_video_file.close()
 
 
-def compute_every_param_from_target_fps(video_fps: float, max_target_fps: int) -> int:
+def compute_every_param_from_target_fps(video_fps: float, max_target_fps: float) -> int:
     """Computes the every_n_frame parameter of the function extract_video_frames
 
     It returns the frames to keep to obtain an output of max_target_fps form a video of video_fps.
@@ -80,7 +80,7 @@ def compute_every_param_from_target_fps(video_fps: float, max_target_fps: int) -
 @dataclasses.dataclass
 class FPSVideoFrameExtractorTransform:
     # Number of frames per second to return
-    fps: int
+    fps: float
 
     def __call__(self, video_file: BinaryIO) -> FrameSequenceType:
         with video_file:

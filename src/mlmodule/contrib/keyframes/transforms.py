@@ -22,11 +22,11 @@ class ApplyImageTransformToVideoFrames(Generic[_OutputDatasetType]):
         return frame_indices, ret
 
 
-def stack_and_squeeze_video_frames(
+def stack_video_frames(
     video_frames: Tuple[List[int], List[torch.Tensor]]
 ) -> Tuple[torch.LongTensor, torch.Tensor]:
     """Take video frames and stack them into one Tensor"""
     frame_indices, frame_tensors = video_frames
     return torch.LongTensor(frame_indices), torch.stack(
         frame_tensors
-    ).squeeze() if frame_tensors else torch.Tensor(0)
+    ) if frame_tensors else torch.Tensor(0)
