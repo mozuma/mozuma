@@ -25,13 +25,13 @@ def save_state_dict_to_bytes(obj) -> bytes:
     return f.read()
 
 
-def send_batch_to_device(batch, device: torch.device):
+def send_batch_to_device(batch, device: torch.device, non_blocking: bool = False):
     if isinstance(batch, tuple):
-        return tuple(send_batch_to_device(b, device) for b in batch)
+        return tuple(send_batch_to_device(b, device, non_blocking) for b in batch)
     elif isinstance(batch, list):
-        return [send_batch_to_device(b, device) for b in batch]
+        return [send_batch_to_device(b, device, non_blocking) for b in batch]
     elif hasattr(batch, "to"):
-        return batch.to(device)
+        return batch.to(device, non_blocking=non_blocking)
     else:
         return batch
 

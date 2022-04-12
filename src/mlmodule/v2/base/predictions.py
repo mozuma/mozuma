@@ -1,10 +1,13 @@
 import dataclasses
+from logging import getLogger
 from typing import Generic, Optional, Sequence, TypeVar, Union
 
 import numpy as np
 import torch
 
 _ArrayType = TypeVar("_ArrayType", bound=Union[np.ndarray, torch.Tensor])
+
+logger = getLogger()
 
 
 @dataclasses.dataclass

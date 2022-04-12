@@ -22,7 +22,7 @@ Go ahead to the [getting started](1-getting-started.md) guide for an overview of
 - [x] Model zoo
 - [x] PyTorch inference
 - [ ] PyTorch training
-- [ ] Multi-GPU support
+- [x] Multi-GPU support
 
 ## Installation
 
