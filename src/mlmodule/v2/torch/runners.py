@@ -1,6 +1,6 @@
 import dataclasses
 import logging
-from typing import Any, Dict, List, Tuple, cast
+from typing import Any, Dict, Tuple, cast
 
 import ignite.distributed as idist
 import torch
@@ -34,6 +34,32 @@ from mlmodule.v2.torch.utils import send_batch_to_device
 logger = logging.getLogger()
 
 
+def validate_data_loader_options(
+    model: TorchMlModule, data_loader_options: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Makes sure the collate function is properly defined"""
+    # Making a copy of options
+    data_loader_options = data_loader_options.copy()
+
+    # Default collate function
+    model_collate_fn = model.get_dataloader_collate_fn()
+    if model_collate_fn:
+        default_collate = TorchMlModuleCollateFn(model_collate_fn)
+    else:
+        default_collate = TorchMlModuleCollateFn()
+    # Sets the collate_fn if not defined
+    data_loader_options.setdefault("collate_fn", default_collate)
+
+    # Checking that if set the collate_fn is an instance of TorchMlModuleCollateFn
+    if not isinstance(data_loader_options["collate_fn"], TorchMlModuleCollateFn):
+        logger.warning(
+            "The given collate_fn is not an instance of TorchMlModuleCollateFn "
+            "which could lead to type errors on callbacks"
+        )
+
+    return data_loader_options
+
+
 class TorchInferenceRunner(
     BaseRunner[TorchMlModule, TorchDataset, TorchRunnerCallbackType, TorchRunnerOptions]
 ):
@@ -48,32 +74,6 @@ class TorchInferenceRunner(
         options (TorchRunnerOptions): PyTorch options
     """
 
-    @staticmethod
-    def validate_data_loader_options(
-        model: TorchMlModule, data_loader_options: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """Makes sure the collate function is properly defined"""
-        # Making a copy of options
-        data_loader_options = data_loader_options.copy()
-
-        # Default collate function
-        model_collate_fn = model.get_dataloader_collate_fn()
-        if model_collate_fn:
-            default_collate = TorchMlModuleCollateFn(model_collate_fn)
-        else:
-            default_collate = TorchMlModuleCollateFn()
-        # Sets the collate_fn if not defined
-        data_loader_options.setdefault("collate_fn", default_collate)
-
-        # Checking that if set the collate_fn is an instance of TorchMlModuleCollateFn
-        if not isinstance(data_loader_options["collate_fn"], TorchMlModuleCollateFn):
-            logger.warning(
-                "The given collate_fn is not an instance of TorchMlModuleCollateFn "
-                "which could lead to type errors on callbacks"
-            )
-
-        return data_loader_options
-
     def get_data_loader(self) -> DataLoader:
         """Creates a data loader from the options, the given dataset and the module transforms"""
         data_with_transforms = TorchDatasetTransformsWrapper(
@@ -82,7 +82,7 @@ class TorchInferenceRunner(
         )
         return DataLoader(
             dataset=cast(Dataset, data_with_transforms),
-            **TorchInferenceRunner.validate_data_loader_options(
+            **validate_data_loader_options(
                 self.model, self.options.data_loader_options
             ),
         )
@@ -136,10 +136,7 @@ class TorchInferenceMultiGPURunner(
 ):
     """Runner for inference tasks on PyTorch models
 
-    Supports multi-GPU inference with `nccl` backend.
-
-    Warning:
-        Only `nccl` backend is supported at the moment.
+    Supports CPU and multi-GPU inference with native torch backends.
 
     Attributes:
         model (TorchMlModule): The PyTorch model to run inference
@@ -148,19 +145,6 @@ class TorchInferenceMultiGPURunner(
         options (TorchMultiGPURunnerOptions): PyTorch multi-gpu options
     """
 
-    def __init__(
-        self,
-        model: TorchMlModule,
-        dataset: TorchDataset,
-        callbacks: List[TorchRunnerCallbackType],
-        options: TorchMultiGPURunnerOptions,
-    ):
-        options.dist_options.setdefault("backend", "nccl")
-        if options.dist_options["backend"] != "nccl":
-            raise ValueError("Only nccl backend is supported at the moment")
-
-        super().__init__(model, dataset, callbacks, options)
-
     def get_data_loader(self) -> DataLoader:
         """Creates a data loader from the options, the given dataset and the module transforms"""
         data_with_transforms = TorchDatasetTransformsWrapper(
@@ -168,7 +152,7 @@ class TorchInferenceMultiGPURunner(
             transform_func=transforms.Compose(self.model.get_dataset_transforms()),
         )
 
-        data_loader_options = TorchInferenceRunner.validate_data_loader_options(
+        data_loader_options = validate_data_loader_options(
             self.model, self.options.data_loader_options
         )
 

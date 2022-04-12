@@ -9,7 +9,6 @@ from ignite.engine import Engine, Events
 from torch.utils.data.dataloader import DataLoader
 
 from mlmodule.v2.base.predictions import BatchModelPrediction
-from mlmodule.v2.torch.modules import _ForwardOutputType
 
 
 @dataclasses.dataclass
@@ -18,7 +17,7 @@ class ResultsCollector:
     after every iteration.
     """
 
-    output_transform: Callable[[_ForwardOutputType], BatchModelPrediction[torch.Tensor]]
+    output_transform: Callable[..., BatchModelPrediction[torch.Tensor]]
     callbacks_fn: Callable[[torch.Tensor, BatchModelPrediction[torch.Tensor]], None]
     dst_rank: int = 0
     world_size: int = dataclasses.field(
