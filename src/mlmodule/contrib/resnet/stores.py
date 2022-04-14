@@ -1,3 +1,4 @@
+import functools
 from collections import OrderedDict
 from typing import List, NoReturn
 
@@ -6,23 +7,24 @@ from torch.hub import load_state_dict_from_url
 from torchvision.models import resnet
 
 from mlmodule.contrib.resnet.modules import TorchResNetModule
-from mlmodule.contrib.resnet.utils import sanitize_resnet_arch
+from mlmodule.helpers.torch import state_dict_combine, state_dict_get
+from mlmodule.helpers.torchvision import (
+    sanitize_torchvision_arch,
+    validate_torchvision_state_type,
+)
 from mlmodule.v2.states import StateKey, StateType
 from mlmodule.v2.stores.abstract import AbstractStateStore
 
-RESNET_ARCHITECTURES_MAP = {sanitize_resnet_arch(a): a for a in resnet.model_urls}
+RESNET_ARCHITECTURES_MAP = {sanitize_torchvision_arch(a): a for a in resnet.model_urls}
+
+
+_validate_resnet_state_type = functools.partial(
+    validate_torchvision_state_type, valid_architectures=RESNET_ARCHITECTURES_MAP
+)
 
 
 class ResNetTorchVisionStore(AbstractStateStore[TorchResNetModule]):
     """Model store to load ResNet weights pretrained on ImageNet from TorchVision"""
-
-    def _valid_resnet_state_type(self, state_type: StateType) -> None:
-        if state_type.backend != "pytorch":
-            raise ValueError("TorchVision state type should have backend='pytorch'")
-        if state_type.architecture not in RESNET_ARCHITECTURES_MAP:
-            raise ValueError(
-                f"ResNet state type architecture {state_type.architecture} not found in TorchVision"
-            )
 
     def save(self, model: TorchResNetModule, training_id: str) -> NoReturn:
         """Not implemented for this store"""
@@ -40,7 +42,7 @@ class ResNetTorchVisionStore(AbstractStateStore[TorchResNetModule]):
             raise ValueError(
                 "TorchVision state keys should have training_id='imagenet'"
             )
-        self._valid_resnet_state_type(state_key.state_type)
+        _validate_resnet_state_type(state_key.state_type)
         # Warnings if the state types are not compatible with the model
         super().load(model, state_key)
 
@@ -60,15 +62,14 @@ class ResNetTorchVisionStore(AbstractStateStore[TorchResNetModule]):
                 if not key.startswith("fc")
             ]
         )
-        classifier_state_dict = OrderedDict(
-            [
-                (key[3:], value)
-                for key, value in pretrained_state_dict.items()
-                if key.startswith("fc")
-            ]
+        classifier_state_dict = state_dict_get(pretrained_state_dict, "fc")
+
+        model.load_state_dict(
+            state_dict_combine(
+                features_module=features_state_dict,
+                classifier_module=classifier_state_dict,
+            )
         )
-        model.features_module.load_state_dict(features_state_dict)
-        model.classifier_module.load_state_dict(classifier_state_dict)
 
     def get_state_keys(self, state_type: StateType) -> List[StateKey]:
         """ImageNet pre-training state_keys
@@ -79,7 +80,7 @@ class ResNetTorchVisionStore(AbstractStateStore[TorchResNetModule]):
                 [`TorchResNetModule.state_type`][mlmodule.contrib.resnet.TorchResNetModule.state_type]
         """
         try:
-            self._valid_resnet_state_type(state_type)
+            _validate_resnet_state_type(state_type)
         except ValueError:
             return []
         else:

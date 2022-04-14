@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Callable, Generic, Optional, Set, TypeVar
+from typing import Callable, Generic, Optional, TypeVar
 
 from mlmodule.v2.stores.abstract import AbstractStateStore
 
@@ -12,6 +12,7 @@ class ModuleTestConfiguration(Generic[_Module]):
 
     name: str
     module_factory: Callable[[], _Module]
+    training_id: str
     has_state: bool = True
     # Is it a Pytorch model
     is_pytorch: bool = True
@@ -19,7 +20,6 @@ class ModuleTestConfiguration(Generic[_Module]):
     batch_factory: Optional[Callable] = None
     # Model provider store
     provider_store: Optional[AbstractStateStore] = None
-    provider_store_training_ids: Set[str] = dataclasses.field(default_factory=set)
 
     def get_module(self) -> _Module:
         return self.module_factory()

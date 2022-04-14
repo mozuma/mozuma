@@ -10,11 +10,13 @@ from mlmodule.contrib.arcface import ArcFaceFeatures
 from mlmodule.contrib.clip.image import CLIPImageModule
 from mlmodule.contrib.clip.stores import CLIPStore
 from mlmodule.contrib.clip.text import CLIPTextModule
-from mlmodule.contrib.densenet import (
-    DenseNet161ImageNetClassifier,
-    DenseNet161ImageNetFeatures,
-    DenseNet161PlacesClassifier,
-    DenseNet161PlacesFeatures,
+from mlmodule.contrib.densenet.modules import (
+    TorchDenseNetModule,
+    torch_densenet_places365,
+)
+from mlmodule.contrib.densenet.stores import (
+    DenseNetPlaces365Store,
+    DenseNetTorchVisionStore,
 )
 from mlmodule.contrib.keyframes.encoders import VideoFramesEncoder
 from mlmodule.contrib.keyframes.selectors import KeyFrameSelector
@@ -42,7 +44,26 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
             [2, 3, 224, 224]
         ),  # batch, channels, width, height
         provider_store=ResNetTorchVisionStore(),
-        provider_store_training_ids={"imagenet"},
+        training_id="imagenet",
+    ),
+    # DenseNet
+    ModuleTestConfiguration(
+        "torchdensenet121",
+        lambda: TorchDenseNetModule("densenet161"),
+        batch_factory=lambda: torch.rand(
+            [2, 3, 224, 224]
+        ),  # batch, channels, width, height
+        provider_store=DenseNetTorchVisionStore(),
+        training_id="imagenet",
+    ),
+    ModuleTestConfiguration(
+        "torchdensenet121places",
+        lambda: torch_densenet_places365("densenet161"),
+        batch_factory=lambda: torch.rand(
+            [2, 3, 224, 224]
+        ),  # batch, channels, width, height
+        provider_store=DenseNetPlaces365Store(),
+        training_id="places365",
     ),
     # CLIP
     ModuleTestConfiguration(
@@ -52,14 +73,14 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
             [2, 3, 224, 224]
         ),  # batch, channels, width, height
         provider_store=CLIPStore(),
-        provider_store_training_ids={"clip"},
+        training_id="clip",
     ),
     ModuleTestConfiguration(
         "clip-text-rn50",
         lambda: CLIPTextModule("RN50"),
         batch_factory=lambda: torch.randint(10, size=(2, 77)),  # batch, ctx_len
         provider_store=CLIPStore(),
-        provider_store_training_ids={"clip"},
+        training_id="clip",
     ),
     # MTCNN
     ModuleTestConfiguration(
@@ -67,7 +88,7 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
         lambda: TorchMTCNNModule(),
         batch_factory=lambda: [torch.rand([720 + i * 10, 720, 3]) for i in range(5)],
         provider_store=FaceNetMTCNNStore(),
-        provider_store_training_ids={"facenet"},
+        training_id="facenet",
     ),
     # MagFace
     ModuleTestConfiguration(
@@ -77,12 +98,13 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
             (2, 3, 112, 112)
         ),  # batch, channels, width, height
         provider_store=MagFaceStore(),
-        provider_store_training_ids={"magface"},
+        training_id="magface",
     ),
     # Key-frames
     ModuleTestConfiguration(
         "frames-encoder-rn18",
         lambda: VideoFramesEncoder(TorchResNetModule("resnet18")),
+        training_id="imagenet",
         batch_factory=lambda: (
             [torch.range(0, 1), torch.range(0, 3)],  # Frame indices
             [
@@ -94,6 +116,7 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
     ModuleTestConfiguration(
         "frames-selector-rn18",
         lambda: KeyFrameSelector(TorchResNetModule("resnet18")),
+        training_id="imagenet",
         batch_factory=lambda: (
             [torch.range(0, 1), torch.range(0, 3)],  # Frame indices
             [
@@ -111,7 +134,7 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
             [(56, 56)] * 5,  # width, height
         ),
         provider_store=VinVLStore(),
-        provider_store_training_ids={"vinvl"},
+        training_id="vinvl",
     ),
 ]
 
@@ -216,10 +239,6 @@ def module_pretrained_mlmodule_store(
 
 @pytest.fixture(
     params=[
-        DenseNet161ImageNetFeatures,
-        DenseNet161ImageNetClassifier,
-        DenseNet161PlacesFeatures,
-        DenseNet161PlacesClassifier,
         ArcFaceFeatures,
         # TorchMLModuleKeyFrames,
     ]
@@ -233,12 +252,7 @@ def data_platform_scanner(request: SubRequest):
     return request.param
 
 
-@pytest.fixture(
-    params=[
-        DenseNet161ImageNetFeatures,
-        DenseNet161PlacesFeatures,
-    ]
-)
+@pytest.fixture(params=[])
 def image_module(request: SubRequest) -> Type[BaseTorchMLModule]:
     """MLModules operating on images"""
     return request.param
@@ -270,11 +284,3 @@ def image_dataset() -> ImageDataset:
 @pytest.fixture(scope="session")
 def video_file_path() -> str:
     return os.path.join("tests", "fixtures", "video", "test.mp4")
-
-
-def pytest_collection_modifyitems(config, items):
-    if not config.getoption("-m"):
-        skip_me = pytest.mark.skip(reason="use `-m slow` to run this test")
-        for item in items:
-            if "slow" in item.keywords:
-                item.add_marker(skip_me)
