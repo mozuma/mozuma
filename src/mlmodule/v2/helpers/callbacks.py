@@ -1,6 +1,7 @@
 import dataclasses
 from typing import Any, List, Sequence
 
+import ignite.distributed as idist
 import numpy as np
 
 from mlmodule.v2.base.callbacks import (
@@ -20,6 +21,7 @@ from mlmodule.v2.helpers.utils import (
     convert_batch_video_frames_to_numpy,
     convert_numeric_array_like_to_numpy,
 )
+from mlmodule.v2.stores.abstract import AbstractStateStore
 
 
 @dataclasses.dataclass
@@ -162,3 +164,25 @@ class CollectVideoFramesInMemory(BaseSaveVideoFramesCallback[NumericArrayTypes])
 
         # Adding frames
         self.frames += [convert_batch_video_frames_to_numpy(f) for f in frames]
+
+
+@dataclasses.dataclass
+class SaveModelWeights:
+    """Simple callback to save model weights during training
+
+    Attributes:
+        store (AbstractStateStore): Object to handle model state saving
+        training_id (str): Identifier for the training activity
+    """
+
+    store: AbstractStateStore = dataclasses.field()
+    training_id: str = dataclasses.field()
+
+    @idist.one_rank_only()
+    def save_model_weights(self, model: Any) -> None:
+        """Save model state by calling the state store
+
+        Arguments:
+            model (Any): The MLModule model to save
+        """
+        self.store.save(model, self.training_id)

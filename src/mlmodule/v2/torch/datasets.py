@@ -24,6 +24,7 @@ _IndicesType = TypeVar("_IndicesType", covariant=True)
 _DatasetType = TypeVar("_DatasetType", covariant=True)
 _NewDatasetType = TypeVar("_NewDatasetType", covariant=True)
 _PathLike = TypeVar("_PathLike", bound=Union[str, pathlib.Path])
+_TargetsType = TypeVar("_TargetsType", covariant=True)
 
 
 class TorchDataset(Protocol[_IndicesType, _DatasetType]):
@@ -259,3 +260,85 @@ class ImageBoundingBoxDataset(
 
     def __len__(self) -> int:
         return len(self.flat_indices)
+
+
+class TorchTrainingDataset(Protocol[_DatasetType, _TargetsType]):
+    """PyTorch dataset protocol for protocol
+
+    In order to be used with the PyTorch training runners, a TorchTrainingDataset
+    should expose the function `__getitem__`.
+    """
+
+    def __getitem__(self, index: int) -> Tuple[_DatasetType, _TargetsType]:
+        """Get an item of the dataset by index with its target class
+
+        Arguments:
+            index (int): The index of the element to get
+        Returns:
+            Tuple[_IndicesType, _TargetType]: A tuple of dataset element
+                and the class_index of the target class.
+        """
+        ...
+
+
+@dataclasses.dataclass
+class TorchTrainingDatasetTransformsWrapper(
+    TorchDatasetTransformsWrapper, TorchTrainingDataset[_NewDatasetType, _TargetsType]
+):
+    """Similar to TorchDatasetTransformsWrapper but can be used
+    with training datasets
+    """
+
+    def __getitem__(self, index: int) -> Tuple[_NewDatasetType, _TargetsType]:
+        data, target = self.dataset.__getitem__(index)
+        return self.transform_func(data), target
+
+
+@dataclasses.dataclass
+class LocalBinaryFilesTrainingDataset(
+    LocalBinaryFilesDataset, TorchTrainingDataset[BinaryIO, int]
+):
+    """Training dataset that reads a list of local file names
+    and returns their content as bytes
+
+    Attributes:
+        paths (Sequence[str]): List of paths to files
+        labels (Sequence[str]): List of classes, one for each element in `path`
+    """
+
+    labels: Sequence[str]
+    classes: Sequence[str] = dataclasses.field(init=False, default_factory=set)
+    classes_to_idx: dict = dataclasses.field(init=False, default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if len(self.paths) != len(self.labels):
+            raise ValueError("Length for classes doensn't match lenght for labels")
+
+        self.classes = set(self.labels)
+        self.classes_to_idx = {class_: idx for idx, class_ in enumerate(self.classes)}
+
+    def __getitem__(self, index: int) -> Tuple[BinaryIO, int]:
+        _, file = super().__getitem__(index)
+
+        return (
+            file,
+            self.classes_to_idx[self.labels[index]],
+        )
+
+
+@dataclasses.dataclass
+class ImageTrainingDataset(ImageDataset, TorchTrainingDataset[Image, int]):
+    """Trainig dataset that returns `PIL.Image.Image` from a dataset of images in bytes format
+
+    Attributes:
+        binary_files_dataset (TorchDataset[Image, int]): Training dataset to load images.
+            Usually a [`LocalBinaryFilesTrainingDataset`][mlmodule.v2.torch.datasets.LocalBinaryFilesTrainingDataset].
+        resize_image_size (tuple[int, int] | None): Optionally reduce the image size on load
+        mode (str | None): Optional mode to apply when loading the image. See PIL `Image.draft` parameters.
+    """
+
+    binary_files_dataset: TorchTrainingDataset[Image, int]
+
+    def __getitem__(self, index: int) -> Tuple[Image, int]:
+        bin_image, target = self.binary_files_dataset[index]
+        return (self._open_image(bin_image), target)

@@ -1,35 +1,49 @@
 import dataclasses
 import logging
-from typing import Any, Dict, Tuple, cast
+from typing import Any, Callable, Dict, Tuple, Union, cast
 
 import ignite.distributed as idist
 import torch
 from ignite.contrib.handlers import ProgressBar
 from ignite.engine import Engine, Events
+from ignite.metrics import Metric
 from ignite.utils import manual_seed
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.dataset import Dataset
 from torchvision import transforms
 from tqdm import tqdm
 
-from mlmodule.v2.base.callbacks import callbacks_caller
+from mlmodule.v2.base.callbacks import BaseRunnerEndCallback, callbacks_caller
 from mlmodule.v2.base.predictions import BatchModelPrediction
 from mlmodule.v2.base.runners import BaseRunner
+from mlmodule.v2.helpers.callbacks import SaveModelWeights
 from mlmodule.v2.helpers.distributed import (
     ResultsCollector,
     register_multi_gpu_runner_logger,
 )
 from mlmodule.v2.torch.callbacks import TorchRunnerCallbackType
-from mlmodule.v2.torch.collate import TorchMlModuleCollateFn
+from mlmodule.v2.torch.collate import (
+    TorchMlModuleCollateFn,
+    TorchMlModuleTrainingCollateFn,
+)
 from mlmodule.v2.torch.datasets import (
     TorchDataset,
     TorchDatasetTransformsWrapper,
-    _DatasetType,
-    _IndicesType,
+    TorchTrainingDataset,
+    TorchTrainingDatasetTransformsWrapper,
 )
 from mlmodule.v2.torch.modules import TorchMlModule
-from mlmodule.v2.torch.options import TorchMultiGPURunnerOptions, TorchRunnerOptions
-from mlmodule.v2.torch.utils import send_batch_to_device
+from mlmodule.v2.torch.options import (
+    TorchMultiGPURunnerOptions,
+    TorchRunnerOptions,
+    TorchTrainingOptions,
+)
+from mlmodule.v2.torch.utils import (
+    disable_ignite_logger,
+    log_evaluation_metrics,
+    prepare_batch_for_training,
+    send_batch_to_device,
+)
 
 logger = logging.getLogger()
 
@@ -69,7 +83,7 @@ class TorchInferenceRunner(
 
     Attributes:
         model (TorchMlModule): The PyTorch model to run inference
-        dataset (TorchDataset): Input dataset for the runner
+        datasets (List[TorchDataset]): Input dataset for the runner (list with one element)
         callbacks (List[TorchRunnerCallbackType]): Callbacks to save features, labels or bounding boxes
         options (TorchRunnerOptions): PyTorch options
     """
@@ -77,7 +91,7 @@ class TorchInferenceRunner(
     def get_data_loader(self) -> DataLoader:
         """Creates a data loader from the options, the given dataset and the module transforms"""
         data_with_transforms = TorchDatasetTransformsWrapper(
-            dataset=self.dataset,
+            dataset=self.datasets[0],
             transform_func=transforms.Compose(self.model.get_dataset_transforms()),
         )
         return DataLoader(
@@ -140,7 +154,7 @@ class TorchInferenceMultiGPURunner(
 
     Attributes:
         model (TorchMlModule): The PyTorch model to run inference
-        dataset (TorchDataset): Input dataset for the runner
+        datasets (List[TorchDataset]): Input dataset for the runner (list with one element)
         callbacks (List[TorchRunnerCallbackType]): Callbacks to save features, labels or bounding boxes
         options (TorchMultiGPURunnerOptions): PyTorch multi-gpu options
     """
@@ -148,7 +162,7 @@ class TorchInferenceMultiGPURunner(
     def get_data_loader(self) -> DataLoader:
         """Creates a data loader from the options, the given dataset and the module transforms"""
         data_with_transforms = TorchDatasetTransformsWrapper(
-            dataset=self.dataset,
+            dataset=self.datasets[0],
             transform_func=transforms.Compose(self.model.get_dataset_transforms()),
         )
 
@@ -156,12 +170,8 @@ class TorchInferenceMultiGPURunner(
             self.model, self.options.data_loader_options
         )
 
-        # Before applying, raise Ignite's logger level
-        # to avoid displaying data_loader info
-        if logger.level >= logging.INFO:
-            logging.getLogger("ignite.distributed.auto.auto_dataloader").setLevel(
-                logging.WARNING
-            )
+        # Disable Ignite logging
+        disable_ignite_logger("ignite.distributed.auto.auto_dataloader", logger)
 
         return idist.auto_dataloader(
             dataset=cast(Dataset, data_with_transforms), **data_loader_options
@@ -182,13 +192,8 @@ class TorchInferenceMultiGPURunner(
 
     def run(self) -> None:
         """Runs inference"""
-        # Some of Ignite's loggers logs a bunch of infos which we don't want
-        # (to keep this runner giving the same info as the others)
-        # Thus, keep them only if the current's logger level drops below INFO
-        if logger.level >= logging.INFO:
-            logging.getLogger("ignite.distributed.launcher.Parallel").setLevel(
-                logging.WARNING
-            )
+        # Disable Ignite logging
+        disable_ignite_logger("ignite.distributed.launcher.Parallel", logger)
 
         with idist.Parallel(**self.options.dist_options) as parallel:
             parallel.run(self.inference)
@@ -207,11 +212,10 @@ class TorchInferenceMultiGPURunner(
             logger.warning("Input data has zero size. Please provide non-empty data.")
             return
 
+        # Disable Ignite logging
+        disable_ignite_logger("ignite.distributed.auto.auto_model", logger)
+
         # Adapt model for distributed settings
-        if logger.level >= logging.INFO:
-            logging.getLogger("ignite.distributed.auto.auto_model").setLevel(
-                logging.WARNING
-            )
         ddp_model = idist.auto_model(self.model)
 
         # Create inference engine
@@ -246,14 +250,15 @@ class TorchInferenceMultiGPURunner(
 
     def create_engine(
         self,
-        model: TorchMlModule,
+        model: torch.nn.Module,
         device: torch.device,
         non_blocking: bool = True,
     ) -> Engine:
         """Utility to create a PyTorch Ignite's Engine."""
 
         def inference_step(
-            engine: Engine, batch_wrapper: Tuple[_IndicesType, _DatasetType]
+            engine: Engine,
+            batch_wrapper: Tuple,
         ):
             model.eval()
             with torch.no_grad():
@@ -274,3 +279,231 @@ class TorchInferenceMultiGPURunner(
         engine = Engine(inference_step)
 
         return engine
+
+
+class TorchTrainingRunner(
+    BaseRunner[
+        TorchMlModule,
+        Tuple[TorchTrainingDataset, TorchTrainingDataset],
+        Union[BaseRunnerEndCallback, SaveModelWeights],
+        TorchTrainingOptions,
+    ]
+):
+    """Runner for training tasks on PyTorch models
+
+    Supports CPU and multi-GPU training with multiple backends.
+
+    Attributes:
+        model (TorchMlModule): The PyTorch model to run inference
+        datasets (List[TorchTrainingDataset]): Train and test dataset for the runner
+        callbacks (List[Union[BaseRunnerEndCallback, SaveModelWeights]]):
+            Callback to save model weights plus one or more callbacks for when the runner ends.
+        options (TorchTrainingOptions): PyTorch training options
+    """
+
+    def validate_data_loader_options(
+        cls, model: TorchMlModule, data_loader_options: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Makes sure the collate function is properly defined"""
+        # Making a copy of options
+        data_loader_options = data_loader_options.copy()
+
+        # Default collate function
+        model_collate_fn = model.get_dataloader_collate_fn()
+        if model_collate_fn:
+            default_collate = TorchMlModuleTrainingCollateFn(model_collate_fn)
+        else:
+            default_collate = TorchMlModuleTrainingCollateFn()
+        # Sets the collate_fn if not defined
+        data_loader_options.setdefault("collate_fn", default_collate)
+
+        # Checking that if set the collate_fn is an instance of TorchMlModuleTrainingCollateFn
+        if not isinstance(
+            data_loader_options["collate_fn"], TorchMlModuleTrainingCollateFn
+        ):
+            logger.warning(
+                "The given collate_fn is not an instance of TorchMlModuleTrainingCollateFn "
+                "which could lead to type errors on callbacks"
+            )
+
+        return data_loader_options
+
+    def get_data_loader(self, dataset: TorchTrainingDataset, **kwargs) -> DataLoader:
+        """Creates the data loaders from the options, the given datasets and the module transforms.
+        The first data loader will be used to train, se second to test.
+        """
+        data_with_transforms = TorchTrainingDatasetTransformsWrapper(
+            dataset=dataset,
+            transform_func=transforms.Compose(self.model.get_dataset_transforms()),
+        )
+
+        data_loader_options = self.options.data_loader_options.copy()
+        data_loader_options.update(kwargs)
+
+        data_loader_options = self.validate_data_loader_options(
+            self.model, data_loader_options
+        )
+
+        # Disable Ignite logging
+        disable_ignite_logger("ignite.distributed.auto.auto_dataloader", logger)
+
+        return idist.auto_dataloader(
+            dataset=cast(Dataset, data_with_transforms), **data_loader_options
+        )
+
+    def run(self) -> None:
+        """Runs training"""
+        # Disable Ignite logging
+        disable_ignite_logger("ignite.distributed.launcher.Parallel", logger)
+
+        with idist.Parallel(**self.options.dist_options) as parallel:
+            parallel.run(self.training)
+
+    def training(self, local_rank: int) -> None:
+        """Training function to be executed in a distributed fashion"""
+        rank = idist.get_rank()
+        manual_seed(self.options.seed + rank)
+        device = idist.device()
+
+        train_loader = self.get_data_loader(self.datasets[0])
+        test_loader = self.get_data_loader(self.datasets[1], shuffle=False)
+
+        # If data has zero size stop here, otherwise engine will raise an error
+        if len(train_loader) == 0 or len(test_loader) == 0:
+            logger.warning("Input data has zero size. Please provide non-empty data.")
+            return
+
+        # Disable Ignite logging
+        disable_ignite_logger("ignite.distributed.auto.auto_model", logger)
+
+        # Adapt model for distributed settings
+        ddp_model = idist.auto_model(self.model)
+
+        # Adapt optimizer for distributed settings
+        optimizer = idist.auto_optim(self.options.optimizer)
+
+        criterion = self.options.loss_fn.to(device)
+
+        # Create trainer for current task
+        trainer = self.create_trainer(
+            model=ddp_model,
+            optimizer=optimizer,
+            loss_fn=criterion,
+            device=device,
+            non_blocking=True,
+            # optimizer, criterion, lr_scheduler, train_loader.sampler, config, logger
+        )
+
+        # Setup evaluator engine to perform model's validation and compute metrics
+        evaluator = self.create_evaluator(
+            model=ddp_model,
+            metrics={},
+            device=device,
+            non_blocking=True,
+        )
+
+        def run_validation(engine: Engine) -> None:
+            epoch = trainer.state.epoch
+            state = evaluator.run(test_loader)
+            log_evaluation_metrics(
+                logger, epoch, state.times["COMPLETED"], "Test", state.metrics
+            )
+
+        trainer.add_event_handler(
+            Events.EPOCH_COMPLETED(every=self.options.validate_every)
+            | Events.COMPLETED,
+            run_validation,
+        )
+
+        trainer.run(train_loader, max_epochs=self.options.num_epoch)
+
+    def create_trainer(
+        self,
+        model: torch.nn.Module,
+        optimizer: torch.optim.Optimizer,
+        loss_fn: Union[Callable, torch.nn.Module],
+        device: torch.device,
+        non_blocking: bool = True,
+        gradient_accumulation_steps: int = 1,
+    ) -> Engine:
+        """Utility to create a PyTorch Ignite's Engine."""
+
+        def update(engine: Engine, batch_wrapper: Tuple):
+            model.train()
+
+            x, y = prepare_batch_for_training(
+                batch_wrapper, device=device, non_blocking=non_blocking
+            )
+
+            # TODO: resnet returns (features, label_scores)
+            #   check with other models
+            y_pred, _ = model(x)
+
+            loss = loss_fn(y_pred, y)
+
+            if gradient_accumulation_steps > 1:
+                loss = loss / gradient_accumulation_steps
+            loss.backward()
+
+            if engine.state.iteration % gradient_accumulation_steps == 0:
+                optimizer.step()
+                optimizer.zero_grad()
+
+            # return output_transform(x, y, y_pred, loss)
+            return loss.item()
+
+        trainer = Engine(update)
+
+        # Register handler to save model weights
+        # Note: there should be only one callback of such
+        trainer.add_event_handler(
+            Events.COMPLETED,
+            lambda: callbacks_caller(self.callbacks, "save_model_weights", self.model),
+        )
+
+        # Register handler to notify the end of the runner
+        trainer.add_event_handler(
+            Events.COMPLETED,
+            lambda: callbacks_caller(self.callbacks, "on_runner_end", self.model),
+        )
+
+        # Setup tqdm
+        if self.options.tqdm_enabled and idist.get_rank() == 0:
+            pbar = ProgressBar(persist=True, bar_format=None)
+            pbar.attach(trainer)
+
+        return trainer
+
+    def create_evaluator(
+        self,
+        model: torch.nn.Module,
+        metrics: Dict[str, Metric],
+        device: torch.device,
+        non_blocking: bool = True,
+    ):
+        def evaluate_step(engine: Engine, batch_wrapper: Tuple):
+            model.eval()
+            with torch.no_grad():
+                # Sending data on device
+                batch, target = prepare_batch_for_training(
+                    batch_wrapper, device=device, non_blocking=non_blocking
+                )
+
+                # TODO: resnet returns (features, label_scores)
+                #   check with other models
+                output, _ = model(batch)
+
+                # Store output data in engine's state
+                return output, target
+
+        evaluator = Engine(evaluate_step)
+
+        for name, metric in metrics.items():
+            metric.attach(evaluator, name)
+
+        # Setup tqdm
+        if self.options.tqdm_enabled and idist.get_rank() == 0:
+            pbar = ProgressBar(desc="Evaluation ", persist=False)
+            pbar.attach(evaluator)
+
+        return evaluator
