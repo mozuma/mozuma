@@ -1,9 +1,10 @@
 import dataclasses
-from typing import Callable, Union
+from typing import Callable, Dict, Union
 
+import dill
 import torch
+from ignite.metrics import Metric
 
-# from ignite.metrics import Metric
 from mlmodule.v2.torch.utils import resolve_default_torch_device
 
 
@@ -55,10 +56,11 @@ class TorchTrainingOptions:
     """Options for PyTorch training runners
 
     Attributes:
-        loss_fn (torch.nn.Module): the loss function to use during training.
+        loss_fn (Union[Callable, torch.nn.Module]): the loss function to use during training.
+        optimizer (torch.optim.Optimizer): Optimization strategy to use during training.
         num_epochs (int): number of epochs to train the model. Default, 24.
         validate_every (int): run model's validation every ``validate_every`` epochs. Default, 3.
-        metrics (dict): Ignite's metrics to compute during training.
+        metrics (dict): Dictionary where values are Ignite's metrics to compute during evaluation.
         data_loader_options (dict): Options passed to `torch.utils.dataloader.DataLoader`.
         tqdm_enabled (bool): Whether to print a `tqdm` progress bar. Default, False.
         dist_options (dict): Options passed to `ignite.distributed.Parallel`.
@@ -77,9 +79,33 @@ class TorchTrainingOptions:
     optimizer: torch.optim.Optimizer
     num_epoch: int = 24
     validate_every: int = 3
-    # metrics: Dict[str, Callable[[], Metric]] = dataclasses.field(default_factory=dict)
+    metrics: Dict[str, Metric] = dataclasses.field(default_factory=dict)
+    metrics: dict = dataclasses.field(default_factory=dict)
 
     data_loader_options: dict = dataclasses.field(default_factory=dict)
     tqdm_enabled: bool = False
     dist_options: dict = dataclasses.field(default_factory=dict)
     seed: int = 543
+
+    def __getstate__(self):
+        # This method is called when you are
+        # going to pickle the class, to know what to pickle
+        state = self.__dict__.copy()
+
+        # Don't pickle the attribute metrics
+        del state["metrics"]
+
+        # Instead, pre-pickle the attribute metric with dill
+        state["pickled-metrics"] = dill.dumps(self.metrics)
+
+        return state
+
+    def __setstate__(self, state):
+        # Put pre-pickled parameter aside
+        pickled_metrics = state.pop("pickled-metrics", None)
+
+        # Restore all other attributes
+        self.__dict__.update(state)
+
+        # Unpickle the attribute metrics
+        object.__setattr__(self, "metrics", dill.loads(pickled_metrics))

@@ -75,7 +75,7 @@ def log_evaluation_metrics(
     tag: str,
     metrics: Dict[str, Any],
 ):
-    metrics_output = "\n".join([f"\t{k}: {v}" for k, v in metrics.items()])
+    metrics_output = "\n".join([f"\t{k}: {v:.2f}" for k, v in metrics.items()])
     logger.info(
         f"\nEpoch {epoch} - Evaluation time (seconds): {elapsed:.2f} - {tag} metrics:\n {metrics_output}"
     )

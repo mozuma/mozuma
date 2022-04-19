@@ -295,7 +295,7 @@ class TorchTrainingRunner(
 
     Attributes:
         model (TorchMlModule): The PyTorch model to run inference
-        datasets (List[TorchTrainingDataset]): Train and test dataset for the runner
+        datasets (List[TorchTrainingDataset]): Train and test datasets for the runner
         callbacks (List[Union[BaseRunnerEndCallback, SaveModelWeights]]):
             Callback to save model weights plus one or more callbacks for when the runner ends.
         options (TorchTrainingOptions): PyTorch training options
@@ -397,23 +397,20 @@ class TorchTrainingRunner(
         # Setup evaluator engine to perform model's validation and compute metrics
         evaluator = self.create_evaluator(
             model=ddp_model,
-            metrics={},
+            metrics=self.options.metrics,
             device=device,
             non_blocking=True,
         )
 
+        @trainer.on(
+            Events.EPOCH_COMPLETED(every=self.options.validate_every) | Events.COMPLETED
+        )
         def run_validation(engine: Engine) -> None:
             epoch = trainer.state.epoch
             state = evaluator.run(test_loader)
             log_evaluation_metrics(
                 logger, epoch, state.times["COMPLETED"], "Test", state.metrics
             )
-
-        trainer.add_event_handler(
-            Events.EPOCH_COMPLETED(every=self.options.validate_every)
-            | Events.COMPLETED,
-            run_validation,
-        )
 
         trainer.run(train_loader, max_epochs=self.options.num_epoch)
 
