@@ -6,7 +6,6 @@ import ignite.distributed as idist
 import torch
 from ignite.contrib.handlers import ProgressBar
 from ignite.engine import Engine, Events
-from ignite.metrics import Metric
 from ignite.utils import manual_seed
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.dataset import Dataset
@@ -382,7 +381,7 @@ class TorchTrainingRunner(
         # Adapt optimizer for distributed settings
         optimizer = idist.auto_optim(self.options.optimizer)
 
-        criterion = self.options.loss_fn.to(device)
+        criterion = self.options.criterion.to(device)
 
         # Create trainer for current task
         trainer = self.create_trainer(
@@ -391,13 +390,16 @@ class TorchTrainingRunner(
             loss_fn=criterion,
             device=device,
             non_blocking=True,
-            # optimizer, criterion, lr_scheduler, train_loader.sampler, config, logger
         )
 
         # Setup evaluator engine to perform model's validation and compute metrics
+        train_evaluator = self.create_evaluator(
+            model=ddp_model,
+            device=device,
+            non_blocking=True,
+        )
         evaluator = self.create_evaluator(
             model=ddp_model,
-            metrics=self.options.metrics,
             device=device,
             non_blocking=True,
         )
@@ -407,6 +409,10 @@ class TorchTrainingRunner(
         )
         def run_validation(engine: Engine) -> None:
             epoch = trainer.state.epoch
+            state = train_evaluator.run(train_loader)
+            log_evaluation_metrics(
+                logger, epoch, state.times["COMPLETED"], "Train", state.metrics
+            )
             state = evaluator.run(test_loader)
             log_evaluation_metrics(
                 logger, epoch, state.times["COMPLETED"], "Test", state.metrics
@@ -434,7 +440,7 @@ class TorchTrainingRunner(
 
             # TODO: resnet returns (features, label_scores)
             #   check with other models
-            y_pred, _ = model(x)
+            _, y_pred = model(x)
 
             loss = loss_fn(y_pred, y)
 
@@ -474,7 +480,6 @@ class TorchTrainingRunner(
     def create_evaluator(
         self,
         model: torch.nn.Module,
-        metrics: Dict[str, Metric],
         device: torch.device,
         non_blocking: bool = True,
     ):
@@ -488,14 +493,14 @@ class TorchTrainingRunner(
 
                 # TODO: resnet returns (features, label_scores)
                 #   check with other models
-                output, _ = model(batch)
+                _, output = model(batch)
 
                 # Store output data in engine's state
                 return output, target
 
         evaluator = Engine(evaluate_step)
 
-        for name, metric in metrics.items():
+        for name, metric in self.options.metrics.items():
             metric.attach(evaluator, name)
 
         # Setup tqdm

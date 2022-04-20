@@ -56,7 +56,7 @@ class TorchTrainingOptions:
     """Options for PyTorch training runners
 
     Attributes:
-        loss_fn (Union[Callable, torch.nn.Module]): the loss function to use during training.
+        criterion (Union[Callable, torch.nn.Module]): the loss function to use during training.
         optimizer (torch.optim.Optimizer): Optimization strategy to use during training.
         num_epochs (int): number of epochs to train the model. Default, 24.
         validate_every (int): run model's validation every ``validate_every`` epochs. Default, 3.
@@ -75,7 +75,7 @@ class TorchTrainingOptions:
         For more info visit [PyTorch Ignite's distributed documentation](https://pytorch.org/ignite/distributed.html).
     """  # noqa: E501
 
-    loss_fn: Union[Callable, torch.nn.Module]
+    criterion: Union[Callable, torch.nn.Module]
     optimizer: torch.optim.Optimizer
     num_epoch: int = 24
     validate_every: int = 3
