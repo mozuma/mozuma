@@ -64,7 +64,7 @@ def disable_ignite_logger(logger_name: str, mlmodule_logger: logging.Logger) -> 
     # Some of Ignite's loggers logs a bunch of infos which we don't want,
     # such as those from auto_dataloader and auto_model.
     # Thus, keep them only if the current's logger level drops below INFO
-    if mlmodule_logger.level >= logging.INFO:
+    if mlmodule_logger.getEffectiveLevel() >= logging.INFO:
         logging.getLogger(logger_name).setLevel(logging.WARNING)
 
 
@@ -77,5 +77,5 @@ def log_evaluation_metrics(
 ):
     metrics_output = "\n".join([f"\t{k}: {v:.2f}" for k, v in metrics.items()])
     logger.info(
-        f"\nEpoch {epoch} - Evaluation time (seconds): {elapsed:.2f} - {tag} metrics:\n {metrics_output}"
+        f"Epoch {epoch} - Evaluation time (seconds): {elapsed:.2f} - {tag} metrics:\n {metrics_output}"
     )

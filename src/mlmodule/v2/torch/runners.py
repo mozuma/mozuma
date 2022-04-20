@@ -45,7 +45,7 @@ from mlmodule.v2.torch.utils import (
     send_batch_to_device,
 )
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def validate_data_loader_options(
