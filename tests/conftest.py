@@ -26,6 +26,12 @@ from mlmodule.contrib.mtcnn.modules import TorchMTCNNModule
 from mlmodule.contrib.mtcnn.stores import FaceNetMTCNNStore
 from mlmodule.contrib.resnet.modules import TorchResNetModule
 from mlmodule.contrib.resnet.stores import ResNetTorchVisionStore
+from mlmodule.contrib.sentences.distilbert.modules import (
+    DistilUseBaseMultilingualCasedV2Module,
+)
+from mlmodule.contrib.sentences.distilbert.stores import (
+    SBERTDistiluseBaseMultilingualCasedV2Store,
+)
 from mlmodule.contrib.vinvl.modules import TorchVinVLDetectorModule
 from mlmodule.contrib.vinvl.stores import VinVLStore
 from mlmodule.torch.base import BaseTorchMLModule
@@ -135,6 +141,17 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
         ),
         provider_store=VinVLStore(),
         training_id="vinvl",
+    ),
+    # S-BERT
+    ModuleTestConfiguration(
+        "distiluse-base-multilingual-cased-v2",
+        lambda: DistilUseBaseMultilingualCasedV2Module(),
+        training_id="cased-v2",
+        batch_factory=lambda: (
+            torch.LongTensor([[2, 3, 4]]),  # token ids
+            torch.FloatTensor([[1, 1, 1]]),  # attention mask
+        ),
+        provider_store=SBERTDistiluseBaseMultilingualCasedV2Store(),
     ),
 ]
 

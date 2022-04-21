@@ -1,13 +1,14 @@
 from io import BytesIO
-from typing import Any, Callable, Dict, List, Optional, OrderedDict, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, OrderedDict, Tuple, Union
 
-import requests
 import torch
 from tokenizers import Tokenizer
 
 from mlmodule.contrib.sentences.distilbert.transforms import TokenizerTransform
+from mlmodule.v2.base.predictions import BatchModelPrediction
+from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
-from mlmodule.v2.torch.utils import add_prefix_to_state_dict, save_state_dict_to_bytes
+from mlmodule.v2.torch.utils import save_state_dict_to_bytes
 
 from .blocks.dense import Dense
 from .blocks.embeddings import Embeddings
@@ -16,12 +17,9 @@ from .blocks.transformers import Transformer
 from .config import DistilBertConfig
 
 
-class BaseDistilBertModule(TorchMlModule):
-
-    transformer_weights_url: str
-    dense_layer_weights_url: str
-    tokenizer_params_url: str
-
+class TorchDistilBertModule(
+    TorchMlModule[Tuple[torch.LongTensor, torch.FloatTensor], torch.Tensor]
+):
     def __init__(
         self,
         device: torch.device,
@@ -47,56 +45,24 @@ class BaseDistilBertModule(TorchMlModule):
             )
         return self._tokenizer
 
-    def load_state_dict(
-        self,
-        state_dict: "OrderedDict[str, Union[torch.Tensor, str]]",
-        strict: bool = True,
-    ):
-        tokenizer_config = cast(str, state_dict.pop("_tokenizer_json"))
-        self._tokenizer = Tokenizer.from_str(tokenizer_config)
-        super().load_state_dict(
-            cast(OrderedDict[str, torch.Tensor], state_dict), strict=strict
-        )
-
-    def state_dict(self):
-        """Full state dict with tokenizer"""
-        # Getting the basic state
-        state: OrderedDict[str, Union[torch.Tensor, str]] = super().state_dict()
-
-        # Adding the tokenizer data
-        state["_tokenizer_json"] = self.get_tokenizer().to_str()
-        return state
-
-    def set_state(self, state: bytes, **options) -> None:
-        state_dict: OrderedDict[str, Union[torch.Tensor, str]] = torch.load(
+    def set_state(self, state: bytes) -> None:
+        state_payload: Tuple[str, OrderedDict[str, torch.Tensor]] = torch.load(
             BytesIO(state), map_location=self.device
         )
+        tokenizer_config, state_dict = state_payload
+
+        # Extracting tokeniser
+        self._tokenizer = Tokenizer.from_str(tokenizer_config)
+
+        # Loading model weights
         self.load_state_dict(state_dict)
 
-    def get_state(self, **options) -> bytes:
-        return save_state_dict_to_bytes(self.state_dict())
-
-    def set_state_from_provider(self) -> None:
-        """Gets model weigths from HuggingFace and applies them to the current model"""
-        # Loading embeddings and transformer weights
-        state: OrderedDict[str, torch.Tensor] = torch.hub.load_state_dict_from_url(
-            self.transformer_weights_url, map_location=self.device
-        )
-        # Loading dense layer weights
-        dense_state = torch.hub.load_state_dict_from_url(
-            self.dense_layer_weights_url, map_location=self.device
-        )
-        state.update(add_prefix_to_state_dict(dense_state, "dense"))
-        # Loading weights
-        super().load_state_dict(state)
-        # Loading tokenizer
-        resp = requests.get(self.tokenizer_params_url)
-        if resp.status_code == 200:
-            self._tokenizer = Tokenizer.from_str(resp.text)
-        else:
-            raise ValueError(
-                f"Cannot load tokenizer configuration from {self.tokenizer_params_url}"
-            )
+    def get_state(self) -> bytes:
+        # Getting tokenizer and weights
+        tokenizer_config = self.get_tokenizer().to_str()
+        weights = self.state_dict()
+        # Returns a tuple of tokenizer and weights
+        return save_state_dict_to_bytes((tokenizer_config, weights))
 
     def get_head_mask(
         self,
@@ -150,7 +116,7 @@ class BaseDistilBertModule(TorchMlModule):
         self,
         input_ids: Optional[torch.LongTensor] = None,
         attention_mask: Optional[torch.FloatTensor] = None,
-        head_mask: Optional[Union[torch.FloatTensor, List[None]]] = None,
+        head_mask: Optional[torch.FloatTensor] = None,
         inputs_embeds: Optional[torch.FloatTensor] = None,
         output_attentions: bool = None,
         output_hidden_states: bool = None,
@@ -206,61 +172,62 @@ class BaseDistilBertModule(TorchMlModule):
             )
         elif input_ids is not None:
             input_shape = input_ids.size()
+            device = input_ids.device
         elif inputs_embeds is not None:
             input_shape = inputs_embeds.size()[:-1]
+            device = inputs_embeds.device
         else:
             raise ValueError("You have to specify either input_ids or inputs_embeds")
 
-        device = input_ids.device if input_ids is not None else inputs_embeds.device
-
         if attention_mask is None:
-            attention_mask = torch.ones(input_shape, device=device)  # (bs, seq_length)
-
-        # Prepare head mask if needed
-        head_mask = self.get_head_mask(head_mask, self.config.num_hidden_layers)
+            attention_mask = torch.FloatTensor(
+                torch.ones(input_shape, device=device)
+            )  # (bs, seq_length)
 
         if inputs_embeds is None:
             inputs_embeds = self.embeddings(input_ids)  # (bs, seq_length, dim)
         return self.transformer(
             x=inputs_embeds,
             attn_mask=attention_mask,
-            head_mask=head_mask,
+            head_mask=self.get_head_mask(head_mask, self.config.num_hidden_layers),
             output_attentions=output_attentions,
             output_hidden_states=output_hidden_states,
         )
 
     def forward(
-        self, input_ids: torch.LongTensor, attention_mask: torch.FloatTensor
+        self, batch: Tuple[torch.LongTensor, torch.FloatTensor]
     ) -> torch.Tensor:
+        """Forward of DistilBERT
+
+        Args:
+            batch (tuple[torch.LongTensor], torch.FloatTensor): A tuple of token ids and attention mask per token.
+                Dimensions:
+                    - token ids (n_batch, n_tokens)
+                    - attention masks (n_batch, n_tokens)
+
+        Returns:
+            torch.Tensor: The sentence embedding of all sentences in the batch
+        """
+        input_ids, attention_mask = batch
         output_tokens, _ = self.forward_transformer(input_ids, attention_mask)
         features = self.pool.forward(
             {"token_embeddings": output_tokens, "attention_mask": attention_mask}
         )
         return self.dense.forward(features)["sentence_embedding"]
 
+    def to_predictions(
+        self, forward_output: torch.Tensor
+    ) -> BatchModelPrediction[torch.Tensor]:
+        """Transforms forward output into a BatchModelPrediction with features"""
+        return BatchModelPrediction(features=forward_output)
+
     def get_dataset_transforms(self) -> List[Callable]:
         return [TokenizerTransform(self.get_tokenizer())]
 
 
-class DistilUseBaseMultilingualCasedV2Module(BaseDistilBertModule):
+class DistilUseBaseMultilingualCasedV2Module(TorchDistilBertModule):
 
-    transformer_weights_url: str = (
-        "https://cdn-lfs.huggingface.co"
-        "/sentence-transformers/distiluse-base-multilingual-cased-v2"
-        "/0ea26561995c7c873e177e6801bb80f36511281d4d96c0f62aea6c19e85ddb7b"
-    )
-    dense_layer_weights_url: str = (
-        "https://cdn-lfs.huggingface.co"
-        "/sentence-transformers/distiluse-base-multilingual-cased-v2"
-        "/64fe81485f483cee6c54573686e4117a9e6f32e1579022d3621a1487d5bfea58"
-    )
-    tokenizer_params_url: str = (
-        "https://huggingface.co"
-        "/sentence-transformers/distiluse-base-multilingual-cased-v2/raw/main/tokenizer.json"
-    )
-    mlmodule_model_uri: str = "text-encoder/distiluse-multilingual-cased-v2.pt"
-
-    def __init__(self, device: torch.device):
+    def __init__(self, device: torch.device = torch.device("cpu")):
         config = DistilBertConfig(
             vocab_size=119547,
             activation="gelu",
@@ -292,3 +259,10 @@ class DistilUseBaseMultilingualCasedV2Module(BaseDistilBertModule):
             "activation_function": torch.nn.Tanh(),
         }
         super().__init__(device, config, pooling_config, dense_config)
+
+    @property
+    def state_type(self) -> StateType:
+        return StateType(
+            backend="pytorch",
+            architecture="sbert-distiluse-base-multilingual",
+        )
