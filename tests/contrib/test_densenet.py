@@ -1,129 +1,84 @@
 import os
+import pathlib
+from typing import List, cast
 
-from mlmodule.contrib.densenet import (
-    DenseNet161ImageNetClassifier,
-    DenseNet161ImageNetFeatures,
-    DenseNet161PlacesClassifier,
-    DenseNet161PlacesFeatures,
-)
-from mlmodule.torch.data.base import IndexedDataset
-from mlmodule.torch.data.images import ImageDataset
-from mlmodule.utils import list_files_in_dir
+import torch
 
-
-def test_densenet_imagenet_features_inference(torch_device):
-    densenet = DenseNet161ImageNetFeatures(device=torch_device)
-
-    # Pretrained model
-    densenet.load()
-    base_path = os.path.join("tests", "fixtures", "cats_dogs")
-    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
-    dataset = ImageDataset(file_names)
-
-    file_names_idx, features = densenet.bulk_inference(
-        dataset, data_loader_options={"batch_size": 10}
-    )
-    assert len(features) == 50
-    assert len(features[0]) == 2208
-    assert type(file_names[0]) == str
-    assert set(file_names_idx) == set(file_names)
+from mlmodule.contrib.densenet.modules import TorchDenseNetModule
+from mlmodule.labels.places import PLACES_LABELS
+from mlmodule.v2.helpers.callbacks import CollectLabelsInMemory
+from mlmodule.v2.states import StateKey
+from mlmodule.v2.stores import Store
+from mlmodule.v2.torch.datasets import ImageDataset, LocalBinaryFilesDataset
+from mlmodule.v2.torch.options import TorchRunnerOptions
+from mlmodule.v2.torch.runners import TorchInferenceRunner
 
 
-def test_densenet_places365_features_inference(torch_device):
-    densenet = DenseNet161PlacesFeatures(device=torch_device)
+def test_densenet_cats_dogs(
+    cats_and_dogs_images: List[str], torch_device: torch.device
+):
+    """Test DenseNet classification of cats and dogs images"""
+    # Creating a dataset
+    dataset_dir = os.path.dirname(cats_and_dogs_images[0])
+    dataset = ImageDataset(LocalBinaryFilesDataset(cats_and_dogs_images))
 
-    # Pretrained model
-    densenet.load()
-    base_path = os.path.join("tests", "fixtures", "cats_dogs")
-    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
-    dataset = ImageDataset(file_names)
-
-    file_names_idx, features = densenet.bulk_inference(
-        dataset, data_loader_options={"batch_size": 10}
-    )
-    assert len(features) == 50
-    assert len(features[0]) == 2208
-    assert type(file_names[0]) == str
-    assert set(file_names_idx) == set(file_names)
-
-
-def test_densenet_imagenet_classifier(torch_device):
-    densenet = DenseNet161ImageNetFeatures(device=torch_device)
-
-    # Pretrained model
-    densenet.load()
-
-    # Getting data
-    base_path = os.path.join("tests", "fixtures", "cats_dogs")
-    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
-    dataset = ImageDataset(file_names)
-
-    # Getting features
-    idx, features = densenet.bulk_inference(
-        dataset, data_loader_options={"batch_size": 10}
+    # Loading model
+    model = TorchDenseNetModule("densenet161")
+    # Pre-trained state
+    Store().load(
+        model, state_key=StateKey(state_type=model.state_type, training_id="imagenet")
     )
 
-    # Creating features dataset
-    features = IndexedDataset(idx, features)  # Zipping indices and features
+    # Inference runner for Torch model
+    labels = CollectLabelsInMemory()
+    runner = TorchInferenceRunner(
+        dataset=dataset,
+        model=model,
+        callbacks=[labels],
+        options=TorchRunnerOptions(device=torch_device),
+    )
+    runner.run()
 
-    # Getting classifier
-    densenet_cls = DenseNet161ImageNetClassifier(device=torch_device)
-    densenet_cls.load()
-
-    # Running inference
-    file_names_idx, weights = densenet_cls.bulk_inference(features)
-    max_class = weights.argmax(axis=1)
-    # Putting class label
-    label_set = densenet_cls.get_labels()
-    max_class = [label_set[c] for c in max_class]
-
-    # Collecting classes with filenames
-    file_class = dict(zip(file_names_idx, max_class))
-
-    # Making sure we have all input classified
-    assert set(file_names) == set(file_names_idx)
-
-    # Verifying a couple of output labels
-    assert "cat" in file_class[os.path.join(base_path, "cat_90.jpg")].lower()
-    assert file_class[os.path.join(base_path, "dog_900.jpg")] == "Labrador retriever"
-
-
-def test_densenet_places365_classifier(torch_device):
-    densenet = DenseNet161PlacesFeatures(device=torch_device)
-
-    # Pretrained model
-    densenet.load()
-
-    # Getting data
-    base_path = os.path.join("tests", "fixtures", "cats_dogs")
-    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
-    dataset = ImageDataset(file_names)
-
-    # Getting features
-    idx, features = densenet.bulk_inference(
-        dataset, data_loader_options={"batch_size": 10}
+    # Checking the resulting labels
+    labels_dict = dict(zip(cast(List[str], labels.indices), labels.labels))
+    # Cat sample
+    assert "cat" in labels_dict[os.path.join(dataset_dir, "cat_930.jpg")].lower()
+    # Dog sample
+    dog_file = os.path.join(dataset_dir, "dog_900.jpg")
+    assert (
+        "pointer" in labels_dict[dog_file].lower()
+        or "labrador" in labels_dict[dog_file].lower()
     )
 
-    # Creating features dataset
-    features = IndexedDataset(idx, features)  # Zipping indices and features
 
-    # Getting classifier
-    densenet_cls = DenseNet161PlacesClassifier(device=torch_device)
-    densenet_cls.load()
+def test_densenet_places365(torch_device: torch.device):
+    """Test DenseNet classification of cats and dogs images"""
+    # Creating a dataset
+    office_picture = str(pathlib.Path("tests", "fixtures", "berset", "berset3.jpg"))
+    outdoor_picture = str(pathlib.Path("tests", "fixtures", "objects", "soldiers.jpg"))
+    dataset = ImageDataset(LocalBinaryFilesDataset([office_picture, outdoor_picture]))
 
-    # Running inference
-    file_names_idx, weights = densenet_cls.bulk_inference(features)
-    max_class = weights.argmax(axis=1)
-    # Putting class label
-    label_set = densenet_cls.get_labels()
-    max_class = [label_set[c] for c in max_class]
+    # Loading model
+    model = TorchDenseNetModule("densenet161", label_set=PLACES_LABELS)
+    # Pre-trained state
+    Store().load(
+        model, state_key=StateKey(state_type=model.state_type, training_id="places365")
+    )
 
-    # Collecting classes with filenames
-    file_class = dict(zip(file_names_idx, max_class))
+    # Inference runner for Torch model
+    labels = CollectLabelsInMemory()
+    runner = TorchInferenceRunner(
+        dataset=dataset,
+        model=model,
+        callbacks=[labels],
+        options=TorchRunnerOptions(device=torch_device),
+    )
+    runner.run()
 
-    # Making sure we have all input classified
-    assert set(file_names) == set(file_names_idx)
-
-    # Verifying a couple of output labels
-    assert "veterinarians" in file_class[os.path.join(base_path, "cat_90.jpg")].lower()
-    assert "veterinarians" in file_class[os.path.join(base_path, "dog_900.jpg")].lower()
+    # Checking the resulting labels
+    labels_dict = dict(zip(cast(List[str], labels.indices), labels.labels))
+    print(labels_dict)
+    # Office sample
+    assert "legislative chamber" == labels_dict[office_picture].lower()
+    # Dog sample
+    assert "army base" == labels_dict[outdoor_picture].lower()

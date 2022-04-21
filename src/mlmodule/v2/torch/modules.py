@@ -69,10 +69,10 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
         ```
 
     Note:
-        This is a generic class taking a `_BatchType` type argument.
-        This corresponds to the type of data the
-        [`forward_predictions`][mlmodule.v2.torch.modules.TorchMlModule.forward_predictions]
-        will receive. It is most likely `torch.Tensor`
+        This is a generic class taking a `_BatchType` and `_ForwardOutputType` type argument.
+        This corresponds respectively to the type of data the
+        [`forward`][mlmodule.v2.torch.modules.TorchMlModule.forward]
+        will take as argument and return. It is most likely `torch.Tensor`
     """
 
     def __init__(self, device: torch.device = torch.device("cpu")):

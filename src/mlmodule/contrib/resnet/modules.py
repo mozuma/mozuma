@@ -2,10 +2,12 @@ from collections import OrderedDict
 from typing import Callable, List, Tuple
 
 import torch
-import torchvision.models
-from typing_extensions import Literal
 
-from mlmodule.contrib.resnet.utils import sanitize_resnet_arch
+from mlmodule.helpers.torchvision import (
+    ResNetArch,
+    get_torchvision_model,
+    sanitize_torchvision_arch,
+)
 from mlmodule.labels.base import LabelSet
 from mlmodule.labels.imagenet import IMAGENET_LABELS
 from mlmodule.v2.base.predictions import BatchModelPrediction
@@ -13,21 +15,9 @@ from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 from mlmodule.v2.torch.transforms import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 
-ResNetArchs = Literal[
-    "resnet18",
-    "resnet34",
-    "resnet50",
-    "resnet101",
-    "resnet152",
-    "resnext50_32x4d",
-    "resnext101_32x8d",
-    "wide_resnet50_2",
-    "wide_resnet101_2",
-]
-
 
 class TorchResNetModule(TorchMlModule[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]):
-    """PyTorch ResNet architecture for ImageNet classification.
+    """PyTorch ResNet architecture.
 
     See [PyTorch's documentation](https://pytorch.org/vision/stable/_modules/torchvision/models/resnet.html).
 
@@ -51,7 +41,7 @@ class TorchResNetModule(TorchMlModule[torch.Tensor, Tuple[torch.Tensor, torch.Te
 
     def __init__(
         self,
-        resnet_arch: ResNetArchs,
+        resnet_arch: ResNetArch,
         label_set: LabelSet = None,
         device: torch.device = torch.device("cpu"),
     ):
@@ -60,7 +50,7 @@ class TorchResNetModule(TorchMlModule[torch.Tensor, Tuple[torch.Tensor, torch.Te
         self.label_set = label_set or IMAGENET_LABELS
 
         # Getting the resnet architecture from torchvision
-        base_resnet = self.get_resnet_module(
+        base_resnet = get_torchvision_model(
             resnet_arch, num_classes=len(self.label_set)
         )
         self.features_module = torch.nn.Sequential(
@@ -82,7 +72,7 @@ class TorchResNetModule(TorchMlModule[torch.Tensor, Tuple[torch.Tensor, torch.Te
 
     @property
     def resnet_arch_safe(self) -> str:
-        return sanitize_resnet_arch(self.resnet_arch)
+        return sanitize_torchvision_arch(self.resnet_arch)
 
     @property
     def state_type(self) -> StateType:
@@ -97,13 +87,6 @@ class TorchResNetModule(TorchMlModule[torch.Tensor, Tuple[torch.Tensor, torch.Te
             architecture=self.resnet_arch_safe,
             extra=(f"cls{len(self.label_set)}",),
         )
-
-    @classmethod
-    def get_resnet_module(
-        cls, resnet_arch: ResNetArchs, **kwargs
-    ) -> torchvision.models.ResNet:
-        # Getting the ResNet architecture https://pytorch.org/vision/stable/models.html
-        return getattr(torchvision.models, resnet_arch)(**kwargs)
 
     def forward_features(self, x: torch.Tensor) -> torch.Tensor:
         return torch.flatten(self.features_module(x), 1)
@@ -123,7 +106,7 @@ class TorchResNetModule(TorchMlModule[torch.Tensor, Tuple[torch.Tensor, torch.Te
         """Forward pass of the ResNet model
 
         Returns:
-            BatchModelPrediction: Features and labels_scores (ImageNet)
+            BatchModelPrediction: Features and labels_scores
         """
         features, labels_scores = forward_output
         return BatchModelPrediction(features=features, label_scores=labels_scores)
@@ -133,4 +116,4 @@ class TorchResNetModule(TorchMlModule[torch.Tensor, Tuple[torch.Tensor, torch.Te
         return TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 
     def get_labels(self) -> LabelSet:
-        return IMAGENET_LABELS
+        return self.label_set

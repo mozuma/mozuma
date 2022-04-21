@@ -1,14 +1,24 @@
 # DenseNet
 
-!!! warning "Deprecated"
-    This model needs to be migrated to the latest version
+PyTorch implementation of DenseNet architecture.
 
-We are using torchvision to load pretrained models, see https://pytorch.org/docs/stable/torchvision/models.html.
 
-# Feature Models
+## Model
 
-TODO
+The DenseNet model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
 
-# Pretrained Classifier
+::: mlmodule.contrib.densenet.TorchDenseNetModule
+    selection:
+        members: none
 
-TODO
+## Pre-trained state origins
+
+See the [stores documentation](../references/stores.md) for usage.
+
+::: mlmodule.contrib.densenet.stores.DenseNetTorchVisionStore
+    selection:
+        members: none
+
+::: mlmodule.contrib.densenet.stores.DenseNetPlaces365Store
+    selection:
+        members: none
