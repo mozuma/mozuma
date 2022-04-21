@@ -48,7 +48,7 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
     ),
     # DenseNet
     ModuleTestConfiguration(
-        "torchdensenet121",
+        "torchdensenet161",
         lambda: TorchDenseNetModule("densenet161"),
         batch_factory=lambda: torch.rand(
             [2, 3, 224, 224]
@@ -57,7 +57,7 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
         training_id="imagenet",
     ),
     ModuleTestConfiguration(
-        "torchdensenet121places",
+        "torchdensenet161places",
         lambda: torch_densenet_places365("densenet161"),
         batch_factory=lambda: torch.rand(
             [2, 3, 224, 224]
@@ -179,7 +179,7 @@ def gpu_torch_device() -> torch.device:
     return torch.device("cuda")
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def cats_and_dogs_images() -> List[str]:
     base_path = os.path.join("tests", "fixtures", "cats_dogs")
     return list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]

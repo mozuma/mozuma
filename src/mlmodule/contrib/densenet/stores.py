@@ -159,7 +159,10 @@ def _fix_densenet_state_dict_places365(
 
 
 class DenseNetPlaces365Store(_BaseDenseNetTorchVisionStore):
-    """Model store to load DenseNet weights pretrained on Places365"""
+    """Model store to load DenseNet weights pretrained on Places365
+
+    See [places365 documentation](https://github.com/CSAILVision/places365) for more info.
+    """
 
     _training_id = "places365"
     _arch_to_state_url = DENSENET_PLACES365_WEIGHTS
