@@ -7,6 +7,10 @@ import torch
 from _pytest.fixtures import SubRequest
 
 from mlmodule.contrib.arcface import ArcFaceFeatures
+from mlmodule.contrib.classification.modules import (
+    LinearClassifierTorchModule,
+    MLPClassifierTorchModule,
+)
 from mlmodule.contrib.clip.image import CLIPImageModule
 from mlmodule.contrib.clip.stores import CLIPStore
 from mlmodule.contrib.clip.text import CLIPTextModule
@@ -34,6 +38,7 @@ from mlmodule.contrib.sentences.distilbert.stores import (
 )
 from mlmodule.contrib.vinvl.modules import TorchVinVLDetectorModule
 from mlmodule.contrib.vinvl.stores import VinVLStore
+from mlmodule.labels.imagenet import IMAGENET_LABELS
 from mlmodule.torch.base import BaseTorchMLModule
 from mlmodule.torch.data.images import ImageDataset
 from mlmodule.types import StateDict
@@ -152,6 +157,22 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
             torch.FloatTensor([[1, 1, 1]]),  # attention mask
         ),
         provider_store=SBERTDistiluseBaseMultilingualCasedV2Store(),
+    ),
+    # Classifiers
+    ModuleTestConfiguration(
+        "linear-classifier",
+        lambda: LinearClassifierTorchModule(in_features=10, label_set=IMAGENET_LABELS),
+        batch_factory=lambda: torch.rand(3, 10),  # batch, input dimension
+    ),
+    ModuleTestConfiguration(
+        "mlp-classifier",
+        lambda: MLPClassifierTorchModule(
+            in_features=10,
+            hidden_layers=(5, 3),
+            label_set=IMAGENET_LABELS,
+            activation="ReLU",
+        ),
+        batch_factory=lambda: torch.rand(3, 10),  # batch, input dimension
     ),
 ]
 
