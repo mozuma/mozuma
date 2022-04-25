@@ -8,14 +8,31 @@ from mlmodule.v2.stores.abstract import AbstractStateStore
 _ModelType = TypeVar("_ModelType", bound=ModelWithState)
 
 
-class ListStateStore(AbstractStateStore[_ModelType]):
+class AbstractListStateStore(AbstractStateStore[_ModelType]):
+    """Helper to define a store from a fixed list of state keys.
+
+    The subclasses should implement the following:
+
+    * [`available_state_keys`][mlmodule.v2.stores.list.AbstractListStateStore.available_state_keys]
+    * [`state_downloader`][mlmodule.v2.stores.list.AbstractListStateStore.state_downloader]
+    """
+
     @abc.abstractproperty
     def available_state_keys(self) -> List[StateKey]:
-        """List of available state keys"""
+        """List of available state keys for this store
+
+        Returns:
+            list(StateKey): All available state keys in the store
+        """
 
     @abc.abstractmethod
     def state_downloader(self, model: _ModelType, state_key: StateKey) -> None:
-        """Downloads and applies a state to a model"""
+        """Downloads and applies a state to a model
+
+        Args:
+            model (_ModelType): The model that will be used to load the state
+            state_key (StateKey): The state key identifier
+        """
 
     def get_state_keys(self, state_type: StateType) -> List[StateKey]:
         return [

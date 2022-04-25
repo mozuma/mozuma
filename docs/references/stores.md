@@ -71,3 +71,12 @@ A store should inherit [`AbstractStateStore`][mlmodule.v2.stores.abstract.Abstra
 and implement the `save`, `load` and `get_state_keys` methods.
 
 ::: mlmodule.v2.stores.abstract.AbstractStateStore
+
+For stores used to download states of a single model, it can be useful to subclass the
+[`AbstractListStateStore`][mlmodule.v2.stores.list.AbstractListStateStore] directly.
+This makes it easier to define a store from a fix set of states as it is often the case when
+integrating the weights from external sources (pre-trained states for a paper, hugging face...).
+See [`SBERTDistiluseBaseMultilingualCasedV2Store`][mlmodule.contrib.sentences.distilbert.stores.SBERTDistiluseBaseMultilingualCasedV2Store]
+for an example.
+
+::: mlmodule.v2.stores.list.AbstractListStateStore

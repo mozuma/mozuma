@@ -9,11 +9,11 @@ from mlmodule.contrib.sentences.distilbert.modules import (
 )
 from mlmodule.helpers.torch import state_dict_combine
 from mlmodule.v2.states import StateKey, StateType
-from mlmodule.v2.stores.list import ListStateStore
+from mlmodule.v2.stores.list import AbstractListStateStore
 
 
 class SBERTDistiluseBaseMultilingualCasedV2Store(
-    ListStateStore[DistilUseBaseMultilingualCasedV2Module]
+    AbstractListStateStore[DistilUseBaseMultilingualCasedV2Module]
 ):
     """Loads weights from SBERT's hugging face
 
