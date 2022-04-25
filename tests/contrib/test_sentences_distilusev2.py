@@ -6,13 +6,11 @@ from mlmodule.contrib.sentences.distilbert.modules import (
     DistilUseBaseMultilingualCasedV2Module,
 )
 from mlmodule.contrib.sentences.distilbert.transforms import TokenizerTransform
+from mlmodule.v2.states import StateKey
+from mlmodule.v2.stores import Store
 
-# from mlmodule.v2.stores import MLModuleModelStore
 
-
-@pytest.mark.skip("Sentence embedding needs to be migrated to v2")
-@pytest.mark.parametrize("weights_src", ["provider", "mlmodule"])
-def test_embeddings(torch_device: torch.device, weights_src: str):
+def test_embeddings(torch_device: torch.device):
     try:
         from sentence_transformers import SentenceTransformer
     except ImportError:
@@ -32,17 +30,20 @@ def test_embeddings(torch_device: torch.device, weights_src: str):
         distilbert = DistilUseBaseMultilingualCasedV2Module(torch.device("cpu"))
         distilbert.eval()
         distilbert.to(torch_device)
-        if weights_src == "provider":
-            distilbert.set_state_from_provider()
-        else:
-            MLModuleModelStore().load(distilbert)
+        Store().load(
+            distilbert,
+            state_key=StateKey(distilbert.state_type, training_id="cased-v2"),
+        )
 
         tokenizer = TokenizerTransform(distilbert.get_tokenizer())
         tokens = tokenizer(sentence)
 
         embedding_mlmodule = (
             distilbert.forward(
-                torch.unsqueeze(tokens[0], 0), torch.unsqueeze(tokens[1], 0)
+                (
+                    torch.LongTensor(torch.unsqueeze(tokens[0], 0)),
+                    torch.FloatTensor(torch.unsqueeze(tokens[1], 0)),
+                )
             )
             .cpu()
             .numpy()
