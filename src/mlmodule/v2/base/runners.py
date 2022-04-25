@@ -1,6 +1,6 @@
 import abc
 import dataclasses
-from typing import Generic, List, Tuple, TypeVar, Union
+from typing import Generic, List, TypeVar
 
 _ModelType = TypeVar("_ModelType")
 _DataType = TypeVar("_DataType")
@@ -13,7 +13,7 @@ class _AbstractRunnerDataClass(
     Generic[_ModelType, _DataType, _CallbackType, _OptionsType]
 ):
     model: _ModelType
-    datasets: List[_DataType]
+    dataset: _DataType
     callbacks: List[_CallbackType]
     options: _OptionsType
 
@@ -35,8 +35,7 @@ class BaseRunner(
 
     Attributes:
         model (_ModelType): The model object to run the action against
-        datasets (List[_DataType]): The input datasets. Usually it's one for
-            inference tasks and multiple (train, test, eval, ...) for training.
+        dataset (_DataType): The input dataset
         callbacks (List[_CallbackType]): Callbacks to save model state or predictions
         options (_OptionsType): Options of the runner (devices...)
 
@@ -62,7 +61,7 @@ class BaseRunner(
             None                        # _OptionType
         ]):
             def run(self):
-                for index, data in enumerate(self.datasets[0]):
+                for index, data in enumerate(self.dataset):
                     # Helper function to call all matching callbacks
                     callbacks_caller(
                         self.callbacks,

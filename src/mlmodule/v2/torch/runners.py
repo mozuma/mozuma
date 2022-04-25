@@ -82,7 +82,7 @@ class TorchInferenceRunner(
 
     Attributes:
         model (TorchMlModule): The PyTorch model to run inference
-        datasets (List[TorchDataset]): Input dataset for the runner (list with one element)
+        dataset (TorchDataset): Input dataset for the runner
         callbacks (List[TorchRunnerCallbackType]): Callbacks to save features, labels or bounding boxes
         options (TorchRunnerOptions): PyTorch options
     """
@@ -90,7 +90,7 @@ class TorchInferenceRunner(
     def get_data_loader(self) -> DataLoader:
         """Creates a data loader from the options, the given dataset and the module transforms"""
         data_with_transforms = TorchDatasetTransformsWrapper(
-            dataset=self.datasets[0],
+            dataset=self.dataset,
             transform_func=transforms.Compose(self.model.get_dataset_transforms()),
         )
         return DataLoader(
@@ -153,7 +153,7 @@ class TorchInferenceMultiGPURunner(
 
     Attributes:
         model (TorchMlModule): The PyTorch model to run inference
-        datasets (List[TorchDataset]): Input dataset for the runner (list with one element)
+        dataset (TorchDataset): Input dataset for the runner
         callbacks (List[TorchRunnerCallbackType]): Callbacks to save features, labels or bounding boxes
         options (TorchMultiGPURunnerOptions): PyTorch multi-gpu options
     """
@@ -161,7 +161,7 @@ class TorchInferenceMultiGPURunner(
     def get_data_loader(self) -> DataLoader:
         """Creates a data loader from the options, the given dataset and the module transforms"""
         data_with_transforms = TorchDatasetTransformsWrapper(
-            dataset=self.datasets[0],
+            dataset=self.dataset,
             transform_func=transforms.Compose(self.model.get_dataset_transforms()),
         )
 
@@ -294,7 +294,7 @@ class TorchTrainingRunner(
 
     Attributes:
         model (TorchMlModule): The PyTorch model to run inference
-        datasets (List[TorchTrainingDataset]): Train and test datasets for the runner
+        datasets (Tuple[TorchTrainingDataset, TorchTrainingDataset]): Train and test datasets for the runner
         callbacks (List[Union[BaseRunnerEndCallback, SaveModelWeights]]):
             Callback to save model weights plus one or more callbacks for when the runner ends.
         options (TorchTrainingOptions): PyTorch training options
@@ -364,8 +364,8 @@ class TorchTrainingRunner(
         manual_seed(self.options.seed + rank)
         device = idist.device()
 
-        train_loader = self.get_data_loader(self.datasets[0])
-        test_loader = self.get_data_loader(self.datasets[1], shuffle=False)
+        train_loader = self.get_data_loader(self.dataset[0])
+        test_loader = self.get_data_loader(self.dataset[1], shuffle=False)
 
         # If data has zero size stop here, otherwise engine will raise an error
         if len(train_loader) == 0 or len(test_loader) == 0:
