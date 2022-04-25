@@ -314,8 +314,13 @@ class LocalBinaryFilesTrainingDataset(
         if len(self.paths) != len(self.labels):
             raise ValueError("Length for classes doensn't match lenght for labels")
 
-        self.classes = set(self.labels)
-        self.classes_to_idx = {class_: idx for idx, class_ in enumerate(self.classes)}
+        self._make_classes()
+
+    def _make_classes(self) -> None:
+        for label in self.labels:
+            if label not in self.classes:
+                self.classes.add(label)
+                self.classes_to_idx[label] = len(self.classes) - 1
 
     def __getitem__(self, index: int) -> Tuple[BinaryIO, int]:
         _, file = super().__getitem__(index)
