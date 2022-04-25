@@ -226,6 +226,14 @@ class TorchDistilBertModule(
 
 
 class DistilUseBaseMultilingualCasedV2Module(TorchDistilBertModule):
+    """Multilingual model for semantic similarity
+
+    See [
+        distiluse-base-multilingual-cased-v2
+    ](https://huggingface.co/sentence-transformers/distiluse-base-multilingual-cased-v2)
+    and [sbert documentation](https://www.sbert.net/docs/pretrained_models.html#multi-lingual-models)
+    for more information.
+    """
 
     def __init__(self, device: torch.device = torch.device("cpu")):
         config = DistilBertConfig(

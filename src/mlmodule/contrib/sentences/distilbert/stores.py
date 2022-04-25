@@ -15,9 +15,11 @@ from mlmodule.v2.stores.list import ListStateStore
 class SBERTDistiluseBaseMultilingualCasedV2Store(
     ListStateStore[DistilUseBaseMultilingualCasedV2Module]
 ):
-    """Loads weights from SBERT
+    """Loads weights from SBERT's hugging face
 
-    See https://huggingface.co/sentence-transformers/distiluse-base-multilingual-cased-v2
+    See [
+        Hugging face's documentation
+    ](https://huggingface.co/sentence-transformers/distiluse-base-multilingual-cased-v2).
     """
 
     transformer_weights_url = (
