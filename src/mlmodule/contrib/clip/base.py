@@ -28,7 +28,7 @@ class BaseCLIPModule(TorchMlModule[torch.Tensor, torch.Tensor]):
         model_type: Literal["image", "text"],
         device: torch.device = torch.device("cpu"),
     ):
-        super().__init__(device=device)
+        super().__init__(device=device, is_trainable=False)
         self.clip_model_name = clip_model_name
         self.model_type = model_type
 

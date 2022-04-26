@@ -276,6 +276,7 @@ class TorchInferenceMultiGPURunner(
         return engine
 
 
+@dataclasses.dataclass(frozen=True)
 class TorchTrainingRunner(
     BaseRunner[
         TorchMlModule,
@@ -295,6 +296,11 @@ class TorchTrainingRunner(
             Callback to save model weights plus one or more callbacks for when the runner ends.
         options (TorchTrainingOptions): PyTorch training options
     """
+
+    def __post_init__(self) -> None:
+        #  Warn user if model isn't trainable
+        if not getattr(self.model, "is_trainable", None):
+            logger.warning(self.model.__class__.__name__ + " is not trainable!")
 
     def get_data_loader(self, dataset: TorchTrainingDataset, **kwargs) -> DataLoader:
         """Creates the data loaders from the options, the given datasets and the module transforms.

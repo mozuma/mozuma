@@ -28,7 +28,7 @@ class TorchDistilBertModule(
         dense_config: Dict[str, Any],
     ):
         self.device = device
-        super().__init__()
+        super().__init__(is_trainable=False)
         self.config = config
 
         self.embeddings = Embeddings(config)  # Embeddings
