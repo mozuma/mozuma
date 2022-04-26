@@ -1,3 +1,4 @@
+import gzip
 from collections import OrderedDict
 from unittest import mock
 
@@ -5,10 +6,11 @@ import pytest
 import requests_mock
 from requests.auth import _basic_auth_str
 
+from mlmodule.v2.base.models import ModelWithState
 from mlmodule.v2.states import StateKey, StateType
 from mlmodule.v2.stores.github import (
     GitHUBReleaseStore,
-    call_github_api,
+    call_github_with_auth,
     get_github_basic_auth,
     get_github_token,
     gh_asset_name_to_state_key,
@@ -63,14 +65,14 @@ def test_authenticate_github_basic(basic_github_auth: str):
     url = "https://api.github.com/test"
     with requests_mock.Mocker() as m:
         m.get(url, request_headers={"Authorization": basic_github_auth})
-        call_github_api("get", url)
+        call_github_with_auth("get", url)
 
 
 def test_authenticate_github_token(token_github_auth: str):
     url = "https://api.github.com/test"
     with requests_mock.Mocker() as m:
         m.get(url, request_headers={"Authorization": token_github_auth})
-        call_github_api("get", url)
+        call_github_with_auth("get", url)
 
 
 def test_paginate_github_api():
@@ -175,3 +177,60 @@ def test_gh_store_get_state_keys():
                 training_id="train2",
             ),
         }
+
+
+def test_gh_store_download_state_key():
+    repo_owner = "AAA"
+    repo_name = "test"
+    state_key = StateKey(
+        state_type=StateType(
+            backend="pytorch", architecture="resnet18", extra=("imagenet",)
+        ),
+        training_id="train1",
+    )
+    url = (
+        f"https://github.com/{repo_owner}/{repo_name}"
+        "/releases/download/state.pytorch.resnet18/imagenet.train1.state.gzip"
+    )
+    store = GitHUBReleaseStore(repository_owner=repo_owner, repository_name=repo_name)
+
+    # The file exists
+    with requests_mock.Mocker() as m:
+        m.get(url, content=gzip.compress(b"aaa"))
+        assert store.gh_download_state_key(state_key) == b"aaa"
+
+    # The file doesn't exists
+    with requests_mock.Mocker() as m:
+        m.get(url, status_code=404)
+        assert store.gh_download_state_key(state_key) is None
+
+
+def test_gh_store_load(model_with_state: ModelWithState):
+    repo_owner = "AAA"
+    repo_name = "test"
+    state_key = StateKey(
+        state_type=StateType(
+            backend="pytorch", architecture="resnet18", extra=("imagenet",)
+        ),
+        training_id="train1",
+    )
+    url = (
+        f"https://github.com/{repo_owner}/{repo_name}"
+        "/releases/download/state.pytorch.resnet18/imagenet.train1.state.gzip"
+    )
+    store = GitHUBReleaseStore[ModelWithState](
+        repository_owner=repo_owner, repository_name=repo_name
+    )
+
+    # Update the state type to match the one of the URL
+    model_with_state._state_type = state_key.state_type  # type: ignore
+
+    # Initial state of the model
+    assert model_with_state.get_state() != b"aaa"
+
+    with requests_mock.Mocker() as m:
+        m.get(url, content=gzip.compress(b"aaa"))
+        store.load(model_with_state, state_key)
+
+    # Makes sure the model state has changed
+    assert model_with_state.get_state() == b"aaa"

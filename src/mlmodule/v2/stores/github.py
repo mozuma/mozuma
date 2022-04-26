@@ -1,4 +1,5 @@
 import dataclasses
+import gzip
 import os
 from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar
 
@@ -32,7 +33,7 @@ def get_github_token() -> Optional[str]:
     return os.environ.get("GH_TOKEN")
 
 
-def call_github_api(method: str, url: str, **kwargs) -> requests.Response:
+def call_github_with_auth(method: str, url: str, **kwargs) -> requests.Response:
     """Authenticated call to GitHUB API"""
     # Resolving authentication method
     basic_auth = get_github_basic_auth()
@@ -50,7 +51,7 @@ def paginate_github_api(method: str, url: str, **kwargs) -> Sequence[_JsonType]:
     results: List[_JsonType] = []
     while True:
         # Calling GitHUB
-        response = call_github_api(method, url, **kwargs)
+        response = call_github_with_auth(method, url, **kwargs)
         response.raise_for_status()
 
         # Accumulating results
@@ -73,6 +74,13 @@ def paginate_github_api(method: str, url: str, **kwargs) -> Sequence[_JsonType]:
 def state_type_to_gh_tag(release_name_prefix: str, state_type: StateType) -> str:
     """Formats a state type to a GitHUB release tag"""
     return f"{release_name_prefix}.{state_type.backend}.{state_type.architecture}"
+
+
+def state_key_to_gh_asset_name(state_key: StateKey) -> str:
+    """From a state key returns the name of the asset in the corresponding release"""
+    extra = tuple(state_key.state_type.extra or tuple())
+    filename = ".".join(extra + (state_key.training_id,))
+    return f"{filename}.state.gzip"
 
 
 def gh_asset_name_to_state_key(
@@ -147,10 +155,36 @@ class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
     def gh_release_by_tag_url(self, tag: str) -> str:
         return f"https://api.github.com/repos/{self.repository_owner}/{self.repository_name}/releases/tags/{tag}"
 
+    def gh_download_state_key_url(self, state_key: StateKey) -> str:
+        """Download URL for the state key"""
+        return (
+            f"https://github.com/{self.repository_owner}/{self.repository_name}"
+            f"/releases/download/{state_type_to_gh_tag(self.release_name_prefix, state_key.state_type)}"
+            f"/{state_key_to_gh_asset_name(state_key)}"
+        )
+
+    def gh_download_state_key(self, state_key: StateKey) -> Optional[bytes]:
+        """Download the state key from GitHUB
+
+        Returns:
+            BinaryIO | None: The binary stream of the weights or None if the weights doesn't exist"""
+        response = call_github_with_auth(
+            "get", self.gh_download_state_key_url(state_key)
+        )
+
+        # When state does not exists
+        if response.status_code == 404:
+            return None
+
+        # For any other error
+        response.raise_for_status()
+
+        return gzip.decompress(response.content)
+
     def get_state_keys(self, state_type: StateType) -> List[StateKey]:
         """List state keys available for a given state type"""
         # Getting release details
-        response = call_github_api(
+        response = call_github_with_auth(
             "get",
             self.gh_release_by_tag_url(
                 state_type_to_gh_tag(self.release_name_prefix, state_type)
@@ -177,4 +211,15 @@ class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
         raise NotImplementedError()
 
     def load(self, model: _ModelType, state_key: StateKey) -> None:
-        return super().load(model, state_key)
+        # Making sure the model and state key are compatible
+        super().load(model, state_key)
+
+        # Downloading the state
+        binary_state = self.gh_download_state_key(state_key)
+        if binary_state is None:
+            raise ValueError(
+                f"The given state key does not exist in the store: {state_key}"
+            )
+
+        # Applying to the model
+        model.set_state(binary_state)
