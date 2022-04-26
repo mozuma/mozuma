@@ -60,11 +60,12 @@ class TorchTrainingOptions:
         optimizer (torch.optim.Optimizer): Optimization strategy to use during training.
         num_epochs (int): number of epochs to train the model. Default, 24.
         validate_every (int): run model's validation every ``validate_every`` epochs. Default, 3.
-        metrics (dict): Dictionary where values are Ignite's metrics to compute during evaluation.
+        metrics (Dict[str, Metric]): Dictionary where values are Ignite's metrics to compute during evaluation.
         data_loader_options (dict): Options passed to `torch.utils.dataloader.DataLoader`.
         tqdm_enabled (bool): Whether to print a `tqdm` progress bar. Default, False.
         dist_options (dict): Options passed to `ignite.distributed.Parallel`.
         seed (int): random state seed to set. Default, 543.
+
     Note:
         `data_loader_options`'s options `batch_size` and `num_worker`
         will be automatically scaled according to `world_size` and `nprocs` respectively.
@@ -80,7 +81,6 @@ class TorchTrainingOptions:
     num_epoch: int = 24
     validate_every: int = 3
     metrics: Dict[str, Metric] = dataclasses.field(default_factory=dict)
-    metrics: dict = dataclasses.field(default_factory=dict)
 
     data_loader_options: dict = dataclasses.field(default_factory=dict)
     tqdm_enabled: bool = False

@@ -170,7 +170,7 @@ class TorchInferenceMultiGPURunner(
 
         return idist.auto_dataloader(
             dataset=cast(Dataset, data_with_transforms), **data_loader_options
-        )
+        )  # type: ignore
 
     def apply_predictions_callbacks(
         self, indices: torch.Tensor, predictions: BatchModelPrediction[torch.Tensor]
@@ -238,7 +238,7 @@ class TorchInferenceMultiGPURunner(
 
         # Setup tqdm
         if self.options.tqdm_enabled and idist.get_rank() == 0:
-            pbar = ProgressBar(persist=True, bar_format=None)
+            pbar = ProgressBar(persist=True, bar_format="")
             pbar.attach(inference_engine)
 
         inference_engine.run(data_loader)
@@ -328,7 +328,7 @@ class TorchTrainingRunner(
 
         return idist.auto_dataloader(
             dataset=cast(Dataset, data_with_transforms), **data_loader_options
-        )
+        )  # type: ignore
 
     def run(self) -> None:
         """Runs training"""
@@ -361,7 +361,9 @@ class TorchTrainingRunner(
         # Adapt optimizer for distributed settings
         optimizer = idist.auto_optim(self.options.optimizer)
 
-        criterion = self.options.criterion.to(device)
+        criterion = self.options.criterion
+        if isinstance(self.options.criterion, torch.nn.Module):
+            criterion = self.options.criterion.to(device)
 
         # Create trainer for current task
         trainer = self.create_trainer(
@@ -455,7 +457,7 @@ class TorchTrainingRunner(
 
         # Setup tqdm
         if self.options.tqdm_enabled and idist.get_rank() == 0:
-            pbar = ProgressBar(persist=True, bar_format=None)
+            pbar = ProgressBar(persist=True, bar_format="")
             pbar.attach(trainer)
 
         return trainer
