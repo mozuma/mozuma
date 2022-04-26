@@ -10,7 +10,7 @@ from mlmodule.v2.torch.datasets import (
     ImageBoundingBoxDataset,
     ImageDataset,
     LocalBinaryFilesDataset,
-    LocalBinaryFilesTrainingDataset,
+    TorchTrainingDataset,
 )
 
 
@@ -96,15 +96,17 @@ def test_bounding_box_dataset(cats_and_dogs_images: List[str], crop_image: bool)
     np.testing.assert_equal(bbox.bounding_boxes, np.array([[5, 0, 25, 25]]))
 
 
-def test_binay_file_training_dataset(cats_and_dogs_images):
+def test_training_dataset(cats_and_dogs_images):
     labels = [f"label_{i}" for i in range(len(cats_and_dogs_images))]
-    binary_files_dataset = LocalBinaryFilesTrainingDataset(
-        paths=cats_and_dogs_images, labels=labels
+
+    image_dataset = ImageDataset(
+        binary_files_dataset=LocalBinaryFilesDataset(paths=cats_and_dogs_images)
     )
+    dataset = TorchTrainingDataset(dataset=image_dataset, target_labels=labels)
 
     # Checking length
-    assert len(binary_files_dataset) == len(cats_and_dogs_images)
+    assert len(dataset) == len(cats_and_dogs_images)
 
     # Checking class (self.classes and self.classes_to_idx)
     # (since in this test all labels are unique the number of classes is the same as the size)
-    assert all(item[1] == i for i, item in enumerate(binary_files_dataset))
+    assert all(item[1][1] == i for i, item in enumerate(dataset))

@@ -21,15 +21,11 @@ from mlmodule.v2.helpers.distributed import (
     register_multi_gpu_runner_logger,
 )
 from mlmodule.v2.torch.callbacks import TorchRunnerCallbackType
-from mlmodule.v2.torch.collate import (
-    TorchMlModuleCollateFn,
-    TorchMlModuleTrainingCollateFn,
-)
-from mlmodule.v2.torch.datasets import (
+from mlmodule.v2.torch.collate import TorchMlModuleCollateFn
+from mlmodule.v2.torch.datasets import (  # TorchTrainingDatasetTransformsWrapper,
     TorchDataset,
     TorchDatasetTransformsWrapper,
     TorchTrainingDataset,
-    TorchTrainingDatasetTransformsWrapper,
 )
 from mlmodule.v2.torch.modules import TorchMlModule
 from mlmodule.v2.torch.options import (
@@ -300,46 +296,30 @@ class TorchTrainingRunner(
         options (TorchTrainingOptions): PyTorch training options
     """
 
-    def validate_data_loader_options(
-        cls, model: TorchMlModule, data_loader_options: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """Makes sure the collate function is properly defined"""
-        # Making a copy of options
-        data_loader_options = data_loader_options.copy()
-
-        # Default collate function
-        model_collate_fn = model.get_dataloader_collate_fn()
-        if model_collate_fn:
-            default_collate = TorchMlModuleTrainingCollateFn(model_collate_fn)
-        else:
-            default_collate = TorchMlModuleTrainingCollateFn()
-        # Sets the collate_fn if not defined
-        data_loader_options.setdefault("collate_fn", default_collate)
-
-        # Checking that if set the collate_fn is an instance of TorchMlModuleTrainingCollateFn
-        if not isinstance(
-            data_loader_options["collate_fn"], TorchMlModuleTrainingCollateFn
-        ):
-            logger.warning(
-                "The given collate_fn is not an instance of TorchMlModuleTrainingCollateFn "
-                "which could lead to type errors on callbacks"
-            )
-
-        return data_loader_options
-
     def get_data_loader(self, dataset: TorchTrainingDataset, **kwargs) -> DataLoader:
         """Creates the data loaders from the options, the given datasets and the module transforms.
         The first data loader will be used to train, se second to test.
         """
-        data_with_transforms = TorchTrainingDatasetTransformsWrapper(
+
+        # This functions allows to apply dataset transforms to the payload
+        # leaving the targets untouched
+        def _apply_transforms_on_training_data(data):
+            payload, target = data
+
+            return (
+                transforms.Compose(self.model.get_dataset_transforms())(payload),
+                target,
+            )
+
+        data_with_transforms = TorchDatasetTransformsWrapper(
             dataset=dataset,
-            transform_func=transforms.Compose(self.model.get_dataset_transforms()),
+            transform_func=_apply_transforms_on_training_data,
         )
 
         data_loader_options = self.options.data_loader_options.copy()
         data_loader_options.update(kwargs)
 
-        data_loader_options = self.validate_data_loader_options(
+        data_loader_options = validate_data_loader_options(
             self.model, data_loader_options
         )
 
@@ -434,8 +414,11 @@ class TorchTrainingRunner(
         def update(engine: Engine, batch_wrapper: Tuple):
             model.train()
 
+            # Unpack batch data and discard indices, we don't need them for now
+            _, payload = batch_wrapper
+
             x, y = prepare_batch_for_training(
-                batch_wrapper, device=device, non_blocking=non_blocking
+                payload, device=device, non_blocking=non_blocking
             )
 
             # TODO: resnet returns (features, label_scores)
@@ -486,9 +469,11 @@ class TorchTrainingRunner(
         def evaluate_step(engine: Engine, batch_wrapper: Tuple):
             model.eval()
             with torch.no_grad():
+                _, payload = batch_wrapper
+
                 # Sending data on device
                 batch, target = prepare_batch_for_training(
-                    batch_wrapper, device=device, non_blocking=non_blocking
+                    payload, device=device, non_blocking=non_blocking
                 )
 
                 # TODO: resnet returns (features, label_scores)

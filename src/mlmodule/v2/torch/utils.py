@@ -1,6 +1,6 @@
 import logging
 from io import BytesIO
-from typing import Any, Dict, Mapping, Optional, OrderedDict, Sequence, Tuple, Union
+from typing import Any, Dict, Mapping, OrderedDict, Sequence, Tuple, Union
 
 import torch
 from PIL.Image import Image
@@ -44,19 +44,16 @@ def apply_mode_to_image(image: Image, mode: str) -> Image:
 
 
 def prepare_batch_for_training(
-    batch_wrapper: Tuple,  # type: Tuple[_DatasetType, _TargetsType]
-    device: Optional[Union[str, torch.device]] = None,
+    payload: Tuple,
+    device: torch.device,
     non_blocking: bool = False,
 ) -> Tuple[Union[torch.Tensor, Sequence, Mapping, str, bytes], ...]:
-    batch, target = batch_wrapper
-
-    # Convert targets from lists to tensors
-    target_tensor = torch.tensor(target)
+    batch, target = payload
 
     # Sending data on device
     return (
         send_batch_to_device(batch, device=device, non_blocking=non_blocking),
-        target_tensor.to(device, non_blocking=non_blocking),
+        target.to(device, non_blocking=non_blocking),
     )
 
 
