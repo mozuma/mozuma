@@ -102,7 +102,7 @@ def state_type_to_gh_tag(release_name_prefix: str, state_type: StateType) -> str
 
 def state_key_to_gh_asset_name(state_key: StateKey) -> str:
     """From a state key returns the name of the asset in the corresponding release"""
-    extra = tuple(state_key.state_type.extra or tuple())
+    extra = state_key.state_type.extra
     filename = ".".join(extra + (state_key.training_id,))
     return f"{filename}.state.gzip"
 

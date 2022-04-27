@@ -41,7 +41,7 @@ class LocalStateStore(AbstractStateStore[_ModelType]):
     def _filename_to_state_key(self, filename: str) -> StateKey:
         name_parts = filename[:-3].split(".")
         backend, architecture = name_parts[:2]
-        extras = tuple(name_parts[2:-1]) or None
+        extras = tuple(name_parts[2:-1])
         training_id = name_parts[-1]
         return StateKey(
             state_type=StateType(

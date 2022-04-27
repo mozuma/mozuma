@@ -27,9 +27,7 @@ def local_store() -> LocalStateStore:
         (
             "pytorch.resnet18.imagenet.pt",
             StateKey(
-                state_type=StateType(
-                    backend="pytorch", architecture="resnet18", extra=None
-                ),
+                state_type=StateType(backend="pytorch", architecture="resnet18"),
                 training_id="imagenet",
             ),
         ),
@@ -73,7 +71,7 @@ def test_parse_state_key(
             ".cls1000.extra1",
         ),
         (
-            StateType(backend="pytorch", architecture="resnet18", extra=None),
+            StateType(backend="pytorch", architecture="resnet18"),
             "pytorch.resnet18",
             "",
         ),

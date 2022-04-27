@@ -44,7 +44,7 @@ def test_parse_state_key(s3_store: S3StateStore):
             ".cls1000.extra1",
         ),
         (
-            StateType(backend="pytorch", architecture="resnet18", extra=None),
+            StateType(backend="pytorch", architecture="resnet18"),
             "pytorch/resnet18",
             "",
         ),

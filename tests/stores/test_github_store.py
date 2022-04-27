@@ -188,7 +188,7 @@ def test_gh_store_get_state_keys(gh_store: GitHUBReleaseStore, gh_base_url: str)
                 training_id="train",
             ),
             StateKey(
-                state_type=StateType("pytorch", "resnet18", extra=tuple()),
+                state_type=StateType("pytorch", "resnet18"),
                 training_id="train2",
             ),
         }
