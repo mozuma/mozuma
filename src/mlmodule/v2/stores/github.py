@@ -282,13 +282,14 @@ class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
         response = call_github_with_auth(
             "post",
             self.gh_releases_url(),
-            data={
+            json={
                 "tag_name": state_type_tag,
                 "target_commitish": self.branch_name,
                 "name": state_type_tag,
                 "body": state_type_to_release_body(state_type),
                 "draft": False,
                 "prerelease": False,
+                "generate_release_notes": False,
             },
         )
         response.raise_for_status()
