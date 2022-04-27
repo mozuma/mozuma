@@ -62,6 +62,17 @@ class AbstractStateStore(abc.ABC, Generic[_ModelType]):
             ```
         """
 
+    def exists(self, state_key: StateKey) -> bool:
+        """Tests whether the state key exists in the current store
+
+        Args:
+            state_key (StateKey): The state key to test
+
+        Returns:
+            bool: `True` if state key exists or `False` otherwise
+        """
+        return state_key in self.get_state_keys(state_key.state_type)
+
 
 class MLModuleModelStore(AbstractStateStore):
     """Default MLModule store with pretrained model states"""
