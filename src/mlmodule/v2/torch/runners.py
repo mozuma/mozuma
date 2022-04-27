@@ -397,14 +397,18 @@ class TorchTrainingRunner(
         )
         def run_validation(engine: Engine) -> None:
             epoch = trainer.state.epoch
+            
             state = train_evaluator.run(train_loader)
-            log_evaluation_metrics(
-                logger, epoch, state.times["COMPLETED"], "Train", state.metrics
-            )
+            if idist.get_rank() == 0:
+                log_evaluation_metrics(
+                    logger, epoch, state.times["COMPLETED"], "Train", state.metrics
+                )
+
             state = evaluator.run(test_loader)
-            log_evaluation_metrics(
-                logger, epoch, state.times["COMPLETED"], "Test", state.metrics
-            )
+            if idist.get_rank() == 0:
+                log_evaluation_metrics(
+                    logger, epoch, state.times["COMPLETED"], "Test", state.metrics
+                )
 
         trainer.run(train_loader, max_epochs=self.options.num_epoch)
 
