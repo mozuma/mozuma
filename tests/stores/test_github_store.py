@@ -234,3 +234,35 @@ def test_gh_store_load(model_with_state: ModelWithState):
 
     # Makes sure the model state has changed
     assert model_with_state.get_state() == b"aaa"
+
+
+@pytest.mark.usefixtures("token_github_auth")
+def test_get_or_create_release_exists():
+    repo_owner = "AAA"
+    repo_name = "test"
+    state_type = StateType(
+        backend="pytorch", architecture="resnet18", extra=("imagenet",)
+    )
+    release_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/tags/state.pytorch.resnet18"
+    store = GitHUBReleaseStore(repository_owner=repo_owner, repository_name=repo_name)
+
+    with requests_mock.Mocker() as m:
+        m.get(release_url, json={"id": 1})
+        assert store.gh_get_or_create_state_type_release(state_type) == 1
+
+
+@pytest.mark.usefixtures("token_github_auth")
+def test_get_or_create_release_not_exists():
+    repo_owner = "AAA"
+    repo_name = "test"
+    state_type = StateType(
+        backend="pytorch", architecture="resnet18", extra=("imagenet",)
+    )
+    release_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/tags/state.pytorch.resnet18"
+    post_release_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases"
+    store = GitHUBReleaseStore(repository_owner=repo_owner, repository_name=repo_name)
+
+    with requests_mock.Mocker() as m:
+        m.get(release_url, status_code=404)
+        m.post(post_release_url, json={"id": 10})
+        assert store.gh_get_or_create_state_type_release(state_type) == 10
