@@ -302,24 +302,23 @@ class TorchTrainingRunner(
         if not getattr(self.model, "is_trainable", None):
             logger.warning(self.model.__class__.__name__ + " is not trainable!")
 
+    def _apply_transforms_on_training_data(self, data: Any) -> Tuple:
+        """This functions allows to use TorchTrainingDataset with TorchDatasetTransformsWrapper.
+        It apply dataset transforms to the payload leaving the targets untouched."""
+        payload, target = data
+
+        return (
+            transforms.Compose(self.model.get_dataset_transforms())(payload),
+            target,
+        )
+
     def get_data_loader(self, dataset: TorchTrainingDataset, **kwargs) -> DataLoader:
         """Creates the data loaders from the options, the given datasets and the module transforms.
         The first data loader will be used to train, se second to test.
         """
-
-        # This functions allows to apply dataset transforms to the payload
-        # leaving the targets untouched
-        def _apply_transforms_on_training_data(data):
-            payload, target = data
-
-            return (
-                transforms.Compose(self.model.get_dataset_transforms())(payload),
-                target,
-            )
-
         data_with_transforms = TorchDatasetTransformsWrapper(
             dataset=dataset,
-            transform_func=_apply_transforms_on_training_data,
+            transform_func=self._apply_transforms_on_training_data,
         )
 
         data_loader_options = self.options.data_loader_options.copy()
@@ -397,7 +396,7 @@ class TorchTrainingRunner(
         )
         def run_validation(engine: Engine) -> None:
             epoch = trainer.state.epoch
-            
+
             state = train_evaluator.run(train_loader)
             if idist.get_rank() == 0:
                 log_evaluation_metrics(
