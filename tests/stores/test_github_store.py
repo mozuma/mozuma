@@ -1,5 +1,6 @@
 import gzip
 from collections import OrderedDict
+from typing import Tuple
 from unittest import mock
 
 import pytest
@@ -39,6 +40,23 @@ def token_github_auth():
             basic.return_value = None
             token.return_value = gh_token
             yield f"Bearer {gh_token}"
+
+
+@pytest.fixture
+def gh_repo_details():
+    return "AAA", "test"
+
+
+@pytest.fixture
+def gh_base_url(gh_repo_details: Tuple[str, str]):
+    repo_owner, repo_name = gh_repo_details
+    return f"https://api.github.com/repos/{repo_owner}/{repo_name}"
+
+
+@pytest.fixture
+def gh_store(gh_repo_details):
+    repo_owner, repo_name = gh_repo_details
+    return GitHUBReleaseStore(repository_owner=repo_owner, repository_name=repo_name)
 
 
 def test_github_basic_auth(monkeypatch):
@@ -88,7 +106,7 @@ def test_paginate_github_api():
             json=[{"c": 3}],
         )
 
-        assert paginate_github_api("get", url) == [
+        assert list(paginate_github_api("get", url)) == [
             {"a": 1},
             {"b": 2},
             {"c": 3},
@@ -110,7 +128,7 @@ def test_paginate_github_api_querystrings():
             json=[{"c": 3}],
         )
 
-        assert paginate_github_api("get", url, params=params) == [
+        assert list(paginate_github_api("get", url, params=params)) == [
             {"a": 1},
             {"b": 2},
             {"c": 3},
@@ -147,14 +165,11 @@ def test_gh_asset_name_to_state_key(asset_name: str, expected_key: StateKey):
     )
 
 
-def test_gh_store_get_state_keys():
-    repo_owner = "AAA"
-    repo_name = "test"
+def test_gh_store_get_state_keys(gh_store: GitHUBReleaseStore, gh_base_url: str):
     state_type = StateType(
         backend="pytorch", architecture="resnet18", extra=("imagenet",)
     )
-    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/tags/state.pytorch.resnet18"
-    store = GitHUBReleaseStore(repository_owner=repo_owner, repository_name=repo_name)
+    url = f"{gh_base_url}/releases/tags/state.pytorch.resnet18"
 
     with requests_mock.Mocker() as m:
         m.get(
@@ -167,7 +182,7 @@ def test_gh_store_get_state_keys():
                 ]
             },
         )
-        assert set(store.get_state_keys(state_type)) == {
+        assert set(gh_store.get_state_keys(state_type)) == {
             StateKey(
                 state_type=StateType("pytorch", "resnet18", extra=("hello",)),
                 training_id="train",
@@ -179,9 +194,10 @@ def test_gh_store_get_state_keys():
         }
 
 
-def test_gh_store_download_state_key():
-    repo_owner = "AAA"
-    repo_name = "test"
+def test_gh_store_download_state_key(
+    gh_store: GitHUBReleaseStore, gh_repo_details: Tuple[str, str]
+):
+    repo_owner, repo_name = gh_repo_details
     state_key = StateKey(
         state_type=StateType(
             backend="pytorch", architecture="resnet18", extra=("imagenet",)
@@ -192,22 +208,24 @@ def test_gh_store_download_state_key():
         f"https://github.com/{repo_owner}/{repo_name}"
         "/releases/download/state.pytorch.resnet18/imagenet.train1.state.gzip"
     )
-    store = GitHUBReleaseStore(repository_owner=repo_owner, repository_name=repo_name)
 
     # The file exists
     with requests_mock.Mocker() as m:
         m.get(url, content=gzip.compress(b"aaa"))
-        assert store.gh_download_state_key(state_key) == b"aaa"
+        assert gh_store.gh_download_state_key(state_key) == b"aaa"
 
     # The file doesn't exists
     with requests_mock.Mocker() as m:
         m.get(url, status_code=404)
-        assert store.gh_download_state_key(state_key) is None
+        assert gh_store.gh_download_state_key(state_key) is None
 
 
-def test_gh_store_load(model_with_state: ModelWithState):
-    repo_owner = "AAA"
-    repo_name = "test"
+def test_gh_store_load(
+    model_with_state: ModelWithState,
+    gh_store: GitHUBReleaseStore,
+    gh_repo_details: Tuple[str, str],
+):
+    repo_owner, repo_name = gh_repo_details
     state_key = StateKey(
         state_type=StateType(
             backend="pytorch", architecture="resnet18", extra=("imagenet",)
@@ -217,9 +235,6 @@ def test_gh_store_load(model_with_state: ModelWithState):
     url = (
         f"https://github.com/{repo_owner}/{repo_name}"
         "/releases/download/state.pytorch.resnet18/imagenet.train1.state.gzip"
-    )
-    store = GitHUBReleaseStore[ModelWithState](
-        repository_owner=repo_owner, repository_name=repo_name
     )
 
     # Update the state type to match the one of the URL
@@ -230,39 +245,76 @@ def test_gh_store_load(model_with_state: ModelWithState):
 
     with requests_mock.Mocker() as m:
         m.get(url, content=gzip.compress(b"aaa"))
-        store.load(model_with_state, state_key)
+        gh_store.load(model_with_state, state_key)
 
     # Makes sure the model state has changed
     assert model_with_state.get_state() == b"aaa"
 
 
 @pytest.mark.usefixtures("token_github_auth")
-def test_get_or_create_release_exists():
-    repo_owner = "AAA"
-    repo_name = "test"
+def test_get_or_create_release_exists(gh_store: GitHUBReleaseStore, gh_base_url: str):
     state_type = StateType(
         backend="pytorch", architecture="resnet18", extra=("imagenet",)
     )
-    release_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/tags/state.pytorch.resnet18"
-    store = GitHUBReleaseStore(repository_owner=repo_owner, repository_name=repo_name)
+    release_url = f"{gh_base_url}/releases/tags/state.pytorch.resnet18"
 
     with requests_mock.Mocker() as m:
         m.get(release_url, json={"id": 1})
-        assert store.gh_get_or_create_state_type_release(state_type) == 1
+        assert gh_store.gh_get_or_create_state_type_release(state_type) == 1
 
 
 @pytest.mark.usefixtures("token_github_auth")
-def test_get_or_create_release_not_exists():
-    repo_owner = "AAA"
-    repo_name = "test"
+def test_get_or_create_release_not_exists(
+    gh_store: GitHUBReleaseStore, gh_base_url: str
+):
     state_type = StateType(
         backend="pytorch", architecture="resnet18", extra=("imagenet",)
     )
-    release_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/tags/state.pytorch.resnet18"
-    post_release_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases"
-    store = GitHUBReleaseStore(repository_owner=repo_owner, repository_name=repo_name)
+    release_url = f"{gh_base_url}/releases/tags/state.pytorch.resnet18"
+    post_release_url = f"{gh_base_url}/releases"
 
     with requests_mock.Mocker() as m:
         m.get(release_url, status_code=404)
         m.post(post_release_url, json={"id": 10})
-        assert store.gh_get_or_create_state_type_release(state_type) == 10
+        assert gh_store.gh_get_or_create_state_type_release(state_type) == 10
+
+
+@pytest.mark.usefixtures("token_github_auth")
+def test_delete_release_asset_exists(gh_store: GitHUBReleaseStore, gh_base_url: str):
+    release_id = 10
+    asset_name = "test.zip"
+    asset_id = 101
+    list_release_assets_url = f"{gh_base_url}/releases/{release_id}/assets"
+    delete_asset_url = f"{gh_base_url}/releases/assets/{asset_id}"
+
+    with requests_mock.Mocker() as m:
+        m.get(
+            list_release_assets_url,
+            json=[
+                {"name": "test2.zip", "id": 111},
+                {"name": asset_name, "id": asset_id},
+            ],
+        )
+        m.delete(delete_asset_url, status_code=204)
+
+        assert gh_store.gh_delete_release_asset_if_exists(release_id, asset_name)
+
+
+@pytest.mark.usefixtures("token_github_auth")
+def test_delete_release_asset_not_exists(
+    gh_store: GitHUBReleaseStore, gh_base_url: str
+):
+    release_id = 10
+    asset_name = "test.zip"
+    asset_id = 101
+    list_release_assets_url = f"{gh_base_url}/releases/{release_id}/assets"
+    delete_asset_url = f"{gh_base_url}/releases/assets/{asset_id}"
+
+    with requests_mock.Mocker() as m:
+        m.get(
+            list_release_assets_url,
+            json=[{"name": "test2.zip", "id": 111}, {"name": "test1.zip", "id": 121}],
+        )
+        m.delete(delete_asset_url, status_code=204)
+
+        assert not gh_store.gh_delete_release_asset_if_exists(release_id, asset_name)

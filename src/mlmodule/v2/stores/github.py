@@ -2,7 +2,7 @@ import dataclasses
 import gzip
 import os
 import textwrap
-from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar
+from typing import Any, Dict, Generator, List, Optional, Tuple, TypeVar
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -71,15 +71,17 @@ def call_github_with_auth(
     return getattr(requests, method)(url, **kwargs)
 
 
-def paginate_github_api(method: str, url: str, **kwargs) -> Sequence[_JsonType]:
-    results: List[_JsonType] = []
+def paginate_github_api(
+    method: str, url: str, **kwargs
+) -> Generator[_JsonType, None, None]:
     while True:
         # Calling GitHUB
         response = call_github_with_auth(method, url, **kwargs)
         response.raise_for_status()
 
-        # Accumulating results
-        results += response.json()
+        # Returning results
+        for r in response.json():
+            yield r
 
         # Stopping if no next url
         if "next" not in response.links:
@@ -91,8 +93,6 @@ def paginate_github_api(method: str, url: str, **kwargs) -> Sequence[_JsonType]:
         # Removing querystring if exists
         if "params" in kwargs:
             del kwargs["params"]
-
-    return results
 
 
 def state_type_to_gh_tag(release_name_prefix: str, state_type: StateType) -> str:
@@ -193,6 +193,9 @@ class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
     def gh_release_by_tag_url(self, tag: str) -> str:
         return f"{self.gh_releases_url()}/tags/{tag}"
 
+    def gh_release_assets_url(self, release_id: int) -> str:
+        return f"{self.gh_releases_url()}/{release_id}/assets"
+
     def gh_download_state_key_url(self, state_key: StateKey) -> str:
         """Download URL for the state key"""
         return (
@@ -227,7 +230,6 @@ class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
             self.gh_release_by_tag_url(
                 state_type_to_gh_tag(self.release_name_prefix, state_type)
             ),
-            force_auth=True,
         )
 
         # If not found returns an empty list
@@ -273,7 +275,7 @@ class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
 
         # Getting the release for the state type
         response = call_github_with_auth(
-            "get", self.gh_release_by_tag_url(state_type_tag), force_auth=True
+            "get", self.gh_release_by_tag_url(state_type_tag)
         )
         if response.ok:
             return response.json()["id"]
@@ -291,9 +293,64 @@ class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
                 "prerelease": False,
                 "generate_release_notes": False,
             },
+            force_auth=True,
         )
         response.raise_for_status()
         return response.json()["id"]
+
+    def gh_get_release_asset_id_by_name(
+        self, release_id: int, asset_name: str
+    ) -> Optional[int]:
+        """Finds the asset id in a release from the asset name
+
+        Args:
+            release_id (int): The identifier of the release
+            asset_name (str): The name of the asset to find
+
+        Returns:
+            int | None: The asset id if it exists
+        """
+        release_assets = paginate_github_api(
+            "get", self.gh_release_assets_url(release_id)
+        )
+        # Return the first asset matching
+        return next(
+            (asset["id"] for asset in release_assets if asset["name"] == asset_name),
+            None,
+        )
+
+    def gh_delete_release_asset_if_exists(
+        self, release_id: int, asset_name: str
+    ) -> bool:
+        """Deletes a release asset by name if exists
+
+        Args:
+            release_id (int): The identifier of the release
+            asset_name (str): The name of the asset to delete
+
+        Returns:
+            bool: True if the asset needed to be deleted
+        """
+        asset_id = self.gh_get_release_asset_id_by_name(release_id, asset_name)
+        if asset_id is None:
+            return False
+
+        response = call_github_with_auth(
+            "delete", f"{self.gh_releases_url()}/assets/{asset_id}", force_auth=True
+        )
+        response.raise_for_status()
+        return True
+
+    def gh_update_state_key_file(
+        self, release_id: int, state_key: StateKey, binary_state: bytes
+    ) -> None:
+        """Update the asset file for a state key in a release
+
+        Args:
+            release_id (int): The id of the GitHUB release
+            state_key (StateKey): The state key of the model to save
+            binary_state (bytes): The model state as binary
+        """
 
     def save(self, model: _ModelType, training_id: str) -> StateKey:
         raise NotImplementedError()
