@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, Tuple, Union, cast
 import ignite.distributed as idist
 import torch
 from ignite.contrib.handlers import ProgressBar
-from ignite.engine import Engine, Events
+from ignite.engine import Engine, Events, EventsList
 from ignite.utils import manual_seed
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.dataset import Dataset
@@ -15,7 +15,7 @@ from tqdm import tqdm
 from mlmodule.v2.base.callbacks import BaseRunnerEndCallback, callbacks_caller
 from mlmodule.v2.base.predictions import BatchModelPrediction
 from mlmodule.v2.base.runners import BaseRunner
-from mlmodule.v2.helpers.callbacks import SaveModelWeights
+from mlmodule.v2.helpers.callbacks import SaveModelState
 from mlmodule.v2.helpers.distributed import (
     ResultsCollector,
     register_multi_gpu_runner_logger,
@@ -281,7 +281,7 @@ class TorchTrainingRunner(
     BaseRunner[
         TorchMlModule,
         Tuple[TorchTrainingDataset, TorchTrainingDataset],
-        Union[BaseRunnerEndCallback, SaveModelWeights],
+        Union[BaseRunnerEndCallback, SaveModelState],
         TorchTrainingOptions,
     ]
 ):
@@ -292,7 +292,7 @@ class TorchTrainingRunner(
     Attributes:
         model (TorchMlModule): The PyTorch model to run inference
         datasets (Tuple[TorchTrainingDataset, TorchTrainingDataset]): Train and test datasets for the runner
-        callbacks (List[Union[BaseRunnerEndCallback, SaveModelWeights]]):
+        callbacks (List[Union[BaseRunnerEndCallback, SaveModelState]]):
             Callback to save model weights plus one or more callbacks for when the runner ends.
         options (TorchTrainingOptions): PyTorch training options
     """
@@ -450,9 +450,17 @@ class TorchTrainingRunner(
 
         # Register handler to save model weights
         # Note: there should be only one callback of such
+        checkpoint_events = EventsList()
+        checkpoint_events |= Events.COMPLETED
+        if self.options.checkpoint_every:
+            checkpoint_events |= Events.EPOCH_COMPLETED(
+                every=self.options.checkpoint_every
+            )
         trainer.add_event_handler(
-            Events.COMPLETED,
-            lambda: callbacks_caller(self.callbacks, "save_model_weights", self.model),
+            checkpoint_events,
+            lambda engine: callbacks_caller(
+                self.callbacks, "save_model_state", engine, self.model
+            ),
         )
 
         # Register handler to notify the end of the runner

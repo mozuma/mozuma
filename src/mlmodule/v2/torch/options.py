@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Callable, Dict, Union
+from typing import Callable, Dict, Optional, Union
 
 import dill
 import torch
@@ -58,8 +58,9 @@ class TorchTrainingOptions:
     Attributes:
         criterion (Union[Callable, torch.nn.Module]): the loss function to use during training.
         optimizer (torch.optim.Optimizer): Optimization strategy to use during training.
-        num_epochs (int): number of epochs to train the model. Default, 24.
-        validate_every (int): run model's validation every ``validate_every`` epochs. Default, 3.
+        num_epochs (int): number of epochs to train the model.
+        validate_every (int): run model's validation every ``validate_every`` epochs.
+        checkpoint_every (Optional[int]): store training checkpoint every ``checkpoint_every`` epochs.
         metrics (Dict[str, Metric]): Dictionary where values are Ignite's metrics to compute during evaluation.
         data_loader_options (dict): Options passed to `torch.utils.dataloader.DataLoader`.
         tqdm_enabled (bool): Whether to print a `tqdm` progress bar. Default, False.
@@ -78,9 +79,10 @@ class TorchTrainingOptions:
 
     criterion: Union[Callable, torch.nn.Module]
     optimizer: torch.optim.Optimizer
-    num_epoch: int = 24
-    validate_every: int = 3
+    num_epoch: int
+    validate_every: int
     metrics: Dict[str, Metric] = dataclasses.field(default_factory=dict)
+    checkpoint_every: Optional[int] = None
 
     data_loader_options: dict = dataclasses.field(default_factory=dict)
     tqdm_enabled: bool = False

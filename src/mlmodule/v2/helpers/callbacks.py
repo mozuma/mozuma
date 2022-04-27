@@ -1,8 +1,10 @@
 import dataclasses
+from logging import getLogger
 from typing import Any, List, Sequence
 
 import ignite.distributed as idist
 import numpy as np
+from ignite.engine import Engine
 
 from mlmodule.v2.base.callbacks import (
     BaseSaveBoundingBoxCallback,
@@ -22,6 +24,8 @@ from mlmodule.v2.helpers.utils import (
     convert_numeric_array_like_to_numpy,
 )
 from mlmodule.v2.stores.abstract import AbstractStateStore
+
+logger = getLogger()
 
 
 @dataclasses.dataclass
@@ -167,22 +171,52 @@ class CollectVideoFramesInMemory(BaseSaveVideoFramesCallback[NumericArrayTypes])
 
 
 @dataclasses.dataclass
-class SaveModelWeights:
-    """Simple callback to save model weights during training
+class SaveModelState:
+    """Simple callback to save model state during training
 
     Attributes:
         store (AbstractStateStore): Object to handle model state saving
         training_id (str): Identifier for the training activity
+
+    Note:
+        During training, the current epoch number is appended to the
+        provied `training_id`, making the filename looking like this:
+        `...<training_id>-<epoch>...`.
+        When the training is complete, just the `training_id` is used.
+
+    Warning:
+        This callback only saves the model state, thus does not create a whole
+        training checkpoint (optimizer state, loss, etc..).
     """
 
     store: AbstractStateStore = dataclasses.field()
     training_id: str = dataclasses.field()
 
     @idist.one_rank_only()
-    def save_model_weights(self, model: Any) -> None:
+    def save_model_state(self, engine: Engine, model: Any) -> None:
         """Save model state by calling the state store
 
         Arguments:
             model (Any): The MLModule model to save
         """
-        self.store.save(model, self.training_id)
+        epoch = engine.state.epoch
+        logger.debug(f"Calling store.save for epoch {epoch}")
+
+        # Append current epoch number to training_id
+        new_training_id = "{}-{}".format(self.training_id, epoch)
+
+        # If the training is done instead, use the pure training_id,
+        # without epoch information
+        is_done_epochs = (
+            engine.state.max_epochs is not None
+            and engine.state.epoch >= engine.state.max_epochs
+        )
+        if is_done_epochs:
+            new_training_id = self.training_id
+
+        # LocalStateStore raise an error when the file already exists
+        # Catch it and log a warning instead, not to distrupt the runner execution
+        try:
+            self.store.save(model, new_training_id)
+        except ValueError as err:
+            logger.warning(err)

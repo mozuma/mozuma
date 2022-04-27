@@ -25,7 +25,7 @@ They expose their results via object attributes.
 
 ## Callbacks for training
 
-::: mlmodule.v2.helpers.callbacks.SaveModelWeights
+::: mlmodule.v2.helpers.callbacks.SaveModelState
 
 ## Write your own callbacks
 
