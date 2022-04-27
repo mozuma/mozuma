@@ -1,6 +1,7 @@
 import dataclasses
 import gzip
 import os
+import textwrap
 from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar
 
 import requests
@@ -33,16 +34,39 @@ def get_github_token() -> Optional[str]:
     return os.environ.get("GH_TOKEN")
 
 
-def call_github_with_auth(method: str, url: str, **kwargs) -> requests.Response:
-    """Authenticated call to GitHUB API"""
+def call_github_with_auth(
+    method: str, url: str, force_auth: bool = False, **kwargs
+) -> requests.Response:
+    """Authenticated call to GitHUB API
+
+    Authentication can be configured with the `GH_TOKEN` or `GH_BASIC_AUTH` environment variables.
+
+    Args:
+        method (str): The HTTP method
+        url (str): Full URL to call
+        force_auth (bool, optional): Whether to force authentication,
+            will raise an error if no GitHUB auth is configured.
+            Defaults to `False`.
+
+    Raises:
+        ValueError: If `force_auth` is True and GitHUB authentication is not configured.
+    """
+    # Add defaults
+    kwargs.setdefault("headers", {})
+
     # Resolving authentication method
     basic_auth = get_github_basic_auth()
     gh_token = get_github_token()
     if basic_auth:
         kwargs.setdefault("auth", HTTPBasicAuth(*basic_auth))
     elif gh_token:
-        kwargs.setdefault("headers", {})
         kwargs["headers"].setdefault("Authorization", f"Bearer {gh_token}")
+    elif force_auth:
+        # No auth configured by force_auth is True
+        raise ValueError("Cannot resolve GitHUB auth configuration.")
+
+    # Setting recommended headers
+    kwargs["headers"]["Accept"] = "application/vnd.github.v3+json"
 
     return getattr(requests, method)(url, **kwargs)
 
@@ -103,6 +127,17 @@ def gh_asset_name_to_state_key(
     )
 
 
+def state_type_to_release_body(state_type: StateType) -> str:
+    return textwrap.dedent(
+        f"""
+    This release contains model state files for model with the following characteristics:
+
+    - **Backend**: `{state_type.backend}`
+    - **Architecture**: `{state_type.architecture}`
+    """
+    )
+
+
 @dataclasses.dataclass
 class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
     """Store implementation leveraging GitHUB releases
@@ -152,8 +187,11 @@ class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
         if "." in self.release_name_prefix:
             raise ValueError("`release_name_prefix` cannot contain a dot character")
 
+    def gh_releases_url(self) -> str:
+        return f"https://api.github.com/repos/{self.repository_owner}/{self.repository_name}/releases"
+
     def gh_release_by_tag_url(self, tag: str) -> str:
-        return f"https://api.github.com/repos/{self.repository_owner}/{self.repository_name}/releases/tags/{tag}"
+        return f"{self.gh_releases_url()}/tags/{tag}"
 
     def gh_download_state_key_url(self, state_key: StateKey) -> str:
         """Download URL for the state key"""
@@ -189,6 +227,7 @@ class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
             self.gh_release_by_tag_url(
                 state_type_to_gh_tag(self.release_name_prefix, state_type)
             ),
+            force_auth=True,
         )
 
         # If not found returns an empty list
@@ -207,9 +246,6 @@ class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
         # Filtering out invalid assets
         return [sk for sk in state_keys if sk]
 
-    def save(self, model: _ModelType, training_id: str) -> StateKey:
-        raise NotImplementedError()
-
     def load(self, model: _ModelType, state_key: StateKey) -> None:
         # Making sure the model and state key are compatible
         super().load(model, state_key)
@@ -223,3 +259,40 @@ class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
 
         # Applying to the model
         model.set_state(binary_state)
+
+    def gh_get_or_create_state_type_release(self, state_type: StateType) -> int:
+        """Creates a release to hold model states for a state type
+
+        Args:
+            state_type (StateType): The state type that the release will represent
+
+        Returns:
+            str: The release ID that can be used to upload assets
+        """
+        state_type_tag = state_type_to_gh_tag(self.release_name_prefix, state_type)
+
+        # Getting the release for the state type
+        response = call_github_with_auth(
+            "get", self.gh_release_by_tag_url(state_type_tag), force_auth=True
+        )
+        if response.ok:
+            return response.json()["id"]
+
+        # Otherwise create the new release
+        response = call_github_with_auth(
+            "post",
+            self.gh_releases_url(),
+            data={
+                "tag_name": state_type_tag,
+                "target_commitish": self.branch_name,
+                "name": state_type_tag,
+                "body": state_type_to_release_body(state_type),
+                "draft": False,
+                "prerelease": False,
+            },
+        )
+        response.raise_for_status()
+        return response.json()["id"]
+
+    def save(self, model: _ModelType, training_id: str) -> StateKey:
+        raise NotImplementedError()
