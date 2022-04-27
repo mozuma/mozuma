@@ -222,27 +222,42 @@ class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
 
         return gzip.decompress(response.content)
 
+    def gh_get_release_by_tag(self, tag: str) -> Optional[_JsonType]:
+        """Returns the release JSON object from a tag
+
+        Args:
+            tag (str): GitHUB tag to search a matching release
+
+        Returns:
+            _JsonType | None: The JSON asset payload if found otherwise None.
+        """
+        response = call_github_with_auth(
+            "get",
+            self.gh_release_by_tag_url(tag),
+        )
+        if response.status_code == 404:
+            return None
+
+        # Raise if unexpected error occurred
+        response.raise_for_status()
+
+        return response.json()
+
     def get_state_keys(self, state_type: StateType) -> List[StateKey]:
         """List state keys available for a given state type"""
         # Getting release details
-        response = call_github_with_auth(
-            "get",
-            self.gh_release_by_tag_url(
-                state_type_to_gh_tag(self.release_name_prefix, state_type)
-            ),
+        release = self.gh_get_release_by_tag(
+            state_type_to_gh_tag(self.release_name_prefix, state_type)
         )
 
         # If not found returns an empty list
-        if response.status_code == 404:
+        if release is None:
             return []
-
-        # Raise if anything else happened
-        response.raise_for_status()
 
         # Getting state keys from payload
         state_keys = [
             gh_asset_name_to_state_key(state_type, asset["name"])
-            for asset in response.json()["assets"]
+            for asset in release["assets"]
         ]
 
         # Filtering out invalid assets
@@ -274,11 +289,11 @@ class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
         state_type_tag = state_type_to_gh_tag(self.release_name_prefix, state_type)
 
         # Getting the release for the state type
-        response = call_github_with_auth(
-            "get", self.gh_release_by_tag_url(state_type_tag)
-        )
-        if response.ok:
-            return response.json()["id"]
+        release = self.gh_get_release_by_tag(state_type_tag)
+
+        # If exists return the id
+        if release is not None:
+            return release["id"]
 
         # Otherwise create the new release
         response = call_github_with_auth(
@@ -351,6 +366,30 @@ class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
             state_key (StateKey): The state key of the model to save
             binary_state (bytes): The model state as binary
         """
+        asset_name = state_key_to_gh_asset_name(state_key)
+        self.gh_delete_release_asset_if_exists(release_id, asset_name)
+
+        response = call_github_with_auth(
+            "post",
+            (
+                "https://uploads.github.com/repos/"
+                f"{self.repository_owner}/{self.repository_name}/releases/{release_id}/assets"
+            ),
+            force_auth=True,
+            data=gzip.compress(binary_state),
+            headers={"Content-Type": "application/gzip"},
+            params={"name": asset_name, "label": asset_name},
+        )
+        response.raise_for_status()
 
     def save(self, model: _ModelType, training_id: str) -> StateKey:
-        raise NotImplementedError()
+        # Getting state key
+        state_key = super().save(model, training_id)
+
+        # Getting release ID for the state type
+        release_id = self.gh_get_or_create_state_type_release(state_key.state_type)
+
+        # Updating the release asset file
+        self.gh_update_state_key_file(release_id, state_key, model.get_state())
+
+        return state_key

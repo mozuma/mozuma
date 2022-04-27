@@ -318,3 +318,36 @@ def test_delete_release_asset_not_exists(
         m.delete(delete_asset_url, status_code=204)
 
         assert not gh_store.gh_delete_release_asset_if_exists(release_id, asset_name)
+
+
+@pytest.mark.usefixtures("token_github_auth")
+def test_update_state_key_file(
+    gh_store: GitHUBReleaseStore,
+    model_with_state: ModelWithState,
+    gh_repo_details: Tuple[str, str],
+):
+    release_id = 10
+    asset_name = "imagenet.train1.state.gzip"
+    repo_owner, repo_name = gh_repo_details
+    state_key = StateKey(
+        state_type=StateType(
+            backend="pytorch", architecture="resnet18", extra=("imagenet",)
+        ),
+        training_id="train1",
+    )
+    post_asset_url = f"https://uploads.github.com/repos/{repo_owner}/{repo_name}/releases/{release_id}/assets"
+    model_state = model_with_state.get_state()
+
+    with requests_mock.Mocker() as m:
+        with mock.patch.object(
+            gh_store, "gh_delete_release_asset_if_exists", return_value=False
+        ) as s:
+            # Mocking the post asset
+            m.post(
+                f"{post_asset_url}?name={asset_name}&label={asset_name}",
+                content=gzip.compress(model_state),
+                headers={"Content-Type": "application/gzip"},
+            )
+
+            gh_store.gh_update_state_key_file(release_id, state_key, model_state)
+            s.assert_called_once_with(release_id, asset_name)
