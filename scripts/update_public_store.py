@@ -3,7 +3,7 @@ import argparse
 import dataclasses
 import itertools
 import logging
-from typing import Iterable, List, Tuple, Union
+from typing import Iterable, List, Optional, Tuple, Union
 
 from mlmodule.contrib.clip.base import BaseCLIPModule
 from mlmodule.contrib.clip.image import CLIPImageModule
@@ -21,10 +21,16 @@ from mlmodule.contrib.mtcnn.modules import TorchMTCNNModule
 from mlmodule.contrib.mtcnn.stores import FaceNetMTCNNStore
 from mlmodule.contrib.resnet.modules import TorchResNetModule
 from mlmodule.contrib.resnet.stores import ResNetTorchVisionStore
+from mlmodule.contrib.sentences.distilbert.modules import (
+    DistilUseBaseMultilingualCasedV2Module,
+)
+from mlmodule.contrib.sentences.distilbert.stores import (
+    SBERTDistiluseBaseMultilingualCasedV2Store,
+)
 from mlmodule.helpers.torchvision import DenseNetArch, ResNetArch
 from mlmodule.labels.places import PLACES_LABELS
 from mlmodule.v2.base.models import ModelWithState
-from mlmodule.v2.states import StateKey
+from mlmodule.v2.states import StateKey, StateType
 from mlmodule.v2.stores.abstract import AbstractStateStore
 from mlmodule.v2.stores.github import GitHUBReleaseStore
 
@@ -33,6 +39,8 @@ logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class UpdatePublicStoreOptions:
+    backend: Optional[str] = None
+    architecture: Optional[str] = None
     dry_run: bool = False
 
 
@@ -104,6 +112,20 @@ def get_mtcnn_stores() -> List[Tuple[TorchMTCNNModule, FaceNetMTCNNStore]]:
     return [(TorchMTCNNModule(), FaceNetMTCNNStore())]
 
 
+def get_distiluse_stores() -> List[
+    Tuple[
+        DistilUseBaseMultilingualCasedV2Module,
+        SBERTDistiluseBaseMultilingualCasedV2Store,
+    ]
+]:
+    return [
+        (
+            DistilUseBaseMultilingualCasedV2Module(),
+            SBERTDistiluseBaseMultilingualCasedV2Store(),
+        )
+    ]
+
+
 def get_all_models_stores() -> Iterable[Tuple[ModelWithState, AbstractStateStore]]:
     """List of all models with associated store in the contrib module"""
     return itertools.chain(
@@ -112,21 +134,44 @@ def get_all_models_stores() -> Iterable[Tuple[ModelWithState, AbstractStateStore
         get_densenet_stores(),
         get_magface_stores(),
         get_mtcnn_stores(),
+        get_distiluse_stores(),
     )
+
+
+def state_type_match(
+    state_type: StateType,
+    backend: Optional[str] = None,
+    architecture: Optional[str] = None,
+) -> bool:
+    backend_match = backend is None or state_type.backend == backend
+    architecture_match = architecture is None or state_type.architecture == architecture
+    return backend_match and architecture_match
 
 
 def iterate_state_keys_to_upload(
     mlmodule_store: AbstractStateStore,
+    backend: Optional[str] = None,
+    architecture: Optional[str] = None,
 ) -> Iterable[Tuple[ModelWithState, AbstractStateStore, StateKey]]:
     """Iterates over the missing model states in MLModule store"""
     ret: List[Tuple[ModelWithState, AbstractStateStore, StateKey]] = []
     for model, provider_store in get_all_models_stores():
+        # If the state type does not match the backend and architecture filters
+        # We skip this loop
+        if not state_type_match(
+            model.state_type, backend=backend, architecture=architecture
+        ):
+            continue
+
         # Getting available state keys in the provider store and not available in mlmodule
-        state_keys = set(provider_store.get_state_keys(model.state_type)) - set(
+        already_uploaded_state_keys = set(
             mlmodule_store.get_state_keys(model.state_type)
         )
 
-        for sk in state_keys:
+        for sk in provider_store.get_state_keys(model.state_type):
+            if sk in already_uploaded_state_keys:
+                logger.info(f"Already in MLModule store, skipping {sk}")
+                continue
             ret.append((model, provider_store, sk))
 
     return ret
@@ -134,16 +179,28 @@ def iterate_state_keys_to_upload(
 
 def main(options: UpdatePublicStoreOptions):
     mlmodule_store = get_mlmodule_store()
-    for item in iterate_state_keys_to_upload(mlmodule_store):
+    for item in iterate_state_keys_to_upload(
+        mlmodule_store, backend=options.backend, architecture=options.architecture
+    ):
         model, provider_store, state_key = item
         logger.info(f"Saving {state_key} to MLModule store")
-        if not options.dry_run:
-            provider_store.load(model, state_key)
-            mlmodule_store.save(model, training_id=state_key.training_id)
+
+        # If dry run skipping loading and saving the model
+        if options.dry_run:
+            continue
+
+        provider_store.load(model, state_key)
+        mlmodule_store.save(model, training_id=state_key.training_id)
 
 
 def parse_arguments() -> UpdatePublicStoreOptions:
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--backend", default=None, help="Filter model with the given backend"
+    )
+    parser.add_argument(
+        "--architecture", default=None, help="Filter model with the given architecture"
+    )
     parser.add_argument(
         "--dry-run", action="store_true", help="Dry run, does not execute anything."
     )
