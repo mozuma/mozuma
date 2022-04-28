@@ -3,16 +3,22 @@ import argparse
 import dataclasses
 import itertools
 import logging
-from typing import Iterable, List, Tuple
+from typing import Iterable, List, Tuple, Union
 
 from mlmodule.contrib.clip.base import BaseCLIPModule
 from mlmodule.contrib.clip.image import CLIPImageModule
 from mlmodule.contrib.clip.parameters import PARAMETERS
 from mlmodule.contrib.clip.stores import CLIPStore
 from mlmodule.contrib.clip.text import CLIPTextModule
+from mlmodule.contrib.densenet.modules import TorchDenseNetModule
+from mlmodule.contrib.densenet.stores import (
+    DenseNetPlaces365Store,
+    DenseNetTorchVisionStore,
+)
 from mlmodule.contrib.resnet.modules import TorchResNetModule
 from mlmodule.contrib.resnet.stores import ResNetTorchVisionStore
-from mlmodule.helpers.torchvision import ResNetArch
+from mlmodule.helpers.torchvision import DenseNetArch, ResNetArch
+from mlmodule.labels.places import PLACES_LABELS
 from mlmodule.v2.base.models import ModelWithState
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores.abstract import AbstractStateStore
@@ -61,9 +67,36 @@ def get_clip_stores() -> List[Tuple[BaseCLIPModule, CLIPStore]]:
     return ret
 
 
+def get_densenet_stores() -> List[
+    Tuple[TorchDenseNetModule, Union[DenseNetTorchVisionStore, DenseNetPlaces365Store]]
+]:
+    """DenseNet models and stores"""
+    tv_store = DenseNetTorchVisionStore()
+    p_store = DenseNetPlaces365Store()
+
+    densenet_archs: List[DenseNetArch] = [
+        "densenet121",
+        "densenet161",
+        "densenet169",
+        "densenet201",
+    ]
+    ret: List[
+        Tuple[
+            TorchDenseNetModule, Union[DenseNetTorchVisionStore, DenseNetPlaces365Store]
+        ]
+    ] = []
+    for d in densenet_archs:
+        ret.append((TorchDenseNetModule(d), tv_store))
+        ret.append((TorchDenseNetModule(d, label_set=PLACES_LABELS), p_store))
+
+    return ret
+
+
 def get_all_models_stores() -> Iterable[Tuple[ModelWithState, AbstractStateStore]]:
     """List of all models with associated store in the contrib module"""
-    return itertools.chain(get_resnet_stores(), get_clip_stores())
+    return itertools.chain(
+        get_resnet_stores(), get_clip_stores(), get_densenet_stores()
+    )
 
 
 def iterate_state_keys_to_upload(

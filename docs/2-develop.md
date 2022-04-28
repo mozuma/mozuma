@@ -57,18 +57,6 @@ pip install pre-commit
 pre-commit install
 ```
 
-## Packaging
-
-MLModules is distributed via wheels on the
-[LSIR public assets](https://github.com/LSIR/dataplatform-infra/tree/main/lsir-public-assets)
-bucket.
-
-A wheel can be created with the [`build`](https://pypi.org/project/build/) module
-
-```shell
-MLMODULE_BUILD_VERSION=x.y.z python -m build --wheel
-```
-
 ## Requirements
 
 Updating requirements should be done in `setup.cfg`.
@@ -81,7 +69,12 @@ pip-compile --extra full --upgrade
 ## Publish a new version
 
 * Push the new version to the `master` branch
-* Add a tag on the branch with the format `vX.Y.Z`. For instance, `v0.1.1`.
-* Follow the guide in
-  [dataplatform-infra/build-ml-module](https://github.com/LSIR/dataplatform-infra/tree/main/build-ml-module)
-  to build and upload the new release
+* Create a GitHUB release on the branch `master` with format `vX.Y.Z`. For instance, `v0.1.1`.
+
+## Upload new model weights
+
+* Add the model and provider stores to the `scripts/update_public_store.py`.
+  They should be added in a function that returns a list of tuple with model and provider store.
+* Update the `get_all_models_stores` to iterate over your new function.
+* Run the `update_public_store` scripts. Note that it accepts a `--dry-run` argument
+  to see changes before actually uploading models
