@@ -73,8 +73,12 @@ pip-compile --extra full --upgrade
 
 ## Upload new model weights
 
+!!! note
+    You will need to set the `GH_TOKEN` environment variable to the token given by
+    `gh auth status -t` of the [GitHUB CLI](https://cli.github.com/manual/gh_auth_status).
+
 * Add the model and provider stores to the `scripts/update_public_store.py`.
   They should be added in a function that returns a list of tuple with model and provider store.
 * Update the `get_all_models_stores` to iterate over your new function.
-* Run the `update_public_store` scripts. Note that it accepts a `--dry-run` argument
-  to see changes before actually uploading models
+* Run the `update_public_store` scripts. This script accepts a `--dry-run` argument
+  to see changes before actually uploading models.

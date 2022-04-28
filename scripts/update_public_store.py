@@ -15,6 +15,8 @@ from mlmodule.contrib.densenet.stores import (
     DenseNetPlaces365Store,
     DenseNetTorchVisionStore,
 )
+from mlmodule.contrib.magface.modules import TorchMagFaceModule
+from mlmodule.contrib.magface.stores import MagFaceStore
 from mlmodule.contrib.resnet.modules import TorchResNetModule
 from mlmodule.contrib.resnet.stores import ResNetTorchVisionStore
 from mlmodule.helpers.torchvision import DenseNetArch, ResNetArch
@@ -92,10 +94,17 @@ def get_densenet_stores() -> List[
     return ret
 
 
+def get_magface_stores() -> List[Tuple[TorchMagFaceModule, MagFaceStore]]:
+    return [(TorchMagFaceModule(), MagFaceStore())]
+
+
 def get_all_models_stores() -> Iterable[Tuple[ModelWithState, AbstractStateStore]]:
     """List of all models with associated store in the contrib module"""
     return itertools.chain(
-        get_resnet_stores(), get_clip_stores(), get_densenet_stores()
+        get_resnet_stores(),
+        get_clip_stores(),
+        get_densenet_stores(),
+        get_magface_stores(),
     )
 
 
