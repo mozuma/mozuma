@@ -27,6 +27,8 @@ from mlmodule.contrib.sentences.distilbert.modules import (
 from mlmodule.contrib.sentences.distilbert.stores import (
     SBERTDistiluseBaseMultilingualCasedV2Store,
 )
+from mlmodule.contrib.vinvl.modules import TorchVinVLDetectorModule
+from mlmodule.contrib.vinvl.stores import VinVLStore
 from mlmodule.helpers.torchvision import DenseNetArch, ResNetArch
 from mlmodule.labels.places import PLACES_LABELS
 from mlmodule.v2.base.models import ModelWithState
@@ -126,6 +128,10 @@ def get_distiluse_stores() -> List[
     ]
 
 
+def get_vinvl_stores() -> List[Tuple[TorchVinVLDetectorModule, VinVLStore]]:
+    return [(TorchVinVLDetectorModule(), VinVLStore())]
+
+
 def get_all_models_stores() -> Iterable[Tuple[ModelWithState, AbstractStateStore]]:
     """List of all models with associated store in the contrib module"""
     return itertools.chain(
@@ -135,6 +141,7 @@ def get_all_models_stores() -> Iterable[Tuple[ModelWithState, AbstractStateStore
         get_magface_stores(),
         get_mtcnn_stores(),
         get_distiluse_stores(),
+        get_vinvl_stores(),
     )
 
 
