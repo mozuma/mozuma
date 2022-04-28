@@ -9,6 +9,7 @@ on:
       - ready_for_review
     paths:
       - "src/**.py"
+      - "scripts/**.py"
       - "tests/**.py"
 
 jobs:
