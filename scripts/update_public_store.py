@@ -1,4 +1,6 @@
 """This script will take model states from mlmodule.contrib and publish them to the MLModule store"""
+import argparse
+import dataclasses
 import itertools
 import logging
 from typing import Iterable, List, Tuple
@@ -12,19 +14,23 @@ from mlmodule.contrib.resnet.modules import TorchResNetModule
 from mlmodule.contrib.resnet.stores import ResNetTorchVisionStore
 from mlmodule.helpers.torchvision import ResNetArch
 from mlmodule.v2.base.models import ModelWithState
+from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores.abstract import AbstractStateStore
 from mlmodule.v2.stores.github import GitHUBReleaseStore
 
 logger = logging.getLogger(__name__)
 
 
+@dataclasses.dataclass
+class UpdatePublicStoreOptions:
+    dry_run: bool = False
+
+
 def get_mlmodule_store() -> GitHUBReleaseStore:
     return GitHUBReleaseStore("LSIR", "mlmodule")
 
 
-def get_contrib_resnet_stores() -> List[
-    Tuple[TorchResNetModule, ResNetTorchVisionStore]
-]:
+def get_resnet_stores() -> List[Tuple[TorchResNetModule, ResNetTorchVisionStore]]:
     """ResNet models and store"""
     resnet_arch: List[ResNetArch] = [
         "resnet18",
@@ -45,7 +51,7 @@ def get_contrib_resnet_stores() -> List[
     return ret
 
 
-def get_contrib_clip_stores() -> List[Tuple[BaseCLIPModule, CLIPStore]]:
+def get_clip_stores() -> List[Tuple[BaseCLIPModule, CLIPStore]]:
     """CLIP models and stores"""
     store = CLIPStore()
     ret: List[Tuple[BaseCLIPModule, CLIPStore]] = []
@@ -55,25 +61,47 @@ def get_contrib_clip_stores() -> List[Tuple[BaseCLIPModule, CLIPStore]]:
     return ret
 
 
-def get_contrib_model_stores() -> Iterable[Tuple[ModelWithState, AbstractStateStore]]:
+def get_all_models_stores() -> Iterable[Tuple[ModelWithState, AbstractStateStore]]:
     """List of all models with associated store in the contrib module"""
-    return itertools.chain(get_contrib_resnet_stores(), get_contrib_clip_stores())
+    return itertools.chain(get_resnet_stores(), get_clip_stores())
 
 
-def main():
-    mlmodule_store = get_mlmodule_store()
-    for model, provider_store in get_contrib_model_stores():
+def iterate_state_keys_to_upload(
+    mlmodule_store: AbstractStateStore,
+) -> Iterable[Tuple[ModelWithState, AbstractStateStore, StateKey]]:
+    """Iterates over the missing model states in MLModule store"""
+    ret: List[Tuple[ModelWithState, AbstractStateStore, StateKey]] = []
+    for model, provider_store in get_all_models_stores():
         # Getting available state keys in the provider store and not available in mlmodule
         state_keys = set(provider_store.get_state_keys(model.state_type)) - set(
             mlmodule_store.get_state_keys(model.state_type)
         )
 
         for sk in state_keys:
-            logger.info(f"Saving {sk} to MLModule store")
-            provider_store.load(model, sk)
-            mlmodule_store.save(model, training_id=sk.training_id)
+            ret.append((model, provider_store, sk))
+
+    return ret
+
+
+def main(options: UpdatePublicStoreOptions):
+    mlmodule_store = get_mlmodule_store()
+    for item in iterate_state_keys_to_upload(mlmodule_store):
+        model, provider_store, state_key = item
+        logger.info(f"Saving {state_key} to MLModule store")
+        if not options.dry_run:
+            provider_store.load(model, state_key)
+            mlmodule_store.save(model, training_id=state_key.training_id)
+
+
+def parse_arguments() -> UpdatePublicStoreOptions:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Dry run, does not execute anything."
+    )
+
+    return UpdatePublicStoreOptions(**vars(parser.parse_args()))
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    main()
+    main(parse_arguments())
