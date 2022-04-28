@@ -17,6 +17,8 @@ from mlmodule.contrib.densenet.stores import (
 )
 from mlmodule.contrib.magface.modules import TorchMagFaceModule
 from mlmodule.contrib.magface.stores import MagFaceStore
+from mlmodule.contrib.mtcnn.modules import TorchMTCNNModule
+from mlmodule.contrib.mtcnn.stores import FaceNetMTCNNStore
 from mlmodule.contrib.resnet.modules import TorchResNetModule
 from mlmodule.contrib.resnet.stores import ResNetTorchVisionStore
 from mlmodule.helpers.torchvision import DenseNetArch, ResNetArch
@@ -98,6 +100,10 @@ def get_magface_stores() -> List[Tuple[TorchMagFaceModule, MagFaceStore]]:
     return [(TorchMagFaceModule(), MagFaceStore())]
 
 
+def get_mtcnn_stores() -> List[Tuple[TorchMTCNNModule, FaceNetMTCNNStore]]:
+    return [(TorchMTCNNModule(), FaceNetMTCNNStore())]
+
+
 def get_all_models_stores() -> Iterable[Tuple[ModelWithState, AbstractStateStore]]:
     """List of all models with associated store in the contrib module"""
     return itertools.chain(
@@ -105,6 +111,7 @@ def get_all_models_stores() -> Iterable[Tuple[ModelWithState, AbstractStateStore
         get_clip_stores(),
         get_densenet_stores(),
         get_magface_stores(),
+        get_mtcnn_stores(),
     )
 
 
