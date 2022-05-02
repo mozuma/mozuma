@@ -79,6 +79,7 @@ def parse_run_arguments(parser: argparse.ArgumentParser):
         default="im",
         help="The type of input files",
     )
+    parser.add_argument("--training-id", help="The training id of the model to load")
     parser.add_argument(
         "file_names", nargs="+", type=pathlib.Path, help="Paths to files"
     )
