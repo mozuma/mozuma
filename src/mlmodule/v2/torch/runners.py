@@ -432,9 +432,7 @@ class TorchTrainingRunner(
                 payload, device=device, non_blocking=non_blocking
             )
 
-            # TODO: resnet returns (features, label_scores)
-            #   check with other models
-            _, y_pred = model(x)
+            y_pred = model(x)
 
             loss = loss_fn(y_pred, y)
 
@@ -495,9 +493,7 @@ class TorchTrainingRunner(
                     payload, device=device, non_blocking=non_blocking
                 )
 
-                # TODO: resnet returns (features, label_scores)
-                #   check with other models
-                _, output = model(batch)
+                output = model(batch)
 
                 # Store output data in engine's state
                 return output, target
