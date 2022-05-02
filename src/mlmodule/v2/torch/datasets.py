@@ -1,5 +1,16 @@
 import dataclasses
-from typing import BinaryIO, Callable, Generic, List, Optional, Sequence, Tuple, TypeVar
+import pathlib
+from typing import (
+    BinaryIO,
+    Callable,
+    Generic,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 import numpy as np
 import PIL.Image
@@ -12,6 +23,7 @@ from mlmodule.v2.torch.utils import apply_mode_to_image
 _IndicesType = TypeVar("_IndicesType", covariant=True)
 _DatasetType = TypeVar("_DatasetType", covariant=True)
 _NewDatasetType = TypeVar("_NewDatasetType", covariant=True)
+_PathLike = TypeVar("_PathLike", bound=Union[str, pathlib.Path])
 
 
 class TorchDataset(Protocol[_IndicesType, _DatasetType]):
@@ -119,19 +131,19 @@ class ListDatasetIndexed(TorchDataset[_IndicesType, _DatasetType]):
 
 
 @dataclasses.dataclass
-class LocalBinaryFilesDataset(TorchDataset[str, BinaryIO]):
+class LocalBinaryFilesDataset(TorchDataset[_PathLike, BinaryIO]):
     """Dataset that reads a list of local file names and returns their content as bytes
 
     Attributes:
-        paths (Sequence[str]): List of paths to files
+        paths (Sequence[_PathLike]): List of paths to files
     """
 
-    paths: Sequence[str]
+    paths: Sequence[_PathLike]
 
-    def getitem_indices(self, index: int) -> str:
+    def getitem_indices(self, index: int) -> _PathLike:
         return self.paths[index]
 
-    def __getitem__(self, index: int) -> Tuple[str, BinaryIO]:
+    def __getitem__(self, index: int) -> Tuple[_PathLike, BinaryIO]:
         return self.paths[index], open(self.paths[index], mode="rb")
 
     def __len__(self) -> int:

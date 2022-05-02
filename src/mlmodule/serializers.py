@@ -1,55 +1,77 @@
-import dataclasses
-from typing import List, Union
+import functools
+from typing import Any, Iterable, List, Optional, Union
 
 import numpy as np
 
-from mlmodule.box import BBoxCollection, BBoxOutput
-from mlmodule.frames import FrameOutput, FrameOutputCollection
+from mlmodule.v2.base.predictions import (
+    BatchBoundingBoxesPrediction,
+    BatchModelPrediction,
+    BatchVideoFramesPrediction,
+)
 
-_BBoxModelOutput = List[BBoxCollection]
-_FramesModelOutput = List[FrameOutputCollection]
-_FeaturesModelOutput = np.ndarray
+
+@functools.singledispatch
+def _predictions_data_serializer(data) -> Optional[Union[dict, list]]:
+    """Recursively serializes data contained in of a batch model prediction object"""
+    return data
 
 
-@dataclasses.dataclass
-class Serializer:
-    data: Union[_BBoxModelOutput, _FeaturesModelOutput, _FramesModelOutput]
+@_predictions_data_serializer.register
+def _(data: np.ndarray) -> list:
+    return data.tolist()
 
-    @classmethod
-    def safe_json_bbox(cls, bbox: BBoxOutput) -> dict:
-        """Turns the BBoxOutput dataclass into a dictionnary that is JSON serializable"""
-        bbox_dict = dataclasses.asdict(bbox)
-        if bbox_dict["features"] is not None:
-            bbox_dict["features"] = bbox_dict["features"].tolist()
-        return bbox_dict
 
-    @classmethod
-    def safe_json_frames(cls, frame: FrameOutput) -> dict:
-        """Turns the FrameOutput dataclass into a dictionnary"""
-        frame_dict = dataclasses.asdict(frame)
-        if frame_dict["features"] is not None:
-            frame_dict["features"] = frame_dict["features"].tolist()
-        return frame_dict
+@_predictions_data_serializer.register
+def _(data: list) -> list:
+    return [_predictions_data_serializer(d) for d in data]
 
-    def safe_json_types(self) -> list:
-        """Returns the data attribute as a dictionnary"""
-        if (
-            type(self.data) == list
-            and len(self.data) > 0
-            and type(self.data[0]) == list
-            and len(self.data[0]) > 0
-        ):
-            if isinstance(self.data[0][0], BBoxOutput):
-                # This is a list of BoudingBox collection
-                return [
-                    [self.safe_json_bbox(bbox) for bbox in col] for col in self.data
-                ]
-            elif isinstance(self.data[0][0], FrameOutput):
-                return [
-                    [self.safe_json_frames(frame) for frame in col] for col in self.data
-                ]
-        elif hasattr(self.data, "tolist"):
-            # This is a numpy array
-            return self.data.tolist()
-        else:
-            return self.data
+
+@_predictions_data_serializer.register
+def _(data: None) -> None:
+    return None
+
+
+@_predictions_data_serializer.register
+def _(data: BatchBoundingBoxesPrediction) -> dict:
+    return {
+        "bounding_boxes": _predictions_data_serializer(data.bounding_boxes),
+        "scores": _predictions_data_serializer(data.scores),
+        "features": _predictions_data_serializer(data.features),
+    }
+
+
+@_predictions_data_serializer.register
+def _(data: BatchVideoFramesPrediction) -> dict:
+    return {
+        "features": _predictions_data_serializer(data.features),
+        "frame_indices": _predictions_data_serializer(data.frame_indices),
+    }
+
+
+def get_batch_model_prediction_attribute_at_index(
+    batch_model_prediction: BatchModelPrediction[np.ndarray],
+    attribute: str,
+    index: int,
+) -> Optional[
+    Union[np.ndarray, BatchVideoFramesPrediction, BatchBoundingBoxesPrediction]
+]:
+    """Returns for the given object attribute the data point at index"""
+    attribute_value = getattr(batch_model_prediction, attribute)
+    return attribute_value[index] if attribute_value is not None else None
+
+
+def batch_model_prediction_to_dict(
+    indices: Iterable[Any], predictions: BatchModelPrediction[np.ndarray]
+) -> List[dict]:
+    ret: List[dict] = []
+    for index, index_value in enumerate(indices):
+        d = {"index": index_value}
+        for attribute in ("features", "label_scores", "frames", "bounding_boxes"):
+            d[attribute] = _predictions_data_serializer(
+                get_batch_model_prediction_attribute_at_index(
+                    predictions, attribute, index
+                )
+            )
+        ret.append(d)
+
+    return ret

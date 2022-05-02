@@ -89,9 +89,18 @@ print(labels.indices, labels.labels)
 
 ## Command-line interface
 
-This only works for models accepting images for now.
-For instance, to run CLIP on all images in a folder:
+MLModule exposes a command-line interface. See `python -m mlmodule -h` for a list of available commands.
 
-```bash
-python -m mlmodule.cli run clip.CLIPViTB32ImageEncoder folder/* --batch-size 256 --num-workers 12
+For instance, one can run a ResNet model against a list of local images with the following command:
+
+```shell
+python -m mlmodule run ".resnet.modules.TorchResNetModule(resnet18)" *.jpg
+```
+
+It prints the results (features and labels) in JSON format.
+
+Similarly, we can extract the key-frames from videos:
+
+```shell
+python -m mlmodule run ".keyframes.selectors.resnet_key_frame_selector(resnet18, 10)" *.mp4 --file-type vi --batch-size 1
 ```
