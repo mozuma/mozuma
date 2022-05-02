@@ -4,11 +4,9 @@ from typing import (
     BinaryIO,
     Callable,
     Generic,
-    Dict,
     List,
     Optional,
     Sequence,
-    Set,
     Tuple,
     TypeVar,
     Union,
@@ -266,50 +264,42 @@ class ImageBoundingBoxDataset(
 
 @dataclasses.dataclass
 class TorchTrainingDataset(
-    TorchDataset[_IndicesType, Tuple[_DatasetType, int]],
+    TorchDataset[_IndicesType, Tuple[_DatasetType, _TargetsType]],
     Generic[_IndicesType, _DatasetType, _TargetsType],
 ):
     """Dataset for training that returns a tuple `(payload, target)` where `payload` is the value returned
-    by `dataset`.
+    by `dataset` and `target` the corrisponding element in `targets`.
 
     Attributes:
-        dataset (TorchDataset[_IndicesType, _DatasetType]): Dataset following the `TorchDataset` protocol
-        target_labels (Sequence[_TargetsType]): Target labels for each element of the dataset
+        dataset (TorchDataset[_IndicesType, _DatasetType]): A TorchDataset
+        targets (Sequence[_TargetsType]): Training target for each element of the dataset
 
     Note:
-        Number of elements in `target_labels`'s must be the same as the number of elements in `dataset`.
+        Length of `targets` must match the size of the `dataset`.
+
+    Warning:
+        `TorchTrainingDataset` doesn't work is with Torchvision datasets
+        in `torchvision.datasets`.
     """
 
     dataset: TorchDataset[_IndicesType, _DatasetType]
-    target_labels: Sequence[_TargetsType]
-    classes: Set[_TargetsType] = dataclasses.field(init=False, default_factory=set)
-    classes_to_idx: Dict[_TargetsType, int] = dataclasses.field(
-        init=False, default_factory=dict
-    )
+    targets: Sequence[_TargetsType]
 
     def __post_init__(self) -> None:
-        if len(self.dataset) != len(self.target_labels):
-            raise ValueError(
-                "Length for dataset doensn't match length for target_labels"
-            )
-
-        self._make_classes()
-
-    def _make_classes(self) -> None:
-        for target in self.target_labels:
-            if target not in self.classes:
-                self.classes.add(target)
-                self.classes_to_idx[target] = len(self.classes) - 1
+        if len(self.dataset) != len(self.targets):
+            raise ValueError("Length for dataset doensn't match length for targets")
 
     def getitem_indices(self, index: int) -> _IndicesType:
         return self.dataset.getitem_indices(index)
 
-    def __getitem__(self, index: int) -> Tuple[_IndicesType, Tuple[_DatasetType, int]]:
+    def __getitem__(
+        self, index: int
+    ) -> Tuple[_IndicesType, Tuple[_DatasetType, _TargetsType]]:
         idx, payload = self.dataset.__getitem__(index)
 
         return (
             idx,
-            (payload, self.classes_to_idx[self.target_labels[index]]),
+            (payload, self.targets[index]),
         )
 
     def __len__(self) -> int:

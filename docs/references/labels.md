@@ -1,5 +1,8 @@
 
 ::: mlmodule.labels.base.LabelSet
+    selection:
+      members:
+        - get_label_ids
 
 ## Available label sets
 
