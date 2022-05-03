@@ -1,4 +1,4 @@
-__all__ = ["ArcFaceFeatures"]
+__all__ = ["TorchArcFaceModule"]
 
 
-from mlmodule.contrib.arcface.features import ArcFaceFeatures
+from mlmodule.contrib.arcface.modules import TorchArcFaceModule
