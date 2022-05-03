@@ -23,6 +23,7 @@ from mlmodule.v2.helpers.utils import (
     convert_batch_video_frames_to_numpy,
     convert_numeric_array_like_to_numpy,
 )
+from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores.abstract import AbstractStateStore
 
 logger = getLogger()
@@ -172,17 +173,17 @@ class CollectVideoFramesInMemory(BaseSaveVideoFramesCallback[NumericArrayTypes])
 
 @dataclasses.dataclass
 class SaveModelState:
-    """Simple callback to save model state during training
+    """Simple callback to save model state during training.
+
+    If state are saved during traing (every X epochs,
+    see [`TorchTrainingOptions`][mlmodule.v2.torch.options.TorchTrainingOptions])
+    the current epoch number is appended to the `state_key.training_id` in the
+    following way: `<state_key.training_id>-e<num_epoch>`.
+    When the training is complete, just the `state_key.training_id` is used.
 
     Attributes:
         store (AbstractStateStore): Object to handle model state saving
-        training_id (str): Identifier for the training activity
-
-    Note:
-        During training, the current epoch number is appended to the
-        provied `training_id`, making the filename looking like this:
-        `...<training_id>-<epoch>...`.
-        When the training is complete, just the `training_id` is used.
+        state_key (StateKey): State identifier for the training activity.
 
     Warning:
         This callback only saves the model state, thus does not create a whole
@@ -190,7 +191,11 @@ class SaveModelState:
     """
 
     store: AbstractStateStore = dataclasses.field()
-    training_id: str = dataclasses.field()
+    state_key: StateKey = dataclasses.field()
+
+    def __post_init__(self) -> None:
+        if self.store.exists(self.state_key):
+            raise ValueError("Model state already exists!")
 
     @idist.one_rank_only()
     def save_model_state(self, engine: Engine, model: Any) -> None:
@@ -203,7 +208,7 @@ class SaveModelState:
         logger.debug(f"Calling store.save for epoch {epoch}")
 
         # Append current epoch number to training_id
-        new_training_id = "{}-{}".format(self.training_id, epoch)
+        new_training_id = f"{self.state_key.training_id}-e{epoch}"
 
         # If the training is done instead, use the pure training_id,
         # without epoch information
@@ -211,12 +216,12 @@ class SaveModelState:
             engine.state.max_epochs is not None
             and engine.state.epoch >= engine.state.max_epochs
         )
-        if is_done_epochs:
-            new_training_id = self.training_id
 
-        # LocalStateStore raise an error when the file already exists
-        # Catch it and log a warning instead, not to distrupt the runner execution
-        try:
+        if is_done_epochs:
+            new_training_id = self.state_key.training_id
+
+            if not self.store.exists(self.state_key):
+                self.store.save(model, new_training_id)
+
+        else:
             self.store.save(model, new_training_id)
-        except ValueError as err:
-            logger.warning(err)

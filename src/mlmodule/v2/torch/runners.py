@@ -291,7 +291,7 @@ class TorchTrainingRunner(
 
     Attributes:
         model (TorchMlModule): The PyTorch model to run inference
-        datasets (Tuple[TorchTrainingDataset, TorchTrainingDataset]): Train and test datasets for the runner
+        dataset (Tuple[TorchTrainingDataset, TorchTrainingDataset]): Train and test datasets for the runner
         callbacks (List[Union[BaseRunnerEndCallback, SaveModelState]]):
             Callback to save model weights plus one or more callbacks for when the runner ends.
         options (TorchTrainingOptions): PyTorch training options
