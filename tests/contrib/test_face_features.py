@@ -1,11 +1,12 @@
 import itertools
 import os
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence, Type, Union
 
 import numpy as np
 import pytest
 import torch
 
+from mlmodule.contrib.arcface.modules import TorchArcFaceModule
 from mlmodule.contrib.magface.modules import TorchMagFaceModule
 from mlmodule.contrib.mtcnn.modules import TorchMTCNNModule
 from mlmodule.utils import list_files_in_dir
@@ -22,6 +23,8 @@ from mlmodule.v2.torch.datasets import (
 )
 from mlmodule.v2.torch.options import TorchRunnerOptions
 from mlmodule.v2.torch.runners import TorchInferenceRunner
+
+_FaceModelType = Union[Type[TorchMagFaceModule], Type[TorchArcFaceModule]]
 
 FACE_DISTANCE_THRESHOLD = 0.5
 
@@ -55,6 +58,8 @@ def _face_detection_for_folder(
 
 
 def _face_features_for_folder(
+    face_module: _FaceModelType,
+    training_id: str,
     torch_device: torch.device,
     folder: str,
     bounding_boxes: Optional[CollectBoundingBoxesInMemory] = None,
@@ -64,8 +69,8 @@ def _face_features_for_folder(
     bounding_boxes = bounding_boxes or _face_detection_for_folder(torch_device, folder)
 
     # Loading model with pre-trained state
-    model = TorchMagFaceModule(device=torch_device, remove_bad_faces=remove_bad_faces)
-    Store().load(model, StateKey(model.state_type, "magface"))
+    model = face_module(device=torch_device, remove_bad_faces=remove_bad_faces)
+    Store().load(model, StateKey(model.state_type, training_id))
 
     # Dataset
     dataset = ImageBoundingBoxDataset(
@@ -96,9 +101,18 @@ def _count_matching_face_features(f1: Sequence[np.ndarray], f2: Sequence[np.ndar
     return count
 
 
-def test_magface_features_inference(torch_device: torch.device):
+@pytest.mark.parametrize(
+    "face_module,training_id",
+    [(TorchMagFaceModule, "magface"), (TorchArcFaceModule, "insightface")],
+    ids=["magface", "arcface"],
+)
+def test_face_features_inference(
+    torch_device: torch.device, face_module: _FaceModelType, training_id: str
+):
     base_path = os.path.join("tests", "fixtures", "berset")
-    feature = _face_features_for_folder(torch_device, base_path)
+    feature = _face_features_for_folder(
+        face_module, training_id, torch_device, base_path
+    )
     normalized_features: np.ndarray = feature.features / np.linalg.norm(
         feature.features, axis=1, keepdims=True
     )
@@ -134,7 +148,17 @@ def test_magface_features_inference(torch_device: torch.device):
 @pytest.mark.parametrize(
     "remove_bad_faces", [True, False], ids=["remove-bad", "keep-bad"]
 )
-def test_bad_quality_face_filter(remove_bad_faces: bool):
+@pytest.mark.parametrize(
+    "face_module,training_id,n_good_faces",
+    [(TorchMagFaceModule, "magface", 1), (TorchArcFaceModule, "insightface", 3)],
+    ids=["magface", "arcface"],
+)
+def test_bad_quality_face_filter(
+    remove_bad_faces: bool,
+    face_module: _FaceModelType,
+    training_id: str,
+    n_good_faces: int,
+):
     # Defining variables
     base_path = os.path.join("tests", "fixtures", "faces")
     device = torch.device("cpu")
@@ -144,7 +168,12 @@ def test_bad_quality_face_filter(remove_bad_faces: bool):
     bb = _face_detection_for_folder(device, base_path)
     # Getting face features
     ff = _face_features_for_folder(
-        device, base_path, bb, remove_bad_faces=remove_bad_faces
+        face_module,
+        training_id,
+        device,
+        base_path,
+        bb,
+        remove_bad_faces=remove_bad_faces,
     )
 
     # COunting the number of bounding boxes for the blurry picture
@@ -162,9 +191,9 @@ def test_bad_quality_face_filter(remove_bad_faces: bool):
     count_features = len(features_index_blur)
 
     if remove_bad_faces:
-        # Blurry face picture has 1 visible faces
-        assert count_features == 1
+        # Blurry face picture visible faces
+        assert count_features == n_good_faces
     else:
         assert count_features == count_bbox
     # But more detected faces
-    assert count_bbox > 1
+    assert count_bbox > n_good_faces
