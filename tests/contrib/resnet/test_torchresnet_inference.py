@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 import torch
 
-from mlmodule.contrib.resnet.modules import TorchResNetModule, TorchResNetTrainingMode
+from mlmodule.models.resnet.modules import TorchResNetModule, TorchResNetTrainingMode
 from mlmodule.v2.helpers.callbacks import CollectLabelsInMemory
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import Store

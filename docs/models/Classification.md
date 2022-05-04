@@ -1,16 +1,16 @@
 # Classification
 
-Path: `mlmodule.contrib.classification`
+Path: `mlmodule.models.classification`
 
 This module contains torch modules that can be used as classification heads on top
 of features.
 
 ## Models
 
-::: mlmodule.contrib.classification.LinearClassifierTorchModule
+::: mlmodule.models.classification.LinearClassifierTorchModule
     selection:
         members: none
 
-::: mlmodule.contrib.classification.MLPClassifierTorchModule
+::: mlmodule.models.classification.MLPClassifierTorchModule
     selection:
         members: none

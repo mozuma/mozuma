@@ -6,7 +6,7 @@ We are using an implementation of InsightFace in PyTorch (https://github.com/Tre
 
 The MagFace model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
 
-::: mlmodule.contrib.arcface.modules.TorchArcFaceModule
+::: mlmodule.models.arcface.modules.TorchArcFaceModule
     selection:
         members: none
 
@@ -14,6 +14,6 @@ The MagFace model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.
 
 See the [stores documentation](../references/stores.md) for usage.
 
-::: mlmodule.contrib.arcface.stores.ArcFaceStore
+::: mlmodule.models.arcface.stores.ArcFaceStore
     selection:
         members: none

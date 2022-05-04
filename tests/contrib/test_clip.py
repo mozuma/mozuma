@@ -7,8 +7,8 @@ import pytest
 import torch
 from PIL import Image
 
-from mlmodule.contrib.clip.image import CLIPImageModule
-from mlmodule.contrib.clip.text import CLIPTextModule
+from mlmodule.models.clip.image import CLIPImageModule
+from mlmodule.models.clip.text import CLIPTextModule
 from mlmodule.v2.helpers.callbacks import CollectFeaturesInMemory
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import Store

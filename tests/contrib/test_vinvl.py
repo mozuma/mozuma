@@ -1,6 +1,6 @@
 import os
 
-from mlmodule.contrib.vinvl.modules import TorchVinVLDetectorModule
+from mlmodule.models.vinvl.modules import TorchVinVLDetectorModule
 from mlmodule.utils import list_files_in_dir
 from mlmodule.v2.helpers.callbacks import CollectBoundingBoxesInMemory
 from mlmodule.v2.states import StateKey

@@ -17,7 +17,7 @@ pip install yacs==0.1.8
 
 The VinVL model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
 
-::: mlmodule.contrib.vinvl.modules.TorchVinVLDetectorModule
+::: mlmodule.models.vinvl.modules.TorchVinVLDetectorModule
     selection:
         members: none
 
@@ -25,6 +25,6 @@ The VinVL model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.mo
 
 See the [stores documentation](../references/stores.md) for usage.
 
-::: mlmodule.contrib.vinvl.stores.VinVLStore
+::: mlmodule.models.vinvl.stores.VinVLStore
     selection:
         members: none

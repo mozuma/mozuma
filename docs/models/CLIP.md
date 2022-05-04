@@ -12,15 +12,15 @@ pip install mlmodule[torch,clip]
 
 ## Models
 
-CLIP comes with image ([`CLIPImageModule`][mlmodule.contrib.clip.image.CLIPImageModule])
-and a text ([`CLIPTextModule`][mlmodule.contrib.clip.text.CLIPTextModule]) encoders.
+CLIP comes with image ([`CLIPImageModule`][mlmodule.models.clip.image.CLIPImageModule])
+and a text ([`CLIPTextModule`][mlmodule.models.clip.text.CLIPTextModule]) encoders.
 These modules are an implementation of [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
 
-::: mlmodule.contrib.clip.image.CLIPImageModule
+::: mlmodule.models.clip.image.CLIPImageModule
     selection:
         members: none
 
-::: mlmodule.contrib.clip.text.CLIPTextModule
+::: mlmodule.models.clip.text.CLIPTextModule
     selection:
         members: none
 
@@ -28,7 +28,7 @@ These modules are an implementation of [`TorchMlModule`][mlmodule.v2.torch.modul
 
 See the [stores documentation](../references/stores.md) for usage.
 
-::: mlmodule.contrib.clip.stores.CLIPStore
+::: mlmodule.models.clip.stores.CLIPStore
     selection:
         members: none
 
@@ -37,7 +37,7 @@ See the [stores documentation](../references/stores.md) for usage.
 There is a command line utility to list all available models from CLIP with their associated parameters in JSON format:
 
 ```bash
-python -m mlmodule.contrib.clip.list
+python -m mlmodule.models.clip.list
 ```
 
-The output is used to fill the mlmodule.contrib.clip.parameters file.
+The output is used to fill the mlmodule.models.clip.parameters file.
