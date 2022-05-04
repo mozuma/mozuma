@@ -31,13 +31,11 @@
     "inputs": [
         {
             "id": "flavour",
-            "description": "Data platform version",
+            "description": "Tox environment version",
             "type": "pickString",
             "options": [
-                "py37",
-                "cuda111-py37",
-                "py39",
-                "cuda111-py39"
+                "py37-pt19",
+                "py37-pt19-cuda"
             ]
         },
     ]

@@ -1,34 +1,50 @@
 # MLModule Kit
 
-Docker images with PyTorch related libraries pre-installed to use MLModule.
+MLModuleKit is a collection of docker images with a pre-configured environment to use MLModule.
+
+You can pull the image for a specific [`<version>`](#available-versions) with:
 
 ```
 docker pull lsirepfl/mlmodulekit:<version>
 ```
 
-## Versions
+## Usage
 
-List of image tags and installed libraries.
+This example will go through the process to run a python script called `main.py`
+in the MLModuleKit docker image.
 
-All versions are available with the suffix `-ca35`.
-These images are compiled for the CUDA compute ability version 3.5 (see https://en.wikipedia.org/wiki/CUDA),
-they must be used when using the LSIR PC32 machine.
+As a first step, we need to create a `Dockerfile` that uses mlmodulekit,
+installs the latest version of MLModule and copies the script we want to run.
 
-### `1`, `1-ca35`
+```Dockerfile
+FROM lsirepfl/mlmodulekit:3
 
-* Python 3.7
-* CUDA 11.0
-* PyTorch 1.7.1
-* TorchVision 0.8.2
-* MMCV full 1.3.11
+WORKDIR /app
+RUN pip install git+https://github.com/LSIR/mlmodule
 
-### `2`
+ADD main.py .
 
-* Python 3.7
-* CUDA 11.1
-* PyTorch 1.9.1
-* TorchVision 0.10.1
-* MMCV full 1.3.14
+ENTRYPOINT ["conda", "run", "-n", "app", "--no-capture-output"]
+```
+
+Then, we need to build a docker image from the `Dockerfile`:
+
+```shell
+docker build . -t my-mlmodule-job
+```
+
+The previous command has created a docker container
+that we can run with the following command:
+
+```shell
+docker run my-mlmodule-job python main.py
+```
+
+That's it ! You should see you script output in the terminal.
+
+## Available versions
+
+Description of available image tags.
 
 ### `3`
 
