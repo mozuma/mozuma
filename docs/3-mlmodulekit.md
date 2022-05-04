@@ -1,6 +1,8 @@
 # MLModule Kit
 
-Docker images with a pre-configured environment to use MLModule.
+MLModuleKit is a collection of docker images with a pre-configured environment to use MLModule.
+
+You can pull the image for a specific [`<version>`](#available-versions) with:
 
 ```
 docker pull lsirepfl/mlmodulekit:<version>
@@ -8,8 +10,11 @@ docker pull lsirepfl/mlmodulekit:<version>
 
 ## Usage
 
-In order to use the Docker Image and run a script called `main.py`,
-you should create a new `Dockerfile` with the following content.
+This example will go through the process to run a python script called `main.py`
+in the MLModuleKit docker image.
+
+As a first step, we need to create a `Dockerfile` that uses mlmodulekit,
+installs the latest version of MLModule and copies the script we want to run.
 
 ```Dockerfile
 FROM lsirepfl/mlmodulekit:3
@@ -22,17 +27,20 @@ ADD main.py .
 ENTRYPOINT ["conda", "run", "-n", "app", "--no-capture-output"]
 ```
 
-Then build the new docker image:
+Then, we need to build a docker image from the `Dockerfile`:
 
 ```shell
 docker build . -t my-mlmodule-job
 ```
 
-And run the resulting container with:
+The previous command has created a docker container
+that we can run with the following command:
 
 ```shell
 docker run my-mlmodule-job python main.py
 ```
+
+That's it ! You should see you script output in the terminal.
 
 ## Available versions
 
