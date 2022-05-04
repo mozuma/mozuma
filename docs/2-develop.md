@@ -94,3 +94,26 @@ pip-compile --extra full --upgrade
 * Update the `get_all_models_stores` to iterate over your new function.
 * Run the `update_public_store` scripts. This script accepts a `--dry-run` argument
   to see changes before actually uploading models.
+
+## Update documentation
+
+Install requirements to build the documentation:
+
+```shell
+pip install -r docs/requirements.txt
+```
+
+We are using [`mkdocs-material`](https://squidfunk.github.io/mkdocs-material/).
+It allows for previewing the changes with hot-reload:
+
+```shell
+mkdocs serve
+```
+
+The documentation can then be deployed to GitHUB pages manually with:
+
+```shell
+mkdocs gh-deploy
+```
+
+Or automatically when merging a Pull Request into the main branch with GitHUB actions.
