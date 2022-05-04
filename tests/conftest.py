@@ -1,7 +1,6 @@
 import os
-from typing import Callable, List, Set, Type
+from typing import List
 
-import numpy as np
 import pytest
 import torch
 from _pytest.fixtures import SubRequest
@@ -40,9 +39,6 @@ from mlmodule.contrib.sentences.distilbert.stores import (
 from mlmodule.contrib.vinvl.modules import TorchVinVLDetectorModule
 from mlmodule.contrib.vinvl.stores import VinVLStore
 from mlmodule.labels.imagenet import IMAGENET_LABELS
-from mlmodule.torch.base import BaseTorchMLModule
-from mlmodule.torch.data.images import ImageDataset
-from mlmodule.types import StateDict
 from mlmodule.utils import list_files_in_dir
 from mlmodule.v2.testing import ModuleTestConfiguration
 from mlmodule.v2.torch.modules import TorchMlModule
@@ -232,87 +228,6 @@ def gpu_torch_device() -> torch.device:
 def cats_and_dogs_images() -> List[str]:
     base_path = os.path.join("tests", "fixtures", "cats_dogs")
     return list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
-
-
-# OLD
-
-
-@pytest.fixture(
-    params=[
-        lambda: TorchResNetModule("resnet18"),
-        lambda: CLIPImageModule("ViT-B/32"),
-        lambda: CLIPTextModule("ViT-B/32"),
-        # CLIPViTB32ImageEncoder,
-        # ArcFaceFeatures,
-        # MagFaceFeatures,
-        # TorchMLModuleKeyFrames,
-        # VinVLDetector - too slow to download
-    ],
-    ids=[
-        "torch-resnet-18",
-        "torch-keyframes",
-        "torch-clip-vit-image",
-        "torch-clip-vit-text",
-    ],
-)
-def module_pretrained_by_provider(
-    request: SubRequest,
-):
-    """Returns a module that implements DownloadPretrainedStateFromProvider"""
-    return request.param
-
-
-@pytest.fixture(
-    params=[
-        lambda: TorchResNetModule("resnet18"),
-        lambda: CLIPImageModule("ViT-B/32"),
-        lambda: CLIPTextModule("ViT-B/32"),
-        # CLIPViTB32ImageEncoder,
-        # ArcFaceFeatures,
-        # MagFaceFeatures,
-        # TorchMLModuleKeyFrames,
-        # VinVLDetector - too slow to download
-    ],
-    ids=[
-        "torch-resnet-18",
-        "torch-keyframes",
-        "torch-clip-vit-image",
-        "torch-clip-vit-text",
-    ],
-)
-def module_pretrained_mlmodule_store(
-    request: SubRequest,
-):
-    return request.param
-
-
-@pytest.fixture(params=[])
-def image_module(request: SubRequest) -> Type[BaseTorchMLModule]:
-    """MLModules operating on images"""
-    return request.param
-
-
-@pytest.fixture(scope="session")
-def gpu_only_modules() -> Set[Type[BaseTorchMLModule]]:
-    """MLModules operating on images"""
-    return set()
-
-
-@pytest.fixture
-def assert_state_dict_equals() -> Callable[[StateDict, StateDict], None]:
-    def _assert_state_dict_equals(sd1: StateDict, sd2: StateDict) -> None:
-        for key in sd1:
-            np.testing.assert_array_equal(sd1[key], sd2[key])
-
-    return _assert_state_dict_equals
-
-
-@pytest.fixture(scope="session")
-def image_dataset() -> ImageDataset:
-    """Sample image dataset"""
-    base_path = os.path.join("tests", "fixtures", "faces")
-    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))
-    return ImageDataset(file_names)
 
 
 @pytest.fixture(scope="session")
