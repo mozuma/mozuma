@@ -1,0 +1,7 @@
+# Install mlmodule
+-e .
+
+# Install mkdocs
+mkdocs-material
+mkdocs-markdownextradata-plugin
+mkdocstrings-python-legacy

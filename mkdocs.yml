@@ -39,6 +39,7 @@ extra_css:
 
 plugins:
   - search
+  - markdownextradata
   - mkdocstrings:
       handlers:
         python:
@@ -50,3 +51,11 @@ plugins:
             show_source: false
       watch:
         - src/mlmodule
+
+extra:
+  develop:
+    python_version: 3.7
+    pytorch_version: 1.9
+    tox_env_version: py37-pt19
+  release:
+    tox_env_version: "{py37,py38,py39}{-pt19,-pt110}{-cuda,}"

@@ -2,17 +2,24 @@
 
 ## Installation
 
-### Using `tox`
+This section covers the installation of a development environment for contributing to MLModule.
+If you want to use MLModule in your project, see [installation instructions](0-installation.md) instead.
 
-This method requires [`conda`](https://docs.conda.io/en/latest/) and [`tox`](https://tox.readthedocs.io/en/latest/) to be installed.
+We are developing on Python {{develop.python_version}} and PyTorch {{develop.pytorch_version}}.
+
+### Using `tox` (recommended)
+
+This method is the recommended method as it will install a complete environment with PyTorch.
+It requires [`conda`](https://docs.conda.io/en/latest/) and
+[`tox`](https://tox.readthedocs.io/en/latest/) to be installed.
 
 Create a development environment:
 
 ```shell
 # CPU development
-tox --devenv venv -e py39
+tox --devenv venv -e {{develop.tox_env_version}}
 # or CUDA 11.1
-tox --devenv venv -e cuda111-py39
+tox --devenv venv -e {{develop.tox_env_version}}-cuda
 ```
 
 The environment can be activated with:
@@ -23,7 +30,8 @@ conda activate ./venv
 
 ### Using `pip`
 
-This method requires `pip` to be installed
+This method requires you to install PyTorch and TorchVision
+(see [PyTorch documentation](https://pytorch.org/)).
 
 ```bash
 pip install -r requirements.txt
@@ -33,13 +41,13 @@ pip install -e .
 
 ## Testing
 
-Testing can be done using `tox`
+Testing can be done using `tox`:
 
 ```shell
 # CPU testing
-tox -e py39
-# or CUDA 11.1
-tox -e cuda111-py39
+tox -e {{develop.tox_env_version}}
+# or with GPU support
+tox -e {{develop.tox_env_version}}-cuda
 ```
 
 or with directly using `pytest` on an environment with all dependencies installed
@@ -69,6 +77,10 @@ pip-compile --extra full --upgrade
 ## Publish a new version
 
 * Push the new version to the `master` branch
+* Test the release on all supported Python / PyTorch versions with the command.
+  ```shell
+  tox -e "{{release.tox_env_version}}"
+  ```
 * Create a GitHUB release on the branch `master` with format `vX.Y.Z`. For instance, `v0.1.1`.
 
 ## Upload new model weights

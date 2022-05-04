@@ -1,0 +1,9 @@
+black
+darker[isort]
+pytest
+pytest-dotenv
+requests-mock
+flake8
+mypy
+types-PyYAML
+types-requests
