@@ -1,5 +1,3 @@
-__all__ = [
-    "TorchResNetModule",
-]
+__all__ = ["TorchResNetModule", "TorchResNetTrainingMode"]
 
 from mlmodule.contrib.resnet.modules import TorchResNetModule, TorchResNetTrainingMode

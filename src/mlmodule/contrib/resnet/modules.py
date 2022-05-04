@@ -111,9 +111,9 @@ class TorchResNetModule(TorchMlModule[torch.Tensor, TorchResNetForwardOutputType
         features = self.forward_features(batch)
 
         # If the model is set on training, return either features or labels_scores
-        if self.training_mode and TorchResNetTrainingMode.features:
+        if self.training_mode == TorchResNetTrainingMode.features:
             return features
-        elif self.training_mode and TorchResNetTrainingMode.labels:
+        elif self.training_mode == TorchResNetTrainingMode.labels:
             labels_scores = self.forward_classifier(features)
             return labels_scores
 
@@ -136,8 +136,9 @@ class TorchResNetModule(TorchMlModule[torch.Tensor, TorchResNetForwardOutputType
             features = cast(torch.Tensor, forward_output)
         elif self.training_mode == TorchResNetTrainingMode.labels:
             labels_scores = cast(torch.Tensor, forward_output)
+        else:
+            features, labels_scores = forward_output
 
-        features, labels_scores = forward_output
         return BatchModelPrediction(features=features, label_scores=labels_scores)
 
     def get_dataset_transforms(self) -> List[Callable]:
