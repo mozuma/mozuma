@@ -4,7 +4,7 @@ from typing import List, NoReturn, Optional, TypeVar
 
 import boto3
 
-from mlmodule.v2.base.models import ModelWithState
+from mlmodule.models.types import ModelWithState
 from mlmodule.v2.states import StateKey, StateType
 from mlmodule.v2.stores.abstract import AbstractStateStore
 

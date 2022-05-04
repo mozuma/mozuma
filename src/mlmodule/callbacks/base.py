@@ -4,7 +4,7 @@ from typing import Any, Callable, Generic, Optional, Sequence, TypeVar, Union
 import numpy as np
 import torch
 
-from mlmodule.v2.base.models import ModelWithLabels
+from mlmodule.models.types import ModelWithLabels
 from mlmodule.v2.base.predictions import (
     BatchBoundingBoxesPrediction,
     BatchVideoFramesPrediction,
