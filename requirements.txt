@@ -18,6 +18,8 @@ click==8.0.4
     # via mlmodule (setup.py)
 clip @ git+https://github.com/openai/CLIP.git
     # via mlmodule (setup.py)
+dill==0.3.4
+    # via mlmodule (setup.py)
 facenet-pytorch==2.5.2
     # via mlmodule (setup.py)
 ftfy==6.0.3

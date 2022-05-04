@@ -31,6 +31,7 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
 
     Attributes:
         device (torch.device): Mandatory PyTorch device attribute to initialise model.
+        is_trainable (bool): Flag which indicates if the model is trainable. Default, True.
 
     Example:
         This would define a simple PyTorch model consisting of fully connected layer.
@@ -73,11 +74,18 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
         This corresponds respectively to the type of data the
         [`forward`][mlmodule.v2.torch.modules.TorchMlModule.forward]
         will take as argument and return. It is most likely `torch.Tensor`
-    """
 
-    def __init__(self, device: torch.device = torch.device("cpu")):
+    Note:
+        By default, MLModule models are trainable. Set the `is_trainable`
+        parameter to `False` when creating a subclass if it shouldn't be trained.
+    """  # noqa: E501
+
+    def __init__(
+        self, device: torch.device = torch.device("cpu"), is_trainable: bool = True
+    ):
         super().__init__()
         self.device = device
+        self.is_trainable = is_trainable
 
     @staticmethod
     def _extract_device_from_args(*args, **kwargs) -> Optional[torch.device]:
