@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 from PIL.Image import Image
 
-from mlmodule.types import FrameIdxType, FrameSequenceType
+from mlmodule.contrib.keyframes.types import FrameIdxType, FrameSequenceType
 from mlmodule.utils import convert_cv2_image_to_pil
 
 
