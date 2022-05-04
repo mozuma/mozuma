@@ -7,7 +7,7 @@ from typing import Any, Dict, Generator, List, Optional, Tuple, TypeVar
 import requests
 from requests.auth import HTTPBasicAuth
 
-from mlmodule.v2.base.models import ModelWithState
+from mlmodule.models.types import ModelWithState
 from mlmodule.v2.states import StateKey, StateType
 from mlmodule.v2.stores.abstract import AbstractStateStore
 
