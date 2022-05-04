@@ -5,36 +5,36 @@ handles the results (features, labels or model weights).
 
 They are classes implementing a pre-defined set of functions:
 
-- [`save_features`][mlmodule.v2.base.callbacks.BaseSaveFeaturesCallback.save_features]
-- [`save_label_scores`][mlmodule.v2.base.callbacks.BaseSaveLabelsCallback.save_label_scores]
-- [`save_bounding_boxes`][mlmodule.v2.base.callbacks.BaseSaveBoundingBoxCallback.save_bounding_boxes]
-- [`save_frames`][mlmodule.v2.base.callbacks.BaseSaveVideoFramesCallback.save_frames]
+- [`save_features`][mlmodule.callbacks.base.BaseSaveFeaturesCallback.save_features]
+- [`save_label_scores`][mlmodule.callbacks.base.BaseSaveLabelsCallback.save_label_scores]
+- [`save_bounding_boxes`][mlmodule.callbacks.base.BaseSaveBoundingBoxCallback.save_bounding_boxes]
+- [`save_frames`][mlmodule.callbacks.base.BaseSaveVideoFramesCallback.save_frames]
 
 ## In memory callbacks
 
 These callbacks accumulate results in-memory.
 They expose their results via object attributes.
 
-::: mlmodule.v2.helpers.callbacks.CollectFeaturesInMemory
+::: mlmodule.callbacks.CollectFeaturesInMemory
 
-::: mlmodule.v2.helpers.callbacks.CollectLabelsInMemory
+::: mlmodule.callbacks.CollectLabelsInMemory
 
-::: mlmodule.v2.helpers.callbacks.CollectBoundingBoxesInMemory
+::: mlmodule.callbacks.CollectBoundingBoxesInMemory
 
-::: mlmodule.v2.helpers.callbacks.CollectVideoFramesInMemory
+::: mlmodule.callbacks.CollectVideoFramesInMemory
 
 ## Callbacks for training
 
-::: mlmodule.v2.helpers.callbacks.SaveModelState
+::: mlmodule.callbacks.states.SaveModelState
 
 ## Write your own callbacks
 
-::: mlmodule.v2.base.callbacks.BaseSaveFeaturesCallback
+::: mlmodule.callbacks.base.BaseSaveFeaturesCallback
 
-::: mlmodule.v2.base.callbacks.BaseSaveLabelsCallback
+::: mlmodule.callbacks.base.BaseSaveLabelsCallback
 
-::: mlmodule.v2.base.callbacks.BaseSaveBoundingBoxCallback
+::: mlmodule.callbacks.base.BaseSaveBoundingBoxCallback
 
-::: mlmodule.v2.base.callbacks.BaseSaveVideoFramesCallback
+::: mlmodule.callbacks.base.BaseSaveVideoFramesCallback
 
-::: mlmodule.v2.base.callbacks.BaseRunnerEndCallback
+::: mlmodule.callbacks.base.BaseRunnerEndCallback

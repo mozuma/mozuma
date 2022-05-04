@@ -12,10 +12,10 @@ from torch.utils.data.dataset import Dataset
 from torchvision import transforms
 from tqdm import tqdm
 
-from mlmodule.v2.base.callbacks import BaseRunnerEndCallback, callbacks_caller
+from mlmodule.callbacks.base import BaseRunnerEndCallback, callbacks_caller
+from mlmodule.callbacks.states import SaveModelState
 from mlmodule.v2.base.predictions import BatchModelPrediction
 from mlmodule.v2.base.runners import BaseRunner
-from mlmodule.v2.helpers.callbacks import SaveModelState
 from mlmodule.v2.helpers.distributed import (
     ResultsCollector,
     register_multi_gpu_runner_logger,

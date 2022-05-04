@@ -8,6 +8,12 @@ import numpy as np
 import torch
 from typing_extensions import Literal
 
+from mlmodule.callbacks.memory import (
+    CollectBoundingBoxesInMemory,
+    CollectFeaturesInMemory,
+    CollectLabelsInMemory,
+    CollectVideoFramesInMemory,
+)
 from mlmodule.cli.helpers import (
     parser_add_formatter_argument,
     parser_add_model_argument,
@@ -20,12 +26,6 @@ from mlmodule.cli.types import (
 )
 from mlmodule.serializers import batch_model_prediction_to_dict
 from mlmodule.v2.base.predictions import BatchModelPrediction
-from mlmodule.v2.helpers.callbacks import (
-    CollectBoundingBoxesInMemory,
-    CollectFeaturesInMemory,
-    CollectLabelsInMemory,
-    CollectVideoFramesInMemory,
-)
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import Store
 from mlmodule.v2.stores.abstract import AbstractStateStore
