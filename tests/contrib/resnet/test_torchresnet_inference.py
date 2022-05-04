@@ -1,9 +1,11 @@
 import os
 from typing import List, cast
+from unittest import mock
 
+import pytest
 import torch
 
-from mlmodule.contrib.resnet.modules import TorchResNetModule
+from mlmodule.contrib.resnet.modules import TorchResNetModule, TorchResNetTrainingMode
 from mlmodule.v2.helpers.callbacks import CollectLabelsInMemory
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import Store
@@ -45,3 +47,64 @@ def test_resnet_cats_dogs(cats_and_dogs_images: List[str], torch_device: torch.d
         "pointer" in labels_dict[dog_file].lower()
         or "labrador" in labels_dict[dog_file].lower()
     )
+
+
+@pytest.mark.parametrize(
+    "training_mode",
+    [None, TorchResNetTrainingMode.features, TorchResNetTrainingMode.labels],
+    ids=["no_training_mode", "training_mode_features", "training_mode_labels"],
+)
+def test_resnet_forward_output(training_mode):
+    # Loading model
+    model = TorchResNetModule("resnet18", training_mode=training_mode)
+
+    input_example = torch.zeros([1])
+    expected = (
+        torch.zeros([1]),
+        torch.zeros([2]),
+    )  # features, labels_scores
+
+    with mock.patch.object(TorchResNetModule, "forward_features") as ff:
+        ff.return_value = expected[0]
+
+        with mock.patch.object(TorchResNetModule, "forward_classifier") as fc:
+            fc.return_value = expected[1]
+
+            # call forward pass
+            output = model(input_example)
+
+            # Check forward() returns according to training_mode
+            if not training_mode:
+                assert isinstance(output, tuple) and len(output) == 2
+
+                assert torch.equal(output[0], expected[0])
+                assert torch.equal(output[1], expected[1])
+            elif training_mode == TorchResNetTrainingMode.features:
+                assert isinstance(output, torch.Tensor)
+
+                assert torch.equal(output, expected[0])
+            elif training_mode == TorchResNetTrainingMode.labels:
+                assert isinstance(output, torch.Tensor)
+
+                assert torch.equal(output, expected[1])
+
+            # Check to_predictions()
+            predictions = model.to_predictions(output)
+
+            if not training_mode:
+                assert (
+                    predictions.features is not None
+                    and predictions.label_scores is not None
+                )
+
+            elif training_mode == TorchResNetTrainingMode.features:
+                assert (
+                    predictions.features is not None
+                    and predictions.label_scores is None
+                )
+
+            elif training_mode == TorchResNetTrainingMode.labels:
+                assert (
+                    predictions.features is None
+                    and predictions.label_scores is not None
+                )
