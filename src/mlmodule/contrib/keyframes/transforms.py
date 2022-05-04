@@ -1,16 +1,19 @@
 import dataclasses
-from typing import Callable, Generic, List, Tuple, TypeVar
+from typing import Callable, Generic, List, Tuple, TypeVar, Union
 
+import numpy as np
 import torch
+from PIL.Image import Image
 
-from mlmodule.types import FrameIdxType, FrameSequenceType, ImageDatasetType
+from mlmodule.contrib.keyframes.types import FrameIdxType, FrameSequenceType
 
+_ImageDatasetType = Union[Image, np.ndarray]
 _OutputDatasetType = TypeVar("_OutputDatasetType")
 
 
 @dataclasses.dataclass
 class ApplyImageTransformToVideoFrames(Generic[_OutputDatasetType]):
-    image_transform_func: Callable[[ImageDatasetType], _OutputDatasetType]
+    image_transform_func: Callable[[_ImageDatasetType], _OutputDatasetType]
 
     def __call__(
         self, frame_seq: FrameSequenceType

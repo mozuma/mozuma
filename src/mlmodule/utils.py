@@ -63,3 +63,12 @@ def convert_cv2_image_to_pil(cv2_image_arr: np.ndarray) -> Image.Image:
     """
     img = cv2.cvtColor(cv2_image_arr, cv2.COLOR_BGR2RGB)
     return Image.fromarray(img)
+
+
+def convert_to_rgb(pil_image: Image.Image) -> Image.Image:
+    """PIL convert to RGB function.
+    Returns the same image object if the image is already RGB.
+    """
+    if pil_image.mode == "RGB":
+        return pil_image
+    return pil_image.convert("RGB")

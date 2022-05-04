@@ -76,3 +76,9 @@ def log_evaluation_metrics(
     logger.info(
         f"Epoch {epoch} - Evaluation time (seconds): {elapsed:.2f} - {tag} metrics:\n {metrics_output}"
     )
+
+
+def l2_norm(x, axis=1):
+    norm = torch.norm(x, 2, axis, True)
+    output = torch.div(x, norm)
+    return output

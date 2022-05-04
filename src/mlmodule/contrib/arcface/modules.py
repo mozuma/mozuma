@@ -8,11 +8,11 @@ import torch.nn as nn
 from torchvision.transforms import Normalize, ToTensor
 
 from mlmodule.contrib.arcface.transforms import ArcFaceAlignment
-from mlmodule.torch.modules import Bottleneck_IR_SE, get_block
-from mlmodule.torch.utils import l2_norm
 from mlmodule.v2.base.predictions import BatchModelPrediction
 from mlmodule.v2.states import StateType
+from mlmodule.v2.torch.layers import Bottleneck_IR_SE, get_block
 from mlmodule.v2.torch.modules import TorchMlModule
+from mlmodule.v2.torch.utils import l2_norm
 
 # See https://quip.com/blC4A0YmfhbQ/Approach-to-remove-face-embeddings-leading-to-false-positive
 ARCFACE_DEFAULT_BAD_FACE_DISTANCE = 0.87
