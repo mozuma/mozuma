@@ -25,7 +25,7 @@ Next, we need to load the ResNet PyTorch module specifying the `resnet18` archit
 The model is initialised with weights provided by the `MLModuleModelStore`.
 
 ```python
-from mlmodule.contrib.resnet import TorchResNetModule
+from mlmodule.models.resnet import TorchResNetModule
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import MLModuleModelStore
 

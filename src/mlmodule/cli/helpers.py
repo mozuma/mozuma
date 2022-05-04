@@ -15,10 +15,10 @@ def parser_add_model_argument(
     """Adds arguments to load a model with string arguments"""
     parser.add_argument(
         "model",
-        type=functools.partial(argparse_load_module, relative_to="mlmodule.contrib"),
+        type=functools.partial(argparse_load_module, relative_to="mlmodule.models"),
         help=(
             "Full path to the model class, "
-            "it is considered a relative import to mlmodule.contrib"
+            "it is considered a relative import to mlmodule.models"
             "if the given path start with a '.'"
         ),
     )
@@ -31,11 +31,11 @@ def parser_add_store_argument(
     """Adds argument to select a store class"""
     parser.add_argument(
         "--store",
-        type=functools.partial(argparse_load_module, relative_to="mlmodule.contrib"),
+        type=functools.partial(argparse_load_module, relative_to="mlmodule.models"),
         default=Store,
         help=(
             "Full path to the store class, "
-            "it is considered a relative import to mlmodule.contrib"
+            "it is considered a relative import to mlmodule.models"
             "if the given path start with a '.'"
         ),
     )

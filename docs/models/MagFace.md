@@ -6,7 +6,7 @@ We are using the official implementation of MagFace in Pytorch (https://github.c
 
 The MagFace model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
 
-::: mlmodule.contrib.magface.modules.TorchMagFaceModule
+::: mlmodule.models.magface.modules.TorchMagFaceModule
     selection:
         members: none
 
@@ -14,6 +14,6 @@ The MagFace model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.
 
 See the [stores documentation](../references/stores.md) for usage.
 
-::: mlmodule.contrib.magface.stores.MagFaceStore
+::: mlmodule.models.magface.stores.MagFaceStore
     selection:
         members: none

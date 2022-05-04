@@ -7,7 +7,7 @@ PyTorch implementation of DenseNet architecture.
 
 The DenseNet model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
 
-::: mlmodule.contrib.densenet.TorchDenseNetModule
+::: mlmodule.models.densenet.TorchDenseNetModule
     selection:
         members: none
 
@@ -15,10 +15,10 @@ The DenseNet model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch
 
 See the [stores documentation](../references/stores.md) for usage.
 
-::: mlmodule.contrib.densenet.stores.DenseNetTorchVisionStore
+::: mlmodule.models.densenet.stores.DenseNetTorchVisionStore
     selection:
         members: none
 
-::: mlmodule.contrib.densenet.stores.DenseNetPlaces365Store
+::: mlmodule.models.densenet.stores.DenseNetPlaces365Store
     selection:
         members: none

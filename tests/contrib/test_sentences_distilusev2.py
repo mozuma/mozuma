@@ -2,10 +2,10 @@ import numpy as np
 import pytest
 import torch
 
-from mlmodule.contrib.sentences.distilbert.modules import (
+from mlmodule.models.sentences.distilbert.modules import (
     DistilUseBaseMultilingualCasedV2Module,
 )
-from mlmodule.contrib.sentences.distilbert.transforms import TokenizerTransform
+from mlmodule.models.sentences.distilbert.transforms import TokenizerTransform
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import Store
 

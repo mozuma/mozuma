@@ -6,9 +6,9 @@ import numpy as np
 import pytest
 import torch
 
-from mlmodule.contrib.arcface.modules import TorchArcFaceModule
-from mlmodule.contrib.magface.modules import TorchMagFaceModule
-from mlmodule.contrib.mtcnn.modules import TorchMTCNNModule
+from mlmodule.models.arcface.modules import TorchArcFaceModule
+from mlmodule.models.magface.modules import TorchMagFaceModule
+from mlmodule.models.mtcnn.modules import TorchMTCNNModule
 from mlmodule.utils import list_files_in_dir
 from mlmodule.v2.helpers.callbacks import (
     CollectBoundingBoxesInMemory,

@@ -5,40 +5,40 @@ import pytest
 import torch
 from _pytest.fixtures import SubRequest
 
-from mlmodule.contrib.arcface.modules import TorchArcFaceModule
-from mlmodule.contrib.arcface.stores import ArcFaceStore
-from mlmodule.contrib.classification.modules import (
+from mlmodule.labels.imagenet import IMAGENET_LABELS
+from mlmodule.models.arcface.modules import TorchArcFaceModule
+from mlmodule.models.arcface.stores import ArcFaceStore
+from mlmodule.models.classification.modules import (
     LinearClassifierTorchModule,
     MLPClassifierTorchModule,
 )
-from mlmodule.contrib.clip.image import CLIPImageModule
-from mlmodule.contrib.clip.stores import CLIPStore
-from mlmodule.contrib.clip.text import CLIPTextModule
-from mlmodule.contrib.densenet.modules import (
+from mlmodule.models.clip.image import CLIPImageModule
+from mlmodule.models.clip.stores import CLIPStore
+from mlmodule.models.clip.text import CLIPTextModule
+from mlmodule.models.densenet.modules import (
     TorchDenseNetModule,
     torch_densenet_places365,
 )
-from mlmodule.contrib.densenet.stores import (
+from mlmodule.models.densenet.stores import (
     DenseNetPlaces365Store,
     DenseNetTorchVisionStore,
 )
-from mlmodule.contrib.keyframes.encoders import VideoFramesEncoder
-from mlmodule.contrib.keyframes.selectors import KeyFrameSelector
-from mlmodule.contrib.magface.modules import TorchMagFaceModule
-from mlmodule.contrib.magface.stores import MagFaceStore
-from mlmodule.contrib.mtcnn.modules import TorchMTCNNModule
-from mlmodule.contrib.mtcnn.stores import FaceNetMTCNNStore
-from mlmodule.contrib.resnet.modules import TorchResNetModule
-from mlmodule.contrib.resnet.stores import ResNetTorchVisionStore
-from mlmodule.contrib.sentences.distilbert.modules import (
+from mlmodule.models.keyframes.encoders import VideoFramesEncoder
+from mlmodule.models.keyframes.selectors import KeyFrameSelector
+from mlmodule.models.magface.modules import TorchMagFaceModule
+from mlmodule.models.magface.stores import MagFaceStore
+from mlmodule.models.mtcnn.modules import TorchMTCNNModule
+from mlmodule.models.mtcnn.stores import FaceNetMTCNNStore
+from mlmodule.models.resnet.modules import TorchResNetModule
+from mlmodule.models.resnet.stores import ResNetTorchVisionStore
+from mlmodule.models.sentences.distilbert.modules import (
     DistilUseBaseMultilingualCasedV2Module,
 )
-from mlmodule.contrib.sentences.distilbert.stores import (
+from mlmodule.models.sentences.distilbert.stores import (
     SBERTDistiluseBaseMultilingualCasedV2Store,
 )
-from mlmodule.contrib.vinvl.modules import TorchVinVLDetectorModule
-from mlmodule.contrib.vinvl.stores import VinVLStore
-from mlmodule.labels.imagenet import IMAGENET_LABELS
+from mlmodule.models.vinvl.modules import TorchVinVLDetectorModule
+from mlmodule.models.vinvl.stores import VinVLStore
 from mlmodule.utils import list_files_in_dir
 from mlmodule.v2.testing import ModuleTestConfiguration
 from mlmodule.v2.torch.modules import TorchMlModule

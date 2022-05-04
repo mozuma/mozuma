@@ -16,7 +16,7 @@ pip install mlmodule[torch,mtcnn]
 
 The MTCNN model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
 
-::: mlmodule.contrib.mtcnn.modules.TorchMTCNNModule
+::: mlmodule.models.mtcnn.modules.TorchMTCNNModule
     selection:
         members: none
 
@@ -24,6 +24,6 @@ The MTCNN model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.mo
 
 See the [stores documentation](../references/stores.md) for usage.
 
-::: mlmodule.contrib.mtcnn.stores.FaceNetMTCNNStore
+::: mlmodule.models.mtcnn.stores.FaceNetMTCNNStore
     selection:
         members: none

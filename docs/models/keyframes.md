@@ -7,12 +7,12 @@ These models are an implementation of a [`TorchMlModule`][mlmodule.v2.torch.modu
 
 These models allow to extract key-frames from a video.
 
-::: mlmodule.contrib.keyframes.selectors.KeyFrameSelector
+::: mlmodule.models.keyframes.selectors.KeyFrameSelector
     selection:
         members: none
 
 ## Video frames encoder
 
-::: mlmodule.contrib.keyframes.encoders.VideoFramesEncoder
+::: mlmodule.models.keyframes.encoders.VideoFramesEncoder
     selection:
         members: none

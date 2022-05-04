@@ -8,7 +8,7 @@ and [Torchvision](https://pytorch.org/vision/stable/index.html).
 
 The ResNet model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
 
-::: mlmodule.contrib.resnet.TorchResNetModule
+::: mlmodule.models.resnet.TorchResNetModule
     selection:
         members: none
 
@@ -16,6 +16,6 @@ The ResNet model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.m
 
 See the [stores documentation](../references/stores.md) for usage.
 
-::: mlmodule.contrib.resnet.stores.ResNetTorchVisionStore
+::: mlmodule.models.resnet.stores.ResNetTorchVisionStore
     selection:
         members: none
