@@ -83,16 +83,12 @@ class LinearClassifierTorchModule(TorchMlModule[torch.Tensor, torch.Tensor]):
     Attributes:
         in_features (int): Number of dimensions in the input
         label_set (LabelSet): The set of labels for this classifier
-        activation (str | None): Name of an activation function in the `torch.nn` module.
-            For instance [`ReLU`](https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html#torch.nn.ReLU).
-            If `None`, no activation function is used.
     """
 
     def __init__(
         self,
         in_features: int,
         label_set: LabelSet,
-        activation: Optional[str] = None,
         device: torch.device = torch.device("cpu"),
     ):
         super().__init__(device)
@@ -101,14 +97,10 @@ class LinearClassifierTorchModule(TorchMlModule[torch.Tensor, torch.Tensor]):
         # Output label set
         self.label_set = label_set
         self.num_classes = len(label_set)
-        # Optional activation function
-        self.activation = activation
-        self.activation_fun = get_activation_fun_from_torch_nn(activation)
-        # Fully connected linear module with activation
-        self.fc = LinearModuleWithActivation(
-            in_dim=self.in_features,
-            out_dim=self.num_classes,
-            activation_fun=self.activation_fun,
+        # Fully connected linear module
+        self.fc = nn.Linear(
+            in_features=self.in_features,
+            out_features=self.num_classes,
             device=self.device,
         )
 
@@ -117,9 +109,9 @@ class LinearClassifierTorchModule(TorchMlModule[torch.Tensor, torch.Tensor]):
         return StateType(
             backend="pytorch",
             architecture=mlp_state_architecture(
-                "lin", (self.in_features, self.num_classes), activation=self.activation
+                "lin", (self.in_features, self.num_classes)
             ),
-            extra=(f"lbl-{self.label_set.label_set_unique_id}"),
+            extra=(f"lbl-{self.label_set.label_set_unique_id}",),
         )
 
     def forward(self, batch: torch.Tensor) -> torch.Tensor:
@@ -169,6 +161,7 @@ class MLPClassifierTorchModule(TorchMlModule[torch.Tensor, torch.Tensor]):
         self.activation_fun = get_activation_fun_from_torch_nn(activation)
 
         # Building the sequence of Linear modules
+        layers_dim_before_last = self.layers_dim[:-1]
         layers_modules = [
             LinearModuleWithActivation(
                 in_dim=dim,
@@ -176,7 +169,15 @@ class MLPClassifierTorchModule(TorchMlModule[torch.Tensor, torch.Tensor]):
                 activation_fun=self.activation_fun,
                 device=self.device,
             )
-            for dim, dim_next in zip(self.layers_dim[:-1], self.layers_dim[1:])
+            for dim, dim_next in zip(
+                layers_dim_before_last[:-1], layers_dim_before_last[1:]
+            )
+        ] + [  # Last layer does not have an activation function
+            LinearModuleWithActivation(
+                in_dim=self.layers_dim[-2],
+                out_dim=self.layers_dim[-1],
+                device=self.device,
+            )
         ]
         self.mlp = nn.Sequential(*layers_modules)
 
@@ -187,7 +188,7 @@ class MLPClassifierTorchModule(TorchMlModule[torch.Tensor, torch.Tensor]):
             architecture=mlp_state_architecture(
                 "mlp", self.layers_dim, activation=self.activation
             ),
-            extra=(f"lbl-{self.label_set.label_set_unique_id}"),
+            extra=(f"lbl-{self.label_set.label_set_unique_id}",),
         )
 
     def forward(self, batch: torch.Tensor) -> torch.Tensor:
