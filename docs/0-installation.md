@@ -28,4 +28,6 @@ pip install git+https://github.com/LSIR/mlmodule@vX.Y.Z
 ## Using Docker
 
 For convenience, we also ship a base [Docker image](https://hub.docker.com/repository/docker/lsirepfl/mlmodulekit)
-which contains dependencies that can be hard to install (for instance PyTorch). See [MLModuleKit](3-mlmodulekit.md).
+which contains dependencies that can be hard to install (for instance PyTorch).
+
+See [MLModuleKit](3-mlmodulekit.md) for usage documentation.
