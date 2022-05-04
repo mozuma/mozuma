@@ -3,6 +3,7 @@ from io import BytesIO
 import pytest
 import torch
 
+from mlmodule.callbacks.memory import CollectVideoFramesInMemory
 from mlmodule.models.keyframes.datasets import (
     FPSVideoFrameExtractorTransform,
     compute_every_param_from_target_fps,
@@ -10,7 +11,6 @@ from mlmodule.models.keyframes.datasets import (
 from mlmodule.models.keyframes.encoders import VideoFramesEncoder
 from mlmodule.models.keyframes.selectors import KeyFrameSelector
 from mlmodule.models.resnet.modules import TorchResNetModule
-from mlmodule.v2.helpers.callbacks import CollectVideoFramesInMemory
 from mlmodule.v2.torch.datasets import ListDataset
 from mlmodule.v2.torch.options import TorchRunnerOptions
 from mlmodule.v2.torch.runners import TorchInferenceRunner

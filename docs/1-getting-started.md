@@ -52,7 +52,7 @@ Note that we pass two callbacks to the runner: `CollectFeaturesInMemory` and `Co
 They will be called to collect the resulting features and labels for each batch.
 
 ```python
-from mlmodule.v2.helpers.callbacks import (
+from mlmodule.callbacks import (
     CollectFeaturesInMemory, CollectLabelsInMemory
 )
 from mlmodule.v2.torch.options import TorchRunnerOptions

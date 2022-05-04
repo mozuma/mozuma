@@ -1,8 +1,8 @@
 import os
 
+from mlmodule.callbacks.memory import CollectBoundingBoxesInMemory
 from mlmodule.models.vinvl.modules import TorchVinVLDetectorModule
 from mlmodule.utils import list_files_in_dir
-from mlmodule.v2.helpers.callbacks import CollectBoundingBoxesInMemory
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import Store
 from mlmodule.v2.torch.datasets import ImageDataset, LocalBinaryFilesDataset

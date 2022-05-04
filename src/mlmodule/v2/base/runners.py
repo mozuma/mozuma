@@ -48,7 +48,7 @@ class BaseRunner(
         It passes the returned data to the save_features callback.
 
         ```python
-        from mlmodule.v2.base.callbacks import (
+        from mlmodule.callbacks.base import (
             BaseSaveFeaturesCallback,
             callbacks_caller
         )

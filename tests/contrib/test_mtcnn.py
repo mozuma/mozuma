@@ -7,9 +7,9 @@ import torch
 from facenet_pytorch.models.mtcnn import MTCNN
 from PIL.Image import Image
 
+from mlmodule.callbacks.memory import CollectBoundingBoxesInMemory
 from mlmodule.models.mtcnn.modules import TorchMTCNNModule
 from mlmodule.utils import list_files_in_dir
-from mlmodule.v2.helpers.callbacks import CollectBoundingBoxesInMemory
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import Store
 from mlmodule.v2.torch.datasets import (

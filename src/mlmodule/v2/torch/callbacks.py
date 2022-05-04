@@ -2,7 +2,7 @@ from typing import Union
 
 import torch
 
-from mlmodule.v2.base.callbacks import (
+from mlmodule.callbacks.base import (
     BaseSaveBoundingBoxCallback,
     BaseSaveFeaturesCallback,
     BaseSaveLabelsCallback,

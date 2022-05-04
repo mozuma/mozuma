@@ -4,9 +4,9 @@ from typing import List, cast
 
 import torch
 
+from mlmodule.callbacks.memory import CollectLabelsInMemory
 from mlmodule.labels.places import PLACES_LABELS
 from mlmodule.models.densenet.modules import TorchDenseNetModule
-from mlmodule.v2.helpers.callbacks import CollectLabelsInMemory
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import Store
 from mlmodule.v2.torch.datasets import ImageDataset, LocalBinaryFilesDataset

@@ -1,6 +1,6 @@
 import numpy as np
 
-from mlmodule.v2.helpers.callbacks import CollectFeaturesInMemory
+from mlmodule.callbacks.memory import CollectFeaturesInMemory
 
 
 def test_collect_features():
