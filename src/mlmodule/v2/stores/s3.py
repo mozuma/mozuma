@@ -61,7 +61,7 @@ class S3StateStore(AbstractStateStore[_ModelType]):
         # Extracting architecture, extra and training id
         file_key_parts = file_key.split(".")
         architecture = file_key_parts[0]
-        extra = tuple(file_key_parts[1:-1]) or None
+        extra = tuple(file_key_parts[1:-1])
         training_id = file_key_parts[-1]
         return StateKey(
             state_type=StateType(

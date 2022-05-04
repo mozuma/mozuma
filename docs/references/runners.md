@@ -17,11 +17,12 @@ They are executed with the `run` function which takes no arguments.
       members:
         - run
 
-## Options
+## Training
 
-::: mlmodule.v2.torch.options.TorchRunnerOptions
-
-::: mlmodule.v2.torch.options.TorchMultiGPURunnerOptions
+::: mlmodule.v2.torch.runners.TorchTrainingRunner
+    selection:
+      members:
+        - run
 
 ## Write your own runner
 

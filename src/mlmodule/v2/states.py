@@ -1,6 +1,6 @@
 import dataclasses
 import re
-from typing import Iterable, Optional
+from typing import Tuple
 
 VALID_NAMES = re.compile(r"^[\w\-\d]+$")
 """The pattern for valid architecture name in
@@ -44,13 +44,13 @@ class StateType:
     Attributes:
         backend (str): The model backend. For instance `pytorch`.
         architecture (str): Identifier for the architecture (e.g. `torchresnet18`...).
-        extra (Optional[Iterable[str]]): Additional information to identify
+        extra (tuple[str, ...]): Additional information to identify
             architecture variants (number of output classes...).
     """
 
     backend: str
     architecture: str
-    extra: Optional[Iterable[str]] = None
+    extra: Tuple[str, ...] = dataclasses.field(default_factory=tuple)
 
     def __post_init__(self):
         self.validate()
@@ -58,7 +58,7 @@ class StateType:
     def validate(self) -> None:
         validate_name(self.backend, "backend")
         validate_name(self.architecture, "architecture")
-        for e in self.extra or []:
+        for e in self.extra:
             validate_name(e, "extra")
 
     def is_compatible_with(self, other: "StateType") -> bool:

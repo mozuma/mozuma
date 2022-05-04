@@ -1,5 +1,16 @@
 import dataclasses
-from typing import BinaryIO, Callable, Generic, List, Optional, Sequence, Tuple, TypeVar
+import pathlib
+from typing import (
+    BinaryIO,
+    Callable,
+    Generic,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 import numpy as np
 import PIL.Image
@@ -12,6 +23,8 @@ from mlmodule.v2.torch.utils import apply_mode_to_image
 _IndicesType = TypeVar("_IndicesType", covariant=True)
 _DatasetType = TypeVar("_DatasetType", covariant=True)
 _NewDatasetType = TypeVar("_NewDatasetType", covariant=True)
+_PathLike = TypeVar("_PathLike", bound=Union[str, pathlib.Path])
+_TargetsType = TypeVar("_TargetsType", covariant=True)
 
 
 class TorchDataset(Protocol[_IndicesType, _DatasetType]):
@@ -119,19 +132,19 @@ class ListDatasetIndexed(TorchDataset[_IndicesType, _DatasetType]):
 
 
 @dataclasses.dataclass
-class LocalBinaryFilesDataset(TorchDataset[str, BinaryIO]):
+class LocalBinaryFilesDataset(TorchDataset[_PathLike, BinaryIO]):
     """Dataset that reads a list of local file names and returns their content as bytes
 
     Attributes:
-        paths (Sequence[str]): List of paths to files
+        paths (Sequence[_PathLike]): List of paths to files
     """
 
-    paths: Sequence[str]
+    paths: Sequence[_PathLike]
 
-    def getitem_indices(self, index: int) -> str:
+    def getitem_indices(self, index: int) -> _PathLike:
         return self.paths[index]
 
-    def __getitem__(self, index: int) -> Tuple[str, BinaryIO]:
+    def __getitem__(self, index: int) -> Tuple[_PathLike, BinaryIO]:
         return self.paths[index], open(self.paths[index], mode="rb")
 
     def __len__(self) -> int:
@@ -247,3 +260,47 @@ class ImageBoundingBoxDataset(
 
     def __len__(self) -> int:
         return len(self.flat_indices)
+
+
+@dataclasses.dataclass
+class TorchTrainingDataset(
+    TorchDataset[_IndicesType, Tuple[_DatasetType, _TargetsType]],
+    Generic[_IndicesType, _DatasetType, _TargetsType],
+):
+    """Dataset for training that returns a tuple `(payload, target)` where `payload` is the value returned
+    by `dataset` and `target` the corrisponding element in `targets`.
+
+    Attributes:
+        dataset (TorchDataset[_IndicesType, _DatasetType]): A TorchDataset
+        targets (Sequence[_TargetsType]): Training target for each element of the dataset
+
+    Note:
+        Length of `targets` must match the size of the `dataset`.
+
+    Warning:
+        `TorchTrainingDataset` doesn't work is with Torchvision datasets
+        in `torchvision.datasets`.
+    """
+
+    dataset: TorchDataset[_IndicesType, _DatasetType]
+    targets: Sequence[_TargetsType]
+
+    def __post_init__(self) -> None:
+        if len(self.dataset) != len(self.targets):
+            raise ValueError("Length for dataset doensn't match length for targets")
+
+    def getitem_indices(self, index: int) -> _IndicesType:
+        return self.dataset.getitem_indices(index)
+
+    def __getitem__(
+        self, index: int
+    ) -> Tuple[_IndicesType, Tuple[_DatasetType, _TargetsType]]:
+        idx, payload = self.dataset.__getitem__(index)
+
+        return (
+            idx,
+            (payload, self.targets[index]),
+        )
+
+    def __len__(self) -> int:
+        return len(self.dataset)

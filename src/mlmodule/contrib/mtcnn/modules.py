@@ -47,7 +47,7 @@ class TorchMTCNNModule(
         min_face_size: int = 20,
         device: torch.device = torch.device("cpu"),
     ):
-        super().__init__(device=device)
+        super().__init__(device=device, is_trainable=False)
         self.image_size = image_size
         self.mtcnn = MLModuleMTCNN(
             thresholds=thresholds,

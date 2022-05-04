@@ -23,6 +23,10 @@ They expose their results via object attributes.
 
 ::: mlmodule.v2.helpers.callbacks.CollectVideoFramesInMemory
 
+## Callbacks for training
+
+::: mlmodule.v2.helpers.callbacks.SaveModelState
+
 ## Write your own callbacks
 
 ::: mlmodule.v2.base.callbacks.BaseSaveFeaturesCallback

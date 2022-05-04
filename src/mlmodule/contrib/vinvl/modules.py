@@ -46,7 +46,7 @@ class TorchVinVLDetectorModule(
         attr_score_threshold: float = 0.5,
         device: torch.device = torch.device("cpu"),
     ):
-        super().__init__(device=device)
+        super().__init__(device=device, is_trainable=False)
         cfg.set_new_allowed(True)
         cfg.merge_from_other_cfg(sg_cfg)
         cfg.set_new_allowed(False)

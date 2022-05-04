@@ -1,5 +1,6 @@
 from collections import OrderedDict
-from typing import Callable, List, Tuple
+from enum import Enum
+from typing import Callable, List, Optional, Tuple, Union, cast
 
 import torch
 
@@ -15,8 +16,17 @@ from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 from mlmodule.v2.torch.transforms import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 
+TorchResNetForwardOutputType = Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]
 
-class TorchResNetModule(TorchMlModule[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]):
+
+class TorchResNetTrainingMode(Enum):
+    """Enables to train a `TorchResNetModule` either on features or on labels"""
+
+    features: str = "features"
+    labels: str = "labels"
+
+
+class TorchResNetModule(TorchMlModule[torch.Tensor, TorchResNetForwardOutputType]):
     """PyTorch ResNet architecture.
 
     See [PyTorch's documentation](https://pytorch.org/vision/stable/_modules/torchvision/models/resnet.html).
@@ -44,10 +54,12 @@ class TorchResNetModule(TorchMlModule[torch.Tensor, Tuple[torch.Tensor, torch.Te
         resnet_arch: ResNetArch,
         label_set: LabelSet = None,
         device: torch.device = torch.device("cpu"),
+        training_mode: Optional[TorchResNetTrainingMode] = None,
     ):
         super().__init__(device)
         self.resnet_arch = resnet_arch
         self.label_set = label_set or IMAGENET_LABELS
+        self.training_mode = training_mode
 
         # Getting the resnet architecture from torchvision
         base_resnet = get_torchvision_model(
@@ -94,20 +106,37 @@ class TorchResNetModule(TorchMlModule[torch.Tensor, Tuple[torch.Tensor, torch.Te
     def forward_classifier(self, x: torch.Tensor) -> torch.Tensor:
         return self.classifier_module(x)
 
-    def forward(self, batch: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(self, batch: torch.Tensor) -> TorchResNetForwardOutputType:
         """Forward pass of the ResNet model"""
         features = self.forward_features(batch)
+
+        # If the model is set on training, return either features or labels_scores
+        if self.training_mode and TorchResNetTrainingMode.features:
+            return features
+        elif self.training_mode and TorchResNetTrainingMode.labels:
+            labels_scores = self.forward_classifier(features)
+            return labels_scores
+
+        # During inference use both instead
         labels_scores = self.forward_classifier(features)
         return features, labels_scores
 
     def to_predictions(
-        self, forward_output: Tuple[torch.Tensor, torch.Tensor]
+        self, forward_output: TorchResNetForwardOutputType
     ) -> BatchModelPrediction[torch.Tensor]:
         """Forward pass of the ResNet model
 
         Returns:
             BatchModelPrediction: Features and labels_scores
         """
+        features = None
+        labels_scores = None
+
+        if self.training_mode == TorchResNetTrainingMode.features:
+            features = cast(torch.Tensor, forward_output)
+        elif self.training_mode == TorchResNetTrainingMode.labels:
+            labels_scores = cast(torch.Tensor, forward_output)
+
         features, labels_scores = forward_output
         return BatchModelPrediction(features=features, label_scores=labels_scores)
 

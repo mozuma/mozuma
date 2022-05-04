@@ -45,6 +45,14 @@ These datasets are compatible with `torch.utils.data.DataLoader`.
     selection:
         members: none
 
+### Training datasets
+
+::: mlmodule.v2.torch.datasets.TorchTrainingDataset
+    rendering:
+        heading_level: 4
+    selection:
+        members: none
+
 ## Write your own dataset
 
 Dataset types depends on the runner used,

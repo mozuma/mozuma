@@ -65,6 +65,11 @@ These stores can be used if you want to store model states locally or on S3 stor
     selection:
         members: none
 
+::: mlmodule.v2.stores.github.GitHUBReleaseStore
+    selection:
+        members: none
+
+
 ## Write your own store
 
 A store should inherit [`AbstractStateStore`][mlmodule.v2.stores.abstract.AbstractStateStore]

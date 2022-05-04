@@ -1,10 +1,13 @@
-from typing import Any, Callable, List, Sequence, Tuple
+from typing import Any, Callable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import torch
 
 from mlmodule.contrib.keyframes.encoders import VideoFramesEncoder
 from mlmodule.contrib.keyframes.keyframes import KeyFramesExtractor
+from mlmodule.contrib.resnet.modules import TorchResNetModule
+from mlmodule.helpers.torchvision import ResNetArch
+from mlmodule.labels.base import LabelSet
 from mlmodule.v2.base.predictions import (
     BatchModelPrediction,
     BatchVideoFramesPrediction,
@@ -32,7 +35,7 @@ class KeyFrameSelector(
     def __init__(
         self,
         image_encoder: TorchMlModule[torch.Tensor, Any],
-        fps: int = 1,
+        fps: float = 1,
         device: torch.device = torch.device("cpu"),
     ):
         super().__init__(device=device)
@@ -134,3 +137,16 @@ class KeyFrameSelector(
             - Stack frames into a `torch.Tensor`
         """
         return self.frames_encoder.get_dataset_transforms()
+
+
+def resnet_key_frame_selector(
+    resnet_arch: ResNetArch,
+    fps: Union[float, str] = 1,
+    label_set: Optional[LabelSet] = None,
+    device: torch.device = torch.device("cpu"),
+):
+    return KeyFrameSelector(
+        TorchResNetModule(resnet_arch, label_set=label_set, device=device),
+        fps=float(fps),
+        device=device,
+    )

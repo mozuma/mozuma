@@ -6,7 +6,8 @@ import pytest
 import torch
 from _pytest.fixtures import SubRequest
 
-from mlmodule.contrib.arcface import ArcFaceFeatures
+from mlmodule.contrib.arcface.modules import TorchArcFaceModule
+from mlmodule.contrib.arcface.stores import ArcFaceStore
 from mlmodule.contrib.classification.modules import (
     LinearClassifierTorchModule,
     MLPClassifierTorchModule,
@@ -100,6 +101,16 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
         batch_factory=lambda: [torch.rand([720 + i * 10, 720, 3]) for i in range(5)],
         provider_store=FaceNetMTCNNStore(),
         training_id="facenet",
+    ),
+    # ArcFace
+    ModuleTestConfiguration(
+        "arcface",
+        lambda: TorchArcFaceModule(),
+        batch_factory=lambda: torch.rand(
+            (2, 3, 112, 112)
+        ),  # batch, channels, width, height
+        provider_store=ArcFaceStore(),
+        training_id="insightface",
     ),
     # MagFace
     ModuleTestConfiguration(
@@ -272,21 +283,6 @@ def module_pretrained_by_provider(
 def module_pretrained_mlmodule_store(
     request: SubRequest,
 ):
-    return request.param
-
-
-@pytest.fixture(
-    params=[
-        ArcFaceFeatures,
-        # TorchMLModuleKeyFrames,
-    ]
-)
-def data_platform_scanner(request: SubRequest):
-    """Fixture for generic tests of Modules to be used in the data platform
-
-    :param request:
-    :return:
-    """
     return request.param
 
 
