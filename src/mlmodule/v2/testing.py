@@ -12,7 +12,7 @@ class ModuleTestConfiguration(Generic[_Module]):
 
     name: str
     module_factory: Callable[[], _Module]
-    training_id: str
+    training_id: Optional[str] = None
     has_state: bool = True
     # Is it a Pytorch model
     is_pytorch: bool = True
