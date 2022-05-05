@@ -3,7 +3,7 @@ import pytest
 from mlmodule.models.types import ModelWithState
 from mlmodule.states import StateKey
 from mlmodule.stores import Store
-from mlmodule.v2.testing import ModuleTestConfiguration
+from mlmodule.testing import ModuleTestConfiguration
 
 
 def test_mlmodule_store(ml_module: ModuleTestConfiguration):

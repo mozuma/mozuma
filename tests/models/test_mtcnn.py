@@ -8,13 +8,13 @@ from facenet_pytorch.models.mtcnn import MTCNN
 from PIL.Image import Image
 
 from mlmodule.callbacks.memory import CollectBoundingBoxesInMemory
+from mlmodule.helpers.files import list_files_in_dir
 from mlmodule.models.mtcnn.modules import TorchMTCNNModule
 from mlmodule.states import StateKey
 from mlmodule.stores import Store
 from mlmodule.torch.datasets import ImageDataset, ListDataset, LocalBinaryFilesDataset
 from mlmodule.torch.options import TorchRunnerOptions
 from mlmodule.torch.runners import TorchInferenceRunner
-from mlmodule.utils import list_files_in_dir
 
 
 @pytest.fixture(scope="session")

@@ -3,10 +3,10 @@ from typing import List, NoReturn
 
 import torch
 
+from mlmodule.helpers.gdrive import download_file_from_google_drive
 from mlmodule.models.magface.modules import TorchMagFaceModule
 from mlmodule.states import StateKey, StateType
 from mlmodule.stores.abstract import AbstractStateStore
-from mlmodule.utils import download_file_from_google_drive
 
 
 class MagFaceStore(AbstractStateStore[TorchMagFaceModule]):

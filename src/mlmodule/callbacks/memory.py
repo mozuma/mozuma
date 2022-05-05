@@ -1,7 +1,8 @@
 import dataclasses
-from typing import Any, List, Sequence
+from typing import TYPE_CHECKING, Any, List, Sequence, Union
 
 import numpy as np
+from typing_extensions import TypeAlias
 
 from mlmodule.callbacks.base import (
     BaseSaveBoundingBoxCallback,
@@ -9,21 +10,26 @@ from mlmodule.callbacks.base import (
     BaseSaveLabelsCallback,
     BaseSaveVideoFramesCallback,
 )
+from mlmodule.helpers.numpy import (
+    convert_batch_bounding_boxes_to_numpy,
+    convert_batch_video_frames_to_numpy,
+    convert_numeric_array_like_to_numpy,
+)
 from mlmodule.models.types import ModelWithLabels
 from mlmodule.predictions import (
     BatchBoundingBoxesPrediction,
     BatchVideoFramesPrediction,
 )
-from mlmodule.v2.helpers.types import NumericArrayTypes
-from mlmodule.v2.helpers.utils import (
-    convert_batch_bounding_boxes_to_numpy,
-    convert_batch_video_frames_to_numpy,
-    convert_numeric_array_like_to_numpy,
-)
+
+if TYPE_CHECKING:
+    import torch
+
+
+_NumericArrayTypes: TypeAlias = Union["torch.Tensor", np.ndarray]
 
 
 @dataclasses.dataclass
-class CollectFeaturesInMemory(BaseSaveFeaturesCallback[NumericArrayTypes]):
+class CollectFeaturesInMemory(BaseSaveFeaturesCallback[_NumericArrayTypes]):
     """Callback to collect features in memory
 
     Attributes:
@@ -41,7 +47,7 @@ class CollectFeaturesInMemory(BaseSaveFeaturesCallback[NumericArrayTypes]):
     )
 
     def save_features(
-        self, model: Any, indices: Sequence, features: NumericArrayTypes
+        self, model: Any, indices: Sequence, features: _NumericArrayTypes
     ) -> None:
         # Convert features to numpy
         features_numpy = convert_numeric_array_like_to_numpy(features)
@@ -58,7 +64,7 @@ class CollectFeaturesInMemory(BaseSaveFeaturesCallback[NumericArrayTypes]):
 
 
 @dataclasses.dataclass
-class CollectLabelsInMemory(BaseSaveLabelsCallback[NumericArrayTypes]):
+class CollectLabelsInMemory(BaseSaveLabelsCallback[_NumericArrayTypes]):
     """Callback to collect labels in memory
 
     Attributes:
@@ -81,7 +87,7 @@ class CollectLabelsInMemory(BaseSaveLabelsCallback[NumericArrayTypes]):
         self,
         model: ModelWithLabels,
         indices: Sequence,
-        labels_scores: NumericArrayTypes,
+        labels_scores: _NumericArrayTypes,
     ) -> None:
         label_set = model.get_labels()
 
@@ -101,7 +107,7 @@ class CollectLabelsInMemory(BaseSaveLabelsCallback[NumericArrayTypes]):
 
 
 @dataclasses.dataclass
-class CollectBoundingBoxesInMemory(BaseSaveBoundingBoxCallback[NumericArrayTypes]):
+class CollectBoundingBoxesInMemory(BaseSaveBoundingBoxCallback[_NumericArrayTypes]):
     """Callback to collect bounding boxes predictions in memory
 
     Attributes:
@@ -122,7 +128,7 @@ class CollectBoundingBoxesInMemory(BaseSaveBoundingBoxCallback[NumericArrayTypes
         self,
         model: Any,
         indices: Sequence,
-        bounding_boxes: Sequence[BatchBoundingBoxesPrediction[NumericArrayTypes]],
+        bounding_boxes: Sequence[BatchBoundingBoxesPrediction[_NumericArrayTypes]],
     ) -> None:
         # Updating indices
         self.indices += list(indices)
@@ -134,7 +140,7 @@ class CollectBoundingBoxesInMemory(BaseSaveBoundingBoxCallback[NumericArrayTypes
 
 
 @dataclasses.dataclass
-class CollectVideoFramesInMemory(BaseSaveVideoFramesCallback[NumericArrayTypes]):
+class CollectVideoFramesInMemory(BaseSaveVideoFramesCallback[_NumericArrayTypes]):
     """Callback to collect video frames in memory
 
     Attributes:
@@ -155,7 +161,7 @@ class CollectVideoFramesInMemory(BaseSaveVideoFramesCallback[NumericArrayTypes])
         self,
         model: Any,
         indices: Sequence,
-        frames: Sequence[BatchVideoFramesPrediction[NumericArrayTypes]],
+        frames: Sequence[BatchVideoFramesPrediction[_NumericArrayTypes]],
     ) -> None:
         # Updating indices
         self.indices += list(indices)

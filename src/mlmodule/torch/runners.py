@@ -14,6 +14,7 @@ from tqdm import tqdm
 
 from mlmodule.callbacks.base import BaseRunnerEndCallback, callbacks_caller
 from mlmodule.callbacks.states import SaveModelState
+from mlmodule.helpers.ignite import ResultsCollector, register_multi_gpu_runner_logger
 from mlmodule.predictions import BatchModelPrediction
 from mlmodule.runners import BaseRunner
 from mlmodule.torch.callbacks import TorchRunnerCallbackType
@@ -34,10 +35,6 @@ from mlmodule.torch.utils import (
     log_evaluation_metrics,
     prepare_batch_for_training,
     send_batch_to_device,
-)
-from mlmodule.v2.helpers.distributed import (
-    ResultsCollector,
-    register_multi_gpu_runner_logger,
 )
 
 logger = logging.getLogger(__name__)
