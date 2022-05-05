@@ -15,8 +15,8 @@ from mlmodule.cli.types import (
     CLIObjectFactory,
 )
 from mlmodule.models.types import ModelWithState
-from mlmodule.v2.stores import Store
-from mlmodule.v2.stores.abstract import AbstractStateStore
+from mlmodule.stores import Store
+from mlmodule.stores.abstract import AbstractStateStore
 
 
 @dataclasses.dataclass

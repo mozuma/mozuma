@@ -14,7 +14,7 @@ from mlmodule.helpers.torchvision import (
 )
 from mlmodule.models.densenet.modules import TorchDenseNetModule
 from mlmodule.states import StateKey, StateType
-from mlmodule.v2.stores.abstract import AbstractStateStore
+from mlmodule.stores.abstract import AbstractStateStore
 
 _DENSENET_TORCHVISION_WEIGHTS_MAP: List[Tuple[DenseNetArch, str]] = [
     ("densenet121", "https://download.pytorch.org/models/densenet121-a639ec97.pth"),

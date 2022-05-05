@@ -9,7 +9,7 @@ from mlmodule.models.sentences.distilbert.modules import (
     DistilUseBaseMultilingualCasedV2Module,
 )
 from mlmodule.states import StateKey, StateType
-from mlmodule.v2.stores.list import AbstractListStateStore
+from mlmodule.stores.list import AbstractListStateStore
 
 
 class SBERTDistiluseBaseMultilingualCasedV2Store(

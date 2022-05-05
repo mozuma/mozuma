@@ -8,7 +8,7 @@ import torch
 from mlmodule.callbacks.memory import CollectLabelsInMemory
 from mlmodule.models.resnet.modules import TorchResNetModule, TorchResNetTrainingMode
 from mlmodule.states import StateKey
-from mlmodule.v2.stores import Store
+from mlmodule.stores import Store
 from mlmodule.v2.torch.datasets import ImageDataset, LocalBinaryFilesDataset
 from mlmodule.v2.torch.options import TorchRunnerOptions
 from mlmodule.v2.torch.runners import TorchInferenceRunner

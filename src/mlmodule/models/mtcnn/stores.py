@@ -4,7 +4,7 @@ from typing import List, NoReturn
 from mlmodule.models.mtcnn._mtcnn import MLModuleMTCNN
 from mlmodule.models.mtcnn.modules import TorchMTCNNModule
 from mlmodule.states import StateKey, StateType
-from mlmodule.v2.stores.abstract import AbstractStateStore
+from mlmodule.stores.abstract import AbstractStateStore
 
 
 class FaceNetMTCNNStore(AbstractStateStore[TorchMTCNNModule]):

@@ -5,7 +5,7 @@ import torch
 
 from mlmodule.models.vinvl.modules import TorchVinVLDetectorModule
 from mlmodule.states import StateKey, StateType
-from mlmodule.v2.stores.abstract import AbstractStateStore
+from mlmodule.stores.abstract import AbstractStateStore
 
 STATE_DICT_URL = "https://penzhanwu2.blob.core.windows.net/sgg/sgg_benchmark/vinvl_model_zoo/vinvl_vg_x152c4.pth"
 

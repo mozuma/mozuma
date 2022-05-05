@@ -3,8 +3,8 @@ import os
 from mlmodule.callbacks.memory import CollectBoundingBoxesInMemory
 from mlmodule.models.vinvl.modules import TorchVinVLDetectorModule
 from mlmodule.states import StateKey
+from mlmodule.stores import Store
 from mlmodule.utils import list_files_in_dir
-from mlmodule.v2.stores import Store
 from mlmodule.v2.torch.datasets import ImageDataset, LocalBinaryFilesDataset
 from mlmodule.v2.torch.options import TorchRunnerOptions
 from mlmodule.v2.torch.runners import TorchInferenceRunner

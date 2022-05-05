@@ -10,8 +10,8 @@ from PIL.Image import Image
 from mlmodule.callbacks.memory import CollectBoundingBoxesInMemory
 from mlmodule.models.mtcnn.modules import TorchMTCNNModule
 from mlmodule.states import StateKey
+from mlmodule.stores import Store
 from mlmodule.utils import list_files_in_dir
-from mlmodule.v2.stores import Store
 from mlmodule.v2.torch.datasets import (
     ImageDataset,
     ListDataset,

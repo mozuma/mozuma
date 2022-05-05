@@ -5,7 +5,7 @@ import clip
 from mlmodule.models.clip.base import BaseCLIPModule
 from mlmodule.models.clip.utils import CLIP_SAFE_NAME_MAPPING
 from mlmodule.states import StateKey, StateType
-from mlmodule.v2.stores.abstract import AbstractStateStore
+from mlmodule.stores.abstract import AbstractStateStore
 
 VALID_CLIP_STATE_TYPE = {
     StateType(backend="pytorch", architecture=f"clip-{model_type}-{model_name}")

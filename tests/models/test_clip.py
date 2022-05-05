@@ -11,7 +11,7 @@ from mlmodule.callbacks.memory import CollectFeaturesInMemory
 from mlmodule.models.clip.image import CLIPImageModule
 from mlmodule.models.clip.text import CLIPTextModule
 from mlmodule.states import StateKey
-from mlmodule.v2.stores import Store
+from mlmodule.stores import Store
 from mlmodule.v2.torch.datasets import (
     ImageDataset,
     ListDataset,

@@ -27,7 +27,7 @@ The model is initialised with weights provided by the `MLModuleModelStore`.
 ```python
 from mlmodule.models.resnet import TorchResNetModule
 from mlmodule.states import StateKey
-from mlmodule.v2.stores import MLModuleModelStore
+from mlmodule.stores import MLModuleModelStore
 
 # Model definition (1)
 resnet = TorchResNetModule("resnet18")

@@ -6,7 +6,7 @@ import ignite.distributed as idist
 from ignite.engine import Engine
 
 from mlmodule.states import StateKey
-from mlmodule.v2.stores.abstract import AbstractStateStore
+from mlmodule.stores.abstract import AbstractStateStore
 
 _logger = getLogger()
 

@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 
 from mlmodule.states import StateKey, StateType
-from mlmodule.v2.stores.local import LocalStateStore
+from mlmodule.stores.local import LocalStateStore
 
 
 @pytest.fixture
@@ -101,7 +101,7 @@ def test_get_filename(local_store: LocalStateStore):
 
 def test_get_state_keys(local_store: LocalStateStore):
 
-    with mock.patch("mlmodule.v2.stores.local.os.listdir") as m:
+    with mock.patch("mlmodule.stores.local.os.listdir") as m:
         m.return_value = [
             "pytorch.resnet18.cls1000.imagenet.pt",
             "pytorch.resnet18.cls2.imagenet.pt",

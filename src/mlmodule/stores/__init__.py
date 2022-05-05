@@ -1,6 +1,6 @@
 import os
 
-from mlmodule.v2.stores.s3 import S3StateStore
+from mlmodule.stores.s3 import S3StateStore
 
 
 def Store() -> S3StateStore:

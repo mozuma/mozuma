@@ -5,7 +5,7 @@ from torch.hub import load_state_dict_from_url
 
 from mlmodule.models.arcface.modules import TorchArcFaceModule
 from mlmodule.states import StateKey, StateType
-from mlmodule.v2.stores.list import AbstractListStateStore
+from mlmodule.stores.list import AbstractListStateStore
 
 # Discovered by looking at OneDrive network activity when downloading a file manually from the Browser
 ONE_DRIVE_API_CALL = (

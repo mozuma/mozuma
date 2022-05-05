@@ -3,7 +3,7 @@ from typing import List, NoReturn, TypeVar
 
 from mlmodule.models.types import ModelWithState
 from mlmodule.states import StateKey, StateType
-from mlmodule.v2.stores.abstract import AbstractStateStore
+from mlmodule.stores.abstract import AbstractStateStore
 
 _ModelType = TypeVar("_ModelType", bound=ModelWithState)
 
@@ -13,8 +13,8 @@ class AbstractListStateStore(AbstractStateStore[_ModelType]):
 
     The subclasses should implement the following:
 
-    * [`available_state_keys`][mlmodule.v2.stores.list.AbstractListStateStore.available_state_keys]
-    * [`state_downloader`][mlmodule.v2.stores.list.AbstractListStateStore.state_downloader]
+    * [`available_state_keys`][mlmodule.stores.list.AbstractListStateStore.available_state_keys]
+    * [`state_downloader`][mlmodule.stores.list.AbstractListStateStore.state_downloader]
     """
 
     @abc.abstractproperty
