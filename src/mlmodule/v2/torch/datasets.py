@@ -17,7 +17,7 @@ import PIL.Image
 from PIL.Image import Image
 from typing_extensions import Protocol
 
-from mlmodule.v2.base.predictions import BatchBoundingBoxesPrediction
+from mlmodule.predictions import BatchBoundingBoxesPrediction
 from mlmodule.v2.torch.utils import apply_mode_to_image
 
 _IndicesType = TypeVar("_IndicesType", covariant=True)

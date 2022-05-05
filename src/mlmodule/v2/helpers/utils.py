@@ -3,7 +3,7 @@ from typing import Collection, Optional, TypeVar, cast, overload
 import numpy as np
 import torch
 
-from mlmodule.v2.base.predictions import (
+from mlmodule.predictions import (
     BatchBoundingBoxesPrediction,
     BatchVideoFramesPrediction,
 )

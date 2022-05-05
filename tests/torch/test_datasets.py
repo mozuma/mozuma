@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from torchvision.transforms import ToTensor
 
-from mlmodule.v2.base.predictions import BatchBoundingBoxesPrediction
+from mlmodule.predictions import BatchBoundingBoxesPrediction
 from mlmodule.v2.torch.datasets import (
     ImageBoundingBoxDataset,
     ImageDataset,

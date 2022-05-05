@@ -10,7 +10,7 @@ from mlmodule.callbacks.base import (
     BaseSaveVideoFramesCallback,
 )
 from mlmodule.models.types import ModelWithLabels
-from mlmodule.v2.base.predictions import (
+from mlmodule.predictions import (
     BatchBoundingBoxesPrediction,
     BatchVideoFramesPrediction,
 )

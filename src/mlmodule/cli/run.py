@@ -24,8 +24,8 @@ from mlmodule.cli.types import (
     CLICommandDefinition,
     CLIObjectFactory,
 )
+from mlmodule.predictions import BatchModelPrediction
 from mlmodule.serializers import batch_model_prediction_to_dict
-from mlmodule.v2.base.predictions import BatchModelPrediction
 from mlmodule.v2.states import StateKey
 from mlmodule.v2.stores import Store
 from mlmodule.v2.stores.abstract import AbstractStateStore

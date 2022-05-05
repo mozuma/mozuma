@@ -3,7 +3,7 @@ from typing import Any, Iterable, List, Optional, Union
 
 import numpy as np
 
-from mlmodule.v2.base.predictions import (
+from mlmodule.predictions import (
     BatchBoundingBoxesPrediction,
     BatchModelPrediction,
     BatchVideoFramesPrediction,

@@ -7,7 +7,7 @@ from mlmodule.models.arcface.utils import (
     get_reference_facial_points,
     warp_and_crop_face,
 )
-from mlmodule.v2.base.predictions import BatchBoundingBoxesPrediction
+from mlmodule.predictions import BatchBoundingBoxesPrediction
 
 
 class ArcFaceAlignment(object):
