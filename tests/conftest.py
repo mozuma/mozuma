@@ -5,6 +5,7 @@ import pytest
 import torch
 from _pytest.fixtures import SubRequest
 
+from mlmodule.helpers.files import list_files_in_dir
 from mlmodule.labels.imagenet import IMAGENET_LABELS
 from mlmodule.models.arcface.modules import TorchArcFaceModule
 from mlmodule.models.arcface.stores import ArcFaceStore
@@ -39,9 +40,8 @@ from mlmodule.models.sentences.distilbert.stores import (
 )
 from mlmodule.models.vinvl.modules import TorchVinVLDetectorModule
 from mlmodule.models.vinvl.stores import VinVLStore
+from mlmodule.testing import ModuleTestConfiguration
 from mlmodule.torch.modules import TorchMlModule
-from mlmodule.utils import list_files_in_dir
-from mlmodule.v2.testing import ModuleTestConfiguration
 
 MODULE_TO_TEST: List[ModuleTestConfiguration] = [
     # ResNet

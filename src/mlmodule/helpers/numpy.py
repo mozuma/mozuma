@@ -1,15 +1,18 @@
-from typing import Collection, Optional, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Union, cast, overload
 
 import numpy as np
-import torch
+from typing_extensions import TypeAlias
 
 from mlmodule.predictions import (
     BatchBoundingBoxesPrediction,
     BatchVideoFramesPrediction,
 )
-from mlmodule.v2.helpers.types import NumericArrayTypes
 
-T = TypeVar("T")
+if TYPE_CHECKING:
+    import torch
+
+
+_NumericArrayTypes: TypeAlias = Union["torch.Tensor", np.ndarray]
 
 
 @overload
@@ -18,7 +21,7 @@ def convert_numeric_array_like_to_numpy(num_array: None) -> None:
 
 
 @overload
-def convert_numeric_array_like_to_numpy(num_array: NumericArrayTypes) -> np.ndarray:
+def convert_numeric_array_like_to_numpy(num_array: _NumericArrayTypes) -> np.ndarray:
     ...
 
 
@@ -27,14 +30,14 @@ def convert_numeric_array_like_to_numpy(num_array):
         return None
     if hasattr(num_array, "cpu"):
         # We expect a tensor
-        return cast(torch.Tensor, num_array).cpu().numpy()
+        return cast("torch.Tensor", num_array).cpu().numpy()
     else:
         # We expect a numpy array
         return cast(np.ndarray, num_array)
 
 
 def convert_batch_video_frames_to_numpy(
-    video_frames: BatchVideoFramesPrediction[NumericArrayTypes],
+    video_frames: BatchVideoFramesPrediction[_NumericArrayTypes],
 ) -> BatchVideoFramesPrediction[np.ndarray]:
     """Convert features type of extracted frames to numpy"""
     return BatchVideoFramesPrediction(
@@ -44,7 +47,7 @@ def convert_batch_video_frames_to_numpy(
 
 
 def convert_batch_bounding_boxes_to_numpy(
-    bounding_boxes: BatchBoundingBoxesPrediction[NumericArrayTypes],
+    bounding_boxes: BatchBoundingBoxesPrediction[_NumericArrayTypes],
 ) -> BatchBoundingBoxesPrediction[np.ndarray]:
     """Convert array types to numpy"""
     return BatchBoundingBoxesPrediction(
@@ -54,10 +57,3 @@ def convert_batch_bounding_boxes_to_numpy(
         scores=convert_numeric_array_like_to_numpy(bounding_boxes.scores),
         features=convert_numeric_array_like_to_numpy(bounding_boxes.features),
     )
-
-
-def take_unique_element(seq: Collection[T]) -> Optional[T]:
-    """Take the only element of a collection or return None if there is more than one element"""
-    if len(seq) != 1:
-        return None
-    return next(seq.__iter__())

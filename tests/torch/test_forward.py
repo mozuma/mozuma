@@ -1,7 +1,7 @@
 import torch
 
+from mlmodule.testing import ModuleTestConfiguration
 from mlmodule.torch.modules import TorchMlModule
-from mlmodule.v2.testing import ModuleTestConfiguration
 
 
 def test_forward_random_tensor(torch_ml_module: ModuleTestConfiguration[TorchMlModule]):

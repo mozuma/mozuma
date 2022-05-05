@@ -10,6 +10,7 @@ from mlmodule.callbacks.memory import (
     CollectBoundingBoxesInMemory,
     CollectFeaturesInMemory,
 )
+from mlmodule.helpers.files import list_files_in_dir
 from mlmodule.models.arcface.modules import TorchArcFaceModule
 from mlmodule.models.magface.modules import TorchMagFaceModule
 from mlmodule.models.mtcnn.modules import TorchMTCNNModule
@@ -22,7 +23,6 @@ from mlmodule.torch.datasets import (
 )
 from mlmodule.torch.options import TorchRunnerOptions
 from mlmodule.torch.runners import TorchInferenceRunner
-from mlmodule.utils import list_files_in_dir
 
 _FaceModelType = Union[Type[TorchMagFaceModule], Type[TorchArcFaceModule]]
 

@@ -1,7 +1,7 @@
 from PIL import Image
 from torchvision.transforms import CenterCrop, Compose, Normalize, Resize, ToTensor
 
-from mlmodule.utils import convert_to_rgb
+from mlmodule.helpers.images import convert_to_rgb
 
 
 def get_image_transform(src_pixel_size: int):

@@ -8,8 +8,8 @@ import cv2
 import numpy as np
 from PIL.Image import Image
 
+from mlmodule.helpers.images import convert_cv2_image_to_pil
 from mlmodule.models.keyframes.types import FrameIdxType, FrameSequenceType
-from mlmodule.utils import convert_cv2_image_to_pil
 
 
 def extract_video_frames(
