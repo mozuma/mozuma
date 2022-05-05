@@ -3,12 +3,12 @@
 
 ## Code-based usage
 
-This guide runs through the inference of a PyTorch ResNet model pretrained on imagenet.
+This guide runs through the inference of a PyTorch ResNet model pre-trained on imagenet.
 
 First, we need to create a dataset of images, for this we will be using the `OpenFileDataset`.
 
 ```python
-from mlmodule.v2.torch.datasets import OpenImageFileDataset
+from mlmodule.torch.datasets import OpenImageFileDataset
 
 # Getting a dataset of images (1)
 dataset = OpenImageFileDataset(
@@ -55,8 +55,8 @@ They will be called to collect the resulting features and labels for each batch.
 from mlmodule.callbacks import (
     CollectFeaturesInMemory, CollectLabelsInMemory
 )
-from mlmodule.v2.torch.options import TorchRunnerOptions
-from mlmodule.v2.torch.runners import TorchInferenceRunner
+from mlmodule.torch.options import TorchRunnerOptions
+from mlmodule.torch.runners import TorchInferenceRunner
 
 # Creating the callback to collect data (1)
 features = CollectFeaturesInMemory()

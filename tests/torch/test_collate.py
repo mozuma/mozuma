@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from mlmodule.v2.torch.collate import TorchMlModuleCollateFn
+from mlmodule.torch.collate import TorchMlModuleCollateFn
 
 
 def test_custom_collate():

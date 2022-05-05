@@ -5,7 +5,7 @@ PyTorch implementation of ResNet[@resnet] as defined in [Torchvision](https://py
 ## Model
 
 
-The ResNet model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
+The ResNet model is an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
 
 ::: mlmodule.models.resnet.TorchResNetModule
     selection:

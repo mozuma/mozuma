@@ -14,7 +14,7 @@ pip install mlmodule[torch,mtcnn]
 
 ## Model
 
-The MTCNN model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
+The MTCNN model is an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
 
 ::: mlmodule.models.mtcnn.modules.TorchMTCNNModule
     selection:

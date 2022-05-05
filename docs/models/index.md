@@ -6,8 +6,8 @@
 In MLModule, a model is usually implemented as a class.
 The model implementation details primarily depend on the type
 of [runner](../references/runners.md) used.
-For instance, the [`TorchInferenceRunner`][mlmodule.v2.torch.runners.TorchInferenceRunner]
-expects to receive a subclass of [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
+For instance, the [`TorchInferenceRunner`][mlmodule.torch.runners.TorchInferenceRunner]
+expects to receive a subclass of [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
 
 However, there are a few conventions to follow:
 
@@ -56,7 +56,7 @@ PyTorch models should be a subclass of `TorchMlModule`.
     [`ModelWithState`][mlmodule.models.ModelWithState] protocol
     by default.
 
-::: mlmodule.v2.torch.modules.TorchMlModule
+::: mlmodule.torch.modules.TorchMlModule
     selection:
         members:
             - state_type

@@ -12,13 +12,9 @@ from mlmodule.models.clip.image import CLIPImageModule
 from mlmodule.models.clip.text import CLIPTextModule
 from mlmodule.states import StateKey
 from mlmodule.stores import Store
-from mlmodule.v2.torch.datasets import (
-    ImageDataset,
-    ListDataset,
-    LocalBinaryFilesDataset,
-)
-from mlmodule.v2.torch.options import TorchRunnerOptions
-from mlmodule.v2.torch.runners import TorchInferenceRunner
+from mlmodule.torch.datasets import ImageDataset, ListDataset, LocalBinaryFilesDataset
+from mlmodule.torch.options import TorchRunnerOptions
+from mlmodule.torch.runners import TorchInferenceRunner
 
 
 @pytest.fixture(params=["RN50", "ViT-B/32"])

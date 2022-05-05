@@ -39,9 +39,9 @@ from mlmodule.models.sentences.distilbert.stores import (
 )
 from mlmodule.models.vinvl.modules import TorchVinVLDetectorModule
 from mlmodule.models.vinvl.stores import VinVLStore
+from mlmodule.torch.modules import TorchMlModule
 from mlmodule.utils import list_files_in_dir
 from mlmodule.v2.testing import ModuleTestConfiguration
-from mlmodule.v2.torch.modules import TorchMlModule
 
 MODULE_TO_TEST: List[ModuleTestConfiguration] = [
     # ResNet

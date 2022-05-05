@@ -6,7 +6,7 @@ import torch
 
 from mlmodule.predictions import BatchModelPrediction
 from mlmodule.states import StateType
-from mlmodule.v2.torch.utils import save_state_dict_to_bytes
+from mlmodule.torch.utils import save_state_dict_to_bytes
 
 # Type of data of a batch passed to the forward function
 _BatchType = TypeVar("_BatchType")
@@ -17,17 +17,17 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
     """
     Base `torch.nn.Module` for PyTorch models implemented in MLModule.
 
-    A valid subclass of [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule]
+    A valid subclass of [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule]
     **must** implement the following method:
 
-    - [`forward`][mlmodule.v2.torch.modules.TorchMlModule.forward]
-    - [`to_predictions`][mlmodule.v2.torch.modules.TorchMlModule.to_predictions]
-    - [`state_type`][mlmodule.v2.torch.modules.TorchMlModule.state_type]
+    - [`forward`][mlmodule.torch.modules.TorchMlModule.forward]
+    - [`to_predictions`][mlmodule.torch.modules.TorchMlModule.to_predictions]
+    - [`state_type`][mlmodule.torch.modules.TorchMlModule.state_type]
 
     And can optionally implement:
 
-    - [`get_dataset_transforms`][mlmodule.v2.torch.modules.TorchMlModule.get_dataset_transforms]
-    - [`get_dataloader_collate_fn`][mlmodule.v2.torch.modules.TorchMlModule.get_dataloader_collate_fn]
+    - [`get_dataset_transforms`][mlmodule.torch.modules.TorchMlModule.get_dataset_transforms]
+    - [`get_dataloader_collate_fn`][mlmodule.torch.modules.TorchMlModule.get_dataloader_collate_fn]
 
     Attributes:
         device (torch.device): Mandatory PyTorch device attribute to initialise model.
@@ -38,7 +38,7 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
 
         ```python
         from mlmodule.states import StateType
-        from mlmodule.v2.torch.modules import TorchMlModule
+        from mlmodule.torch.modules import TorchMlModule
         from torchvision import transforms
 
 
@@ -72,7 +72,7 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
     Note:
         This is a generic class taking a `_BatchType` and `_ForwardOutputType` type argument.
         This corresponds respectively to the type of data the
-        [`forward`][mlmodule.v2.torch.modules.TorchMlModule.forward]
+        [`forward`][mlmodule.torch.modules.TorchMlModule.forward]
         will take as argument and return. It is most likely `torch.Tensor`
 
     Note:
@@ -168,7 +168,7 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
         return save_state_dict_to_bytes(self.state_dict())
 
     def get_dataset_transforms(self) -> List[Callable]:
-        """Transforms to apply to the input [dataset][mlmodule.v2.torch.datasets.TorchDataset].
+        """Transforms to apply to the input [dataset][mlmodule.torch.datasets.TorchDataset].
 
         Note:
             By default, this method returns an empty list (meaning no transformation)
@@ -183,7 +183,7 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
         """Optionally returns a collate function to be passed to the data loader
 
         Note:
-            This collate function will be wrapped in `mlmodule.v2.torch.collate.TorchMlModuleCollateFn`.
+            This collate function will be wrapped in `mlmodule.torch.collate.TorchMlModuleCollateFn`.
             This means that the first argument `batch` will not contain
             the indices of the dataset but only the data element.
 

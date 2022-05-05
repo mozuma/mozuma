@@ -7,8 +7,8 @@ from torchvision import transforms
 from mlmodule.models.arcface.transforms import ArcFaceAlignment
 from mlmodule.predictions import BatchModelPrediction
 from mlmodule.states import StateType
-from mlmodule.v2.torch.layers import IBasicBlock, conv1x1
-from mlmodule.v2.torch.modules import TorchMlModule
+from mlmodule.torch.layers import IBasicBlock, conv1x1
+from mlmodule.torch.modules import TorchMlModule
 
 
 class TorchMagFaceModule(TorchMlModule[torch.Tensor, torch.Tensor]):

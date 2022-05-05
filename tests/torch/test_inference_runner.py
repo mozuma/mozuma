@@ -5,10 +5,10 @@ import torch
 
 from mlmodule.predictions import BatchModelPrediction
 from mlmodule.states import StateType
-from mlmodule.v2.torch.datasets import ListDataset
-from mlmodule.v2.torch.modules import TorchMlModule
-from mlmodule.v2.torch.options import TorchRunnerOptions
-from mlmodule.v2.torch.runners import TorchInferenceRunner
+from mlmodule.torch.datasets import ListDataset
+from mlmodule.torch.modules import TorchMlModule
+from mlmodule.torch.options import TorchRunnerOptions
+from mlmodule.torch.runners import TorchInferenceRunner
 
 
 class TorchTestFeaturesModule(TorchMlModule[torch.Tensor, torch.Tensor]):

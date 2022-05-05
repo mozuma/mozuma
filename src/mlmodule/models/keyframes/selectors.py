@@ -10,7 +10,7 @@ from mlmodule.models.keyframes.keyframes import KeyFramesExtractor
 from mlmodule.models.resnet.modules import TorchResNetModule
 from mlmodule.predictions import BatchModelPrediction, BatchVideoFramesPrediction
 from mlmodule.states import StateType
-from mlmodule.v2.torch.modules import TorchMlModule
+from mlmodule.torch.modules import TorchMlModule
 
 
 class KeyFrameSelector(

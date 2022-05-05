@@ -13,8 +13,8 @@ from mlmodule.labels.base import LabelSet
 from mlmodule.labels.imagenet import IMAGENET_LABELS
 from mlmodule.predictions import BatchModelPrediction
 from mlmodule.states import StateType
-from mlmodule.v2.torch.modules import TorchMlModule
-from mlmodule.v2.torch.transforms import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
+from mlmodule.torch.modules import TorchMlModule
+from mlmodule.torch.transforms import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 
 TorchResNetForwardOutputType = Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]
 

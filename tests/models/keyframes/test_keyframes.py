@@ -11,9 +11,9 @@ from mlmodule.models.keyframes.datasets import (
 from mlmodule.models.keyframes.encoders import VideoFramesEncoder
 from mlmodule.models.keyframes.selectors import KeyFrameSelector
 from mlmodule.models.resnet.modules import TorchResNetModule
-from mlmodule.v2.torch.datasets import ListDataset
-from mlmodule.v2.torch.options import TorchRunnerOptions
-from mlmodule.v2.torch.runners import TorchInferenceRunner
+from mlmodule.torch.datasets import ListDataset
+from mlmodule.torch.options import TorchRunnerOptions
+from mlmodule.torch.runners import TorchInferenceRunner
 
 
 @pytest.mark.parametrize(

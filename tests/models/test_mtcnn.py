@@ -11,14 +11,10 @@ from mlmodule.callbacks.memory import CollectBoundingBoxesInMemory
 from mlmodule.models.mtcnn.modules import TorchMTCNNModule
 from mlmodule.states import StateKey
 from mlmodule.stores import Store
+from mlmodule.torch.datasets import ImageDataset, ListDataset, LocalBinaryFilesDataset
+from mlmodule.torch.options import TorchRunnerOptions
+from mlmodule.torch.runners import TorchInferenceRunner
 from mlmodule.utils import list_files_in_dir
-from mlmodule.v2.torch.datasets import (
-    ImageDataset,
-    ListDataset,
-    LocalBinaryFilesDataset,
-)
-from mlmodule.v2.torch.options import TorchRunnerOptions
-from mlmodule.v2.torch.runners import TorchInferenceRunner
 
 
 @pytest.fixture(scope="session")

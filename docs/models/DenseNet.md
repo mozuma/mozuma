@@ -4,7 +4,7 @@ PyTorch implementation of DenseNet architecture[@Huang_2017_CVPR] as defined in 
 
 ## Model
 
-The DenseNet model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
+The DenseNet model is an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
 
 ::: mlmodule.models.densenet.TorchDenseNetModule
     selection:

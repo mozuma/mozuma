@@ -18,7 +18,7 @@ from PIL.Image import Image
 from typing_extensions import Protocol
 
 from mlmodule.predictions import BatchBoundingBoxesPrediction
-from mlmodule.v2.torch.utils import apply_mode_to_image
+from mlmodule.torch.utils import apply_mode_to_image
 
 _IndicesType = TypeVar("_IndicesType", covariant=True)
 _DatasetType = TypeVar("_DatasetType", covariant=True)
@@ -157,7 +157,7 @@ class ImageDataset(TorchDataset[_IndicesType, Image]):
 
     Attributes:
         binary_files_dataset (TorchDataset[_IndicesType, bytes]): Dataset to load images.
-            Usually a [`LocalBinaryFilesDataset`][mlmodule.v2.torch.datasets.LocalBinaryFilesDataset].
+            Usually a [`LocalBinaryFilesDataset`][mlmodule.torch.datasets.LocalBinaryFilesDataset].
         resize_image_size (tuple[int, int] | None): Optionally reduce the image size on load
         mode (str | None): Optional mode to apply when loading the image. See PIL `Image.draft` parameters.
     """

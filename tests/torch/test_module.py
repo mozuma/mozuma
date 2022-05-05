@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, Sequence
 import pytest
 import torch
 
-from mlmodule.v2.torch.modules import TorchMlModule
+from mlmodule.torch.modules import TorchMlModule
 
 _CPU = torch.device("cpu")
 

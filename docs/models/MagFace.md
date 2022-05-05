@@ -4,7 +4,7 @@ We are using the official implementation of MagFace[@Meng_2021_CVPR] in Pytorch.
 
 ## Models
 
-The MagFace model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
+The MagFace model is an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
 
 ::: mlmodule.models.magface.modules.TorchMagFaceModule
     selection:

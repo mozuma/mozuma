@@ -6,7 +6,7 @@ import pytest
 from torchvision.transforms import ToTensor
 
 from mlmodule.predictions import BatchBoundingBoxesPrediction
-from mlmodule.v2.torch.datasets import (
+from mlmodule.torch.datasets import (
     ImageBoundingBoxDataset,
     ImageDataset,
     LocalBinaryFilesDataset,

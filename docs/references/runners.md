@@ -7,19 +7,19 @@ They are executed with the `run` function which takes no arguments.
 
 ## Inference
 
-::: mlmodule.v2.torch.runners.TorchInferenceRunner
+::: mlmodule.torch.runners.TorchInferenceRunner
     selection:
       members:
         - run
 
-::: mlmodule.v2.torch.runners.TorchInferenceMultiGPURunner
+::: mlmodule.torch.runners.TorchInferenceMultiGPURunner
     selection:
       members:
         - run
 
 ## Training
 
-::: mlmodule.v2.torch.runners.TorchTrainingRunner
+::: mlmodule.torch.runners.TorchTrainingRunner
     selection:
       members:
         - run
