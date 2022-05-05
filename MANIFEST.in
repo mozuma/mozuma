@@ -1,2 +1,2 @@
-include src/mlmodule/contrib/arcface/normalized_faces.npy
+include src/mlmodule/models/arcface/normalized_faces.npy
 include src/mlmodule/py.typed
