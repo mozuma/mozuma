@@ -1,7 +1,16 @@
 # Models
 
-!!! tip
-    See the the menu on the left for a list of available models
+## Available models
+
+| Reference    | Name   | Training Id |
+|---------------|---------------|-----------------|
+{% for module in models -%}
+{% for model in models[module] -%}
+| [`{{ model.factory }}`][mlmodule.models.{{ module }}.{{ model.factory }}] | {{ model.name }} | `{{ model.training_id }}` |
+{% endfor %}
+{% endfor %}
+
+## Add a new model
 
 In MLModule, a model is usually implemented as a class.
 The model implementation details primarily depend on the type

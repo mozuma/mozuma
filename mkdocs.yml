@@ -62,3 +62,9 @@ extra:
     tox_env_version: py37-pt19
   release:
     tox_env_version: "{py37,py38,py39}{-pt19,-pt110}{-cuda,}"
+
+  models:
+    resnet:
+      - name: PyTorch ResNet pre-trained on ImageNet
+        factory: torch_resnet_imagenet
+        training_id: imagenet
