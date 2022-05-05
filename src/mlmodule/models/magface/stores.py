@@ -4,8 +4,8 @@ from typing import List, NoReturn
 import torch
 
 from mlmodule.models.magface.modules import TorchMagFaceModule
+from mlmodule.states import StateKey, StateType
 from mlmodule.utils import download_file_from_google_drive
-from mlmodule.v2.states import StateKey, StateType
 from mlmodule.v2.stores.abstract import AbstractStateStore
 
 

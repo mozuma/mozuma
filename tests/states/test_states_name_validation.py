@@ -2,7 +2,7 @@ from typing import Tuple
 
 import pytest
 
-from mlmodule.v2.states import StateKey, StateType
+from mlmodule.states import StateKey, StateType
 
 
 def test_state_key_valid_name():

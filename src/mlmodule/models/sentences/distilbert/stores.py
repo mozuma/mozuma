@@ -8,7 +8,7 @@ from mlmodule.helpers.torch import state_dict_combine
 from mlmodule.models.sentences.distilbert.modules import (
     DistilUseBaseMultilingualCasedV2Module,
 )
-from mlmodule.v2.states import StateKey, StateType
+from mlmodule.states import StateKey, StateType
 from mlmodule.v2.stores.list import AbstractListStateStore
 
 

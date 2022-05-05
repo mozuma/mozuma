@@ -4,7 +4,7 @@ import clip
 
 from mlmodule.models.clip.base import BaseCLIPModule
 from mlmodule.models.clip.utils import CLIP_SAFE_NAME_MAPPING
-from mlmodule.v2.states import StateKey, StateType
+from mlmodule.states import StateKey, StateType
 from mlmodule.v2.stores.abstract import AbstractStateStore
 
 VALID_CLIP_STATE_TYPE = {

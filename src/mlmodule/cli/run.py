@@ -26,7 +26,7 @@ from mlmodule.cli.types import (
 )
 from mlmodule.predictions import BatchModelPrediction
 from mlmodule.predictions.serializers import batch_model_prediction_to_dict
-from mlmodule.v2.states import StateKey
+from mlmodule.states import StateKey
 from mlmodule.v2.stores import Store
 from mlmodule.v2.stores.abstract import AbstractStateStore
 from mlmodule.v2.torch.datasets import (

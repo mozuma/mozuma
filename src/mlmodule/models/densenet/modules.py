@@ -13,7 +13,7 @@ from mlmodule.labels.base import LabelSet
 from mlmodule.labels.imagenet import IMAGENET_LABELS
 from mlmodule.labels.places import PLACES_LABELS
 from mlmodule.predictions import BatchModelPrediction
-from mlmodule.v2.states import StateType
+from mlmodule.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 from mlmodule.v2.torch.transforms import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 

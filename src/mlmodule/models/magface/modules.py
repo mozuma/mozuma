@@ -6,7 +6,7 @@ from torchvision import transforms
 
 from mlmodule.models.arcface.transforms import ArcFaceAlignment
 from mlmodule.predictions import BatchModelPrediction
-from mlmodule.v2.states import StateType
+from mlmodule.states import StateType
 from mlmodule.v2.torch.layers import IBasicBlock, conv1x1
 from mlmodule.v2.torch.modules import TorchMlModule
 

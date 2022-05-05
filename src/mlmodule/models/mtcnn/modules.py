@@ -5,7 +5,7 @@ import torch
 
 from mlmodule.models.mtcnn._mtcnn import MLModuleMTCNN
 from mlmodule.predictions import BatchBoundingBoxesPrediction, BatchModelPrediction
-from mlmodule.v2.states import StateType
+from mlmodule.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 
 _SingleBoundingBoxTupleForm = Tuple[torch.Tensor, torch.Tensor, torch.Tensor]

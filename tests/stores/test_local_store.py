@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from mlmodule.v2.states import StateKey, StateType
+from mlmodule.states import StateKey, StateType
 from mlmodule.v2.stores.local import LocalStateStore
 
 

@@ -8,7 +8,7 @@ import requests_mock
 from requests.auth import _basic_auth_str
 
 from mlmodule.models.types import ModelWithState
-from mlmodule.v2.states import StateKey, StateType
+from mlmodule.states import StateKey, StateType
 from mlmodule.v2.stores.github import (
     GitHUBReleaseStore,
     call_github_with_auth,

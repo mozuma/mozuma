@@ -4,7 +4,7 @@ import pytest
 import torch
 
 from mlmodule.predictions import BatchModelPrediction
-from mlmodule.v2.states import StateType
+from mlmodule.states import StateType
 from mlmodule.v2.torch.datasets import ListDataset
 from mlmodule.v2.torch.modules import TorchMlModule
 from mlmodule.v2.torch.options import TorchRunnerOptions

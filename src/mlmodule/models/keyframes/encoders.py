@@ -9,7 +9,7 @@ from mlmodule.models.keyframes.transforms import (
     stack_video_frames,
 )
 from mlmodule.predictions import BatchModelPrediction, BatchVideoFramesPrediction
-from mlmodule.v2.states import StateType
+from mlmodule.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 
 

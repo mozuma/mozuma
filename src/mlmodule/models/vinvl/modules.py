@@ -11,7 +11,7 @@ from mlmodule.models.vinvl.models.config import cfg
 from mlmodule.models.vinvl.models.structures.bounding_box import BoxList
 from mlmodule.models.vinvl.transforms import Normalize, Resize, ToTensor
 from mlmodule.predictions import BatchBoundingBoxesPrediction, BatchModelPrediction
-from mlmodule.v2.states import StateType
+from mlmodule.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 
 _ForwardOutput = Tuple[

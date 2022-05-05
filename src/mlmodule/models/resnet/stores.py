@@ -12,7 +12,7 @@ from mlmodule.helpers.torchvision import (
     validate_torchvision_state_type,
 )
 from mlmodule.models.resnet.modules import TorchResNetModule
-from mlmodule.v2.states import StateKey, StateType
+from mlmodule.states import StateKey, StateType
 from mlmodule.v2.stores.abstract import AbstractStateStore
 
 RESNET_ARCHITECTURES_MAP = {sanitize_torchvision_arch(a): a for a in resnet.model_urls}

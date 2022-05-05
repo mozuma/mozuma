@@ -5,7 +5,7 @@ from typing import Any, Callable, Generic, List, Optional, TypeVar
 import torch
 
 from mlmodule.predictions import BatchModelPrediction
-from mlmodule.v2.states import StateType
+from mlmodule.states import StateType
 from mlmodule.v2.torch.utils import save_state_dict_to_bytes
 
 # Type of data of a batch passed to the forward function
@@ -37,7 +37,7 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
         This would define a simple PyTorch model consisting of fully connected layer.
 
         ```python
-        from mlmodule.v2.states import StateType
+        from mlmodule.states import StateType
         from mlmodule.v2.torch.modules import TorchMlModule
         from torchvision import transforms
 

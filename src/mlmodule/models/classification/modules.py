@@ -5,7 +5,7 @@ from torch import nn
 
 from mlmodule.labels.base import LabelSet
 from mlmodule.predictions import BatchModelPrediction
-from mlmodule.v2.states import StateType
+from mlmodule.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 
 

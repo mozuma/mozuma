@@ -5,7 +5,7 @@ from typing import List, NoReturn, Optional, TypeVar
 import boto3
 
 from mlmodule.models.types import ModelWithState
-from mlmodule.v2.states import StateKey, StateType
+from mlmodule.states import StateKey, StateType
 from mlmodule.v2.stores.abstract import AbstractStateStore
 
 _ModelType = TypeVar("_ModelType", bound=ModelWithState)
