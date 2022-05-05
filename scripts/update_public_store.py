@@ -32,9 +32,9 @@ from mlmodule.models.sentences.distilbert.stores import (
 )
 from mlmodule.models.vinvl.modules import TorchVinVLDetectorModule
 from mlmodule.models.vinvl.stores import VinVLStore
-from mlmodule.v2.states import StateKey, StateType
-from mlmodule.v2.stores.abstract import AbstractStateStore
-from mlmodule.v2.stores.github import GitHUBReleaseStore
+from mlmodule.states import StateKey, StateType
+from mlmodule.stores.abstract import AbstractStateStore
+from mlmodule.stores.github import GitHUBReleaseStore
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,7 @@ import torch
 import torchvision.models
 from typing_extensions import Literal
 
-from mlmodule.v2.states import StateType
+from mlmodule.states import StateType
 
 ResNetArch = Literal[
     "resnet18",

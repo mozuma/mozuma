@@ -1,8 +1,8 @@
 import pytest
 
 from mlmodule.models.types import ModelWithState
-from mlmodule.v2.states import StateKey
-from mlmodule.v2.stores import Store
+from mlmodule.states import StateKey
+from mlmodule.stores import Store
 from mlmodule.v2.testing import ModuleTestConfiguration
 
 

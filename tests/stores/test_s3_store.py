@@ -3,8 +3,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from mlmodule.v2.states import StateKey, StateType
-from mlmodule.v2.stores.s3 import S3StateStore
+from mlmodule.states import StateKey, StateType
+from mlmodule.stores.s3 import S3StateStore
 
 
 @pytest.fixture

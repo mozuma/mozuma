@@ -4,7 +4,7 @@ from typing import Tuple
 
 VALID_NAMES = re.compile(r"^[\w\-\d]+$")
 """The pattern for valid architecture name in
-[`StateType.architecture`][mlmodule.v2.states.StateType].
+[`StateType.architecture`][mlmodule.states.StateType].
 It must be alphanumeric characters separated with dashes (i.e. `[\\w\\-\\d]`)"""
 
 
@@ -35,11 +35,11 @@ class StateType:
 
     As a convention, two state types are compatible when `backend` and `architecture`
     attributes are the same. This is implemented in the
-    [`is_compatible_with`][mlmodule.v2.states.StateType.is_compatible_with]
+    [`is_compatible_with`][mlmodule.states.StateType.is_compatible_with]
     method.
 
     Warning:
-        All string attributes must match the [`VALID_NAMES`][mlmodule.v2.states.VALID_NAMES] pattern.
+        All string attributes must match the [`VALID_NAMES`][mlmodule.states.VALID_NAMES] pattern.
 
     Attributes:
         backend (str): The model backend. For instance `pytorch`.
@@ -78,10 +78,10 @@ class StateKey:
     """Identifier for a state of a trained model
 
     Warning:
-        All string attributes must match the [`VALID_NAMES`][mlmodule.v2.states.VALID_NAMES] pattern.
+        All string attributes must match the [`VALID_NAMES`][mlmodule.states.VALID_NAMES] pattern.
 
     Attributes:
-        state_type (StateType): Identifies the [type of state][mlmodule.v2.states.StateType]
+        state_type (StateType): Identifies the [type of state][mlmodule.states.StateType]
         training_id (str): Identifies the training activity that was used to get to this state.
     """
 

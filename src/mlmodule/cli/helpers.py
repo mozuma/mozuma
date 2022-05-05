@@ -6,7 +6,7 @@ from typing import Any, Callable, List, Optional
 
 import yaml
 
-from mlmodule.v2.stores import Store
+from mlmodule.stores import Store
 
 
 def parser_add_model_argument(

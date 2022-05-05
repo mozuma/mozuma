@@ -3,7 +3,7 @@ import dataclasses
 import pytest
 
 from mlmodule.models.types import ModelWithState
-from mlmodule.v2.states import StateType
+from mlmodule.states import StateType
 
 
 @dataclasses.dataclass

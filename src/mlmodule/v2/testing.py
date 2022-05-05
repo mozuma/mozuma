@@ -1,7 +1,7 @@
 import dataclasses
 from typing import Callable, Generic, Optional, TypeVar
 
-from mlmodule.v2.stores.abstract import AbstractStateStore
+from mlmodule.stores.abstract import AbstractStateStore
 
 _Module = TypeVar("_Module")
 

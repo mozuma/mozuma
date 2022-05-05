@@ -1,7 +1,7 @@
 from typing_extensions import Protocol
 
 from mlmodule.labels.base import LabelSet
-from mlmodule.v2.states import StateType
+from mlmodule.states import StateType
 
 
 class ModelWithState(Protocol):

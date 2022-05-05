@@ -6,7 +6,7 @@ from tokenizers import Tokenizer
 
 from mlmodule.models.sentences.distilbert.transforms import TokenizerTransform
 from mlmodule.predictions import BatchModelPrediction
-from mlmodule.v2.states import StateType
+from mlmodule.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 from mlmodule.v2.torch.utils import save_state_dict_to_bytes
 

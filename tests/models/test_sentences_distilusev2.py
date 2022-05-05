@@ -6,8 +6,8 @@ from mlmodule.models.sentences.distilbert.modules import (
     DistilUseBaseMultilingualCasedV2Module,
 )
 from mlmodule.models.sentences.distilbert.transforms import TokenizerTransform
-from mlmodule.v2.states import StateKey
-from mlmodule.v2.stores import Store
+from mlmodule.states import StateKey
+from mlmodule.stores import Store
 
 
 def test_embeddings(torch_device: torch.device):
