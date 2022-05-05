@@ -4,7 +4,7 @@ from typing import Any, Callable, Generic, List, Optional, TypeVar
 
 import torch
 
-from mlmodule.v2.base.predictions import BatchModelPrediction
+from mlmodule.predictions import BatchModelPrediction
 from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.utils import save_state_dict_to_bytes
 
@@ -112,20 +112,23 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
     def state_type(self) -> StateType:
         """Identifier for the current's model state architecture
 
+        Important:
+            This property **must** be implemented in subclasses
+
         Note:
             PyTorch's model architecture should have the `pytorch` backend
 
         Returns:
             StateType: State architecture object
-
-        Note:
-            This method **must** be implemented in subclasses
         """
         raise NotImplementedError("State architecture should be overridden")
 
     @abc.abstractmethod
     def forward(self, batch: _BatchType) -> _ForwardOutputType:
         """Forward pass of the model
+
+        Important:
+            This method **must** be implemented in subclasses
 
         Applies the module on a batch and returns all potentially interesting data point (features, labels...)
 
@@ -146,15 +149,15 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
     ) -> BatchModelPrediction[torch.Tensor]:
         """Modifies the output of the forward pass to create the standard BatchModelPrediction object
 
+        Important:
+            This method **must** be implemented in subclasses
+
         Arguments:
             forward_output (_ForwardOutputType): the batch of data to process
 
         Returns:
             BatchModelPrediction[torch.Tensor]:
                 Prediction object with the keys `features`, `label_scores`...
-
-        Note:
-            This method **must** be implemented in subclasses
         """
 
     def set_state(self, state: bytes) -> None:

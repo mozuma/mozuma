@@ -5,7 +5,7 @@ import numpy as np
 import torch
 
 from mlmodule.models.types import ModelWithLabels
-from mlmodule.v2.base.predictions import (
+from mlmodule.predictions import (
     BatchBoundingBoxesPrediction,
     BatchVideoFramesPrediction,
 )

@@ -8,7 +8,7 @@ import torch.nn as nn
 from torchvision.transforms import Normalize, ToTensor
 
 from mlmodule.models.arcface.transforms import ArcFaceAlignment
-from mlmodule.v2.base.predictions import BatchModelPrediction
+from mlmodule.predictions import BatchModelPrediction
 from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.layers import Bottleneck_IR_SE, get_block
 from mlmodule.v2.torch.modules import TorchMlModule

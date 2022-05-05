@@ -6,7 +6,7 @@ from torch import nn
 from typing_extensions import Literal
 
 from mlmodule.models.clip.utils import sanitize_clip_model_name
-from mlmodule.v2.base.predictions import BatchModelPrediction
+from mlmodule.predictions import BatchModelPrediction
 from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 

@@ -4,10 +4,7 @@ import numpy as np
 import torch
 
 from mlmodule.models.mtcnn._mtcnn import MLModuleMTCNN
-from mlmodule.v2.base.predictions import (
-    BatchBoundingBoxesPrediction,
-    BatchModelPrediction,
-)
+from mlmodule.predictions import BatchBoundingBoxesPrediction, BatchModelPrediction
 from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 

@@ -8,10 +8,7 @@ from mlmodule.models.keyframes.transforms import (
     ApplyImageTransformToVideoFrames,
     stack_video_frames,
 )
-from mlmodule.v2.base.predictions import (
-    BatchModelPrediction,
-    BatchVideoFramesPrediction,
-)
+from mlmodule.predictions import BatchModelPrediction, BatchVideoFramesPrediction
 from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 

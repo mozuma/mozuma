@@ -8,7 +8,7 @@ import torch.distributed as dist
 from ignite.engine import Engine, Events
 from torch.utils.data.dataloader import DataLoader
 
-from mlmodule.v2.base.predictions import BatchModelPrediction
+from mlmodule.predictions import BatchModelPrediction
 
 
 @dataclasses.dataclass

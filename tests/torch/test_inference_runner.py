@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 import torch
 
-from mlmodule.v2.base.predictions import BatchModelPrediction
+from mlmodule.predictions import BatchModelPrediction
 from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.datasets import ListDataset
 from mlmodule.v2.torch.modules import TorchMlModule

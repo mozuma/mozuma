@@ -8,10 +8,7 @@ from mlmodule.labels.base import LabelSet
 from mlmodule.models.keyframes.encoders import VideoFramesEncoder
 from mlmodule.models.keyframes.keyframes import KeyFramesExtractor
 from mlmodule.models.resnet.modules import TorchResNetModule
-from mlmodule.v2.base.predictions import (
-    BatchModelPrediction,
-    BatchVideoFramesPrediction,
-)
+from mlmodule.predictions import BatchModelPrediction, BatchVideoFramesPrediction
 from mlmodule.v2.states import StateType
 from mlmodule.v2.torch.modules import TorchMlModule
 
