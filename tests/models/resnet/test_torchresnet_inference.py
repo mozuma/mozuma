@@ -9,9 +9,9 @@ from mlmodule.callbacks.memory import CollectLabelsInMemory
 from mlmodule.models.resnet.modules import TorchResNetModule, TorchResNetTrainingMode
 from mlmodule.states import StateKey
 from mlmodule.stores import Store
-from mlmodule.v2.torch.datasets import ImageDataset, LocalBinaryFilesDataset
-from mlmodule.v2.torch.options import TorchRunnerOptions
-from mlmodule.v2.torch.runners import TorchInferenceRunner
+from mlmodule.torch.datasets import ImageDataset, LocalBinaryFilesDataset
+from mlmodule.torch.options import TorchRunnerOptions
+from mlmodule.torch.runners import TorchInferenceRunner
 
 
 def test_resnet_cats_dogs(cats_and_dogs_images: List[str], torch_device: torch.device):

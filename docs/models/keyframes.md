@@ -1,7 +1,7 @@
 # Video key-frames extractor
 
 This model implements two types of modules: a video frames encoder and the key-frames module.
-These models are an implementation of a [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
+These models are an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
 
 ## Key-frames selector models
 

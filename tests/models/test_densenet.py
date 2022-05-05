@@ -9,9 +9,9 @@ from mlmodule.labels.places import PLACES_LABELS
 from mlmodule.models.densenet.modules import TorchDenseNetModule
 from mlmodule.states import StateKey
 from mlmodule.stores import Store
-from mlmodule.v2.torch.datasets import ImageDataset, LocalBinaryFilesDataset
-from mlmodule.v2.torch.options import TorchRunnerOptions
-from mlmodule.v2.torch.runners import TorchInferenceRunner
+from mlmodule.torch.datasets import ImageDataset, LocalBinaryFilesDataset
+from mlmodule.torch.options import TorchRunnerOptions
+from mlmodule.torch.runners import TorchInferenceRunner
 
 
 def test_densenet_cats_dogs(

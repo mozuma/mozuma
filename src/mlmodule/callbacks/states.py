@@ -16,7 +16,7 @@ class SaveModelState:
     """Simple callback to save model state during training.
 
     If state are saved during training (every X epochs,
-    see [`TorchTrainingOptions`][mlmodule.v2.torch.options.TorchTrainingOptions])
+    see [`TorchTrainingOptions`][mlmodule.torch.options.TorchTrainingOptions])
     the current epoch number is appended to the `state_key.training_id` in the
     following way: `<state_key.training_id>-e<num_epoch>`.
     When the training is complete, just the `state_key.training_id` is used.

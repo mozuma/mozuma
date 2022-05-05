@@ -10,7 +10,7 @@ from mlmodule.models.keyframes.transforms import (
 )
 from mlmodule.predictions import BatchModelPrediction, BatchVideoFramesPrediction
 from mlmodule.states import StateType
-from mlmodule.v2.torch.modules import TorchMlModule
+from mlmodule.torch.modules import TorchMlModule
 
 
 class VideoFramesEncoder(

@@ -15,14 +15,14 @@ from mlmodule.models.magface.modules import TorchMagFaceModule
 from mlmodule.models.mtcnn.modules import TorchMTCNNModule
 from mlmodule.states import StateKey
 from mlmodule.stores import Store
-from mlmodule.utils import list_files_in_dir
-from mlmodule.v2.torch.datasets import (
+from mlmodule.torch.datasets import (
     ImageBoundingBoxDataset,
     ImageDataset,
     LocalBinaryFilesDataset,
 )
-from mlmodule.v2.torch.options import TorchRunnerOptions
-from mlmodule.v2.torch.runners import TorchInferenceRunner
+from mlmodule.torch.options import TorchRunnerOptions
+from mlmodule.torch.runners import TorchInferenceRunner
+from mlmodule.utils import list_files_in_dir
 
 _FaceModelType = Union[Type[TorchMagFaceModule], Type[TorchArcFaceModule]]
 

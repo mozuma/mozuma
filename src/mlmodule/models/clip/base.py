@@ -8,7 +8,7 @@ from typing_extensions import Literal
 from mlmodule.models.clip.utils import sanitize_clip_model_name
 from mlmodule.predictions import BatchModelPrediction
 from mlmodule.states import StateType
-from mlmodule.v2.torch.modules import TorchMlModule
+from mlmodule.torch.modules import TorchMlModule
 
 
 class BaseCLIPModule(TorchMlModule[torch.Tensor, torch.Tensor]):

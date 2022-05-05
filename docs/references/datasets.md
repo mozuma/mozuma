@@ -9,13 +9,13 @@ These datasets are compatible with `torch.utils.data.DataLoader`.
 
 ### In-memory list datasets
 
-::: mlmodule.v2.torch.datasets.ListDataset
+::: mlmodule.torch.datasets.ListDataset
     rendering:
         heading_level: 4
     selection:
         members: none
 
-::: mlmodule.v2.torch.datasets.ListDatasetIndexed
+::: mlmodule.torch.datasets.ListDatasetIndexed
     rendering:
         heading_level: 4
     selection:
@@ -23,7 +23,7 @@ These datasets are compatible with `torch.utils.data.DataLoader`.
 
 ### Local files datasets
 
-::: mlmodule.v2.torch.datasets.LocalBinaryFilesDataset
+::: mlmodule.torch.datasets.LocalBinaryFilesDataset
     rendering:
         heading_level: 4
     selection:
@@ -31,7 +31,7 @@ These datasets are compatible with `torch.utils.data.DataLoader`.
 
 ### Image datasets
 
-::: mlmodule.v2.torch.datasets.ImageDataset
+::: mlmodule.torch.datasets.ImageDataset
     rendering:
         heading_level: 4
     selection:
@@ -39,7 +39,7 @@ These datasets are compatible with `torch.utils.data.DataLoader`.
 
 ### Bounding box datasets
 
-::: mlmodule.v2.torch.datasets.ImageBoundingBoxDataset
+::: mlmodule.torch.datasets.ImageBoundingBoxDataset
     rendering:
         heading_level: 4
     selection:
@@ -47,7 +47,7 @@ These datasets are compatible with `torch.utils.data.DataLoader`.
 
 ### Training datasets
 
-::: mlmodule.v2.torch.datasets.TorchTrainingDataset
+::: mlmodule.torch.datasets.TorchTrainingDataset
     rendering:
         heading_level: 4
     selection:
@@ -60,4 +60,4 @@ refer to the [runner list](runners.md) to know which type to implement.
 
 Below is the list of dataset protocols that are specified by `mlmodule`
 
-::: mlmodule.v2.torch.datasets.TorchDataset
+::: mlmodule.torch.datasets.TorchDataset

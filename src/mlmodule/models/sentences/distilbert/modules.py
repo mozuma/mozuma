@@ -7,8 +7,8 @@ from tokenizers import Tokenizer
 from mlmodule.models.sentences.distilbert.transforms import TokenizerTransform
 from mlmodule.predictions import BatchModelPrediction
 from mlmodule.states import StateType
-from mlmodule.v2.torch.modules import TorchMlModule
-from mlmodule.v2.torch.utils import save_state_dict_to_bytes
+from mlmodule.torch.modules import TorchMlModule
+from mlmodule.torch.utils import save_state_dict_to_bytes
 
 from .blocks.dense import Dense
 from .blocks.embeddings import Embeddings

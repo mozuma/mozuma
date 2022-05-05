@@ -4,7 +4,7 @@ Text model for computing sentence embeddings in multiple languages based on [Sen
 
 ## Model
 
-This model is an implementation of a [`TorchMlModule`][mlmodule.v2.torch.modules.TorchMlModule].
+This model is an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
 
 ::: mlmodule.models.sentences.distilbert.modules.DistilUseBaseMultilingualCasedV2Module
     selection:

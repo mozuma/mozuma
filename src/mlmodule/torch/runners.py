@@ -16,28 +16,28 @@ from mlmodule.callbacks.base import BaseRunnerEndCallback, callbacks_caller
 from mlmodule.callbacks.states import SaveModelState
 from mlmodule.predictions import BatchModelPrediction
 from mlmodule.runners import BaseRunner
-from mlmodule.v2.helpers.distributed import (
-    ResultsCollector,
-    register_multi_gpu_runner_logger,
-)
-from mlmodule.v2.torch.callbacks import TorchRunnerCallbackType
-from mlmodule.v2.torch.collate import TorchMlModuleCollateFn
-from mlmodule.v2.torch.datasets import (  # TorchTrainingDatasetTransformsWrapper,
+from mlmodule.torch.callbacks import TorchRunnerCallbackType
+from mlmodule.torch.collate import TorchMlModuleCollateFn
+from mlmodule.torch.datasets import (  # TorchTrainingDatasetTransformsWrapper,
     TorchDataset,
     TorchDatasetTransformsWrapper,
     TorchTrainingDataset,
 )
-from mlmodule.v2.torch.modules import TorchMlModule
-from mlmodule.v2.torch.options import (
+from mlmodule.torch.modules import TorchMlModule
+from mlmodule.torch.options import (
     TorchMultiGPURunnerOptions,
     TorchRunnerOptions,
     TorchTrainingOptions,
 )
-from mlmodule.v2.torch.utils import (
+from mlmodule.torch.utils import (
     disable_ignite_logger,
     log_evaluation_metrics,
     prepare_batch_for_training,
     send_batch_to_device,
+)
+from mlmodule.v2.helpers.distributed import (
+    ResultsCollector,
+    register_multi_gpu_runner_logger,
 )
 
 logger = logging.getLogger(__name__)

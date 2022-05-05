@@ -29,15 +29,11 @@ from mlmodule.predictions.serializers import batch_model_prediction_to_dict
 from mlmodule.states import StateKey
 from mlmodule.stores import Store
 from mlmodule.stores.abstract import AbstractStateStore
-from mlmodule.v2.torch.datasets import (
-    ImageDataset,
-    LocalBinaryFilesDataset,
-    TorchDataset,
-)
-from mlmodule.v2.torch.modules import TorchMlModule
-from mlmodule.v2.torch.options import TorchRunnerOptions
-from mlmodule.v2.torch.runners import TorchInferenceRunner
-from mlmodule.v2.torch.utils import resolve_default_torch_device
+from mlmodule.torch.datasets import ImageDataset, LocalBinaryFilesDataset, TorchDataset
+from mlmodule.torch.modules import TorchMlModule
+from mlmodule.torch.options import TorchRunnerOptions
+from mlmodule.torch.runners import TorchInferenceRunner
+from mlmodule.torch.utils import resolve_default_torch_device
 
 _FileType = Literal["im", "vi"]
 

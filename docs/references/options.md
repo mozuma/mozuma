@@ -1,8 +1,8 @@
 
 ## Options
 
-::: mlmodule.v2.torch.options.TorchRunnerOptions
+::: mlmodule.torch.options.TorchRunnerOptions
 
-::: mlmodule.v2.torch.options.TorchMultiGPURunnerOptions
+::: mlmodule.torch.options.TorchMultiGPURunnerOptions
 
-::: mlmodule.v2.torch.options.TorchTrainingOptions
+::: mlmodule.torch.options.TorchTrainingOptions

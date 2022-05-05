@@ -5,7 +5,7 @@ import dill
 import torch
 from ignite.metrics import Metric
 
-from mlmodule.v2.torch.utils import resolve_default_torch_device
+from mlmodule.torch.utils import resolve_default_torch_device
 
 
 @dataclasses.dataclass(frozen=True)
