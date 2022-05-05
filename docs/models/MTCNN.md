@@ -1,6 +1,6 @@
 # MTCNN
 
-We are using `facenet-pytorch` to load pre-trained MTCNN model, see <https://github.com/timesler/facenet-pytorch>.
+We are using `facenet-pytorch` to load pre-trained MTCNN model[@mtcnn], see <https://github.com/timesler/facenet-pytorch>.
 
 ## Requirements
 

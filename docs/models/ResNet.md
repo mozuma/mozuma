@@ -1,7 +1,6 @@
 # ResNet
 
-PyTorch implementation of ResNet as defined in [Deep Residual Learning for Image Recognition](https://arxiv.org/pdf/1512.03385.pdf)
-and [Torchvision](https://pytorch.org/vision/stable/index.html).
+PyTorch implementation of ResNet[@resnet] as defined in [Torchvision](https://pytorch.org/vision/stable/models.html).
 
 ## Model
 

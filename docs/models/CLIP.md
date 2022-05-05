@@ -1,5 +1,6 @@
 # CLIP
 
+CLIP[@clip_radford21a] model encodes text snippets and images into a common embedding space which enables zero-shot retrieval and prediction. 
 See [OpenAI/CLIP](https://github.com/openai/CLIP) for the source code and original models.
 
 This model has extra requirements:

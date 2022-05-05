@@ -1,7 +1,6 @@
 # DenseNet
 
-PyTorch implementation of DenseNet architecture.
-
+PyTorch implementation of DenseNet architecture[@Huang_2017_CVPR] as defined in [Torchvision](https://pytorch.org/vision/stable/models.html).
 
 ## Model
 

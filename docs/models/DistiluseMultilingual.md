@@ -1,5 +1,6 @@
 # Distiluse Multilingual
 
+Text model for computing sentence embeddings in multiple languages based on [Sentence-Transformers](https://www.sbert.net/examples/training/multilingual/README.html) framework[@reimers_2020_multilingual_sentence_bert].
 
 ## Model
 
