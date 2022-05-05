@@ -68,3 +68,10 @@ extra:
       - name: PyTorch ResNet pre-trained on ImageNet
         factory: torch_resnet_imagenet
         training_id: imagenet
+    densenet:
+      - name: PyTorch DenseNet pre-trained on ImageNet
+        factory: torch_densenet_imagenet
+        training_id: imagenet
+      - name: PyTorch DenseNet pre-trained on Places365
+        factory: torch_densenet_places365
+        training_id: places365

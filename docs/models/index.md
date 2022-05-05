@@ -7,8 +7,9 @@
 {% for module in models -%}
 {% for model in models[module] -%}
 | [`{{ model.factory }}`][mlmodule.models.{{ module }}.{{ model.factory }}] | {{ model.name }} | `{{ model.training_id }}` |
+{% endfor -%}
 {% endfor %}
-{% endfor %}
+
 
 ## Add a new model
 
