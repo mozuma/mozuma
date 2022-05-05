@@ -1,31 +1,203 @@
 import os
-import random
-from typing import Callable, Set, Type
+from typing import List
 
-import numpy as np
 import pytest
 import torch
 from _pytest.fixtures import SubRequest
 
-from mlmodule.contrib.arcface import ArcFaceFeatures
-from mlmodule.contrib.clip import CLIPViTB32ImageEncoder
-from mlmodule.contrib.densenet import (
-    DenseNet161ImageNetClassifier,
-    DenseNet161ImageNetFeatures,
-    DenseNet161PlacesClassifier,
-    DenseNet161PlacesFeatures,
+from mlmodule.helpers.files import list_files_in_dir
+from mlmodule.labels.imagenet import IMAGENET_LABELS
+from mlmodule.models.arcface.modules import TorchArcFaceModule
+from mlmodule.models.arcface.stores import ArcFaceStore
+from mlmodule.models.classification.modules import (
+    LinearClassifierTorchModule,
+    MLPClassifierTorchModule,
 )
-from mlmodule.contrib.keyframes.v1 import TorchMLModuleKeyFrames
-from mlmodule.contrib.magface.features import MagFaceFeatures
-from mlmodule.contrib.mtcnn import MTCNNDetector
-from mlmodule.contrib.mtcnn.detector_ori import MTCNNDetectorOriginal
-from mlmodule.contrib.resnet import ResNet18ImageNetClassifier, ResNet18ImageNetFeatures
-from mlmodule.contrib.vinvl import VinVLDetector
-from mlmodule.torch.base import BaseTorchMLModule
-from mlmodule.torch.data.images import ImageDataset
-from mlmodule.torch.mixins import DownloadPretrainedStateFromProvider
-from mlmodule.types import StateDict
-from mlmodule.utils import list_files_in_dir
+from mlmodule.models.clip.image import CLIPImageModule
+from mlmodule.models.clip.stores import CLIPStore
+from mlmodule.models.clip.text import CLIPTextModule
+from mlmodule.models.densenet.modules import (
+    TorchDenseNetModule,
+    torch_densenet_places365,
+)
+from mlmodule.models.densenet.stores import (
+    DenseNetPlaces365Store,
+    DenseNetTorchVisionStore,
+)
+from mlmodule.models.keyframes.encoders import VideoFramesEncoder
+from mlmodule.models.keyframes.selectors import KeyFrameSelector
+from mlmodule.models.magface.modules import TorchMagFaceModule
+from mlmodule.models.magface.stores import MagFaceStore
+from mlmodule.models.mtcnn.modules import TorchMTCNNModule
+from mlmodule.models.mtcnn.stores import FaceNetMTCNNStore
+from mlmodule.models.resnet.modules import TorchResNetModule
+from mlmodule.models.resnet.stores import ResNetTorchVisionStore
+from mlmodule.models.sentences.distilbert.modules import (
+    DistilUseBaseMultilingualCasedV2Module,
+)
+from mlmodule.models.sentences.distilbert.stores import (
+    SBERTDistiluseBaseMultilingualCasedV2Store,
+)
+from mlmodule.models.vinvl.modules import TorchVinVLDetectorModule
+from mlmodule.models.vinvl.stores import VinVLStore
+from mlmodule.testing import ModuleTestConfiguration
+from mlmodule.torch.modules import TorchMlModule
+
+MODULE_TO_TEST: List[ModuleTestConfiguration] = [
+    # ResNet
+    ModuleTestConfiguration(
+        "torchresnet18",
+        lambda: TorchResNetModule("resnet18"),
+        batch_factory=lambda: torch.rand(
+            [2, 3, 224, 224]
+        ),  # batch, channels, width, height
+        provider_store=ResNetTorchVisionStore(),
+        training_id="imagenet",
+    ),
+    # DenseNet
+    ModuleTestConfiguration(
+        "torchdensenet161",
+        lambda: TorchDenseNetModule("densenet161"),
+        batch_factory=lambda: torch.rand(
+            [2, 3, 224, 224]
+        ),  # batch, channels, width, height
+        provider_store=DenseNetTorchVisionStore(),
+        training_id="imagenet",
+    ),
+    ModuleTestConfiguration(
+        "torchdensenet161places",
+        lambda: torch_densenet_places365("densenet161"),
+        batch_factory=lambda: torch.rand(
+            [2, 3, 224, 224]
+        ),  # batch, channels, width, height
+        provider_store=DenseNetPlaces365Store(),
+        training_id="places365",
+    ),
+    # CLIP
+    ModuleTestConfiguration(
+        "clip-image-rn50",
+        lambda: CLIPImageModule("RN50"),
+        batch_factory=lambda: torch.rand(
+            [2, 3, 224, 224]
+        ),  # batch, channels, width, height
+        provider_store=CLIPStore(),
+        training_id="clip",
+    ),
+    ModuleTestConfiguration(
+        "clip-text-rn50",
+        lambda: CLIPTextModule("RN50"),
+        batch_factory=lambda: torch.randint(10, size=(2, 77)),  # batch, ctx_len
+        provider_store=CLIPStore(),
+        training_id="clip",
+    ),
+    # MTCNN
+    ModuleTestConfiguration(
+        "mtcnn",
+        lambda: TorchMTCNNModule(),
+        batch_factory=lambda: [torch.rand([720 + i * 10, 720, 3]) for i in range(5)],
+        provider_store=FaceNetMTCNNStore(),
+        training_id="facenet",
+    ),
+    # ArcFace
+    ModuleTestConfiguration(
+        "arcface",
+        lambda: TorchArcFaceModule(),
+        batch_factory=lambda: torch.rand(
+            (2, 3, 112, 112)
+        ),  # batch, channels, width, height
+        provider_store=ArcFaceStore(),
+        training_id="insightface",
+    ),
+    # MagFace
+    ModuleTestConfiguration(
+        "magface",
+        lambda: TorchMagFaceModule(),
+        batch_factory=lambda: torch.rand(
+            (2, 3, 112, 112)
+        ),  # batch, channels, width, height
+        provider_store=MagFaceStore(),
+        training_id="magface",
+    ),
+    # Key-frames
+    ModuleTestConfiguration(
+        "frames-encoder-rn18",
+        lambda: VideoFramesEncoder(TorchResNetModule("resnet18")),
+        training_id="imagenet",
+        batch_factory=lambda: (
+            [torch.range(0, 1), torch.range(0, 3)],  # Frame indices
+            [
+                torch.rand([1, 3, 224, 224]),  # frame_idx, channels, width, height
+                torch.rand([3, 3, 224, 224]),  # frame_idx, channels, width, height
+            ],
+        ),
+    ),
+    ModuleTestConfiguration(
+        "frames-selector-rn18",
+        lambda: KeyFrameSelector(TorchResNetModule("resnet18")),
+        training_id="imagenet",
+        batch_factory=lambda: (
+            [torch.range(0, 1), torch.range(0, 3)],  # Frame indices
+            [
+                torch.rand([1, 3, 224, 224]),  # frame_idx, channels, width, height
+                torch.rand([3, 3, 224, 224]),  # frame_idx, channels, width, height
+            ],
+        ),
+    ),
+    # VinVL
+    ModuleTestConfiguration(
+        "vinvl",
+        lambda: TorchVinVLDetectorModule(),
+        batch_factory=lambda: (
+            torch.rand(5, 3, 60, 56),  # batch, channels, width, height
+            [(56, 56)] * 5,  # width, height
+        ),
+        provider_store=VinVLStore(),
+        training_id="vinvl",
+    ),
+    # S-BERT
+    ModuleTestConfiguration(
+        "distiluse-base-multilingual-cased-v2",
+        lambda: DistilUseBaseMultilingualCasedV2Module(),
+        training_id="cased-v2",
+        batch_factory=lambda: (
+            torch.LongTensor([[2, 3, 4]]),  # token ids
+            torch.FloatTensor([[1, 1, 1]]),  # attention mask
+        ),
+        provider_store=SBERTDistiluseBaseMultilingualCasedV2Store(),
+    ),
+    # Classifiers
+    ModuleTestConfiguration(
+        "linear-classifier",
+        lambda: LinearClassifierTorchModule(in_features=10, label_set=IMAGENET_LABELS),
+        batch_factory=lambda: torch.rand(3, 10),  # batch, input dimension
+    ),
+    ModuleTestConfiguration(
+        "mlp-classifier",
+        lambda: MLPClassifierTorchModule(
+            in_features=10,
+            hidden_layers=(5, 3),
+            label_set=IMAGENET_LABELS,
+            activation="ReLU",
+        ),
+        batch_factory=lambda: torch.rand(3, 10),  # batch, input dimension
+    ),
+]
+
+
+@pytest.fixture(params=MODULE_TO_TEST, ids=[str(m) for m in MODULE_TO_TEST])
+def ml_module(request: SubRequest) -> ModuleTestConfiguration:
+    """All modules that are part of the MLModule library"""
+    return request.param
+
+
+@pytest.fixture
+def torch_ml_module(
+    ml_module: ModuleTestConfiguration,
+) -> ModuleTestConfiguration[TorchMlModule]:
+    """All modules implemented in Torch"""
+    if not ml_module.is_pytorch:
+        pytest.skip(f"Skipping {ml_module} as it is not a PyTorch module")
+    return ml_module
 
 
 @pytest.fixture(scope="session", params=["cpu", "cuda"])
@@ -53,98 +225,9 @@ def gpu_torch_device() -> torch.device:
 
 
 @pytest.fixture(scope="session")
-def set_seeds():
-    def _set_seeds(val=123):
-        torch.manual_seed(val)
-        torch.cuda.manual_seed(val)
-        np.random.seed(val)
-        random.seed(val)
-        torch.backends.cudnn.enabled = False
-        torch.backends.cudnn.deterministic = True
-
-    return _set_seeds
-
-
-@pytest.fixture(
-    params=[
-        ResNet18ImageNetFeatures,
-        ResNet18ImageNetClassifier,
-        DenseNet161ImageNetFeatures,
-        DenseNet161ImageNetClassifier,
-        DenseNet161PlacesFeatures,
-        DenseNet161PlacesClassifier,
-        CLIPViTB32ImageEncoder,
-        MTCNNDetector,
-        MTCNNDetectorOriginal,
-        ArcFaceFeatures,
-        MagFaceFeatures,
-        TorchMLModuleKeyFrames,
-        VinVLDetector,
-    ]
-)
-def data_platform_scanner(request: SubRequest):
-    """Fixture for generic tests of Modules to be used in the data platform
-
-    :param request:
-    :return:
-    """
-    return request.param
-
-
-@pytest.fixture(
-    params=[
-        ResNet18ImageNetFeatures,
-        DenseNet161ImageNetFeatures,
-        DenseNet161PlacesFeatures,
-        CLIPViTB32ImageEncoder,
-        MTCNNDetector,
-        MTCNNDetectorOriginal,
-        VinVLDetector,
-    ]
-)
-def image_module(request: SubRequest) -> Type[BaseTorchMLModule]:
-    """MLModules operating on images"""
-    return request.param
-
-
-@pytest.fixture(scope="session")
-def gpu_only_modules() -> Set[Type[BaseTorchMLModule]]:
-    """MLModules operating on images"""
-    return set()
-
-
-@pytest.fixture(
-    params=[
-        CLIPViTB32ImageEncoder,
-        MTCNNDetector,
-        ArcFaceFeatures,
-        MagFaceFeatures,
-        TorchMLModuleKeyFrames,
-        # VinVLDetector - too slow to download
-    ]
-)
-def provider_pretrained_module(
-    request: SubRequest,
-) -> DownloadPretrainedStateFromProvider:
-    """Returns a module that implements DownloadPretrainedStateFromProvider"""
-    return request.param
-
-
-@pytest.fixture
-def assert_state_dict_equals() -> Callable[[StateDict, StateDict], None]:
-    def _assert_state_dict_equals(sd1: StateDict, sd2: StateDict) -> None:
-        for key in sd1:
-            np.testing.assert_array_equal(sd1[key], sd2[key])
-
-    return _assert_state_dict_equals
-
-
-@pytest.fixture(scope="session")
-def image_dataset() -> ImageDataset:
-    """Sample image dataset"""
-    base_path = os.path.join("tests", "fixtures", "faces")
-    file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))
-    return ImageDataset(file_names)
+def cats_and_dogs_images() -> List[str]:
+    base_path = os.path.join("tests", "fixtures", "cats_dogs")
+    return list_files_in_dir(base_path, allowed_extensions=("jpg",))[:50]
 
 
 @pytest.fixture(scope="session")

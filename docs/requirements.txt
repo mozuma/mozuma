@@ -1,0 +1,8 @@
+# Install mlmodule
+-e .
+
+# Install mkdocs
+mkdocs-bibtex
+mkdocs-material
+mkdocs-markdownextradata-plugin
+mkdocstrings-python-legacy

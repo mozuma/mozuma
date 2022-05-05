@@ -1,126 +1,193 @@
-from collections import namedtuple
+import abc
+from io import BytesIO
+from typing import Any, Callable, Generic, List, Optional, TypeVar
 
-import torch.nn as nn
+import torch
 
+from mlmodule.predictions import BatchModelPrediction
+from mlmodule.states import StateType
+from mlmodule.torch.utils import save_state_dict_to_bytes
 
-def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
-    """3x3 convolution with padding"""
-    return nn.Conv2d(
-        in_planes,
-        out_planes,
-        kernel_size=3,
-        stride=stride,
-        padding=dilation,
-        groups=groups,
-        bias=False,
-        dilation=dilation,
-    )
+# Type of data of a batch passed to the forward function
+_BatchType = TypeVar("_BatchType")
+_ForwardOutputType = TypeVar("_ForwardOutputType")
 
 
-def conv1x1(in_planes, out_planes, stride=1):
-    """1x1 convolution"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
+class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
+    """
+    Base `torch.nn.Module` for PyTorch models implemented in MLModule.
+
+    A valid subclass of [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule]
+    **must** implement the following method:
+
+    - [`forward`][mlmodule.torch.modules.TorchMlModule.forward]
+    - [`to_predictions`][mlmodule.torch.modules.TorchMlModule.to_predictions]
+    - [`state_type`][mlmodule.torch.modules.TorchMlModule.state_type]
+
+    And can optionally implement:
+
+    - [`get_dataset_transforms`][mlmodule.torch.modules.TorchMlModule.get_dataset_transforms]
+    - [`get_dataloader_collate_fn`][mlmodule.torch.modules.TorchMlModule.get_dataloader_collate_fn]
+
+    Attributes:
+        device (torch.device): Mandatory PyTorch device attribute to initialise model.
+        is_trainable (bool): Flag which indicates if the model is trainable. Default, True.
+
+    Example:
+        This would define a simple PyTorch model consisting of fully connected layer.
+
+        ```python
+        from mlmodule.states import StateType
+        from mlmodule.torch.modules import TorchMlModule
+        from torchvision import transforms
 
 
-class IBasicBlock(nn.Module):
-    expansion = 1
+        class FC(TorchMlModule[torch.Tensor, torch.Tensor]):
+
+            def __init__(self, device: torch.device = torch.device("cpu")):
+                super().__init__(device=device)
+                self.fc = nn.Linear(512, 512)
+
+            def forward(
+                self, batch: torch.Tensor
+            ) -> torch.Tensor:
+                return self.fc(batch)
+
+            def to_predictions(
+                self, forward_output: torch.Tensor
+            ) -> BatchModelPrediction[torch.Tensor]:
+                return BatchModelPrediction(features=forward_output)
+
+            @property
+            def state_type(self) -> StateType:
+                return StateType(
+                    backend="pytorch",
+                    architecture="fc512x512",
+                )
+
+            def get_dataset_transforms(self) -> List[Callable]:
+                return [transforms.ToTensor()]
+        ```
+
+    Note:
+        This is a generic class taking a `_BatchType` and `_ForwardOutputType` type argument.
+        This corresponds respectively to the type of data the
+        [`forward`][mlmodule.torch.modules.TorchMlModule.forward]
+        will take as argument and return. It is most likely `torch.Tensor`
+
+    Note:
+        By default, MLModule models are trainable. Set the `is_trainable`
+        parameter to `False` when creating a subclass if it shouldn't be trained.
+    """  # noqa: E501
 
     def __init__(
-        self,
-        inplanes,
-        planes,
-        stride=1,
-        downsample=None,
-        groups=1,
-        base_width=64,
-        dilation=1,
+        self, device: torch.device = torch.device("cpu"), is_trainable: bool = True
     ):
-        super(IBasicBlock, self).__init__()
-        if groups != 1 or base_width != 64:
-            raise ValueError("BasicBlock only supports groups=1 and base_width=64")
-        if dilation > 1:
-            raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
-        # Both self.conv1 and self.downsample layers downsample the input when stride != 1
-        self.bn1 = nn.BatchNorm2d(inplanes, eps=2e-05, momentum=0.9)
-        self.conv1 = conv3x3(inplanes, planes)
-        self.bn2 = nn.BatchNorm2d(planes, eps=2e-05, momentum=0.9)
-        self.prelu = nn.PReLU(planes)
-        self.conv2 = conv3x3(planes, planes, stride)
-        self.bn3 = nn.BatchNorm2d(planes, eps=2e-05, momentum=0.9)
-        self.downsample = downsample
-        self.stride = stride
+        super().__init__()
+        self.device = device
+        self.is_trainable = is_trainable
 
-    def forward(self, x):
-        identity = x
-
-        out = self.bn1(x)
-        out = self.conv1(out)
-        out = self.bn2(out)
-        out = self.prelu(out)
-        out = self.conv2(out)
-        out = self.bn3(out)
-
-        if self.downsample is not None:
-            identity = self.downsample(x)
-
-        out += identity
-
-        return out
-
-
-class SEModule(nn.Module):
-    def __init__(self, channels, reduction):
-        super(SEModule, self).__init__()
-        self.avg_pool = nn.AdaptiveAvgPool2d(1)
-        self.fc1 = nn.Conv2d(
-            channels, channels // reduction, kernel_size=1, padding=0, bias=False
-        )
-        self.relu = nn.ReLU(inplace=True)
-        self.fc2 = nn.Conv2d(
-            channels // reduction, channels, kernel_size=1, padding=0, bias=False
-        )
-        self.sigmoid = nn.Sigmoid()
-
-    def forward(self, x):
-        module_input = x
-        x = self.avg_pool(x)
-        x = self.fc1(x)
-        x = self.relu(x)
-        x = self.fc2(x)
-        x = self.sigmoid(x)
-        return module_input * x
-
-
-class Bottleneck_IR_SE(nn.Module):
-    def __init__(self, in_channel, depth, stride):
-        super(Bottleneck_IR_SE, self).__init__()
-        if in_channel == depth:
-            self.shortcut_layer = nn.MaxPool2d(1, stride)
-        else:
-            self.shortcut_layer = nn.Sequential(
-                nn.Conv2d(in_channel, depth, (1, 1), stride, bias=False),
-                nn.BatchNorm2d(depth),
-            )
-        self.res_layer = nn.Sequential(
-            nn.BatchNorm2d(in_channel),
-            nn.Conv2d(in_channel, depth, (3, 3), (1, 1), 1, bias=False),
-            nn.PReLU(depth),
-            nn.Conv2d(depth, depth, (3, 3), stride, 1, bias=False),
-            nn.BatchNorm2d(depth),
-            SEModule(depth, 16),
+    @staticmethod
+    def _extract_device_from_args(*args, **kwargs) -> Optional[torch.device]:
+        """Extracts the device argument from the `to` method arguments"""
+        if "device" in kwargs:
+            return kwargs["device"]
+        # Otherwise find the first argument matching the expected type of a device torch.device | int
+        return next(
+            (
+                torch.device(a)
+                for a in args
+                if isinstance(a, int) or isinstance(a, torch.device)
+            ),
+            None,
         )
 
-    def forward(self, x):
-        shortcut = self.shortcut_layer(x)
-        res = self.res_layer(x)
-        return res + shortcut
+    def to(self, *args, **kwargs):
+        device = self._extract_device_from_args(*args, **kwargs)
+        if device:
+            self.device = device
+        return super().to(*args, **kwargs)
 
+    @abc.abstractproperty
+    def state_type(self) -> StateType:
+        """Identifier for the current's model state architecture
 
-class Bottleneck(namedtuple("Block", ["in_channel", "depth", "stride"])):
-    """A named tuple describing a ResNet block."""
+        Important:
+            This property **must** be implemented in subclasses
 
+        Note:
+            PyTorch's model architecture should have the `pytorch` backend
 
-def get_block(in_channel, depth, num_units, stride=2):
-    return [Bottleneck(in_channel, depth, stride)] + [
-        Bottleneck(depth, depth, 1) for i in range(num_units - 1)
-    ]
+        Returns:
+            StateType: State architecture object
+        """
+        raise NotImplementedError("State architecture should be overridden")
+
+    @abc.abstractmethod
+    def forward(self, batch: _BatchType) -> _ForwardOutputType:
+        """Forward pass of the model
+
+        Important:
+            This method **must** be implemented in subclasses
+
+        Applies the module on a batch and returns all potentially interesting data point (features, labels...)
+
+        Arguments:
+            batch (_BatchType): the batch of data to process
+
+        Returns:
+            _ForwardOutputType: A tensor or a sequence of tensor with relevant information
+                (features, labels, bounding boxes...)
+
+        Note:
+            This method **must** be implemented in subclasses
+        """
+
+    @abc.abstractmethod
+    def to_predictions(
+        self, forward_output: _ForwardOutputType
+    ) -> BatchModelPrediction[torch.Tensor]:
+        """Modifies the output of the forward pass to create the standard BatchModelPrediction object
+
+        Important:
+            This method **must** be implemented in subclasses
+
+        Arguments:
+            forward_output (_ForwardOutputType): the batch of data to process
+
+        Returns:
+            BatchModelPrediction[torch.Tensor]:
+                Prediction object with the keys `features`, `label_scores`...
+        """
+
+    def set_state(self, state: bytes) -> None:
+        state_dict = torch.load(BytesIO(state), map_location=self.device)
+        self.load_state_dict(state_dict)
+
+    def get_state(self) -> bytes:
+        return save_state_dict_to_bytes(self.state_dict())
+
+    def get_dataset_transforms(self) -> List[Callable]:
+        """Transforms to apply to the input [dataset][mlmodule.torch.datasets.TorchDataset].
+
+        Note:
+            By default, this method returns an empty list (meaning no transformation)
+            but in most cases, this will need to be overridden.
+
+        Returns:
+            List[Callable]: A list of callables that will be used to transform the input data.
+        """
+        return []
+
+    def get_dataloader_collate_fn(self) -> Optional[Callable[[Any], Any]]:
+        """Optionally returns a collate function to be passed to the data loader
+
+        Note:
+            This collate function will be wrapped in `mlmodule.torch.collate.TorchMlModuleCollateFn`.
+            This means that the first argument `batch` will not contain
+            the indices of the dataset but only the data element.
+
+        Returns:
+            Callable[[Any], Any] | None: The collate function to be passed to `TorchMlModuleCollateFn`.
+        """
+        return None

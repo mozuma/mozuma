@@ -1,97 +1,81 @@
 import logging
-from typing import Callable, Dict, List, Union, cast
+from io import BytesIO
+from typing import Any, Dict, Mapping, OrderedDict, Sequence, Tuple, Union
 
-import numpy as np
 import torch
-from torch.utils.data.dataloader import DataLoader
-from tqdm import tqdm
-
-logger = logging.getLogger(__name__)
+from PIL.Image import Image
 
 
-def torch_apply_state_to_partial_model(
-    partial_model: torch.nn.Module, pretrained_state_dict: Dict[str, torch.Tensor]
-) -> Dict[str, torch.Tensor]:
-    """Creates a new state dict by updating the partial_model state with matching parameters of pretrained_state_dict
-
-    See https://discuss.pytorch.org/t/how-to-load-part-of-pre-trained-model/1113/3
-
-    :param partial_model:
-    :param pretrained_state_dict:
-    :return:
-    """
-    model_dict = partial_model.state_dict()
-
-    # 1. filter out unnecessary keys
-    state_dict = {k: v for k, v in pretrained_state_dict.items() if k in model_dict}
-    # 2. overwrite entries in the existing state dict
-    model_dict.update(state_dict)
-
-    return model_dict
+def resolve_default_torch_device() -> torch.device:
+    return torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 
-def generic_inference(
-    model: torch.nn.Module,
-    data_loader: DataLoader,
-    inference_func: Callable,
-    result_handler: Callable,
-    device: torch.device,
-    result_handler_options=None,
-    inference_options=None,
-    tqdm_enabled=False,
-):
-    # Setting model in eval mode
-    model.eval()
-
-    # Sending model on device
-    model.to(device)
-
-    # Disabling gradient computation
-    acc_results = None
-    with torch.no_grad():
-        # Looping through batches
-        # Assume dataset is composed of tuples (item index, batch)
-        n_batches = len(data_loader)
-        if tqdm_enabled:
-            data_loader = tqdm(data_loader)
-        for batch_n, (indices, batch, *batch_params) in enumerate(data_loader):
-            logger.debug(f"Sending batch number: {batch_n}/{n_batches}")
-            # Sending data on device
-            batch = batch.to(device)
-            acc_results = result_handler(
-                acc_results,
-                indices,
-                inference_func(batch, *batch_params, **(inference_options or {})),
-                **(result_handler_options or {}),
-            )
-            logger.debug(f"Collecting results: {batch_n}/{n_batches}")
-
-    # Returning accumulated results
-    return acc_results
-
-
-def tensor_to_python_list_safe(tensor_or_list: Union[torch.Tensor, List]) -> List:
-    """Transforms a tensor into a Python list.
-
-    If the argument is a list, returns is without raising.
-
-    :param tensor_or_list:
-    :return:
-    """
-    ret: list
-    if hasattr(tensor_or_list, "tolist"):  # This is a tensor
-        ret = cast(torch.Tensor, tensor_or_list).tolist()
-    else:
-        ret = cast(list, tensor_or_list)
+def add_prefix_to_state_dict(
+    state_dict: Mapping[str, torch.Tensor], prefix: str
+) -> "OrderedDict[str, torch.Tensor]":
+    ret = OrderedDict()
+    for key, value in state_dict.items():
+        ret[f"{prefix}.{key}"] = value
     return ret
 
 
-def tensor_to_ndarray(arr: Union[torch.Tensor, np.ndarray]) -> np.ndarray:
-    """Transforms a tensor to ndarray"""
-    if hasattr(arr, "cpu"):
-        return cast(torch.Tensor, arr).cpu().numpy()
+def save_state_dict_to_bytes(obj) -> bytes:
+    f = BytesIO()
+    torch.save(obj, f)
+    f.seek(0)
+    return f.read()
+
+
+def send_batch_to_device(batch, device: torch.device, non_blocking: bool = False):
+    if isinstance(batch, tuple):
+        return tuple(send_batch_to_device(b, device, non_blocking) for b in batch)
+    elif isinstance(batch, list):
+        return [send_batch_to_device(b, device, non_blocking) for b in batch]
+    elif hasattr(batch, "to"):
+        return batch.to(device, non_blocking=non_blocking)
     else:
-        return cast(np.ndarray, arr)
+        return batch
+
+
+def apply_mode_to_image(image: Image, mode: str) -> Image:
+    if image.mode == mode:
+        return image
+    return image.convert(mode)
+
+
+def prepare_batch_for_training(
+    payload: Tuple,
+    device: torch.device,
+    non_blocking: bool = False,
+) -> Tuple[Union[torch.Tensor, Sequence, Mapping, str, bytes], ...]:
+    batch, target = payload
+
+    # Sending data on device
+    return (
+        send_batch_to_device(batch, device=device, non_blocking=non_blocking),
+        target.to(device, non_blocking=non_blocking),
+    )
+
+
+def disable_ignite_logger(logger_name: str, mlmodule_logger: logging.Logger) -> None:
+    # Some of Ignite's loggers logs a bunch of infos which we don't want,
+    # such as those from auto_dataloader and auto_model.
+    # Thus, keep them only if the current's logger level drops below INFO
+    if mlmodule_logger.getEffectiveLevel() >= logging.INFO:
+        logging.getLogger(logger_name).setLevel(logging.WARNING)
+
+
+def log_evaluation_metrics(
+    logger: logging.Logger,
+    epoch: int,
+    elapsed: float,
+    tag: str,
+    metrics: Dict[str, Any],
+):
+    metrics_output = "\n".join([f"\t{k}: {v:.2f}" for k, v in metrics.items()])
+    logger.info(
+        f"Epoch {epoch} - Evaluation time (seconds): {elapsed:.2f} - {tag} metrics:\n {metrics_output}"
+    )
 
 
 def l2_norm(x, axis=1):

@@ -1,46 +1,23 @@
 # MLModule
 
-The goal of this library is to standardise the definition of models
-used in the AI Data platform.
+MLModule is a library containing a collection of machine learning models
+with standardised interface to run inference, train and manage model state files.
 
-## Requirements
+It aims at providing high-level abstractions called [runners](references/runners.md)
+on top of inference and training loops
+while allowing extensions via [callbacks](references/callbacks.md).
+These callbacks control the way the output of a runner is handled
+(i.e. features, labels, model weights...).
 
-* Python 3.9 or newer
+We also try to keep as few dependencies as possible.
+Meaning models will be mostly implemented from
+modules available in deep learning frameworks (such as `PyTorch` or `torchvision`).
 
-## Installation
+See the  for more information.
 
-From the git repository:
+## Quick links
 
-```bash
-pip install git+ssh://git@github.com/LSIR/mlmodule.git
-```
-
-For convenience, we ship a base Docker image https://hub.docker.com/repository/docker/lsirepfl/mlmodulekit which contains dependencies that can be hard to install (for instance PyTorch or MMCV). See [MLModuleKit](mlmodulekit/README.md).
-
-## Models
-
-Using the pretrained models requires access to the `lsir-public-assets` S3 bucket.
-Follow the [dedicated guide](https://github.com/LSIR/dataplatform-infra/tree/main/lsir-public-assets#read-bucket-content)
-to get access to the pretrained models.
-
-Available models
-
-* [ResNet](docs/models/ResNet.md): ImageNet
-* Face detection with [MTCNN](docs/models/MTCNN.md) and [ArcFace](docs/models/ArcFace.md) or [MagFace](docs/models/MagFace.md).
-* [DenseNet](docs/models/DenseNet.md): ImageNet and Places365
-* [VinVL](docs/models/VinVL.md): Object detection
-
-
-## Run a model from CLI
-
-This only works for models accepting images for now. 
-For instance, to run CLIP on all images in a folder:
-
-```bash
-python -m mlmodule.cli run clip.CLIPViTB32ImageEncoder folder/* --batch-size 256 --num-workers 12
-```
-
-## Development
-
-See the [development guide](docs/DEVELOP.md) and the 
-[model contribution guide](docs/CONTRIBUTE.md).
+- [Documentation](https://lsir.github.io/mlmodule/)
+- [Installation](https://lsir.github.io/mlmodule/0-installation)
+- [Getting started](https://lsir.github.io/mlmodule/1-getting-starteg)
+- [Models](https://lsir.github.io/mlmodule/models/)
