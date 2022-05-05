@@ -26,4 +26,4 @@ They are executed with the `run` function which takes no arguments.
 
 ## Write your own runner
 
-::: mlmodule.v2.base.runners.BaseRunner
+::: mlmodule.runners.BaseRunner
