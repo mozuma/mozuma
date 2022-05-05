@@ -684,15 +684,49 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#models-state-management" class="md-nav__link">
-    Models state management
+  <a href="#predictions" class="md-nav__link">
+    Predictions
   </a>
   
-    <nav class="md-nav" aria-label="Models state management">
+    <nav class="md-nav" aria-label="Predictions">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.v2.base.models.ModelWithState" class="md-nav__link">
+  <a href="#mlmodule.predictions.BatchModelPrediction" class="md-nav__link">
+    BatchModelPrediction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.predictions.BatchBoundingBoxesPrediction" class="md-nav__link">
+    BatchBoundingBoxesPrediction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.predictions.BatchVideoFramesPrediction" class="md-nav__link">
+    BatchVideoFramesPrediction
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#state-management" class="md-nav__link">
+    State management
+  </a>
+  
+    <nav class="md-nav" aria-label="State management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.types.ModelWithState" class="md-nav__link">
     ModelWithState
   </a>
   
@@ -700,21 +734,21 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.v2.base.models.ModelWithState.state_type" class="md-nav__link">
+  <a href="#mlmodule.models.types.ModelWithState.state_type" class="md-nav__link">
     state_type
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#mlmodule.v2.base.models.ModelWithState.get_state" class="md-nav__link">
+  <a href="#mlmodule.models.types.ModelWithState.get_state" class="md-nav__link">
     get_state()
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#mlmodule.v2.base.models.ModelWithState.set_state" class="md-nav__link">
+  <a href="#mlmodule.models.types.ModelWithState.set_state" class="md-nav__link">
     set_state()
   </a>
   
@@ -739,7 +773,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.v2.base.models.ModelWithLabels" class="md-nav__link">
+  <a href="#mlmodule.models.types.ModelWithLabels" class="md-nav__link">
     ModelWithLabels
   </a>
   
@@ -747,7 +781,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.v2.base.models.ModelWithLabels.get_labels" class="md-nav__link">
+  <a href="#mlmodule.models.types.ModelWithLabels.get_labels" class="md-nav__link">
     get_labels()
   </a>
   
@@ -772,7 +806,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.v2.torch.modules.TorchMlModule" class="md-nav__link">
+  <a href="#mlmodule.torch.modules.TorchMlModule" class="md-nav__link">
     TorchMlModule
   </a>
   
@@ -780,42 +814,35 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.v2.torch.modules.TorchMlModule.state_type" class="md-nav__link">
+  <a href="#mlmodule.torch.modules.TorchMlModule.state_type" class="md-nav__link">
     state_type
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#mlmodule.v2.torch.modules.TorchMlModule.forward" class="md-nav__link">
+  <a href="#mlmodule.torch.modules.TorchMlModule.forward" class="md-nav__link">
     forward()
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#mlmodule.v2.torch.modules.TorchMlModule.get_dataloader_collate_fn" class="md-nav__link">
+  <a href="#mlmodule.torch.modules.TorchMlModule.get_dataloader_collate_fn" class="md-nav__link">
     get_dataloader_collate_fn()
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#mlmodule.v2.torch.modules.TorchMlModule.get_dataset_transforms" class="md-nav__link">
+  <a href="#mlmodule.torch.modules.TorchMlModule.get_dataset_transforms" class="md-nav__link">
     get_dataset_transforms()
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#mlmodule.v2.torch.modules.TorchMlModule.to" class="md-nav__link">
-    to()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#mlmodule.v2.torch.modules.TorchMlModule.to_predictions" class="md-nav__link">
+  <a href="#mlmodule.torch.modules.TorchMlModule.to_predictions" class="md-nav__link">
     to_predictions()
   </a>
   
@@ -854,21 +881,275 @@
 <p class="admonition-title">Tip</p>
 <p>See the the menu on the left for a list of available models</p>
 </div>
-<p>The sections below will help with defining a new model.
-Each section contains the functions a MLModule model class should define
-to implement a feature.</p>
-<h2 id="models-state-management">Models state management</h2>
-<p>A model with internal state (weights) should at least implement the
-<a class="autorefs autorefs-internal" href="#mlmodule.v2.base.models.ModelWithState"><code>ModelWithState</code></a> protocol.</p>
+<p>In MLModule, a model is usually implemented as a class.
+The model implementation details primarily depend on the type
+of <a href="../references/runners/">runner</a> used.
+For instance, the <a class="autorefs autorefs-internal" href="../references/runners/#mlmodule.torch.runners.TorchInferenceRunner"><code>TorchInferenceRunner</code></a>
+expects to receive a subclass of <a class="autorefs autorefs-internal" href="#mlmodule.torch.modules.TorchMlModule"><code>TorchMlModule</code></a>.</p>
+<p>However, there are a few conventions to follow:</p>
+<ul>
+<li>Model predictions should implement the
+  <a class="autorefs autorefs-internal" href="#mlmodule.predictions.BatchModelPrediction">BatchModelPrediction</a> class, this is required for
+  <a href="../references/callbacks/">callbacks</a> to work properly.</li>
+<li>If the model's state needs to be saved,
+  the model should follow the <a class="autorefs autorefs-internal" href="#mlmodule.models.types.ModelWithState"><code>ModelWithState</code></a> protocol.</li>
+<li>If the model outputs labels,
+  the model should follow the <a class="autorefs autorefs-internal" href="#mlmodule.models.types.ModelWithLabels"><code>ModelWithLabels</code></a> protocol.</li>
+</ul>
+<h2 id="predictions">Predictions</h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code>ArrayLike</code> type is expected to be a <code>np.ndarray</code> or a <code>torch.Tensor</code>.</p>
+</div>
 
 
   <div class="doc doc-object doc-class">
 
 
 
-<h3 class="doc doc-heading" id="mlmodule.v2.base.models.ModelWithState">
+<h3 class="doc doc-heading" id="mlmodule.predictions.BatchModelPrediction">
         <code>
-mlmodule.v2.base.models.ModelWithState        </code>
+mlmodule.predictions.BatchModelPrediction        </code>
+
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h3>
+
+    <div class="doc doc-contents first">
+
+      <p>Class defining the accepted types for model's predictions</p>
+
+<p><strong>Attributes:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>features</code></td>
+        <td><code>ArrayLike | None</code></td>
+        <td><p>Features or embeddings.</p>
+<p>Dimensions=<code>(dataset_size, feature_dims...)</code></p></td>
+      </tr>
+      <tr>
+        <td><code>label_scores</code></td>
+        <td><code>ArrayLike | None</code></td>
+        <td><p>Score for each predicted label.</p>
+<p>Dimensions=<code>(dataset_size, n_labels)</code></p></td>
+      </tr>
+      <tr>
+        <td><code>frames</code></td>
+        <td><code>Sequence[BatchVideoFramesPrediction[ArrayLike]] | None</code></td>
+        <td><p>Prediction for each frame and video.
+See <a class="autorefs autorefs-internal" href="#mlmodule.predictions.BatchVideoFramesPrediction">BatchVideoFramesPrediction</a>.</p>
+<p>Sequence length=<code>dataset_size</code></p></td>
+      </tr>
+      <tr>
+        <td><code>bounding_boxes</code></td>
+        <td><code>Sequence[BatchBoundingBoxesPrediction[ArrayLike]] | None</code></td>
+        <td><p>Prediction for each bounding_box and image.
+See <a class="autorefs autorefs-internal" href="#mlmodule.predictions.BatchBoundingBoxesPrediction">BatchBoundingBoxesPrediction</a>.</p>
+<p>Sequence length=<code>dataset_size</code></p></td>
+      </tr>
+  </tbody>
+</table>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h3 class="doc doc-heading" id="mlmodule.predictions.BatchBoundingBoxesPrediction">
+        <code>
+mlmodule.predictions.BatchBoundingBoxesPrediction        </code>
+
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h3>
+
+    <div class="doc doc-contents first">
+
+      <p>Results of bounding box extraction on an images</p>
+
+<p><strong>Attributes:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>bounding_boxes</code></td>
+        <td><code>ArrayLike</code></td>
+        <td><p>Array of bounding box coordinates.</p>
+<p>Dimensions=<code>(n_boxes, 4)</code>.</p></td>
+      </tr>
+      <tr>
+        <td><code>scores</code></td>
+        <td><code>ArrayLike | None</code></td>
+        <td><p>Array of scores for each bounding boxes.</p>
+<p>Dimensions=<code>(n_boxes, 1)</code>.</p></td>
+      </tr>
+      <tr>
+        <td><code>features</code></td>
+        <td><code>ArrayLike | None</code></td>
+        <td><p>Array of features for each bounding boxes.</p>
+<p>Dimensions=<code>(n_boxes, features_dims...)</code>.</p></td>
+      </tr>
+  </tbody>
+</table>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h3 class="doc doc-heading" id="mlmodule.predictions.BatchVideoFramesPrediction">
+        <code>
+mlmodule.predictions.BatchVideoFramesPrediction        </code>
+
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h3>
+
+    <div class="doc doc-contents first">
+
+      <p>Result of video frames extraction on a video</p>
+
+<p><strong>Attributes:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>frame_indices</code></td>
+        <td><code>Sequence[int]</code></td>
+        <td><p>The frame index in the source video</p></td>
+      </tr>
+      <tr>
+        <td><code>features</code></td>
+        <td><code>ArrayLike | None</code></td>
+        <td><p>The features of the video frames.</p>
+<p>Dimensions=<code>(n_frames, features_dims...)</code></p></td>
+      </tr>
+  </tbody>
+</table>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+<h2 id="state-management">State management</h2>
+<p>A model with internal state (weights) should implement the
+<a class="autorefs autorefs-internal" href="#mlmodule.models.types.ModelWithState"><code>ModelWithState</code></a> protocol
+to be compatible with <a href="../references/stores/">state stores</a>.</p>
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h3 class="doc doc-heading" id="mlmodule.models.types.ModelWithState">
+        <code>
+mlmodule.models.types.ModelWithState        </code>
 
 
 
@@ -911,7 +1192,7 @@ see <a href="../references/states/">states</a> for more information.</p></td>
 
 
 
-<h4 class="doc doc-heading" id="mlmodule.v2.base.models.ModelWithState.state_type">
+<h4 class="doc doc-heading" id="mlmodule.models.types.ModelWithState.state_type">
 <code class="highlight language-python"><span class="n">state_type</span><span class="p">:</span> <span class="n">StateType</span></code>
 
   <span class="doc doc-properties">
@@ -940,7 +1221,7 @@ see <a href="../references/states/">states</a> for more information.</p></td>
 
 
 
-<h4 class="doc doc-heading" id="mlmodule.v2.base.models.ModelWithState.get_state">
+<h4 class="doc doc-heading" id="mlmodule.models.types.ModelWithState.get_state">
 <code class="highlight language-python"><span class="n">get_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span></code>
 
 
@@ -975,7 +1256,7 @@ see <a href="../references/states/">states</a> for more information.</p></td>
 
 
 
-<h4 class="doc doc-heading" id="mlmodule.v2.base.models.ModelWithState.set_state">
+<h4 class="doc doc-heading" id="mlmodule.models.types.ModelWithState.set_state">
 <code class="highlight language-python"><span class="n">set_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 
@@ -1022,7 +1303,7 @@ see <a href="../references/states/">states</a> for more information.</p></td>
 <p>When a model returns label scores, it must define a
 <a class="autorefs autorefs-internal" href="../references/labels/#mlmodule.labels.base.LabelSet"><code>LabelSet</code></a>.
 This should be defined by implementing the
-<a class="autorefs autorefs-internal" href="#mlmodule.v2.base.models.ModelWithLabels"><code>ModelWithLabels</code></a>
+<a class="autorefs autorefs-internal" href="#mlmodule.models.types.ModelWithLabels"><code>ModelWithLabels</code></a>
 protocol.</p>
 
 
@@ -1030,9 +1311,9 @@ protocol.</p>
 
 
 
-<h3 class="doc doc-heading" id="mlmodule.v2.base.models.ModelWithLabels">
+<h3 class="doc doc-heading" id="mlmodule.models.types.ModelWithLabels">
         <code>
-mlmodule.v2.base.models.ModelWithLabels        </code>
+mlmodule.models.types.ModelWithLabels        </code>
 
 
 
@@ -1060,7 +1341,7 @@ mlmodule.v2.base.models.ModelWithLabels        </code>
 
 
 
-<h4 class="doc doc-heading" id="mlmodule.v2.base.models.ModelWithLabels.get_labels">
+<h4 class="doc doc-heading" id="mlmodule.models.types.ModelWithLabels.get_labels">
 <code class="highlight language-python"><span class="n">get_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LabelSet</span></code>
 
 
@@ -1104,7 +1385,7 @@ mlmodule.v2.base.models.ModelWithLabels        </code>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>PyTorch models already implement the
-<a class="autorefs autorefs-internal" href="#mlmodule.v2.base.models.ModelWithState"><code>ModelWithState</code></a> protocol
+<a class="autorefs autorefs-internal" href="#mlmodule.models.types.ModelWithState"><code>ModelWithState</code></a> protocol
 by default.</p>
 </div>
 
@@ -1113,9 +1394,9 @@ by default.</p>
 
 
 
-<h3 class="doc doc-heading" id="mlmodule.v2.torch.modules.TorchMlModule">
+<h3 class="doc doc-heading" id="mlmodule.torch.modules.TorchMlModule">
         <code>
-mlmodule.v2.torch.modules.TorchMlModule        </code>
+mlmodule.torch.modules.TorchMlModule        </code>
 
 
 
@@ -1124,17 +1405,17 @@ mlmodule.v2.torch.modules.TorchMlModule        </code>
     <div class="doc doc-contents first">
 
       <p>Base <code>torch.nn.Module</code> for PyTorch models implemented in MLModule.</p>
-<p>A valid subclass of <a class="autorefs autorefs-internal" href="#mlmodule.v2.torch.modules.TorchMlModule"><code>TorchMlModule</code></a>
+<p>A valid subclass of <a class="autorefs autorefs-internal" href="#mlmodule.torch.modules.TorchMlModule"><code>TorchMlModule</code></a>
 <strong>must</strong> implement the following method:</p>
 <ul>
-<li><a class="autorefs autorefs-internal" href="#mlmodule.v2.torch.modules.TorchMlModule.forward"><code>forward</code></a></li>
-<li><a class="autorefs autorefs-internal" href="#mlmodule.v2.torch.modules.TorchMlModule.to_predictions"><code>to_predictions</code></a></li>
-<li><a class="autorefs autorefs-internal" href="#mlmodule.v2.torch.modules.TorchMlModule.state_type"><code>state_type</code></a></li>
+<li><a class="autorefs autorefs-internal" href="#mlmodule.torch.modules.TorchMlModule.forward"><code>forward</code></a></li>
+<li><a class="autorefs autorefs-internal" href="#mlmodule.torch.modules.TorchMlModule.to_predictions"><code>to_predictions</code></a></li>
+<li><a class="autorefs autorefs-internal" href="#mlmodule.torch.modules.TorchMlModule.state_type"><code>state_type</code></a></li>
 </ul>
 <p>And can optionally implement:</p>
 <ul>
-<li><a class="autorefs autorefs-internal" href="#mlmodule.v2.torch.modules.TorchMlModule.get_dataset_transforms"><code>get_dataset_transforms</code></a></li>
-<li><a class="autorefs autorefs-internal" href="#mlmodule.v2.torch.modules.TorchMlModule.get_dataloader_collate_fn"><code>get_dataloader_collate_fn</code></a></li>
+<li><a class="autorefs autorefs-internal" href="#mlmodule.torch.modules.TorchMlModule.get_dataset_transforms"><code>get_dataset_transforms</code></a></li>
+<li><a class="autorefs autorefs-internal" href="#mlmodule.torch.modules.TorchMlModule.get_dataloader_collate_fn"><code>get_dataloader_collate_fn</code></a></li>
 </ul>
 
 <p><strong>Attributes:</strong></p>
@@ -1161,8 +1442,8 @@ mlmodule.v2.torch.modules.TorchMlModule        </code>
 </table>
 <p><strong>Examples:</strong></p>
     <p>This would define a simple PyTorch model consisting of fully connected layer.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span> <span class="nn">mlmodule.v2.states</span> <span class="kn">import</span> <span class="n">StateType</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span> <span class="nn">mlmodule.v2.torch.modules</span> <span class="kn">import</span> <span class="n">TorchMlModule</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span> <span class="nn">mlmodule.states</span> <span class="kn">import</span> <span class="n">StateType</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span> <span class="nn">mlmodule.torch.modules</span> <span class="kn">import</span> <span class="n">TorchMlModule</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">transforms</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
@@ -1196,7 +1477,7 @@ mlmodule.v2.torch.modules.TorchMlModule        </code>
 <p class="admonition-title">Note</p>
 <p>This is a generic class taking a <code>_BatchType</code> and <code>_ForwardOutputType</code> type argument.
 This corresponds respectively to the type of data the
-<a class="autorefs autorefs-internal" href="#mlmodule.v2.torch.modules.TorchMlModule.forward"><code>forward</code></a>
+<a class="autorefs autorefs-internal" href="#mlmodule.torch.modules.TorchMlModule.forward"><code>forward</code></a>
 will take as argument and return. It is most likely <code>torch.Tensor</code></p>
 </div>
 <div class="admonition note">
@@ -1219,7 +1500,7 @@ parameter to <code>False</code> when creating a subclass if it shouldn't be trai
 
 
 
-<h4 class="doc doc-heading" id="mlmodule.v2.torch.modules.TorchMlModule.state_type">
+<h4 class="doc doc-heading" id="mlmodule.torch.modules.TorchMlModule.state_type">
 <code class="highlight language-python"><span class="n">state_type</span><span class="p">:</span> <span class="n">StateType</span></code>
 
   <span class="doc doc-properties">
@@ -1232,6 +1513,10 @@ parameter to <code>False</code> when creating a subclass if it shouldn't be trai
     <div class="doc doc-contents ">
 
       <p>Identifier for the current's model state architecture</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This property <strong>must</strong> be implemented in subclasses</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>PyTorch's model architecture should have the <code>pytorch</code> backend</p>
@@ -1251,14 +1536,9 @@ parameter to <code>False</code> when creating a subclass if it shouldn't be trai
       <td><p>State architecture object</p></td>
     </tr>
   </tbody>
-</table>      <div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This method <strong>must</strong> be implemented in subclasses</p>
-</div>
-    </div>
+</table>    </div>
 
   </div>
-
 
 
 
@@ -1269,7 +1549,7 @@ parameter to <code>False</code> when creating a subclass if it shouldn't be trai
 
 
 
-<h4 class="doc doc-heading" id="mlmodule.v2.torch.modules.TorchMlModule.forward">
+<h4 class="doc doc-heading" id="mlmodule.torch.modules.TorchMlModule.forward">
 <code class="highlight language-python"><span class="n">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="o">~</span><span class="n">_BatchType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_ForwardOutputType</span></code>
 
 
@@ -1278,6 +1558,10 @@ parameter to <code>False</code> when creating a subclass if it shouldn't be trai
     <div class="doc doc-contents ">
 
       <p>Forward pass of the model</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This method <strong>must</strong> be implemented in subclasses</p>
+</div>
 <p>Applies the module on a batch and returns all potentially interesting data point (features, labels...)</p>
 
 <p><strong>Parameters:</strong></p>
@@ -1329,7 +1613,7 @@ parameter to <code>False</code> when creating a subclass if it shouldn't be trai
 
 
 
-<h4 class="doc doc-heading" id="mlmodule.v2.torch.modules.TorchMlModule.get_dataloader_collate_fn">
+<h4 class="doc doc-heading" id="mlmodule.torch.modules.TorchMlModule.get_dataloader_collate_fn">
 <code class="highlight language-python"><span class="n">get_dataloader_collate_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span></code>
 
 
@@ -1340,7 +1624,7 @@ parameter to <code>False</code> when creating a subclass if it shouldn't be trai
       <p>Optionally returns a collate function to be passed to the data loader</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This collate function will be wrapped in <code>mlmodule.v2.torch.collate.TorchMlModuleCollateFn</code>.
+<p>This collate function will be wrapped in <code>mlmodule.torch.collate.TorchMlModuleCollateFn</code>.
 This means that the first argument <code>batch</code> will not contain
 the indices of the dataset but only the data element.</p>
 </div>
@@ -1370,7 +1654,7 @@ the indices of the dataset but only the data element.</p>
 
 
 
-<h4 class="doc doc-heading" id="mlmodule.v2.torch.modules.TorchMlModule.get_dataset_transforms">
+<h4 class="doc doc-heading" id="mlmodule.torch.modules.TorchMlModule.get_dataset_transforms">
 <code class="highlight language-python"><span class="n">get_dataset_transforms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span></code>
 
 
@@ -1378,7 +1662,7 @@ the indices of the dataset but only the data element.</p>
 
     <div class="doc doc-contents ">
 
-      <p>Transforms to apply to the input <a class="autorefs autorefs-internal" href="../references/datasets/#mlmodule.v2.torch.datasets.TorchDataset">dataset</a>.</p>
+      <p>Transforms to apply to the input <a class="autorefs autorefs-internal" href="../references/datasets/#mlmodule.torch.datasets.TorchDataset">dataset</a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>By default, this method returns an empty list (meaning no transformation)
@@ -1406,144 +1690,12 @@ but in most cases, this will need to be overridden.</p>
 
 
 
-
-
   <div class="doc doc-object doc-method">
 
 
 
-<h4 class="doc doc-heading" id="mlmodule.v2.torch.modules.TorchMlModule.to">
-<code class="highlight language-python"><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
-
-
-</h4>
-
-    <div class="doc doc-contents ">
-
-      <p>Moves and/or casts the parameters and buffers.</p>
-<p>This can be called as</p>
-<p>.. function:: to(device=None, dtype=None, non_blocking=False)</p>
-<p>.. function:: to(dtype, non_blocking=False)</p>
-<p>.. function:: to(tensor, non_blocking=False)</p>
-<p>.. function:: to(memory_format=torch.channels_last)</p>
-<p>Its signature is similar to :meth:<code>torch.Tensor.to</code>, but only accepts
-floating point or complex :attr:<code>dtype</code>s. In addition, this method will
-only cast the floating point or complex parameters and buffers to :attr:<code>dtype</code>
-(if given). The integral parameters and buffers will be moved
-:attr:<code>device</code>, if that is given, but with dtypes unchanged. When
-:attr:<code>non_blocking</code> is set, it tries to convert/move asynchronously
-with respect to the host if possible, e.g., moving CPU Tensors with
-pinned memory to CUDA devices.</p>
-<p>See below for examples.</p>
-<p>.. note::
-    This method modifies the module in-place.</p>
-
-<p><strong>Parameters:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-      <th>Default</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>device</code></td>
-        <td></td>
-        <td><p>class:<code>torch.device</code>): the desired device of the parameters
-and buffers in this module</p></td>
-        <td><em>required</em></td>
-      </tr>
-      <tr>
-        <td><code>dtype</code></td>
-        <td></td>
-        <td><p>class:<code>torch.dtype</code>): the desired floating point or complex dtype of
-the parameters and buffers in this module</p></td>
-        <td><em>required</em></td>
-      </tr>
-      <tr>
-        <td><code>tensor</code></td>
-        <td><code>torch.Tensor</code></td>
-        <td><p>Tensor whose dtype and device are the desired
-dtype and device for all parameters and buffers in this module</p></td>
-        <td><em>required</em></td>
-      </tr>
-      <tr>
-        <td><code>memory_format</code></td>
-        <td></td>
-        <td><p>class:<code>torch.memory_format</code>): the desired memory
-format for 4D parameters and buffers in this module (keyword
-only argument)</p></td>
-        <td><em>required</em></td>
-      </tr>
-  </tbody>
-</table>
-<p><strong>Returns:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>Module</code></td>
-      <td><p>self</p></td>
-    </tr>
-  </tbody>
-</table>      <p>Examples::</p>
-<div class="highlight"><pre><span></span><code>&gt;&gt;&gt; linear = nn.Linear(2, 2)
-&gt;&gt;&gt; linear.weight
-Parameter containing:
-tensor([[ 0.1913, -0.3420],
-        [-0.5113, -0.2325]])
-&gt;&gt;&gt; linear.to(torch.double)
-Linear(in_features=2, out_features=2, bias=True)
-&gt;&gt;&gt; linear.weight
-Parameter containing:
-tensor([[ 0.1913, -0.3420],
-        [-0.5113, -0.2325]], dtype=torch.float64)
-&gt;&gt;&gt; gpu1 = torch.device(&quot;cuda:1&quot;)
-&gt;&gt;&gt; linear.to(gpu1, dtype=torch.half, non_blocking=True)
-Linear(in_features=2, out_features=2, bias=True)
-&gt;&gt;&gt; linear.weight
-Parameter containing:
-tensor([[ 0.1914, -0.3420],
-        [-0.5112, -0.2324]], dtype=torch.float16, device=&#39;cuda:1&#39;)
-&gt;&gt;&gt; cpu = torch.device(&quot;cpu&quot;)
-&gt;&gt;&gt; linear.to(cpu)
-Linear(in_features=2, out_features=2, bias=True)
-&gt;&gt;&gt; linear.weight
-Parameter containing:
-tensor([[ 0.1914, -0.3420],
-        [-0.5112, -0.2324]], dtype=torch.float16)
-
-&gt;&gt;&gt; linear = nn.Linear(2, 2, bias=None).to(torch.cdouble)
-&gt;&gt;&gt; linear.weight
-Parameter containing:
-tensor([[ 0.3741+0.j,  0.2382+0.j],
-        [ 0.5593+0.j, -0.4443+0.j]], dtype=torch.complex128)
-&gt;&gt;&gt; linear(torch.ones(3, 2, dtype=torch.cdouble))
-tensor([[0.6122+0.j, 0.1150+0.j],
-        [0.6122+0.j, 0.1150+0.j],
-        [0.6122+0.j, 0.1150+0.j]], dtype=torch.complex128)
-</code></pre></div>
-
-    </div>
-
-  </div>
-
-
-
-  <div class="doc doc-object doc-method">
-
-
-
-<h4 class="doc doc-heading" id="mlmodule.v2.torch.modules.TorchMlModule.to_predictions">
-<code class="highlight language-python"><span class="n">to_predictions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forward_output</span><span class="p">:</span> <span class="o">~</span><span class="n">_ForwardOutputType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">mlmodule</span><span class="o">.</span><span class="n">v2</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">predictions</span><span class="o">.</span><span class="n">BatchModelPrediction</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span></code>
+<h4 class="doc doc-heading" id="mlmodule.torch.modules.TorchMlModule.to_predictions">
+<code class="highlight language-python"><span class="n">to_predictions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forward_output</span><span class="p">:</span> <span class="o">~</span><span class="n">_ForwardOutputType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">mlmodule</span><span class="o">.</span><span class="n">predictions</span><span class="o">.</span><span class="n">BatchModelPrediction</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span></code>
 
 
 </h4>
@@ -1551,6 +1703,10 @@ tensor([[0.6122+0.j, 0.1150+0.j],
     <div class="doc doc-contents ">
 
       <p>Modifies the output of the forward pass to create the standard BatchModelPrediction object</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This method <strong>must</strong> be implemented in subclasses</p>
+</div>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1585,11 +1741,7 @@ tensor([[0.6122+0.j, 0.1150+0.j],
       <td><p>Prediction object with the keys <code>features</code>, <code>label_scores</code>...</p></td>
     </tr>
   </tbody>
-</table>      <div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This method <strong>must</strong> be implemented in subclasses</p>
-</div>
-
+</table>
     </div>
 
   </div>

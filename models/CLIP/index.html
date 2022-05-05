@@ -425,14 +425,14 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.contrib.clip.image.CLIPImageModule" class="md-nav__link">
+  <a href="#mlmodule.models.clip.image.CLIPImageModule" class="md-nav__link">
     CLIPImageModule
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#mlmodule.contrib.clip.text.CLIPTextModule" class="md-nav__link">
+  <a href="#mlmodule.models.clip.text.CLIPTextModule" class="md-nav__link">
     CLIPTextModule
   </a>
   
@@ -452,7 +452,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.contrib.clip.stores.CLIPStore" class="md-nav__link">
+  <a href="#mlmodule.models.clip.stores.CLIPStore" class="md-nav__link">
     CLIPStore
   </a>
   
@@ -780,14 +780,14 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.contrib.clip.image.CLIPImageModule" class="md-nav__link">
+  <a href="#mlmodule.models.clip.image.CLIPImageModule" class="md-nav__link">
     CLIPImageModule
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#mlmodule.contrib.clip.text.CLIPTextModule" class="md-nav__link">
+  <a href="#mlmodule.models.clip.text.CLIPTextModule" class="md-nav__link">
     CLIPTextModule
   </a>
   
@@ -807,7 +807,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.contrib.clip.stores.CLIPStore" class="md-nav__link">
+  <a href="#mlmodule.models.clip.stores.CLIPStore" class="md-nav__link">
     CLIPStore
   </a>
   
@@ -844,25 +844,26 @@
 
 
 <h1 id="clip">CLIP</h1>
-<p>See <a href="https://github.com/openai/CLIP">OpenAI/CLIP</a> for the source code and original models.</p>
+<p>CLIP<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> model encodes text snippets and images into a common embedding space which enables zero-shot retrieval and prediction.
+See <a href="https://github.com/openai/CLIP">OpenAI/CLIP</a> for the source code and original models.</p>
 <p>This model has extra requirements:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip install git+ssh://git@github.com/LSIR/mlmodule.git#egg<span class="o">=</span>mlmodule<span class="o">[</span>torch,clip<span class="o">]</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1"># or</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>pip install mlmodule<span class="o">[</span>torch,clip<span class="o">]</span>
 </code></pre></div>
 <h2 id="models">Models</h2>
-<p>CLIP comes with image (<a class="autorefs autorefs-internal" href="#mlmodule.contrib.clip.image.CLIPImageModule"><code>CLIPImageModule</code></a>)
-and a text (<a class="autorefs autorefs-internal" href="#mlmodule.contrib.clip.text.CLIPTextModule"><code>CLIPTextModule</code></a>) encoders.
-These modules are an implementation of <a class="autorefs autorefs-internal" href="../#mlmodule.v2.torch.modules.TorchMlModule"><code>TorchMlModule</code></a>.</p>
+<p>CLIP comes with image (<a class="autorefs autorefs-internal" href="#mlmodule.models.clip.image.CLIPImageModule"><code>CLIPImageModule</code></a>)
+and a text (<a class="autorefs autorefs-internal" href="#mlmodule.models.clip.text.CLIPTextModule"><code>CLIPTextModule</code></a>) encoders.
+These modules are an implementation of <a class="autorefs autorefs-internal" href="../#mlmodule.torch.modules.TorchMlModule"><code>TorchMlModule</code></a>.</p>
 
 
   <div class="doc doc-object doc-class">
 
 
 
-<h3 class="doc doc-heading" id="mlmodule.contrib.clip.image.CLIPImageModule">
+<h3 class="doc doc-heading" id="mlmodule.models.clip.image.CLIPImageModule">
         <code>
-mlmodule.contrib.clip.image.CLIPImageModule        </code>
+mlmodule.models.clip.image.CLIPImageModule        </code>
 
 
 
@@ -908,9 +909,9 @@ Defaults to <code>torch.device("cpu")</code>.</p></td>
 
 
 
-<h3 class="doc doc-heading" id="mlmodule.contrib.clip.text.CLIPTextModule">
+<h3 class="doc doc-heading" id="mlmodule.models.clip.text.CLIPTextModule">
         <code>
-mlmodule.contrib.clip.text.CLIPTextModule        </code>
+mlmodule.models.clip.text.CLIPTextModule        </code>
 
 
 
@@ -958,9 +959,9 @@ Defaults to <code>torch.device("cpu")</code>.</p></td>
 
 
 
-<h3 class="doc doc-heading" id="mlmodule.contrib.clip.stores.CLIPStore">
+<h3 class="doc doc-heading" id="mlmodule.models.clip.stores.CLIPStore">
         <code>
-mlmodule.contrib.clip.stores.CLIPStore        </code>
+mlmodule.models.clip.stores.CLIPStore        </code>
 
 
 
@@ -979,9 +980,17 @@ mlmodule.contrib.clip.stores.CLIPStore        </code>
 
 <h2 id="list-models-and-parameters">List models and parameters</h2>
 <p>There is a command line utility to list all available models from CLIP with their associated parameters in JSON format:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python -m mlmodule.contrib.clip.list
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python -m mlmodule.models.clip.list
 </code></pre></div>
-<p>The output is used to fill the mlmodule.contrib.clip.parameters file.</p>
+<p>The output is used to fill the mlmodule.models.clip.parameters file.</p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen Krueger, and Ilya Sutskever. Learning transferable visual models from natural language supervision. In Marina Meila and Tong Zhang, editors, <em>Proceedings of the 38th International Conference on Machine Learning</em>, volume 139 of Proceedings of Machine Learning Research, 8748–8763. PMLR, 18–24 Jul 2021. URL: <a href="https://proceedings.mlr.press/v139/radford21a.html">https://proceedings.mlr.press/v139/radford21a.html</a>.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
               
             </article>

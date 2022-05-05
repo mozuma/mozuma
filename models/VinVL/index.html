@@ -530,7 +530,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.contrib.vinvl.modules.TorchVinVLDetectorModule" class="md-nav__link">
+  <a href="#mlmodule.models.vinvl.modules.TorchVinVLDetectorModule" class="md-nav__link">
     TorchVinVLDetectorModule
   </a>
   
@@ -550,7 +550,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.contrib.vinvl.stores.VinVLStore" class="md-nav__link">
+  <a href="#mlmodule.models.vinvl.stores.VinVLStore" class="md-nav__link">
     VinVLStore
   </a>
   
@@ -780,7 +780,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.contrib.vinvl.modules.TorchVinVLDetectorModule" class="md-nav__link">
+  <a href="#mlmodule.models.vinvl.modules.TorchVinVLDetectorModule" class="md-nav__link">
     TorchVinVLDetectorModule
   </a>
   
@@ -800,7 +800,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.contrib.vinvl.stores.VinVLStore" class="md-nav__link">
+  <a href="#mlmodule.models.vinvl.stores.VinVLStore" class="md-nav__link">
     VinVLStore
   </a>
   
@@ -830,7 +830,7 @@
 
 
 <h1 id="vinvl">VinVL</h1>
-<p>Pre-trained large-scale object-attribute detection (OD) model is based on the ResNeXt-152 C4 architecture.
+<p>Pre-trained large-scale object-attribute detection (OD) model is based on the ResNeXt-152 C4 architecture<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup>.
 The OD model has been firstly trained on much larger amounts of data, combining multiple public object detection datasets, including <a href="https://cocodataset.org/#home">COCO</a>, <a href="https://storage.googleapis.com/openimages/web/index.html">OpenImages (OI)</a>, <a href="https://www.objects365.org/overview.html">Objects365</a>, and <a href="https://visualgenome.org/">Visual Genome (VG)</a>. Then it is fine-tuned on VG dataset alone, since VG is the only dataset with label attributes (see <a href="https://github.com/microsoft/Oscar/issues/120#issuecomment-898781183">issue #120</a>). It predicts objects from 1594 classes with attributes from 524 classes.
 See the <a href="https://github.com/pzzhang/VinVL">code</a> and the <a href="https://arxiv.org/pdf/2101.00529.pdf">paper</a> for details.</p>
 <h2 id="requirements">Requirements</h2>
@@ -838,16 +838,16 @@ See the <a href="https://github.com/pzzhang/VinVL">code</a> and the <a href="htt
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip install <span class="nv">yacs</span><span class="o">==</span><span class="m">0</span>.1.8
 </code></pre></div>
 <h2 id="models">Models</h2>
-<p>The VinVL model is an implementation of a <a class="autorefs autorefs-internal" href="../#mlmodule.v2.torch.modules.TorchMlModule"><code>TorchMlModule</code></a>.</p>
+<p>The VinVL model is an implementation of a <a class="autorefs autorefs-internal" href="../#mlmodule.torch.modules.TorchMlModule"><code>TorchMlModule</code></a>.</p>
 
 
   <div class="doc doc-object doc-class">
 
 
 
-<h3 class="doc doc-heading" id="mlmodule.contrib.vinvl.modules.TorchVinVLDetectorModule">
+<h3 class="doc doc-heading" id="mlmodule.models.vinvl.modules.TorchVinVLDetectorModule">
         <code>
-mlmodule.contrib.vinvl.modules.TorchVinVLDetectorModule        </code>
+mlmodule.models.vinvl.modules.TorchVinVLDetectorModule        </code>
 
 
 
@@ -898,9 +898,9 @@ mlmodule.contrib.vinvl.modules.TorchVinVLDetectorModule        </code>
 
 
 
-<h3 class="doc doc-heading" id="mlmodule.contrib.vinvl.stores.VinVLStore">
+<h3 class="doc doc-heading" id="mlmodule.models.vinvl.stores.VinVLStore">
         <code>
-mlmodule.contrib.vinvl.stores.VinVLStore        </code>
+mlmodule.models.vinvl.stores.VinVLStore        </code>
 
 
 
@@ -916,6 +916,15 @@ mlmodule.contrib.vinvl.stores.VinVLStore        </code>
     </div>
 
   </div>
+
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>Pengchuan Zhang, Xiujun Li, Xiaowei Hu, Jianwei Yang, Lei Zhang, Lijuan Wang, Yejin Choi, and Jianfeng Gao. Vinvl: revisiting visual representations in vision-language models. In <em>Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)</em>, 5579&ndash;5588. June 2021.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
               
             </article>

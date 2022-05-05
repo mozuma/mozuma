@@ -67,7 +67,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#mlmodule.v2.states.StateType" class="md-skip">
+        <a href="#mlmodule.states.StateType" class="md-skip">
           Skip to content
         </a>
       
@@ -659,7 +659,7 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#mlmodule.v2.states.StateType" class="md-nav__link">
+  <a href="#mlmodule.states.StateType" class="md-nav__link">
     StateType
   </a>
   
@@ -667,7 +667,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.v2.states.StateType.is_compatible_with" class="md-nav__link">
+  <a href="#mlmodule.states.StateType.is_compatible_with" class="md-nav__link">
     is_compatible_with()
   </a>
   
@@ -679,14 +679,14 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#mlmodule.v2.states.StateKey" class="md-nav__link">
+  <a href="#mlmodule.states.StateKey" class="md-nav__link">
     StateKey
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#mlmodule.v2.states.VALID_NAMES" class="md-nav__link">
+  <a href="#mlmodule.states.VALID_NAMES" class="md-nav__link">
     VALID_NAMES
   </a>
   
@@ -746,7 +746,7 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#mlmodule.v2.states.StateType" class="md-nav__link">
+  <a href="#mlmodule.states.StateType" class="md-nav__link">
     StateType
   </a>
   
@@ -754,7 +754,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mlmodule.v2.states.StateType.is_compatible_with" class="md-nav__link">
+  <a href="#mlmodule.states.StateType.is_compatible_with" class="md-nav__link">
     is_compatible_with()
   </a>
   
@@ -766,14 +766,14 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#mlmodule.v2.states.StateKey" class="md-nav__link">
+  <a href="#mlmodule.states.StateKey" class="md-nav__link">
     StateKey
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#mlmodule.v2.states.VALID_NAMES" class="md-nav__link">
+  <a href="#mlmodule.states.VALID_NAMES" class="md-nav__link">
     VALID_NAMES
   </a>
   
@@ -801,10 +801,10 @@
 
 <p>States are managed with two concepts:</p>
 <ul>
-<li><a class="autorefs autorefs-internal" href="#mlmodule.v2.states.StateType"><code>StateType</code></a>: Represents a family of states that are
-    <a class="autorefs autorefs-internal" href="#mlmodule.v2.states.StateType.is_compatible_with">compatible with each other</a>.
+<li><a class="autorefs autorefs-internal" href="#mlmodule.states.StateType"><code>StateType</code></a>: Represents a family of states that are
+    <a class="autorefs autorefs-internal" href="#mlmodule.states.StateType.is_compatible_with">compatible with each other</a>.
     In general, a model can be loaded with any pre-trained state if it matches its <code>state_type</code> attribute.</li>
-<li><a class="autorefs autorefs-internal" href="#mlmodule.v2.states.StateKey"><code>StateKey</code></a>: The identifier of a state instance,
+<li><a class="autorefs autorefs-internal" href="#mlmodule.states.StateKey"><code>StateKey</code></a>: The identifier of a state instance,
     it should uniquely identify the result of a training activity for a model.</li>
 </ul>
 
@@ -813,9 +813,9 @@
 
 
 
-<h3 class="doc doc-heading" id="mlmodule.v2.states.StateType">
+<h3 class="doc doc-heading" id="mlmodule.states.StateType">
         <code>
-mlmodule.v2.states.StateType        </code>
+mlmodule.states.StateType        </code>
 
 
   <span class="doc doc-properties">
@@ -840,11 +840,11 @@ can also be loaded into the key-frame extractor.
 They share the same state type.</p>
 <p>As a convention, two state types are compatible when <code>backend</code> and <code>architecture</code>
 attributes are the same. This is implemented in the
-<a class="autorefs autorefs-internal" href="#mlmodule.v2.states.StateType.is_compatible_with"><code>is_compatible_with</code></a>
+<a class="autorefs autorefs-internal" href="#mlmodule.states.StateType.is_compatible_with"><code>is_compatible_with</code></a>
 method.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>All string attributes must match the <a class="autorefs autorefs-internal" href="#mlmodule.v2.states.VALID_NAMES"><code>VALID_NAMES</code></a> pattern.</p>
+<p>All string attributes must match the <a class="autorefs autorefs-internal" href="#mlmodule.states.VALID_NAMES"><code>VALID_NAMES</code></a> pattern.</p>
 </div>
 
 <p><strong>Attributes:</strong></p>
@@ -902,7 +902,7 @@ architecture variants (number of output classes...).</p></td>
 
 
 
-<h4 class="doc doc-heading" id="mlmodule.v2.states.StateType.is_compatible_with">
+<h4 class="doc doc-heading" id="mlmodule.states.StateType.is_compatible_with">
 <code class="highlight language-python"><span class="n">is_compatible_with</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">StateType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
 
 
@@ -967,9 +967,9 @@ architecture variants (number of output classes...).</p></td>
 
 
 
-<h3 class="doc doc-heading" id="mlmodule.v2.states.StateKey">
+<h3 class="doc doc-heading" id="mlmodule.states.StateKey">
         <code>
-mlmodule.v2.states.StateKey        </code>
+mlmodule.states.StateKey        </code>
 
 
   <span class="doc doc-properties">
@@ -983,7 +983,7 @@ mlmodule.v2.states.StateKey        </code>
       <p>Identifier for a state of a trained model</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>All string attributes must match the <a class="autorefs autorefs-internal" href="#mlmodule.v2.states.VALID_NAMES"><code>VALID_NAMES</code></a> pattern.</p>
+<p>All string attributes must match the <a class="autorefs autorefs-internal" href="#mlmodule.states.VALID_NAMES"><code>VALID_NAMES</code></a> pattern.</p>
 </div>
 
 <p><strong>Attributes:</strong></p>
@@ -999,7 +999,7 @@ mlmodule.v2.states.StateKey        </code>
       <tr>
         <td><code>state_type</code></td>
         <td><code>StateType</code></td>
-        <td><p>Identifies the <a class="autorefs autorefs-internal" href="#mlmodule.v2.states.StateType">type of state</a></p></td>
+        <td><p>Identifies the <a class="autorefs autorefs-internal" href="#mlmodule.states.StateType">type of state</a></p></td>
       </tr>
       <tr>
         <td><code>training_id</code></td>
@@ -1045,8 +1045,8 @@ mlmodule.v2.states.StateKey        </code>
 
 
 
-<h3 class="doc doc-heading" id="mlmodule.v2.states.VALID_NAMES">
-<code class="highlight language-python"><span class="n">mlmodule</span><span class="o">.</span><span class="n">v2</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">VALID_NAMES</span></code>
+<h3 class="doc doc-heading" id="mlmodule.states.VALID_NAMES">
+<code class="highlight language-python"><span class="n">mlmodule</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">VALID_NAMES</span></code>
 
 
 </h3>
@@ -1054,7 +1054,7 @@ mlmodule.v2.states.StateKey        </code>
     <div class="doc doc-contents first">
 
       <p>The pattern for valid architecture name in
-<a class="autorefs autorefs-internal" href="#mlmodule.v2.states.StateType"><code>StateType.architecture</code></a>.
+<a class="autorefs autorefs-internal" href="#mlmodule.states.StateType"><code>StateType.architecture</code></a>.
 It must be alphanumeric characters separated with dashes (i.e. <code>[\w\-\d]</code>)</p>
     </div>
 
