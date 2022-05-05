@@ -1,6 +1,6 @@
 # MagFace
 
-We are using the official implementation of MagFace in Pytorch (https://github.com/IrvingMeng/MagFace)
+We are using the official implementation of MagFace[@Meng_2021_CVPR] in Pytorch. See [https://github.com/IrvingMeng/MagFace](https://github.com/IrvingMeng/MagFace).
 
 ## Models
 

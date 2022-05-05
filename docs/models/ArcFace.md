@@ -1,6 +1,7 @@
 # ArcFace
 
-We are using an implementation of InsightFace in PyTorch (https://github.com/TreB1eN/InsightFace_Pytorch)
+Implementation of ArcFace[@deng2018arcface]
+in PyTorch by [InsightFace](https://github.com/TreB1eN/InsightFace_Pytorch).
 
 ## Models
 
