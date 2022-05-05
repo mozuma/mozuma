@@ -52,7 +52,7 @@ class BaseRunner(
             BaseSaveFeaturesCallback,
             callbacks_caller
         )
-        from mlmodule.v2.base.runners import BaseRunner
+        from mlmodule.runners import BaseRunner
 
         class NumpySumRunnerExample(BaseRunner[
             Callable,                   # _ModelType
