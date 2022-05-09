@@ -72,10 +72,12 @@ def log_evaluation_metrics(
     tag: str,
     metrics: Dict[str, Any],
 ):
-    metrics_output = "\n".join([f"\t{k}: {v:.2f}" for k, v in metrics.items()])
     logger.info(
-        f"Epoch {epoch} - Evaluation time (seconds): {elapsed:.2f} - {tag} metrics:\n {metrics_output}"
+        f"Epoch {epoch} - Evaluation time (seconds): {elapsed:.2f} - {tag} metrics\n"
     )
+    for key, value in metrics.items():
+        if not torch.is_tensor(value):
+            logger.info(f"\t{key}: {value:2.4f}")
 
 
 def l2_norm(x, axis=1):
