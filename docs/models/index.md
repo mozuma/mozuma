@@ -1,6 +1,6 @@
 # Models
 
-## Available models
+## Pre-trained models
 
 | Reference    | Name   | License |
 |---------------|---------------|-----------|

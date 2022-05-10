@@ -67,22 +67,34 @@ extra:
     tox_env_version: "{py37,py38,py39}{-pt19,-pt110}{-cuda,}"
 
   licenses:
-    torchvision:
-      name: TorchVision
-      link: https://github.com/pytorch/vision/blob/main/LICENSE
+    clip:
+      name: CLIP
+      link: https://github.com/openai/CLIP/blob/main/LICENSE
     insightface:
       name: InsightFace
       link: https://github.com/deepinsight/insightface#license
     magface:
       name: MagFace
       link: https://github.com/IrvingMeng/MagFace/blob/main/LICENSE
+    torchvision:
+      name: TorchVision
+      link: https://github.com/pytorch/vision/blob/main/LICENSE
 
   models:
-    resnet:
-      - name: PyTorch ResNet pre-trained on ImageNet
-        factory: torch_resnet_imagenet
-        training_id: imagenet
-        license: torchvision
+    arcface:
+      - name: ArcFace pre-trained by InsightFace
+        factory: torch_arcface_insightface
+        training_id: insightface
+        license: insightface
+    clip:
+      - name: CLIP pre-trained image encoder
+        factory: torch_clip_image_encoder
+        training_id: clip
+        license: clip
+      - name: CLIP pre-trained text encoder
+        factory: torch_clip_text_encoder
+        training_id: clip
+        license: clip
     densenet:
       - name: PyTorch DenseNet pre-trained on ImageNet
         factory: torch_densenet_imagenet
@@ -92,13 +104,13 @@ extra:
         factory: torch_densenet_places365
         training_id: places365
         license: torchvision
-    arcface:
-      - name: ArcFace pre-trained by InsightFace
-        factory: torch_arcface_insightface
-        training_id: insightface
-        license: insightface
     magface:
       - name: Pre-trained MagFace
         factory: torch_magface
         training_id: magface
         license: magface
+    resnet:
+      - name: PyTorch ResNet pre-trained on ImageNet
+        factory: torch_resnet_imagenet
+        training_id: imagenet
+        license: torchvision

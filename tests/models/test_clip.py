@@ -9,9 +9,11 @@ from PIL import Image
 
 from mlmodule.callbacks.memory import CollectFeaturesInMemory
 from mlmodule.models.clip.image import CLIPImageModule
+from mlmodule.models.clip.pretrained import (
+    torch_clip_image_encoder,
+    torch_clip_text_encoder,
+)
 from mlmodule.models.clip.text import CLIPTextModule
-from mlmodule.states import StateKey
-from mlmodule.stores import Store
 from mlmodule.torch.datasets import ImageDataset, ListDataset, LocalBinaryFilesDataset
 from mlmodule.torch.options import TorchRunnerOptions
 from mlmodule.torch.runners import TorchInferenceRunner
@@ -22,13 +24,8 @@ def clip_test_models(
     request,
     torch_device: torch.device,
 ) -> Tuple[CLIPImageModule, CLIPTextModule]:
-    image = CLIPImageModule(request.param, device=torch_device)
-    text = CLIPTextModule(request.param, device=torch_device)
-
-    # Loading model pre-trained states
-    store = Store()
-    store.load(image, StateKey(image.state_type, "clip"))
-    store.load(text, StateKey(text.state_type, "clip"))
+    image = torch_clip_image_encoder(request.param, device=torch_device)
+    text = torch_clip_text_encoder(request.param, device=torch_device)
 
     return image, text
 
