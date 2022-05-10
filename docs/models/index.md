@@ -2,11 +2,11 @@
 
 ## Available models
 
-| Reference    | Name   | Training Id | License |
-|---------------|---------------|-----------------|-----------|
+| Reference    | Name   | License |
+|---------------|---------------|-----------|
 {% for module in models -%}
 {% for model in models[module] -%}
-| [`{{ model.factory }}`][mlmodule.models.{{ module }}.{{ model.factory }}] | {{ model.name }} | `{{ model.training_id }}` | [{{ licenses[model.license].name }} :octicons-link-external-16:]({{ licenses[model.license].link }}){:target="_blank"} |
+| [`{{ model.factory }}`][mlmodule.models.{{ module }}.{{ model.factory }}] | {{ model.name }} | [{{ licenses[model.license].name }} :octicons-link-external-16:]({{ licenses[model.license].link }}){:target="_blank"} |
 {% endfor -%}
 {% endfor %}
 

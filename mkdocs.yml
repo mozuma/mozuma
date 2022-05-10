@@ -73,6 +73,9 @@ extra:
     insightface:
       name: InsightFace
       link: https://github.com/deepinsight/insightface#license
+    magface:
+      name: MagFace
+      link: https://github.com/IrvingMeng/MagFace/blob/main/LICENSE
 
   models:
     resnet:
@@ -91,6 +94,11 @@ extra:
         license: torchvision
     arcface:
       - name: ArcFace pre-trained by InsightFace
-        factory: torch_arcface_insight_face
+        factory: torch_arcface_insightface
         training_id: insightface
         license: insightface
+    magface:
+      - name: Pre-trained MagFace
+        factory: torch_magface
+        training_id: magface
+        license: magface

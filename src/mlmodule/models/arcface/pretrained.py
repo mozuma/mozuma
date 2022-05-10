@@ -2,7 +2,7 @@ from mlmodule.models.arcface.modules import TorchArcFaceModule
 from mlmodule.stores import load_pretrained_model
 
 
-def torch_arcface_insight_face(*args, **kwargs) -> TorchArcFaceModule:
+def torch_arcface_insightface(*args, **kwargs) -> TorchArcFaceModule:
     """ArcFace model pre-trained by InsightFace
 
     Args:

@@ -12,8 +12,9 @@ from mlmodule.callbacks.memory import (
 )
 from mlmodule.helpers.files import list_files_in_dir
 from mlmodule.models.arcface.modules import TorchArcFaceModule
-from mlmodule.models.arcface.pretrained import torch_arcface_insight_face
+from mlmodule.models.arcface.pretrained import torch_arcface_insightface
 from mlmodule.models.magface.modules import TorchMagFaceModule
+from mlmodule.models.magface.pretrained import torch_magface
 from mlmodule.models.mtcnn.modules import TorchMTCNNModule
 from mlmodule.states import StateKey
 from mlmodule.stores import Store
@@ -102,7 +103,7 @@ def _count_matching_face_features(f1: Sequence[np.ndarray], f2: Sequence[np.ndar
 
 @pytest.mark.parametrize(
     "face_module",
-    [TorchMagFaceModule, torch_arcface_insight_face],
+    [torch_magface, torch_arcface_insightface],
     ids=["magface", "arcface"],
 )
 def test_face_features_inference(
@@ -147,7 +148,7 @@ def test_face_features_inference(
 )
 @pytest.mark.parametrize(
     "face_module,n_good_faces",
-    [(TorchMagFaceModule, 1), (torch_arcface_insight_face, 3)],
+    [(torch_magface, 1), (torch_arcface_insightface, 3)],
     ids=["magface", "arcface"],
 )
 def test_bad_quality_face_filter(
