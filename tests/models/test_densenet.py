@@ -5,10 +5,10 @@ from typing import List, cast
 import torch
 
 from mlmodule.callbacks.memory import CollectLabelsInMemory
-from mlmodule.labels.places import PLACES_LABELS
-from mlmodule.models.densenet.modules import TorchDenseNetModule
-from mlmodule.states import StateKey
-from mlmodule.stores import Store
+from mlmodule.models.densenet.pretrained import (
+    torch_densenet_imagenet,
+    torch_densenet_places365,
+)
 from mlmodule.torch.datasets import ImageDataset, LocalBinaryFilesDataset
 from mlmodule.torch.options import TorchRunnerOptions
 from mlmodule.torch.runners import TorchInferenceRunner
@@ -23,11 +23,7 @@ def test_densenet_cats_dogs(
     dataset = ImageDataset(LocalBinaryFilesDataset(cats_and_dogs_images))
 
     # Loading model
-    model = TorchDenseNetModule("densenet161")
-    # Pre-trained state
-    Store().load(
-        model, state_key=StateKey(state_type=model.state_type, training_id="imagenet")
-    )
+    model = torch_densenet_imagenet("densenet161")
 
     # Inference runner for Torch model
     labels = CollectLabelsInMemory()
@@ -59,11 +55,7 @@ def test_densenet_places365(torch_device: torch.device):
     dataset = ImageDataset(LocalBinaryFilesDataset([office_picture, outdoor_picture]))
 
     # Loading model
-    model = TorchDenseNetModule("densenet161", label_set=PLACES_LABELS)
-    # Pre-trained state
-    Store().load(
-        model, state_key=StateKey(state_type=model.state_type, training_id="places365")
-    )
+    model = torch_densenet_places365()
 
     # Inference runner for Torch model
     labels = CollectLabelsInMemory()

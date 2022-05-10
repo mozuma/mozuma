@@ -26,11 +26,14 @@ markdown_extensions:
   - def_list
   - footnotes
   - md_in_html
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.details
   - pymdownx.superfences
   - pymdownx.tasklist:
       custom_checkbox: true
@@ -63,15 +66,31 @@ extra:
   release:
     tox_env_version: "{py37,py38,py39}{-pt19,-pt110}{-cuda,}"
 
+  licenses:
+    torchvision:
+      name: TorchVision
+      link: https://github.com/pytorch/vision/blob/main/LICENSE
+    insightface:
+      name: InsightFace
+      link: https://github.com/deepinsight/insightface#license
+
   models:
     resnet:
       - name: PyTorch ResNet pre-trained on ImageNet
         factory: torch_resnet_imagenet
         training_id: imagenet
+        license: torchvision
     densenet:
       - name: PyTorch DenseNet pre-trained on ImageNet
         factory: torch_densenet_imagenet
         training_id: imagenet
+        license: torchvision
       - name: PyTorch DenseNet pre-trained on Places365
         factory: torch_densenet_places365
         training_id: places365
+        license: torchvision
+    arcface:
+      - name: ArcFace pre-trained by InsightFace
+        factory: torch_arcface_insight_face
+        training_id: insightface
+        license: insightface
