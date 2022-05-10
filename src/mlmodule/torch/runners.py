@@ -6,6 +6,7 @@ import ignite.distributed as idist
 import torch
 from ignite.contrib.handlers import ProgressBar
 from ignite.engine import Engine, Events, EventsList
+from ignite.metrics import RunningAverage
 from ignite.utils import manual_seed
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.dataset import Dataset
@@ -397,13 +398,21 @@ class TorchTrainingRunner(
             state = train_evaluator.run(train_loader)
             if idist.get_rank() == 0:
                 log_evaluation_metrics(
-                    logger, epoch, state.times["COMPLETED"], "Train", state.metrics
+                    logger,
+                    epoch,
+                    state.times["COMPLETED"],
+                    "Train",
+                    state.metrics,
                 )
 
             state = evaluator.run(test_loader)
             if idist.get_rank() == 0:
                 log_evaluation_metrics(
-                    logger, epoch, state.times["COMPLETED"], "Test", state.metrics
+                    logger,
+                    epoch,
+                    state.times["COMPLETED"],
+                    "Test",
+                    state.metrics,
                 )
 
         trainer.run(train_loader, max_epochs=self.options.num_epoch)
@@ -466,11 +475,13 @@ class TorchTrainingRunner(
             Events.COMPLETED,
             lambda: callbacks_caller(self.callbacks, "on_runner_end", self.model),
         )
+        # computer average of the loss and attach it to trainer
+        RunningAverage(output_transform=lambda x: x).attach(trainer, "avg_loss")
 
         # Setup tqdm
         if self.options.tqdm_enabled and idist.get_rank() == 0:
             pbar = ProgressBar(persist=True, bar_format="")
-            pbar.attach(trainer)
+            pbar.attach(trainer, metric_names=["avg_loss"])
 
         return trainer
 
