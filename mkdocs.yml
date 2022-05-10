@@ -76,6 +76,9 @@ extra:
     magface:
       name: MagFace
       link: https://github.com/IrvingMeng/MagFace/blob/main/LICENSE
+    sbert:
+      name: SBERT
+      link: https://github.com/UKPLab/sentence-transformers/blob/master/LICENSE
     torchvision:
       name: TorchVision
       link: https://github.com/pytorch/vision/blob/main/LICENSE
@@ -104,6 +107,11 @@ extra:
         factory: torch_densenet_places365
         training_id: places365
         license: torchvision
+    sentences:
+      - name: SBERT's pre-trained DistilUse Multilingual Cased V2
+        factory: torch_distiluse_base_multilingual_v2
+        training_id: cased-v2
+        license: sbert
     magface:
       - name: Pre-trained MagFace
         factory: torch_magface

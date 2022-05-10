@@ -2,12 +2,8 @@ import numpy as np
 import pytest
 import torch
 
-from mlmodule.models.sentences.distilbert.modules import (
-    DistilUseBaseMultilingualCasedV2Module,
-)
+from mlmodule.models.sentences import torch_distiluse_base_multilingual_v2
 from mlmodule.models.sentences.distilbert.transforms import TokenizerTransform
-from mlmodule.states import StateKey
-from mlmodule.stores import Store
 
 
 def test_embeddings(torch_device: torch.device):
@@ -27,13 +23,9 @@ def test_embeddings(torch_device: torch.device):
 
     with torch.no_grad():
         # Loading model from provider
-        distilbert = DistilUseBaseMultilingualCasedV2Module(torch.device("cpu"))
+        distilbert = torch_distiluse_base_multilingual_v2(torch.device("cpu"))
         distilbert.eval()
         distilbert.to(torch_device)
-        Store().load(
-            distilbert,
-            state_key=StateKey(distilbert.state_type, training_id="cased-v2"),
-        )
 
         tokenizer = TokenizerTransform(distilbert.get_tokenizer())
         tokens = tokenizer(sentence)
