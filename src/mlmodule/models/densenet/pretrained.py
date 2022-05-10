@@ -44,7 +44,7 @@ def torch_densenet_places365(
         device (torch.device): Torch device to initialise the model weights
 
     Returns:
-        TorchDenseNetModule: PyTorch DenseNet model pretrained on ImageNet
+        TorchDenseNetModule: PyTorch DenseNet model pretrained on Places365
     """
     model = TorchDenseNetModule(
         densenet_arch="densenet161", label_set=PLACES_LABELS, device=device

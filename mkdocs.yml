@@ -76,6 +76,9 @@ extra:
     magface:
       name: MagFace
       link: https://github.com/IrvingMeng/MagFace/blob/main/LICENSE
+    places365:
+      name: Places365
+      link: https://github.com/CSAILVision/places365/blob/master/LICENSE
     sbert:
       name: SBERT
       link: https://github.com/UKPLab/sentence-transformers/blob/master/LICENSE
@@ -87,38 +90,40 @@ extra:
     arcface:
       - name: ArcFace pre-trained by InsightFace
         factory: torch_arcface_insightface
-        training_id: insightface
         license: insightface
     clip:
       - name: CLIP pre-trained image encoder
         factory: torch_clip_image_encoder
-        training_id: clip
         license: clip
       - name: CLIP pre-trained text encoder
         factory: torch_clip_text_encoder
-        training_id: clip
         license: clip
     densenet:
       - name: PyTorch DenseNet pre-trained on ImageNet
         factory: torch_densenet_imagenet
-        training_id: imagenet
         license: torchvision
       - name: PyTorch DenseNet pre-trained on Places365
         factory: torch_densenet_places365
-        training_id: places365
+        license: places365
+    keyframes:
+      - name: Keyframes with ResNet pre-trained on ImageNet
+        factory: torch_keyframes_resnet_imagenet
         license: torchvision
+      - name: Keyframes with DenseNet pre-trained on ImageNet
+        factory: torch_keyframes_densenet_imagenet
+        license: torchvision
+      - name: Keyframes with DenseNet pre-trained on Places365
+        factory: torch_keyframes_densenet_places365
+        license: places365
     sentences:
       - name: SBERT's pre-trained DistilUse Multilingual Cased V2
         factory: torch_distiluse_base_multilingual_v2
-        training_id: cased-v2
         license: sbert
     magface:
       - name: Pre-trained MagFace
         factory: torch_magface
-        training_id: magface
         license: magface
     resnet:
       - name: PyTorch ResNet pre-trained on ImageNet
         factory: torch_resnet_imagenet
-        training_id: imagenet
         license: torchvision

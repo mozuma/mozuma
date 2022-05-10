@@ -9,7 +9,7 @@ from mlmodule.models.keyframes.datasets import (
     compute_every_param_from_target_fps,
 )
 from mlmodule.models.keyframes.encoders import VideoFramesEncoder
-from mlmodule.models.keyframes.selectors import KeyFrameSelector
+from mlmodule.models.keyframes.pretrained import torch_keyframes_resnet_imagenet
 from mlmodule.models.resnet.modules import TorchResNetModule
 from mlmodule.torch.datasets import ListDataset
 from mlmodule.torch.options import TorchRunnerOptions
@@ -70,7 +70,7 @@ def test_keyframes_extractor(torch_device: torch.device, video_file_path: str):
     with open(video_file_path, mode="rb") as video_file:
         dataset = ListDataset([video_file])
 
-        model = KeyFrameSelector(TorchResNetModule("resnet18"), device=torch_device)
+        model = torch_keyframes_resnet_imagenet("resnet18", device=torch_device)
         features = CollectVideoFramesInMemory()
         runner = TorchInferenceRunner(
             model=model,
@@ -90,7 +90,7 @@ def test_keyframes_extractor(torch_device: torch.device, video_file_path: str):
 def test_keyframes_extractor_bad_file(torch_device: torch.device):
     dataset = ListDataset([BytesIO(b"bbbbbb")])
 
-    model = KeyFrameSelector(TorchResNetModule("resnet18"), device=torch_device)
+    model = torch_keyframes_resnet_imagenet("resnet18", device=torch_device)
     features = CollectVideoFramesInMemory()
     runner = TorchInferenceRunner(
         model=model,
