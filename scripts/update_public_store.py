@@ -8,6 +8,8 @@ from typing import Iterable, List, Optional, Tuple, Union
 from mlmodule.helpers.torchvision import DenseNetArch, ResNetArch
 from mlmodule.labels.places import PLACES_LABELS
 from mlmodule.models import ModelWithState
+from mlmodule.models.arcface.modules import TorchArcFaceModule
+from mlmodule.models.arcface.stores import ArcFaceStore
 from mlmodule.models.clip.base import BaseCLIPModule
 from mlmodule.models.clip.image import CLIPImageModule
 from mlmodule.models.clip.parameters import PARAMETERS
@@ -110,6 +112,10 @@ def get_magface_stores() -> List[Tuple[TorchMagFaceModule, MagFaceStore]]:
     return [(TorchMagFaceModule(), MagFaceStore())]
 
 
+def get_arcface_stores() -> List[Tuple[TorchArcFaceModule, ArcFaceStore]]:
+    return [(TorchArcFaceModule(), ArcFaceStore())]
+
+
 def get_mtcnn_stores() -> List[Tuple[TorchMTCNNModule, FaceNetMTCNNStore]]:
     return [(TorchMTCNNModule(), FaceNetMTCNNStore())]
 
@@ -138,6 +144,7 @@ def get_all_models_stores() -> Iterable[Tuple[ModelWithState, AbstractStateStore
         get_resnet_stores(),
         get_clip_stores(),
         get_densenet_stores(),
+        get_arcface_stores(),
         get_magface_stores(),
         get_mtcnn_stores(),
         get_distiluse_stores(),
