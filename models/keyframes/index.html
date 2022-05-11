@@ -529,11 +529,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#key-frames-selector-models" class="md-nav__link">
-    Key-frames selector models
+  <a href="#pre-trained-models" class="md-nav__link">
+    Pre-trained models
   </a>
   
-    <nav class="md-nav" aria-label="Key-frames selector models">
+    <nav class="md-nav" aria-label="Pre-trained models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.keyframes.pretrained.torch_keyframes_resnet_imagenet" class="md-nav__link">
+    torch_keyframes_resnet_imagenet()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.keyframes.pretrained.torch_keyframes_densenet_imagenet" class="md-nav__link">
+    torch_keyframes_densenet_imagenet()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.keyframes.pretrained.torch_keyframes_densenet_places365" class="md-nav__link">
+    torch_keyframes_densenet_places365()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#base-key-frames-selector-model" class="md-nav__link">
+    Base key-frames selector model
+  </a>
+  
+    <nav class="md-nav" aria-label="Base key-frames selector model">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -549,11 +583,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#video-frames-encoder" class="md-nav__link">
-    Video frames encoder
+  <a href="#base-video-frames-encoder-model" class="md-nav__link">
+    Base video frames encoder model
   </a>
   
-    <nav class="md-nav" aria-label="Video frames encoder">
+    <nav class="md-nav" aria-label="Base video frames encoder model">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -758,11 +792,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#key-frames-selector-models" class="md-nav__link">
-    Key-frames selector models
+  <a href="#pre-trained-models" class="md-nav__link">
+    Pre-trained models
   </a>
   
-    <nav class="md-nav" aria-label="Key-frames selector models">
+    <nav class="md-nav" aria-label="Pre-trained models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.keyframes.pretrained.torch_keyframes_resnet_imagenet" class="md-nav__link">
+    torch_keyframes_resnet_imagenet()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.keyframes.pretrained.torch_keyframes_densenet_imagenet" class="md-nav__link">
+    torch_keyframes_densenet_imagenet()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.keyframes.pretrained.torch_keyframes_densenet_places365" class="md-nav__link">
+    torch_keyframes_densenet_places365()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#base-key-frames-selector-model" class="md-nav__link">
+    Base key-frames selector model
+  </a>
+  
+    <nav class="md-nav" aria-label="Base key-frames selector model">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -778,11 +846,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#video-frames-encoder" class="md-nav__link">
-    Video frames encoder
+  <a href="#base-video-frames-encoder-model" class="md-nav__link">
+    Base video frames encoder model
   </a>
   
-    <nav class="md-nav" aria-label="Video frames encoder">
+    <nav class="md-nav" aria-label="Base video frames encoder model">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -818,7 +886,215 @@
 <h1 id="video-key-frames-extractor">Video key-frames extractor</h1>
 <p>This model implements two types of modules: a video frames encoder and the key-frames module.
 These models are an implementation of a <a class="autorefs autorefs-internal" href="../#mlmodule.torch.modules.TorchMlModule"><code>TorchMlModule</code></a>.</p>
-<h2 id="key-frames-selector-models">Key-frames selector models</h2>
+<h2 id="pre-trained-models">Pre-trained models</h2>
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 class="doc doc-heading" id="mlmodule.models.keyframes.pretrained.torch_keyframes_resnet_imagenet">
+<code class="highlight language-python"><span class="n">mlmodule</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">keyframes</span><span class="o">.</span><span class="n">pretrained</span><span class="o">.</span><span class="n">torch_keyframes_resnet_imagenet</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents first">
+
+      <p>KeyFrames selector with PyTorch's ResNet pre-trained on ImageNet</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>resnet_arch</code></td>
+        <td><code>ResNetArchs</code></td>
+        <td><p>Identifier for the ResNet architecture to load.
+Must be one of:</p>
+<ul>
+<li><code>resnet18</code></li>
+<li><code>resnet34</code></li>
+<li><code>resnet50</code></li>
+<li><code>resnet101</code></li>
+<li><code>resnet152</code></li>
+<li><code>resnext50_32x4d</code></li>
+<li><code>resnext101_32x8d</code></li>
+<li><code>wide_resnet50_2</code></li>
+<li><code>wide_resnet101_2</code></li>
+</ul></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>fps</code></td>
+        <td><code>float</code></td>
+        <td><p>The number of frames per seconds to extract from the video.
+Defaults to 1.</p></td>
+        <td><code>1</code></td>
+      </tr>
+      <tr>
+        <td><code>device</code></td>
+        <td><code>torch.device</code></td>
+        <td><p>Torch device to initialise the model weights</p></td>
+        <td><code>device(type=&#39;cpu&#39;)</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>KeyFrameSelector</code></td>
+      <td><p>Keyframes model with ResNet pre-trained on ImageNet encoder</p></td>
+    </tr>
+  </tbody>
+</table>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 class="doc doc-heading" id="mlmodule.models.keyframes.pretrained.torch_keyframes_densenet_imagenet">
+<code class="highlight language-python"><span class="n">mlmodule</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">keyframes</span><span class="o">.</span><span class="n">pretrained</span><span class="o">.</span><span class="n">torch_keyframes_densenet_imagenet</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents first">
+
+      <p>KeyFrames selector with PyTorch DenseNet model pretrained on ImageNet</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>densenet_arch</code></td>
+        <td><code>DenseNetArch</code></td>
+        <td><p>Identifier for the DenseNet architecture.
+Must be one of:</p>
+<div class="highlight"><pre><span></span><code>- densenet121
+- densenet161
+- densenet169
+- densenet201
+</code></pre></div></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>fps</code></td>
+        <td><code>float</code></td>
+        <td><p>The number of frames per seconds to extract from the video.
+Defaults to 1.</p></td>
+        <td><code>1</code></td>
+      </tr>
+      <tr>
+        <td><code>device</code></td>
+        <td><code>torch.device</code></td>
+        <td><p>Torch device to initialise the model weights</p></td>
+        <td><code>device(type=&#39;cpu&#39;)</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>KeyFrameSelector</code></td>
+      <td><p>Keyframes model with DenseNet pre-trained on ImageNet encoder</p></td>
+    </tr>
+  </tbody>
+</table>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 class="doc doc-heading" id="mlmodule.models.keyframes.pretrained.torch_keyframes_densenet_places365">
+<code class="highlight language-python"><span class="n">mlmodule</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">keyframes</span><span class="o">.</span><span class="n">pretrained</span><span class="o">.</span><span class="n">torch_keyframes_densenet_places365</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents first">
+
+      <p>KeyFrames selector with PyTorch DenseNet model pretrained on Places365.</p>
+<p>See <a href="https://github.com/CSAILVision/places365">places365 documentation</a> for more info.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>device</code></td>
+        <td><code>torch.device</code></td>
+        <td><p>Torch device to initialise the model weights</p></td>
+        <td><code>device(type=&#39;cpu&#39;)</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>KeyFrameSelector</code></td>
+      <td><p>Keyframes model with DenseNet model pretrained on Places365</p></td>
+    </tr>
+  </tbody>
+</table>
+    </div>
+
+  </div>
+
+<h2 id="base-key-frames-selector-model">Base key-frames selector model</h2>
 <p>These models allow to extract key-frames from a video.</p>
 
 
@@ -855,7 +1131,7 @@ mlmodule.models.keyframes.selectors.KeyFrameSelector        </code>
       </tr>
       <tr>
         <td><code>fps</code></td>
-        <td><code>int</code></td>
+        <td><code>float</code></td>
         <td><p>The number of frames per seconds to extract from the video.
 Defaults to 1.</p></td>
       </tr>
@@ -873,7 +1149,7 @@ Defaults to <code>torch.device("cpu")</code>.</p></td>
 
   </div>
 
-<h2 id="video-frames-encoder">Video frames encoder</h2>
+<h2 id="base-video-frames-encoder-model">Base video frames encoder model</h2>
 
 
   <div class="doc doc-object doc-class">

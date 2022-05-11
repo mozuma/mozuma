@@ -459,11 +459,31 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#model" class="md-nav__link">
-    Model
+  <a href="#pre-trained-models" class="md-nav__link">
+    Pre-trained models
   </a>
   
-    <nav class="md-nav" aria-label="Model">
+    <nav class="md-nav" aria-label="Pre-trained models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.sentences.distilbert.pretrained.torch_distiluse_base_multilingual_v2" class="md-nav__link">
+    torch_distiluse_base_multilingual_v2()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#base-model" class="md-nav__link">
+    Base model
+  </a>
+  
+    <nav class="md-nav" aria-label="Base model">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -758,11 +778,31 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#model" class="md-nav__link">
-    Model
+  <a href="#pre-trained-models" class="md-nav__link">
+    Pre-trained models
   </a>
   
-    <nav class="md-nav" aria-label="Model">
+    <nav class="md-nav" aria-label="Pre-trained models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.sentences.distilbert.pretrained.torch_distiluse_base_multilingual_v2" class="md-nav__link">
+    torch_distiluse_base_multilingual_v2()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#base-model" class="md-nav__link">
+    Base model
+  </a>
+  
+    <nav class="md-nav" aria-label="Base model">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -817,7 +857,53 @@
 
 <h1 id="distiluse-multilingual">Distiluse Multilingual</h1>
 <p>Text model for computing sentence embeddings in multiple languages based on <a href="https://www.sbert.net/examples/training/multilingual/README.html">Sentence-Transformers</a> framework<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup>.</p>
-<h2 id="model">Model</h2>
+<h2 id="pre-trained-models">Pre-trained models</h2>
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 class="doc doc-heading" id="mlmodule.models.sentences.distilbert.pretrained.torch_distiluse_base_multilingual_v2">
+<code class="highlight language-python"><span class="n">mlmodule</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">sentences</span><span class="o">.</span><span class="n">distilbert</span><span class="o">.</span><span class="n">pretrained</span><span class="o">.</span><span class="n">torch_distiluse_base_multilingual_v2</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents first">
+
+      <p>Multilingual model for semantic similarity</p>
+<p>See <a href="https://huggingface.co/sentence-transformers/distiluse-base-multilingual-cased-v2">
+    distiluse-base-multilingual-cased-v2
+</a>
+and <a href="https://www.sbert.net/docs/pretrained_models.html#multi-lingual-models">sbert documentation</a>
+for more information.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>device</code></td>
+        <td><code>torch.device</code></td>
+        <td><p>The PyTorch device to initialise the model weights.
+Defaults to <code>torch.device("cpu")</code>.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+    </div>
+
+  </div>
+
+<h2 id="base-model">Base model</h2>
 <p>This model is an implementation of a <a class="autorefs autorefs-internal" href="../#mlmodule.torch.modules.TorchMlModule"><code>TorchMlModule</code></a>.</p>
 
 
@@ -842,6 +928,26 @@ mlmodule.models.sentences.distilbert.modules.DistilUseBaseMultilingualCasedV2Mod
 and <a href="https://www.sbert.net/docs/pretrained_models.html#multi-lingual-models">sbert documentation</a>
 for more information.</p>
 
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>device</code></td>
+        <td><code>torch.device</code></td>
+        <td><p>The PyTorch device to initialise the model weights.
+Defaults to <code>torch.device("cpu")</code>.</p></td>
+        <td><code>device(type=&#39;cpu&#39;)</code></td>
+      </tr>
+  </tbody>
+</table>
 
 
     </div>

@@ -403,11 +403,31 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#models" class="md-nav__link">
-    Models
+  <a href="#pre-trained-models" class="md-nav__link">
+    Pre-trained models
   </a>
   
-    <nav class="md-nav" aria-label="Models">
+    <nav class="md-nav" aria-label="Pre-trained models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.arcface.pretrained.torch_arcface_insightface" class="md-nav__link">
+    torch_arcface_insightface()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#base-models" class="md-nav__link">
+    Base models
+  </a>
+  
+    <nav class="md-nav" aria-label="Base models">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -758,11 +778,31 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#models" class="md-nav__link">
-    Models
+  <a href="#pre-trained-models" class="md-nav__link">
+    Pre-trained models
   </a>
   
-    <nav class="md-nav" aria-label="Models">
+    <nav class="md-nav" aria-label="Pre-trained models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.arcface.pretrained.torch_arcface_insightface" class="md-nav__link">
+    torch_arcface_insightface()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#base-models" class="md-nav__link">
+    Base models
+  </a>
+  
+    <nav class="md-nav" aria-label="Base models">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -818,7 +858,76 @@
 <h1 id="arcface">ArcFace</h1>
 <p>Implementation of ArcFace<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup>
 in PyTorch by <a href="https://github.com/TreB1eN/InsightFace_Pytorch">InsightFace</a>.</p>
-<h2 id="models">Models</h2>
+<h2 id="pre-trained-models">Pre-trained models</h2>
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 class="doc doc-heading" id="mlmodule.models.arcface.pretrained.torch_arcface_insightface">
+<code class="highlight language-python"><span class="n">mlmodule</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">arcface</span><span class="o">.</span><span class="n">pretrained</span><span class="o">.</span><span class="n">torch_arcface_insightface</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents first">
+
+      <p>ArcFace model pre-trained by InsightFace</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>device</code></td>
+        <td><code>torch.device</code></td>
+        <td><p>Torch device to initialise the model weights</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>remove_bad_faces</code></td>
+        <td><code>bool</code></td>
+        <td><p>Whether to remove the faces with bad quality from the output.
+This will replace features of bad faces with <code>float("nan")</code>. Defaults to <code>False</code>.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>bad_faces_threshold</code></td>
+        <td><code>float</code></td>
+        <td><p>The cosine similarity distance to reference faces for which we
+consider the face is of bad quality.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>TorchArcFaceModule</code></td>
+      <td><p>Pre-trained ArcFace</p></td>
+    </tr>
+  </tbody>
+</table>
+    </div>
+
+  </div>
+
+<h2 id="base-models">Base models</h2>
 <p>The MagFace model is an implementation of a <a class="autorefs autorefs-internal" href="../#mlmodule.torch.modules.TorchMlModule"><code>TorchMlModule</code></a>.</p>
 
 

@@ -417,6 +417,33 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#pre-trained-models" class="md-nav__link">
+    Pre-trained models
+  </a>
+  
+    <nav class="md-nav" aria-label="Pre-trained models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.clip.pretrained.torch_clip_image_encoder" class="md-nav__link">
+    torch_clip_image_encoder()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.clip.pretrained.torch_clip_text_encoder" class="md-nav__link">
+    torch_clip_text_encoder()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#models" class="md-nav__link">
     Models
   </a>
@@ -772,6 +799,33 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#pre-trained-models" class="md-nav__link">
+    Pre-trained models
+  </a>
+  
+    <nav class="md-nav" aria-label="Pre-trained models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.clip.pretrained.torch_clip_image_encoder" class="md-nav__link">
+    torch_clip_image_encoder()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.clip.pretrained.torch_clip_text_encoder" class="md-nav__link">
+    torch_clip_text_encoder()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#models" class="md-nav__link">
     Models
   </a>
@@ -846,11 +900,101 @@
 <h1 id="clip">CLIP</h1>
 <p>CLIP<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> model encodes text snippets and images into a common embedding space which enables zero-shot retrieval and prediction.
 See <a href="https://github.com/openai/CLIP">OpenAI/CLIP</a> for the source code and original models.</p>
-<p>This model has extra requirements:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip install git+ssh://git@github.com/LSIR/mlmodule.git#egg<span class="o">=</span>mlmodule<span class="o">[</span>torch,clip<span class="o">]</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1"># or</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>pip install mlmodule<span class="o">[</span>torch,clip<span class="o">]</span>
-</code></pre></div>
+<h2 id="pre-trained-models">Pre-trained models</h2>
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 class="doc doc-heading" id="mlmodule.models.clip.pretrained.torch_clip_image_encoder">
+<code class="highlight language-python"><span class="n">mlmodule</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">clip</span><span class="o">.</span><span class="n">pretrained</span><span class="o">.</span><span class="n">torch_clip_image_encoder</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents first">
+
+      <p>Pre-trained CLIP image encoder</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>clip_model_name</code></td>
+        <td><code>str</code></td>
+        <td><p>Name of the model to load
+(see <a href="https://github.com/openai/CLIP#clipavailable_models">CLIP doc</a>)</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>device</code></td>
+        <td><code>torch.device</code></td>
+        <td><p>The PyTorch device to initialise the model weights.
+Defaults to <code>torch.device("cpu")</code>.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 class="doc doc-heading" id="mlmodule.models.clip.pretrained.torch_clip_text_encoder">
+<code class="highlight language-python"><span class="n">mlmodule</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">clip</span><span class="o">.</span><span class="n">pretrained</span><span class="o">.</span><span class="n">torch_clip_text_encoder</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents first">
+
+      <p>Pre-trained CLIP text encoder</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>clip_model_name</code></td>
+        <td><code>str</code></td>
+        <td><p>Name of the model to load
+(see <a href="https://github.com/openai/CLIP#clipavailable_models">CLIP doc</a>)</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>device</code></td>
+        <td><code>torch.device</code></td>
+        <td><p>The PyTorch device to initialise the model weights.
+Defaults to <code>torch.device("cpu")</code>.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+    </div>
+
+  </div>
+
 <h2 id="models">Models</h2>
 <p>CLIP comes with image (<a class="autorefs autorefs-internal" href="#mlmodule.models.clip.image.CLIPImageModule"><code>CLIPImageModule</code></a>)
 and a text (<a class="autorefs autorefs-internal" href="#mlmodule.models.clip.text.CLIPTextModule"><code>CLIPTextModule</code></a>) encoders.
@@ -980,7 +1124,7 @@ mlmodule.models.clip.stores.CLIPStore        </code>
 
 <h2 id="list-models-and-parameters">List models and parameters</h2>
 <p>There is a command line utility to list all available models from CLIP with their associated parameters in JSON format:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python -m mlmodule.models.clip.list
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python -m mlmodule.models.clip.list
 </code></pre></div>
 <p>The output is used to fill the mlmodule.models.clip.parameters file.</p>
 <div class="footnote">

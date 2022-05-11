@@ -445,11 +445,38 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#model" class="md-nav__link">
-    Model
+  <a href="#pre-trained-models" class="md-nav__link">
+    Pre-trained models
   </a>
   
-    <nav class="md-nav" aria-label="Model">
+    <nav class="md-nav" aria-label="Pre-trained models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.densenet.pretrained.torch_densenet_imagenet" class="md-nav__link">
+    torch_densenet_imagenet()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.densenet.pretrained.torch_densenet_places365" class="md-nav__link">
+    torch_densenet_places365()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#base-model" class="md-nav__link">
+    Base model
+  </a>
+  
+    <nav class="md-nav" aria-label="Base model">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -765,11 +792,38 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#model" class="md-nav__link">
-    Model
+  <a href="#pre-trained-models" class="md-nav__link">
+    Pre-trained models
   </a>
   
-    <nav class="md-nav" aria-label="Model">
+    <nav class="md-nav" aria-label="Pre-trained models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.densenet.pretrained.torch_densenet_imagenet" class="md-nav__link">
+    torch_densenet_imagenet()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.densenet.pretrained.torch_densenet_places365" class="md-nav__link">
+    torch_densenet_places365()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#base-model" class="md-nav__link">
+    Base model
+  </a>
+  
+    <nav class="md-nav" aria-label="Base model">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -831,7 +885,129 @@
 
 <h1 id="densenet">DenseNet</h1>
 <p>PyTorch implementation of DenseNet architecture<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> as defined in <a href="https://pytorch.org/vision/stable/models.html">Torchvision</a>.</p>
-<h2 id="model">Model</h2>
+<h2 id="pre-trained-models">Pre-trained models</h2>
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 class="doc doc-heading" id="mlmodule.models.densenet.pretrained.torch_densenet_imagenet">
+<code class="highlight language-python"><span class="n">mlmodule</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">densenet</span><span class="o">.</span><span class="n">pretrained</span><span class="o">.</span><span class="n">torch_densenet_imagenet</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents first">
+
+      <p>PyTorch DenseNet model pretrained on ImageNet</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>densenet_arch</code></td>
+        <td><code>DenseNetArch</code></td>
+        <td><p>Identifier for the DenseNet architecture.
+Must be one of:</p>
+<div class="highlight"><pre><span></span><code>- densenet121
+- densenet161
+- densenet169
+- densenet201
+</code></pre></div></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>device</code></td>
+        <td><code>torch.device</code></td>
+        <td><p>Torch device to initialise the model weights</p></td>
+        <td><code>device(type=&#39;cpu&#39;)</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>TorchDenseNetModule</code></td>
+      <td><p>PyTorch DenseNet model pretrained on ImageNet</p></td>
+    </tr>
+  </tbody>
+</table>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 class="doc doc-heading" id="mlmodule.models.densenet.pretrained.torch_densenet_places365">
+<code class="highlight language-python"><span class="n">mlmodule</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">densenet</span><span class="o">.</span><span class="n">pretrained</span><span class="o">.</span><span class="n">torch_densenet_places365</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents first">
+
+      <p>PyTorch DenseNet model pretrained on Places365.</p>
+<p>See <a href="https://github.com/CSAILVision/places365">places365 documentation</a> for more info.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>device</code></td>
+        <td><code>torch.device</code></td>
+        <td><p>Torch device to initialise the model weights</p></td>
+        <td><code>device(type=&#39;cpu&#39;)</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>TorchDenseNetModule</code></td>
+      <td><p>PyTorch DenseNet model pretrained on Places365</p></td>
+    </tr>
+  </tbody>
+</table>
+    </div>
+
+  </div>
+
+<h2 id="base-model">Base model</h2>
 <p>The DenseNet model is an implementation of a <a class="autorefs autorefs-internal" href="../#mlmodule.torch.modules.TorchMlModule"><code>TorchMlModule</code></a>.</p>
 
 

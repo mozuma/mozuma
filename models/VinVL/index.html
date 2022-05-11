@@ -515,18 +515,31 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    Requirements
+  <a href="#pre-trained-models" class="md-nav__link">
+    Pre-trained models
   </a>
+  
+    <nav class="md-nav" aria-label="Pre-trained models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.vinvl.pretrained.torch_vinvl_detector" class="md-nav__link">
+    torch_vinvl_detector()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#models" class="md-nav__link">
-    Models
+  <a href="#base-model" class="md-nav__link">
+    Base model
   </a>
   
-    <nav class="md-nav" aria-label="Models">
+    <nav class="md-nav" aria-label="Base model">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -765,18 +778,31 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    Requirements
+  <a href="#pre-trained-models" class="md-nav__link">
+    Pre-trained models
   </a>
+  
+    <nav class="md-nav" aria-label="Pre-trained models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mlmodule.models.vinvl.pretrained.torch_vinvl_detector" class="md-nav__link">
+    torch_vinvl_detector()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#models" class="md-nav__link">
-    Models
+  <a href="#base-model" class="md-nav__link">
+    Base model
   </a>
   
-    <nav class="md-nav" aria-label="Models">
+    <nav class="md-nav" aria-label="Base model">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -830,14 +856,62 @@
 
 
 <h1 id="vinvl">VinVL</h1>
-<p>Pre-trained large-scale object-attribute detection (OD) model is based on the ResNeXt-152 C4 architecture<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup>.
+<p>Pre-trained large-scale object-attribute detection (OD) model based on the ResNeXt-152 C4 architecture<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup>.
 The OD model has been firstly trained on much larger amounts of data, combining multiple public object detection datasets, including <a href="https://cocodataset.org/#home">COCO</a>, <a href="https://storage.googleapis.com/openimages/web/index.html">OpenImages (OI)</a>, <a href="https://www.objects365.org/overview.html">Objects365</a>, and <a href="https://visualgenome.org/">Visual Genome (VG)</a>. Then it is fine-tuned on VG dataset alone, since VG is the only dataset with label attributes (see <a href="https://github.com/microsoft/Oscar/issues/120#issuecomment-898781183">issue #120</a>). It predicts objects from 1594 classes with attributes from 524 classes.
 See the <a href="https://github.com/pzzhang/VinVL">code</a> and the <a href="https://arxiv.org/pdf/2101.00529.pdf">paper</a> for details.</p>
-<h2 id="requirements">Requirements</h2>
-<p>The model needs the configuration system <a href="https://github.com/rbgirshick/yacs">YACS</a> to be installed.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip install <span class="nv">yacs</span><span class="o">==</span><span class="m">0</span>.1.8
-</code></pre></div>
-<h2 id="models">Models</h2>
+<h2 id="pre-trained-models">Pre-trained models</h2>
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 class="doc doc-heading" id="mlmodule.models.vinvl.pretrained.torch_vinvl_detector">
+<code class="highlight language-python"><span class="n">mlmodule</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">vinvl</span><span class="o">.</span><span class="n">pretrained</span><span class="o">.</span><span class="n">torch_vinvl_detector</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents first">
+
+      <p><a href="https://github.com/pzzhang/VinVL">VinVL</a> object detection model</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>score_threshold</code></td>
+        <td><code>float</code></td>
+        <td></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>attr_score_threshold</code></td>
+        <td><code>float</code></td>
+        <td></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>device</code></td>
+        <td><code>torch.device</code></td>
+        <td><p>PyTorch device attribute to initialise model.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+    </div>
+
+  </div>
+
+<h2 id="base-model">Base model</h2>
 <p>The VinVL model is an implementation of a <a class="autorefs autorefs-internal" href="../#mlmodule.torch.modules.TorchMlModule"><code>TorchMlModule</code></a>.</p>
 
 
