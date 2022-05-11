@@ -5,8 +5,14 @@ from typing import Any, Callable, Dict, Tuple, Union, cast
 import ignite.distributed as idist
 import torch
 from ignite.contrib.handlers import ProgressBar
-from ignite.engine import Engine, Events, EventsList
-from ignite.metrics import RunningAverage
+from ignite.engine import (
+    Engine,
+    Events,
+    EventsList,
+    create_supervised_evaluator,
+    create_supervised_trainer,
+)
+from ignite.metrics import Metric, RunningAverage
 from ignite.utils import manual_seed
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.dataset import Dataset
@@ -380,11 +386,13 @@ class TorchTrainingRunner(
         # Setup evaluator engine to perform model's validation and compute metrics
         train_evaluator = self.create_evaluator(
             model=ddp_model,
+            metrics=self.options.metrics,
             device=device,
             non_blocking=True,
         )
         evaluator = self.create_evaluator(
             model=ddp_model,
+            metrics=self.options.metrics,
             device=device,
             non_blocking=True,
         )
@@ -400,7 +408,7 @@ class TorchTrainingRunner(
                 log_evaluation_metrics(
                     logger,
                     epoch,
-                    state.times["COMPLETED"],
+                    state.times["COMPLETED"] or -1,
                     "Train",
                     state.metrics,
                 )
@@ -410,7 +418,7 @@ class TorchTrainingRunner(
                 log_evaluation_metrics(
                     logger,
                     epoch,
-                    state.times["COMPLETED"],
+                    state.times["COMPLETED"] or -1,
                     "Test",
                     state.metrics,
                 )
@@ -424,36 +432,17 @@ class TorchTrainingRunner(
         loss_fn: Union[Callable, torch.nn.Module],
         device: torch.device,
         non_blocking: bool = True,
-        gradient_accumulation_steps: int = 1,
     ) -> Engine:
-        """Utility to create a PyTorch Ignite's Engine."""
+        """Utility to create a PyTorch Ignite's engine for training."""
 
-        def update(engine: Engine, batch_wrapper: Tuple):
-            model.train()
-
-            # Unpack batch data and discard indices, we don't need them for now
-            _, payload = batch_wrapper
-
-            x, y = prepare_batch_for_training(
-                payload, device=device, non_blocking=non_blocking
-            )
-
-            y_pred = model(x)
-
-            loss = loss_fn(y_pred, y)
-
-            if gradient_accumulation_steps > 1:
-                loss = loss / gradient_accumulation_steps
-            loss.backward()
-
-            if engine.state.iteration % gradient_accumulation_steps == 0:
-                optimizer.step()
-                optimizer.zero_grad()
-
-            # return output_transform(x, y, y_pred, loss)
-            return loss.item()
-
-        trainer = Engine(update)
+        trainer = create_supervised_trainer(
+            model=model,
+            optimizer=optimizer,
+            loss_fn=loss_fn,
+            device=device,
+            non_blocking=non_blocking,
+            prepare_batch=prepare_batch_for_training,
+        )
 
         # Register handler to save model weights
         # Note: there should be only one callback of such
@@ -475,7 +464,8 @@ class TorchTrainingRunner(
             Events.COMPLETED,
             lambda: callbacks_caller(self.callbacks, "on_runner_end", self.model),
         )
-        # computer average of the loss and attach it to trainer
+
+        # Compute average of the loss and attach it to trainer
         RunningAverage(output_transform=lambda x: x).attach(trainer, "avg_loss")
 
         # Setup tqdm
@@ -488,25 +478,18 @@ class TorchTrainingRunner(
     def create_evaluator(
         self,
         model: torch.nn.Module,
+        metrics: Dict[str, Metric],
         device: torch.device,
         non_blocking: bool = True,
-    ):
-        def evaluate_step(engine: Engine, batch_wrapper: Tuple):
-            model.eval()
-            with torch.no_grad():
-                _, payload = batch_wrapper
-
-                # Sending data on device
-                batch, target = prepare_batch_for_training(
-                    payload, device=device, non_blocking=non_blocking
-                )
-
-                output = model(batch)
-
-                # Store output data in engine's state
-                return output, target
-
-        evaluator = Engine(evaluate_step)
+    ) -> Engine:
+        """Utility to create a PyTorch Ignite's engine for evaluation."""
+        evaluator = create_supervised_evaluator(
+            model=model,
+            metrics=metrics,
+            device=device,
+            non_blocking=non_blocking,
+            prepare_batch=prepare_batch_for_training,
+        )
 
         for name, metric in self.options.metrics.items():
             metric.attach(evaluator, name)
