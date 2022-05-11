@@ -1,10 +1,6 @@
 import abc
-import os
 import warnings
-from io import BytesIO
-from typing import Generic, List, NoReturn, TypeVar
-
-import boto3
+from typing import Generic, List, TypeVar
 
 from mlmodule.models.types import ModelWithState
 from mlmodule.states import StateKey, StateType
@@ -72,46 +68,3 @@ class AbstractStateStore(abc.ABC, Generic[_ModelType]):
             bool: `True` if state key exists or `False` otherwise
         """
         return state_key in self.get_state_keys(state_key.state_type)
-
-
-class MLModuleModelStore(AbstractStateStore):
-    """Default MLModule store with pretrained model states"""
-
-    def _get_bucket(self):
-        session = boto3.session.Session(
-            aws_access_key_id=os.environ.get("MLMODULE_AWS_ACCESS_KEY_ID"),
-            aws_secret_access_key=os.environ.get("MLMODULE_AWS_SECRET_ACCESS_KEY"),
-            profile_name=os.environ.get("MLMODULE_AWS_PROFILE_NAME"),
-        )
-        s3 = session.resource("s3", endpoint_url="https://sos-ch-gva-2.exo.io")
-        # Select lsir-public-assets bucket
-        return s3.Bucket("lsir-public-assets")
-
-    def save(self, model: _ModelType, training_id: str) -> NoReturn:
-        raise NotImplementedError("MLModuleStore states are read-only")
-
-    def load(self, model: ModelWithState, state_key: StateKey) -> None:
-        """Loads the models weights from the store
-
-        Attributes:
-            model (ModelWithState): Model to update
-            state_key (StateKey): The state identifier to load.
-
-        Warning:
-            Setting the `training_id` in the argument `state_id` is not supported and will raise an error.
-        """
-        # Making sure state_id is compatible with the model
-        super().load(model, state_key=state_key)
-
-        # S3 Bucket
-        bucket = self._get_bucket()
-
-        # Download state dict into BytesIO file
-        f = BytesIO()
-        bucket.Object(f"pretrained-models/{state_key.state_type}.pt").download_fileobj(
-            f
-        )
-
-        # Set the model state
-        f.seek(0)
-        model.set_state(f.read())

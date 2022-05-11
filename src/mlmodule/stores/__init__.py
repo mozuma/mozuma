@@ -1,16 +1,15 @@
 import functools
-import os
 from typing import TypeVar
 
 from mlmodule.models.types import ModelWithState
 from mlmodule.states import StateKey
-from mlmodule.stores.s3 import S3StateStore
+from mlmodule.stores.github import GitHUBReleaseStore
 
 _T = TypeVar("_T", bound=ModelWithState)
 
 
 @functools.lru_cache(1)  # There is only one entry
-def Store() -> S3StateStore:
+def Store() -> GitHUBReleaseStore:
     """MlModule model state store.
 
     Example:
@@ -27,16 +26,7 @@ def Store() -> S3StateStore:
         store.load(model, state_key=states[0])
         ```
     """
-    return S3StateStore(
-        bucket="lsir-public-assets",
-        session_kwargs=dict(
-            aws_access_key_id=os.environ.get("MLMODULE_AWS_ACCESS_KEY_ID"),
-            aws_secret_access_key=os.environ.get("MLMODULE_AWS_SECRET_ACCESS_KEY"),
-            profile_name=os.environ.get("MLMODULE_AWS_PROFILE_NAME"),
-        ),
-        s3_endpoint_url="https://sos-ch-gva-2.exo.io",
-        base_path="pretrained-models/",
-    )
+    return GitHUBReleaseStore("LSIR", "mlmodule")
 
 
 def load_pretrained_model(model: _T, training_id: str) -> _T:
