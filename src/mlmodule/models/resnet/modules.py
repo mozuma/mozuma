@@ -47,6 +47,8 @@ class TorchResNetModule(TorchMlModule[torch.Tensor, TorchResNetForwardOutputType
 
         label_set (LabelSet): The output labels. Defaults to ImageNet 1000 labels.
         device (torch.device): Torch device to initialise the model weights
+        training_mode (TorchResNetTrainingMode | None): Whether to return features or labels in the forward function.
+            Used for training when computing the loss.
     """
 
     def __init__(

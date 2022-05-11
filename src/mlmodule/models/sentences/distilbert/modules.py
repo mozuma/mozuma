@@ -233,6 +233,10 @@ class DistilUseBaseMultilingualCasedV2Module(TorchDistilBertModule):
     ](https://huggingface.co/sentence-transformers/distiluse-base-multilingual-cased-v2)
     and [sbert documentation](https://www.sbert.net/docs/pretrained_models.html#multi-lingual-models)
     for more information.
+
+    Args:
+        device (torch.device, optional): The PyTorch device to initialise the model weights.
+            Defaults to `torch.device("cpu")`.
     """
 
     def __init__(self, device: torch.device = torch.device("cpu")):

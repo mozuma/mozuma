@@ -23,7 +23,7 @@ class KeyFrameSelector(
 
     Attributes:
         image_encoder (TorchMlModule[torch.Tensor, torch.Tensor]): The PyTorch module to encode frames.
-        fps (int, optional): The number of frames per seconds to extract from the video.
+        fps (float, optional): The number of frames per seconds to extract from the video.
             Defaults to 1.
         device (torch.device, optional): The PyTorch device to initialise the model weights.
             Defaults to `torch.device("cpu")`.
@@ -134,16 +134,3 @@ class KeyFrameSelector(
             - Stack frames into a `torch.Tensor`
         """
         return self.frames_encoder.get_dataset_transforms()
-
-
-def resnet_key_frame_selector(
-    resnet_arch: ResNetArch,
-    fps: Union[float, str] = 1,
-    label_set: Optional[LabelSet] = None,
-    device: torch.device = torch.device("cpu"),
-):
-    return KeyFrameSelector(
-        TorchResNetModule(resnet_arch, label_set=label_set, device=device),
-        fps=float(fps),
-        device=device,
-    )

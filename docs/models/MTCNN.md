@@ -2,17 +2,16 @@
 
 We are using `facenet-pytorch` to load pre-trained MTCNN model[@mtcnn], see <https://github.com/timesler/facenet-pytorch>.
 
-## Requirements
+## Pre-trained models
 
-This needs mlmodule with the `mtcnn` and `torch` extra requirements:
+{% for model in models.mtcnn -%}
+::: mlmodule.models.mtcnn.{{ model.factory }}
+    rendering:
+        show_signature: False
+{% endfor %}
 
-```bash
-pip install git+ssh://git@github.com/LSIR/mlmodule.git#egg=mlmodule[torch,mtcnn]
-# or
-pip install mlmodule[torch,mtcnn]
-```
 
-## Model
+## Base model
 
 The MTCNN model is an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
 

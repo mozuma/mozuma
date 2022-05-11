@@ -1,7 +1,17 @@
 # Models
 
-!!! tip
-    See the the menu on the left for a list of available models
+## Pre-trained models
+
+| Reference    | Name   | License |
+|---------------|---------------|-----------|
+{% for module in models -%}
+{% for model in models[module] -%}
+| [`{{ model.factory }}`][mlmodule.models.{{ module }}.{{ model.factory }}] | {{ model.name }} | [{{ licenses[model.license].name }} :octicons-link-external-16:]({{ licenses[model.license].link }}){:target="_blank"} |
+{% endfor -%}
+{% endfor %}
+
+
+## Add a new model
 
 In MLModule, a model is usually implemented as a class.
 The model implementation details primarily depend on the type

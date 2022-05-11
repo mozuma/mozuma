@@ -12,7 +12,9 @@ from mlmodule.callbacks.memory import (
 )
 from mlmodule.helpers.files import list_files_in_dir
 from mlmodule.models.arcface.modules import TorchArcFaceModule
+from mlmodule.models.arcface.pretrained import torch_arcface_insightface
 from mlmodule.models.magface.modules import TorchMagFaceModule
+from mlmodule.models.magface.pretrained import torch_magface
 from mlmodule.models.mtcnn.modules import TorchMTCNNModule
 from mlmodule.states import StateKey
 from mlmodule.stores import Store
@@ -59,7 +61,6 @@ def _face_detection_for_folder(
 
 def _face_features_for_folder(
     face_module: _FaceModelType,
-    training_id: str,
     torch_device: torch.device,
     folder: str,
     bounding_boxes: Optional[CollectBoundingBoxesInMemory] = None,
@@ -70,7 +71,6 @@ def _face_features_for_folder(
 
     # Loading model with pre-trained state
     model = face_module(device=torch_device, remove_bad_faces=remove_bad_faces)
-    Store().load(model, StateKey(model.state_type, training_id))
 
     # Dataset
     dataset = ImageBoundingBoxDataset(
@@ -102,17 +102,15 @@ def _count_matching_face_features(f1: Sequence[np.ndarray], f2: Sequence[np.ndar
 
 
 @pytest.mark.parametrize(
-    "face_module,training_id",
-    [(TorchMagFaceModule, "magface"), (TorchArcFaceModule, "insightface")],
+    "face_module",
+    [torch_magface, torch_arcface_insightface],
     ids=["magface", "arcface"],
 )
 def test_face_features_inference(
-    torch_device: torch.device, face_module: _FaceModelType, training_id: str
+    torch_device: torch.device, face_module: _FaceModelType
 ):
     base_path = os.path.join("tests", "fixtures", "berset")
-    feature = _face_features_for_folder(
-        face_module, training_id, torch_device, base_path
-    )
+    feature = _face_features_for_folder(face_module, torch_device, base_path)
     normalized_features: np.ndarray = feature.features / np.linalg.norm(
         feature.features, axis=1, keepdims=True
     )
@@ -149,14 +147,13 @@ def test_face_features_inference(
     "remove_bad_faces", [True, False], ids=["remove-bad", "keep-bad"]
 )
 @pytest.mark.parametrize(
-    "face_module,training_id,n_good_faces",
-    [(TorchMagFaceModule, "magface", 1), (TorchArcFaceModule, "insightface", 3)],
+    "face_module,n_good_faces",
+    [(torch_magface, 1), (torch_arcface_insightface, 3)],
     ids=["magface", "arcface"],
 )
 def test_bad_quality_face_filter(
     remove_bad_faces: bool,
     face_module: _FaceModelType,
-    training_id: str,
     n_good_faces: int,
 ):
     # Defining variables
@@ -169,7 +166,6 @@ def test_bad_quality_face_filter(
     # Getting face features
     ff = _face_features_for_folder(
         face_module,
-        training_id,
         device,
         base_path,
         bb,

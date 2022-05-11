@@ -3,7 +3,16 @@
 This model implements two types of modules: a video frames encoder and the key-frames module.
 These models are an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
 
-## Key-frames selector models
+## Pre-trained models
+
+{% for model in models.keyframes -%}
+::: mlmodule.models.keyframes.{{ model.factory }}
+    rendering:
+        show_signature: False
+{% endfor %}
+
+
+## Base key-frames selector model
 
 These models allow to extract key-frames from a video.
 
@@ -11,7 +20,7 @@ These models allow to extract key-frames from a video.
     selection:
         members: none
 
-## Video frames encoder
+## Base video frames encoder model
 
 ::: mlmodule.models.keyframes.encoders.VideoFramesEncoder
     selection:

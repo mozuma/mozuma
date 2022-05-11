@@ -7,8 +7,7 @@ import torch
 
 from mlmodule.callbacks.memory import CollectLabelsInMemory
 from mlmodule.models.resnet.modules import TorchResNetModule, TorchResNetTrainingMode
-from mlmodule.states import StateKey
-from mlmodule.stores import Store
+from mlmodule.models.resnet.pretrained import torch_resnet_imagenet
 from mlmodule.torch.datasets import ImageDataset, LocalBinaryFilesDataset
 from mlmodule.torch.options import TorchRunnerOptions
 from mlmodule.torch.runners import TorchInferenceRunner
@@ -21,11 +20,7 @@ def test_resnet_cats_dogs(cats_and_dogs_images: List[str], torch_device: torch.d
     dataset = ImageDataset(LocalBinaryFilesDataset(cats_and_dogs_images))
 
     # Loading model
-    model = TorchResNetModule("resnet18")
-    # Pre-trained state
-    Store().load(
-        model, state_key=StateKey(state_type=model.state_type, training_id="imagenet")
-    )
+    model = torch_resnet_imagenet("resnet18")
 
     # Inference runner for Torch model
     labels = CollectLabelsInMemory()

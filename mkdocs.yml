@@ -26,11 +26,14 @@ markdown_extensions:
   - def_list
   - footnotes
   - md_in_html
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.details
   - pymdownx.superfences
   - pymdownx.tasklist:
       custom_checkbox: true
@@ -62,3 +65,79 @@ extra:
     tox_env_version: py37-pt19
   release:
     tox_env_version: "{py37,py38,py39}{-pt19,-pt110}{-cuda,}"
+
+  licenses:
+    clip:
+      name: CLIP
+      link: https://github.com/openai/CLIP/blob/main/LICENSE
+    facenet:
+      name: FaceNet
+      link: https://github.com/timesler/facenet-pytorch/blob/master/LICENSE.md
+    insightface:
+      name: InsightFace
+      link: https://github.com/deepinsight/insightface#license
+    magface:
+      name: MagFace
+      link: https://github.com/IrvingMeng/MagFace/blob/main/LICENSE
+    places365:
+      name: Places365
+      link: https://github.com/CSAILVision/places365/blob/master/LICENSE
+    sbert:
+      name: SBERT
+      link: https://github.com/UKPLab/sentence-transformers/blob/master/LICENSE
+    torchvision:
+      name: TorchVision
+      link: https://github.com/pytorch/vision/blob/main/LICENSE
+    vinvl:
+      name: Microsoft scene graph benchmark
+      link: https://github.com/microsoft/scene_graph_benchmark/blob/main/LICENSE
+
+  models:
+    arcface:
+      - name: ArcFace pre-trained by InsightFace
+        factory: torch_arcface_insightface
+        license: insightface
+    clip:
+      - name: CLIP pre-trained image encoder
+        factory: torch_clip_image_encoder
+        license: clip
+      - name: CLIP pre-trained text encoder
+        factory: torch_clip_text_encoder
+        license: clip
+    densenet:
+      - name: PyTorch DenseNet pre-trained on ImageNet
+        factory: torch_densenet_imagenet
+        license: torchvision
+      - name: PyTorch DenseNet pre-trained on Places365
+        factory: torch_densenet_places365
+        license: places365
+    keyframes:
+      - name: Keyframes with ResNet pre-trained on ImageNet
+        factory: torch_keyframes_resnet_imagenet
+        license: torchvision
+      - name: Keyframes with DenseNet pre-trained on ImageNet
+        factory: torch_keyframes_densenet_imagenet
+        license: torchvision
+      - name: Keyframes with DenseNet pre-trained on Places365
+        factory: torch_keyframes_densenet_places365
+        license: places365
+    magface:
+      - name: Pre-trained MagFace
+        factory: torch_magface
+        license: magface
+    mtcnn:
+      - name: Pre-trained face detection MTCNN from FaceNet
+        factory: torch_mtcnn
+        license: facenet
+    resnet:
+      - name: PyTorch ResNet pre-trained on ImageNet
+        factory: torch_resnet_imagenet
+        license: torchvision
+    sentences:
+      - name: SBERT's pre-trained DistilUse Multilingual Cased V2
+        factory: torch_distiluse_base_multilingual_v2
+        license: sbert
+    vinvl:
+      - name: VinVL's pre-trained object detector
+        factory: torch_vinvl_detector
+        license: vinvl

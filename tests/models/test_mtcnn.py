@@ -9,17 +9,10 @@ from PIL.Image import Image
 
 from mlmodule.callbacks.memory import CollectBoundingBoxesInMemory
 from mlmodule.helpers.files import list_files_in_dir
-from mlmodule.models.mtcnn.modules import TorchMTCNNModule
-from mlmodule.states import StateKey
-from mlmodule.stores import Store
+from mlmodule.models.mtcnn.pretrained import torch_mtcnn
 from mlmodule.torch.datasets import ImageDataset, ListDataset, LocalBinaryFilesDataset
 from mlmodule.torch.options import TorchRunnerOptions
 from mlmodule.torch.runners import TorchInferenceRunner
-
-
-@pytest.fixture(scope="session")
-def mtcnn_instance(torch_device: torch.device) -> TorchMTCNNModule:
-    return TorchMTCNNModule(device=torch_device)
 
 
 @pytest.fixture(scope="session")
@@ -38,12 +31,7 @@ def _run_mtcnn_inference(
     torch_device: torch.device,
     inference_device: Optional[torch.device] = None,
 ) -> CollectBoundingBoxesInMemory:
-    mtcnn = TorchMTCNNModule(device=torch_device)
-    # Pretrained model
-    Store().load(
-        mtcnn,
-        state_key=StateKey(state_type=mtcnn.state_type, training_id="facenet"),
-    )
+    mtcnn = torch_mtcnn(device=torch_device)
 
     # Dataset
     dataset = ImageDataset(
@@ -141,12 +129,7 @@ def test_mtcnn_small_images(torch_device: torch.device):
         [np.random.randint(255, size=(14, 200, 3), dtype=np.uint8) for _ in range(2)]
     )
 
-    mtcnn = TorchMTCNNModule(device=torch_device)
-    # Pretrained model
-    Store().load(
-        mtcnn,
-        state_key=StateKey(state_type=mtcnn.state_type, training_id="facenet"),
-    )
+    mtcnn = torch_mtcnn(device=torch_device)
 
     # Callbacks
     result = CollectBoundingBoxesInMemory()

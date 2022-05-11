@@ -3,13 +3,15 @@
 CLIP[@clip_radford21a] model encodes text snippets and images into a common embedding space which enables zero-shot retrieval and prediction.
 See [OpenAI/CLIP](https://github.com/openai/CLIP) for the source code and original models.
 
-This model has extra requirements:
 
-```bash
-pip install git+ssh://git@github.com/LSIR/mlmodule.git#egg=mlmodule[torch,clip]
-# or
-pip install mlmodule[torch,clip]
-```
+## Pre-trained models
+
+{% for model in models.clip -%}
+::: mlmodule.models.clip.{{ model.factory }}
+    rendering:
+        show_signature: False
+{% endfor %}
+
 
 ## Models
 

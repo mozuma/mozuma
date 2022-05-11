@@ -2,8 +2,15 @@
 
 PyTorch implementation of ResNet[@resnet] as defined in [Torchvision](https://pytorch.org/vision/stable/models.html).
 
-## Model
+## Pre-trained models
 
+{% for model in models.resnet -%}
+::: mlmodule.models.resnet.{{ model.factory }}
+    rendering:
+        show_signature: False
+{% endfor %}
+
+## Base model
 
 The ResNet model is an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
 
