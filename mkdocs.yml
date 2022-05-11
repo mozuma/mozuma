@@ -70,6 +70,9 @@ extra:
     clip:
       name: CLIP
       link: https://github.com/openai/CLIP/blob/main/LICENSE
+    facenet:
+      name: FaceNet
+      link: https://github.com/timesler/facenet-pytorch/blob/master/LICENSE.md
     insightface:
       name: InsightFace
       link: https://github.com/deepinsight/insightface#license
@@ -115,15 +118,19 @@ extra:
       - name: Keyframes with DenseNet pre-trained on Places365
         factory: torch_keyframes_densenet_places365
         license: places365
-    sentences:
-      - name: SBERT's pre-trained DistilUse Multilingual Cased V2
-        factory: torch_distiluse_base_multilingual_v2
-        license: sbert
     magface:
       - name: Pre-trained MagFace
         factory: torch_magface
         license: magface
+    mtcnn:
+      - name: Pre-trained face detection MTCNN from FaceNet
+        factory: torch_mtcnn
+        license: facenet
     resnet:
       - name: PyTorch ResNet pre-trained on ImageNet
         factory: torch_resnet_imagenet
         license: torchvision
+    sentences:
+      - name: SBERT's pre-trained DistilUse Multilingual Cased V2
+        factory: torch_distiluse_base_multilingual_v2
+        license: sbert
