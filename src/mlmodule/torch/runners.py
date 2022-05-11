@@ -289,7 +289,7 @@ class TorchTrainingRunner(
         TorchTrainingOptions,
     ]
 ):
-    additional_loggers: Optional[Callable[[Engine, Engine, Engine], None]] = None
+    loggers_factory: Optional[Callable[[Engine, Engine, Engine], None]] = None
 
     """Runner for training tasks on PyTorch models
 
@@ -301,7 +301,7 @@ class TorchTrainingRunner(
         callbacks (List[Union[BaseRunnerEndCallback, SaveModelState]]):
             Callback to save model weights plus one or more callbacks for when the runner ends.
         options (TorchTrainingOptions): PyTorch training options
-        additional_loggers (Callable[[Engine, Engine, Engine], None] | None): Function to attach additional loggers
+        loggers_factory (Callable[[Engine, Engine, Engine], None] | None): Function to attach additional loggers
             to training and evaluators internal (PyTorch Ignite) engines.
             The function receives three engines, one for training and two for evaluation, where
             the first is for the train set and second for the test set.
@@ -404,8 +404,8 @@ class TorchTrainingRunner(
         )
 
         # Attach additional loggers
-        if self.additional_loggers:
-            self.additional_loggers(trainer, train_evaluator, evaluator)
+        if self.loggers_factory:
+            self.loggers_factory(trainer, train_evaluator, evaluator)
 
         @trainer.on(
             Events.EPOCH_COMPLETED(every=self.options.validate_every) | Events.COMPLETED
