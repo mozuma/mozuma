@@ -88,6 +88,9 @@ extra:
     torchvision:
       name: TorchVision
       link: https://github.com/pytorch/vision/blob/main/LICENSE
+    vinvl:
+      name: Microsoft scene graph benchmark
+      link: https://github.com/microsoft/scene_graph_benchmark/blob/main/LICENSE
 
   models:
     arcface:
@@ -134,3 +137,7 @@ extra:
       - name: SBERT's pre-trained DistilUse Multilingual Cased V2
         factory: torch_distiluse_base_multilingual_v2
         license: sbert
+    vinvl:
+      - name: VinVL's pre-trained object detector
+        factory: torch_vinvl_detector
+        license: vinvl

@@ -2,18 +2,14 @@ import os
 
 from mlmodule.callbacks.memory import CollectBoundingBoxesInMemory
 from mlmodule.helpers.files import list_files_in_dir
-from mlmodule.models.vinvl.modules import TorchVinVLDetectorModule
-from mlmodule.states import StateKey
-from mlmodule.stores import Store
+from mlmodule.models.vinvl.pretrained import torch_vinvl_detector
 from mlmodule.torch.datasets import ImageDataset, LocalBinaryFilesDataset
 from mlmodule.torch.options import TorchRunnerOptions
 from mlmodule.torch.runners import TorchInferenceRunner
 
 
 def test_vinvl_object_detection(torch_device):
-    vinvl = TorchVinVLDetectorModule(device=torch_device, score_threshold=0.5)
-    # Pretrained model
-    Store().load(vinvl, StateKey(vinvl.state_type, training_id="vinvl"))
+    vinvl = torch_vinvl_detector(device=torch_device, score_threshold=0.5)
 
     # Getting data
     base_path = os.path.join("tests", "fixtures", "objects")
