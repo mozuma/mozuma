@@ -1,6 +1,6 @@
 import dataclasses
 import logging
-from typing import Any, Callable, Dict, Tuple, Union, cast
+from typing import Any, Callable, Dict, Optional, Tuple, Union, cast
 
 import ignite.distributed as idist
 import torch
@@ -289,6 +289,8 @@ class TorchTrainingRunner(
         TorchTrainingOptions,
     ]
 ):
+    additional_loggers: Optional[Callable[[Engine, Engine, Engine], None]] = None
+
     """Runner for training tasks on PyTorch models
 
     Supports CPU and multi-GPU training with multiple backends.
@@ -299,6 +301,10 @@ class TorchTrainingRunner(
         callbacks (List[Union[BaseRunnerEndCallback, SaveModelState]]):
             Callback to save model weights plus one or more callbacks for when the runner ends.
         options (TorchTrainingOptions): PyTorch training options
+        additional_loggers (Callable[[Engine, Engine, Engine], None] | None): Function to attach additional loggers
+            to training and evaluators internal (PyTorch Ignite) engines.
+            The function receives three engines, one for training and two for evaluation, where
+            the first is for the train set and second for the test set.
     """
 
     def __post_init__(self) -> None:
@@ -396,6 +402,10 @@ class TorchTrainingRunner(
             device=device,
             non_blocking=True,
         )
+
+        # Attach additional loggers
+        if self.additional_loggers:
+            self.additional_loggers(trainer, train_evaluator, evaluator)
 
         @trainer.on(
             Events.EPOCH_COMPLETED(every=self.options.validate_every) | Events.COMPLETED
