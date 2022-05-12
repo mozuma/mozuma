@@ -118,5 +118,8 @@ mkdocs gh-deploy
 
 Or automatically when merging a Pull Request into the main branch with GitHUB actions.
 
-!!! warning
-    When adding new notebooks in the documentation, the bash script `docs/pair-notebooks.sh` should be executed to create the notebooks in Markdown version.
+## Adding notebooks to the documentation
+
+When adding new notebooks in the documentation, the bash script `docs/pair-notebooks.sh` should be executed to create the notebooks in Markdown version.
+
+Once the notebooks are paired to a markdown version, they can be updated with the `docs/sync-notebooks.sh` script.
