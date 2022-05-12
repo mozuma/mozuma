@@ -35,7 +35,7 @@
             "type": "pickString",
             "options": [
                 "py37-pt19",
-                "py37-pt19-cuda"
+                "py37-pt19-cuda111"
             ]
         },
     ]
