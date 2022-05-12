@@ -1,3 +1,19 @@
+---
+jupyter:
+  jupytext:
+    cell_metadata_filter: -all
+    formats: ipynb,md
+    text_representation:
+      extension: .md
+      format_name: markdown
+      format_version: '1.3'
+      jupytext_version: 1.13.7
+  kernelspec:
+    display_name: Python 3.7.10 ('mlmodule')
+    language: python
+    name: python3
+---
+
 
 # Getting started
 
@@ -8,15 +24,18 @@ This guide runs through the inference of a PyTorch ResNet model pre-trained on i
 First, we need to create a dataset of images, for this we will be using the `OpenFileDataset`.
 
 ```python
-from mlmodule.torch.datasets import OpenImageFileDataset
+from mlmodule.torch.datasets import LocalBinaryFilesDataset, ImageDataset
 
 # Getting a dataset of images (1)
-dataset = OpenImageFileDataset(
-    paths=[
-        "tests/fixtures/cats_dogs/cat_0.jpg",
-        "tests/fixtures/cats_dogs/cat_90.jpg"
-    ]
+dataset = ImageDataset(
+    LocalBinaryFilesDataset(
+        paths=[
+            "../tests/fixtures/cats_dogs/cat_0.jpg",
+            "../tests/fixtures/cats_dogs/cat_90.jpg",
+        ]
+    )
 )
+
 ```
 
 1.  See [Datasets](references/datasets.md) for a list of available datasets.
@@ -25,25 +44,14 @@ Next, we need to load the ResNet PyTorch module specifying the `resnet18` archit
 The model is initialised with weights provided by the `MLModuleModelStore`.
 
 ```python
-from mlmodule.models.resnet import TorchResNetModule
-from mlmodule.states import StateKey
-from mlmodule.stores import MLModuleModelStore
+from mlmodule.models.resnet import torch_resnet_imagenet
 
 # Model definition (1)
-resnet = TorchResNetModule("resnet18")
+resnet = torch_resnet_imagenet("resnet18")
 
-# Getting pre-trained model (2)
-store = MLModuleModelStore()
-# Getting the state pre-trained on ImageNet (3)
-store.load(
-    resnet,
-    StateKey(state_type=resnet.state_type, training_id="imagenet")
-)
 ```
 
 1. List of all [models](models/index.md)
-2. List of all [stores](references/stores.md)
-3. Description of how states are handled is available is [state's reference](references/states.md)
 
 Once we have a model initialized, we need to define what we want to do with it.
 In this case, we'll run an inference loop using the `TorchInferenceRunner`.

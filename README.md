@@ -21,3 +21,8 @@ See the  for more information.
 - [Installation](https://lsir.github.io/mlmodule/0-installation)
 - [Getting started](https://lsir.github.io/mlmodule/1-getting-starteg)
 - [Models](https://lsir.github.io/mlmodule/models/)
+
+
+## Example gallery
+
+See `docs/examples/` for a collection of ready to use notebooks.
