@@ -1,6 +1,7 @@
 ---
 jupyter:
   jupytext:
+    formats: ipynb,md
     main_language: python
     text_representation:
       extension: .md
@@ -24,7 +25,7 @@ from mlmodule.torch.datasets import (
 from mlmodule.models.keyframes.pretrained import torch_keyframes_resnet_imagenet
 from mlmodule.models.keyframes.datasets import (
     BinaryVideoCapture,
-    extract_video_frames
+    extract_video_frames,
 )
 from mlmodule.callbacks.memory import CollectVideoFramesInMemory
 from mlmodule.torch.options import TorchRunnerOptions
