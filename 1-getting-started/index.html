@@ -364,6 +364,154 @@
       
         
           
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Examples
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Examples" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Examples
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/arcface/" class="md-nav__link">
+        Face Similarity Search
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/keyframes/" class="md-nav__link">
+        Video Key-frames Extraction Model
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/magface/" class="md-nav__link">
+        Face Quality Assessment with MagFace
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/text_to_retrieval_with_clip/" class="md-nav__link">
+        Text-to-image retrieval with CLIP
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/train_cifar10/" class="md-nav__link">
+        CIFAR10 Image Classification training
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/train_face_emotion_recognizer/" class="md-nav__link">
+        Face emotion recognition training
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/vinvl/" class="md-nav__link">
+        Object Detection with VinVL
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
+      
+      
+      
+        
+          
             
           
         
@@ -394,14 +542,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../models/">Models</a>
           
-            <label for="__nav_6">
+            <label for="__nav_7">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Models" data-md-level="1">
-        <label class="md-nav__title" for="__nav_6">
+        <label class="md-nav__title" for="__nav_7">
           <span class="md-nav__icon md-icon"></span>
           Models
         </label>
@@ -566,7 +714,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
       
       
       
@@ -587,13 +735,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_7">
+        <label class="md-nav__link" for="__nav_8">
           References
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="References" data-md-level="1">
-        <label class="md-nav__title" for="__nav_7">
+        <label class="md-nav__title" for="__nav_8">
           <span class="md-nav__icon md-icon"></span>
           References
         </label>
@@ -765,40 +913,30 @@
 <h2 id="code-based-usage">Code-based usage</h2>
 <p>This guide runs through the inference of a PyTorch ResNet model pre-trained on imagenet.</p>
 <p>First, we need to create a dataset of images, for this we will be using the <code>OpenFileDataset</code>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span> <span class="nn">mlmodule.torch.datasets</span> <span class="kn">import</span> <span class="n">OpenImageFileDataset</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span> <span class="nn">mlmodule.torch.datasets</span> <span class="kn">import</span> <span class="n">LocalBinaryFilesDataset</span><span class="p">,</span> <span class="n">ImageDataset</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Getting a dataset of images (1)</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">OpenImageFileDataset</span><span class="p">(</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">paths</span><span class="o">=</span><span class="p">[</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        <span class="s2">&quot;tests/fixtures/cats_dogs/cat_0.jpg&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>        <span class="s2">&quot;tests/fixtures/cats_dogs/cat_90.jpg&quot;</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="p">]</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">)</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">ImageDataset</span><span class="p">(</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">LocalBinaryFilesDataset</span><span class="p">(</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        <span class="n">paths</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>            <span class="s2">&quot;../tests/fixtures/cats_dogs/cat_0.jpg&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>            <span class="s2">&quot;../tests/fixtures/cats_dogs/cat_90.jpg&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>        <span class="p">]</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="p">)</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">)</span>
 </code></pre></div>
 <ol>
 <li>See <a href="../references/datasets/">Datasets</a> for a list of available datasets.</li>
 </ol>
 <p>Next, we need to load the ResNet PyTorch module specifying the <code>resnet18</code> architecture.
 The model is initialised with weights provided by the <code>MLModuleModelStore</code>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span> <span class="nn">mlmodule.models.resnet</span> <span class="kn">import</span> <span class="n">TorchResNetModule</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span> <span class="nn">mlmodule.states</span> <span class="kn">import</span> <span class="n">StateKey</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">from</span> <span class="nn">mlmodule.stores</span> <span class="kn">import</span> <span class="n">MLModuleModelStore</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Model definition (1)</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">resnet</span> <span class="o">=</span> <span class="n">TorchResNetModule</span><span class="p">(</span><span class="s2">&quot;resnet18&quot;</span><span class="p">)</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="c1"># Getting pre-trained model (2)</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="n">store</span> <span class="o">=</span> <span class="n">MLModuleModelStore</span><span class="p">()</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="c1"># Getting the state pre-trained on ImageNet (3)</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">store</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">resnet</span><span class="p">,</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">StateKey</span><span class="p">(</span><span class="n">state_type</span><span class="o">=</span><span class="n">resnet</span><span class="o">.</span><span class="n">state_type</span><span class="p">,</span> <span class="n">training_id</span><span class="o">=</span><span class="s2">&quot;imagenet&quot;</span><span class="p">)</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span> <span class="nn">mlmodule.models.resnet</span> <span class="kn">import</span> <span class="n">torch_resnet_imagenet</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Model definition (1)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">resnet</span> <span class="o">=</span> <span class="n">torch_resnet_imagenet</span><span class="p">(</span><span class="s2">&quot;resnet18&quot;</span><span class="p">)</span>
 </code></pre></div>
 <ol>
 <li>List of all <a href="../models/">models</a></li>
-<li>List of all <a href="../references/stores/">stores</a></li>
-<li>Description of how states are handled is available is <a href="../references/states/">state's reference</a></li>
 </ol>
 <p>Once we have a model initialized, we need to define what we want to do with it.
 In this case, we'll run an inference loop using the <code>TorchInferenceRunner</code>.</p>

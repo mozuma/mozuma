@@ -379,6 +379,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#adding-notebooks-to-the-documentation" class="md-nav__link">
+    Adding notebooks to the documentation
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -419,6 +426,154 @@
       
         
           
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Examples
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Examples" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Examples
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/arcface/" class="md-nav__link">
+        Face Similarity Search
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/keyframes/" class="md-nav__link">
+        Video Key-frames Extraction Model
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/magface/" class="md-nav__link">
+        Face Quality Assessment with MagFace
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/text_to_retrieval_with_clip/" class="md-nav__link">
+        Text-to-image retrieval with CLIP
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/train_cifar10/" class="md-nav__link">
+        CIFAR10 Image Classification training
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/train_face_emotion_recognizer/" class="md-nav__link">
+        Face emotion recognition training
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/vinvl/" class="md-nav__link">
+        Object Detection with VinVL
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
+      
+      
+      
+        
+          
             
           
         
@@ -449,14 +604,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../models/">Models</a>
           
-            <label for="__nav_6">
+            <label for="__nav_7">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Models" data-md-level="1">
-        <label class="md-nav__title" for="__nav_6">
+        <label class="md-nav__title" for="__nav_7">
           <span class="md-nav__icon md-icon"></span>
           Models
         </label>
@@ -621,7 +776,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
       
       
       
@@ -642,13 +797,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_7">
+        <label class="md-nav__link" for="__nav_8">
           References
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="References" data-md-level="1">
-        <label class="md-nav__title" for="__nav_7">
+        <label class="md-nav__title" for="__nav_8">
           <span class="md-nav__icon md-icon"></span>
           References
         </label>
@@ -853,6 +1008,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#adding-notebooks-to-the-documentation" class="md-nav__link">
+    Adding notebooks to the documentation
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -883,8 +1045,8 @@ It requires <a href="https://docs.conda.io/en/latest/"><code>conda</code></a> an
 <p>Create a development environment:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># CPU development</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>tox --devenv venv -e py37-pt19
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># or CUDA 11.1</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>tox --devenv venv -e py37-pt19-cuda
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># or with GPU support</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>tox --devenv venv -e py37-pt19-cuda111
 </code></pre></div>
 <p>The environment can be activated with:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>conda activate ./venv
@@ -901,7 +1063,7 @@ It requires <a href="https://docs.conda.io/en/latest/"><code>conda</code></a> an
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># CPU testing</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>tox -e py37-pt19
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># or with GPU support</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>tox -e py37-pt19-cuda
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>tox -e py37-pt19-cuda111
 </code></pre></div>
 <p>or with directly using <code>pytest</code> on an environment with all dependencies installed</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>pytest
@@ -920,7 +1082,7 @@ To update the <code>requirement.txt</code> file run:</p>
 <ul>
 <li>Push the new version to the <code>master</code> branch</li>
 <li>Test the release on all supported Python / PyTorch versions with the command.
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>tox -e <span class="s2">&quot;{py37,py38,py39}{-pt19,-pt110}{-cuda,}&quot;</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>tox -e <span class="s2">&quot;{py37,py38,py39}{-pt19,-pt110}{-cuda111,}&quot;</span>
 </code></pre></div></li>
 <li>Create a GitHUB release on the branch <code>master</code> with format <code>vX.Y.Z</code>. For instance, <code>v0.1.1</code>.</li>
 </ul>
@@ -949,6 +1111,9 @@ It allows for previewing the changes with hot-reload:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>mkdocs gh-deploy
 </code></pre></div>
 <p>Or automatically when merging a Pull Request into the main branch with GitHUB actions.</p>
+<h2 id="adding-notebooks-to-the-documentation">Adding notebooks to the documentation</h2>
+<p>When adding new notebooks in the documentation, the bash script <code>docs/pair-notebooks.sh</code> should be executed to create the notebooks in Markdown version.</p>
+<p>Once the notebooks are paired to a markdown version, they can be updated with the <code>docs/sync-notebooks.sh</code> script.</p>
 
               
             </article>
