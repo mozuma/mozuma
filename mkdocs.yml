@@ -63,8 +63,9 @@ extra:
     python_version: 3.7
     pytorch_version: 1.9
     tox_env_version: py37-pt19
+    tox_env_version_cuda: py37-pt19-cuda111
   release:
-    tox_env_version: "{py37,py38,py39}{-pt19,-pt110}{-cuda,}"
+    tox_env_version: "{py37,py38,py39}{-pt19,-pt110}{-cuda111,}"
 
   licenses:
     clip:

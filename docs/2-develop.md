@@ -18,8 +18,8 @@ Create a development environment:
 ```shell
 # CPU development
 tox --devenv venv -e {{develop.tox_env_version}}
-# or CUDA 11.1
-tox --devenv venv -e {{develop.tox_env_version}}-cuda
+# or with GPU support
+tox --devenv venv -e {{develop.tox_env_version_cuda}}
 ```
 
 The environment can be activated with:
@@ -47,7 +47,7 @@ Testing can be done using `tox`:
 # CPU testing
 tox -e {{develop.tox_env_version}}
 # or with GPU support
-tox -e {{develop.tox_env_version}}-cuda
+tox -e {{develop.tox_env_version_cuda}}
 ```
 
 or with directly using `pytest` on an environment with all dependencies installed
