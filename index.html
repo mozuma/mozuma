@@ -898,15 +898,14 @@
 <h1 id="introduction">Introduction</h1>
 <p>MLModule is a library containing a collection of machine learning models
 with standardised interface to run inference, train and manage model state files.</p>
-<p>It aims at providing high-level abstractions called <a href="references/runners/">runners</a>
-on top of inference and training loops
-while allowing extensions via <a href="references/callbacks/">callbacks</a>.
-These callbacks control the way the output of a runner is handled
-(i.e. features, labels, model weights...).</p>
-<p>We also try to keep as few dependencies as possible.
-Meaning models will be mostly implemented from
-modules available in deep learning frameworks (such as <code>PyTorch</code> or <code>torchvision</code>).</p>
-<p>Go ahead to the <a href="0-installation/">installation</a> and <a href="1-getting-started/">getting started</a> guides for an overview of MLModule.</p>
+<p>It provides high-level abstractions called <a href="references/runners/">runners</a>
+to run inference or training against a model.
+Saving the predictions or the model's state is controlled
+via easily extensible <a href="references/callbacks/">callbacks</a>.</p>
+<p>MLModule should also be easy to install,
+therefore, we try to keep as few dependencies as possible.</p>
+<p>To start using MLModule, go ahead to the <a href="0-installation/">installation</a>
+and <a href="1-getting-started/">getting started</a> guides !</p>
 <h2 id="features">Features</h2>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Model zoo</li>

@@ -352,13 +352,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    Requirements
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#publish-a-new-version" class="md-nav__link">
     Publish a new version
   </a>
@@ -981,13 +974,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    Requirements
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#publish-a-new-version" class="md-nav__link">
     Publish a new version
   </a>
@@ -1073,16 +1059,11 @@ It requires <a href="https://docs.conda.io/en/latest/"><code>conda</code></a> an
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>pip install pre-commit
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>pre-commit install
 </code></pre></div>
-<h2 id="requirements">Requirements</h2>
-<p>Updating requirements should be done in <code>setup.cfg</code>.
-To update the <code>requirement.txt</code> file run:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>pip-compile --extra full --upgrade
-</code></pre></div>
 <h2 id="publish-a-new-version">Publish a new version</h2>
 <ul>
 <li>Push the new version to the <code>master</code> branch</li>
 <li>Test the release on all supported Python / PyTorch versions with the command.
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>tox -e <span class="s2">&quot;{py37,py38,py39}{-pt19,-pt110}{-cuda111,}&quot;</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>tox -e <span class="s2">&quot;{py37,py38,py39}{-pt19,-pt110}{-cuda111,}&quot;</span>
 </code></pre></div></li>
 <li>Create a GitHUB release on the branch <code>master</code> with format <code>vX.Y.Z</code>. For instance, <code>v0.1.1</code>.</li>
 </ul>
@@ -1101,14 +1082,14 @@ To update the <code>requirement.txt</code> file run:</p>
 </ul>
 <h2 id="update-documentation">Update documentation</h2>
 <p>Install requirements to build the documentation:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>pip install -r docs/requirements.txt
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>pip install -r docs/requirements.txt
 </code></pre></div>
 <p>We are using <a href="https://squidfunk.github.io/mkdocs-material/"><code>mkdocs-material</code></a>.
 It allows for previewing the changes with hot-reload:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mkdocs serve
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>mkdocs serve
 </code></pre></div>
 <p>The documentation can then be deployed to GitHUB pages manually with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>mkdocs gh-deploy
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mkdocs gh-deploy
 </code></pre></div>
 <p>Or automatically when merging a Pull Request into the main branch with GitHUB actions.</p>
 <h2 id="adding-notebooks-to-the-documentation">Adding notebooks to the documentation</h2>
