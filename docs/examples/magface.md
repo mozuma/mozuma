@@ -41,16 +41,17 @@ import numpy as np
 from facenet_pytorch.models.utils.detect_face import crop_resize
 from PIL import Image
 import seaborn as sns
+
 sns.set(style="white")
 %matplotlib inline
-
 ```
+
 
 Load images
 
 ```python
 base_path = "../../tests/fixtures/remi_faces"
-file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))
+file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))
 remi_dataset = ImageDataset(LocalBinaryFilesDataset(file_names))
 ```
 
@@ -69,14 +70,12 @@ runner = TorchInferenceRunner(
     dataset=remi_dataset,
     callbacks=[bb],
     options=TorchRunnerOptions(
-        data_loader_options={'batch_size': 1},
-        device=torch_device,
-        tqdm_enabled=True
+        data_loader_options={"batch_size": 1}, device=torch_device, tqdm_enabled=True
     ),
 )
 runner.run()
-
 ```
+
 
 Extract face features with `torch_magface`
 
@@ -98,9 +97,7 @@ runner = TorchInferenceRunner(
     dataset=dataset,
     callbacks=[ff],
     options=TorchRunnerOptions(
-        data_loader_options={'batch_size': 3},
-        device=torch_device,
-        tqdm_enabled=True
+        data_loader_options={"batch_size": 3}, device=torch_device, tqdm_enabled=True
     ),
 )
 runner.run()
@@ -111,13 +108,16 @@ Show face quality using feature magnitudes
 ```python
 def image_grid(array, ncols=10):
     index, height, width, channels = array.shape
-    nrows = index//ncols
+    nrows = index // ncols
 
-    img_grid = (array.reshape(nrows, ncols, height, width, channels)
-                .swapaxes(1, 2)
-                .reshape(height*nrows, width*ncols, channels))
+    img_grid = (
+        array.reshape(nrows, ncols, height, width, channels)
+        .swapaxes(1, 2)
+        .reshape(height * nrows, width * ncols, channels)
+    )
 
     return img_grid
+
 
 def display_faces_with_magnitude(features, bounding_boxes, ncols=10):
     # compute feature magnitudes
@@ -133,14 +133,18 @@ def display_faces_with_magnitude(features, bounding_boxes, ncols=10):
         cropped_face = np.asarray(crop_resize(img, box, image_size=112))
         img_arr.append(cropped_face)
 
-    if len(img_arr)%ncols:
-        for i in range(len(img_arr), (len(img_arr)//ncols+1)*ncols):
+    if len(img_arr) % ncols:
+        for i in range(len(img_arr), (len(img_arr) // ncols + 1) * ncols):
             img_arr.append(255 * np.ones((112, 112, 3), np.uint8))
 
     result = image_grid(np.array(img_arr), ncols=ncols)
-    fig = plt.figure(figsize=(20., 20.))
+    fig = plt.figure(figsize=(20.0, 20.0))
     plt.imshow(result)
-    print('feature magnitude: {}'.format([float('{0:.2f}'.format(mags[idx_].item())) for idx_ in sort_idx]))
+    print(
+        "feature magnitude: {}".format(
+            [float("{0:.2f}".format(mags[idx_].item())) for idx_ in sort_idx]
+        )
+    )
     return sort_idx
 ```
 
@@ -158,7 +162,7 @@ normalized_features = torch.nn.functional.normalize(torch.tensor(ff.features))[s
 sim_mat = normalized_features @ normalized_features.T
 fig, ax = plt.subplots(figsize=(8, 6))
 ax = sns.heatmap(sim_mat, cmap="PuRd", annot=True)
-
 ```
+
 
 As we can see on the heatmap below, face quality strongly affects face recognition performance as the cosine similarities between bad quality faces and high quality faces are much smaller.

@@ -41,20 +41,21 @@ import numpy as np
 from facenet_pytorch.models.utils.detect_face import crop_resize
 from PIL import Image
 import seaborn as sns
+
 sns.set(style="white")
 %matplotlib inline
-
 ```
+
 
 Load images
 
 ```python
 base_path = "../../tests/fixtures/berset"
-file_names = list_files_in_dir(base_path, allowed_extensions=('jpg',))
+file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))
 # Load image dataset
 berset_dataset = ImageDataset(LocalBinaryFilesDataset(file_names))
-
 ```
+
 
 Run face detection with `torch_mtcnn`
 
@@ -71,9 +72,7 @@ runner = TorchInferenceRunner(
     dataset=berset_dataset,
     callbacks=[bb],
     options=TorchRunnerOptions(
-        data_loader_options={'batch_size': 1},
-        device=torch_device,
-        tqdm_enabled=True
+        data_loader_options={"batch_size": 1}, device=torch_device, tqdm_enabled=True
     ),
 )
 runner.run()
@@ -99,9 +98,7 @@ runner = TorchInferenceRunner(
     dataset=dataset,
     callbacks=[ff],
     options=TorchRunnerOptions(
-        data_loader_options={'batch_size': 3},
-        device=torch_device,
-        tqdm_enabled=True
+        data_loader_options={"batch_size": 3}, device=torch_device, tqdm_enabled=True
     ),
 )
 runner.run()
@@ -112,10 +109,12 @@ Display the cropped faces
 ```python
 def image_grid(array, ncols=10):
     index, height, width, channels = array.shape
-    nrows = index//ncols
-    img_grid = (array.reshape(nrows, ncols, height, width, channels)
-                .swapaxes(1, 2)
-                .reshape(height*nrows, width*ncols, channels))
+    nrows = index // ncols
+    img_grid = (
+        array.reshape(nrows, ncols, height, width, channels)
+        .swapaxes(1, 2)
+        .reshape(height * nrows, width * ncols, channels)
+    )
 
     return img_grid
 
@@ -129,10 +128,10 @@ for k, file_name in enumerate(bb.indices):
         img_arr.append(cropped_face)
 
 result = image_grid(np.array(img_arr), ncols=len(img_arr))
-fig = plt.figure(figsize=(20., 20.))
+fig = plt.figure(figsize=(20.0, 20.0))
 plt.imshow(result)
-
 ```
+
 
 Compute face similarity
 
@@ -140,7 +139,7 @@ Compute face similarity
 sim_mat = ff.features @ ff.features.T
 fig, ax = plt.subplots(figsize=(8, 6))
 ax = sns.heatmap(sim_mat, cmap="PuRd", annot=True)
-
 ```
+
 
 From this heatmap, we can see that the cosine similarities between the three faces of Alain Berset is quite high (from 0.7 to 0.74) while they are very low between all other faces.

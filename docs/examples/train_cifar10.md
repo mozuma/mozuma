@@ -34,12 +34,9 @@ from mlmodule.labels.base import LabelSet
 from mlmodule.torch.datasets import (
     ListDataset,
     ListDatasetIndexed,
-    TorchTrainingDataset
+    TorchTrainingDataset,
 )
-from mlmodule.callbacks.memory import (
-    CollectFeaturesInMemory,
-    CollectLabelsInMemory
-)
+from mlmodule.callbacks.memory import CollectFeaturesInMemory, CollectLabelsInMemory
 from mlmodule.callbacks.states import SaveModelState
 from mlmodule.stores.local import LocalStateStore
 from mlmodule.states import StateKey
@@ -59,21 +56,35 @@ Enable logging into notebook
 import logging
 import sys
 
-logging.basicConfig(format='%(asctime)s | %(levelname)s : %(message)s',
-                     level=logging.INFO, stream=sys.stdout)
+logging.basicConfig(
+    format="%(asctime)s | %(levelname)s : %(message)s",
+    level=logging.INFO,
+    stream=sys.stdout,
+)
 ```
 
 Load CIFAR10 dataset from torchvision
 
 ```python
-root_dir = os.path.join(os.environ["HOME"], 'torchvision-datasets')
-train_cifar10 = CIFAR10(root=root_dir, train=True, download=True,  transform=None)
+root_dir = os.path.join(os.environ["HOME"], "torchvision-datasets")
+train_cifar10 = CIFAR10(root=root_dir, train=True, download=True, transform=None)
 ```
 
 Format inputs and labels for `mlmodule`
 
 ```python
-labels_dict = {0:"airplane", 1:"automobile", 2:"bird", 3:"cat", 4:"deer", 5:"dog", 6:"frog", 7:"horse", 8:"ship", 9:"truck"}
+labels_dict = {
+    0: "airplane",
+    1: "automobile",
+    2: "bird",
+    3: "cat",
+    4: "deer",
+    5: "dog",
+    6: "frog",
+    7: "horse",
+    8: "ship",
+    9: "truck",
+}
 train_samples = [(img, labels_dict[label]) for img, label in train_cifar10]
 train_images, train_labels = zip(*train_samples)
 ```
@@ -83,12 +94,10 @@ Load `resnet18` pre-trained model
 ```python
 torch_device = "cuda"
 resnet = torch_resnet_imagenet(
-    resnet_arch="resnet18",
-    device=torch_device,
-    training_mode="features"
+    resnet_arch="resnet18", device=torch_device, training_mode="features"
 )
-
 ```
+
 
 Extract image features from ResNet with a single GPU
 
@@ -102,9 +111,7 @@ runner = TorchInferenceRunner(
     dataset=ListDataset(train_images),
     callbacks=[ff_train_resnet],
     options=TorchRunnerOptions(
-        data_loader_options={'batch_size': 32},
-        device=torch_device,
-        tqdm_enabled=True
+        data_loader_options={"batch_size": 32}, device=torch_device, tqdm_enabled=True
     ),
 )
 runner.run()
@@ -115,21 +122,23 @@ Create train and validation splits
 ```python
 # define the set of labels
 label_set = LabelSet(
-            label_set_unique_id="cifar10",
-            label_list=list(labels_dict.values())
-        )
+    label_set_unique_id="cifar10", label_list=list(labels_dict.values())
+)
 
 # split samples into train and valid sets
-train_indices, valid_indices = torch.split(torch.randperm(len(ff_train_resnet.indices)), int(len(ff_train_resnet.indices)*.9))
+train_indices, valid_indices = torch.split(
+    torch.randperm(len(ff_train_resnet.indices)),
+    int(len(ff_train_resnet.indices) * 0.9),
+)
 # define training set
 train_dset = TorchTrainingDataset(
     dataset=ListDatasetIndexed(train_indices, ff_train_resnet.features[train_indices]),
-    targets=label_set.get_label_ids([train_labels[idx] for idx in train_indices])
+    targets=label_set.get_label_ids([train_labels[idx] for idx in train_indices]),
 )
 # define valid set
 valid_dset = TorchTrainingDataset(
     dataset=ListDatasetIndexed(valid_indices, ff_train_resnet.features[valid_indices]),
-    targets=label_set.get_label_ids([train_labels[idx] for idx in valid_indices])
+    targets=label_set.get_label_ids([train_labels[idx] for idx in valid_indices]),
 )
 ```
 
@@ -138,8 +147,7 @@ Train the image classifier using `TorchTrainingRunner` module
 ```python
 # define a classifier on top of resnet features
 classifier_resnet = LinearClassifierTorchModule(
-    in_features=ff_train_resnet.features.shape[1],
-    label_set=label_set
+    in_features=ff_train_resnet.features.shape[1], label_set=label_set
 )
 
 # define the evaluation metrics
@@ -148,15 +156,16 @@ recall = Recall(average=False)
 F1 = (precision * recall * 2 / (precision + recall)).mean()
 
 # Callbacks
-exp_dir = os.path.join(os.environ["HOME"], 'mlmodule-training')
-os.makedirs(exp_dir, exist_ok=True )
+exp_dir = os.path.join(os.environ["HOME"], "mlmodule-training")
+os.makedirs(exp_dir, exist_ok=True)
 
 resnet_state = SaveModelState(
     store=LocalStateStore(exp_dir),
-    state_key=StateKey(classifier_resnet.state_type, 'train-resnet'))
+    state_key=StateKey(classifier_resnet.state_type, "train-resnet"),
+)
 
 # define a loss function
-loss_fn =  F.cross_entropy
+loss_fn = F.cross_entropy
 
 # define the trainer
 trainer = TorchTrainingRunner(
@@ -164,7 +173,7 @@ trainer = TorchTrainingRunner(
     dataset=(train_dset, valid_dset),
     callbacks=[resnet_state],
     options=TorchTrainingOptions(
-        data_loader_options={'batch_size': 32},
+        data_loader_options={"batch_size": 32},
         criterion=loss_fn,
         optimizer=optim.Adam(classifier_resnet.parameters(), lr=1e-3),
         metrics={
@@ -186,7 +195,7 @@ trainer.run()
 Do evaluation on the test set
 
 ```python
-test_cifar10 = CIFAR10(root=root_dir, train=False, download=True,  transform=None)
+test_cifar10 = CIFAR10(root=root_dir, train=False, download=True, transform=None)
 test_samples = [(img, labels_dict[label]) for img, label in test_cifar10]
 test_images, test_labels = zip(*test_samples)
 
@@ -200,9 +209,7 @@ runner = TorchInferenceRunner(
     dataset=ListDataset(test_images),
     callbacks=[ff_test_resnet],
     options=TorchRunnerOptions(
-        data_loader_options={'batch_size': 32},
-        device=torch_device,
-        tqdm_enabled=True
+        data_loader_options={"batch_size": 32}, device=torch_device, tqdm_enabled=True
     ),
 )
 runner.run()
@@ -213,9 +220,7 @@ runner = TorchInferenceRunner(
     dataset=ListDataset(ff_test_resnet.features),
     callbacks=[score_test_resnet],
     options=TorchRunnerOptions(
-        data_loader_options={'batch_size': 32},
-        device=torch_device,
-        tqdm_enabled=True
+        data_loader_options={"batch_size": 32}, device=torch_device, tqdm_enabled=True
     ),
 )
 runner.run()
@@ -252,8 +257,7 @@ runner = TorchInferenceMultiGPURunner(
     dataset=ListDataset(train_images),
     callbacks=[ff_train_densenet],
     options=TorchMultiGPURunnerOptions(
-        data_loader_options={'batch_size': 32},
-        tqdm_enabled=True
+        data_loader_options={"batch_size": 32}, tqdm_enabled=True
     ),
 )
 runner.run()
@@ -264,26 +268,29 @@ Train a new classifier on top of densenet201 features
 ```python
 # define training set
 train_dset_densenet = TorchTrainingDataset(
-    dataset=ListDatasetIndexed(train_indices, ff_train_densenet.features[train_indices]),
-    targets=label_set.get_label_ids([train_labels[idx] for idx in train_indices])
+    dataset=ListDatasetIndexed(
+        train_indices, ff_train_densenet.features[train_indices]
+    ),
+    targets=label_set.get_label_ids([train_labels[idx] for idx in train_indices]),
 )
 # define valid set
 valid_dset_densenet = TorchTrainingDataset(
-    dataset=ListDatasetIndexed(valid_indices, ff_train_densenet.features[valid_indices]),
-    targets=label_set.get_label_ids([train_labels[idx] for idx in valid_indices])
+    dataset=ListDatasetIndexed(
+        valid_indices, ff_train_densenet.features[valid_indices]
+    ),
+    targets=label_set.get_label_ids([train_labels[idx] for idx in valid_indices]),
 )
 ```
 
 ```python
 # define a classifier on top of resnet features
 classifier_densenet = LinearClassifierTorchModule(
-    in_features=ff_train_densenet.features.shape[1],
-    label_set=label_set
+    in_features=ff_train_densenet.features.shape[1], label_set=label_set
 )
 # save state of the classifier on top of densenet features
 densenet_state = SaveModelState(
     store=LocalStateStore(exp_dir),
-    state_key=StateKey(classifier_densenet.state_type, 'train-densenet')
+    state_key=StateKey(classifier_densenet.state_type, "train-densenet"),
 )
 
 # define the trainer
@@ -292,7 +299,7 @@ trainer = TorchTrainingRunner(
     dataset=(train_dset_densenet, valid_dset_densenet),
     callbacks=[densenet_state],
     options=TorchTrainingOptions(
-        data_loader_options={'batch_size': 32},
+        data_loader_options={"batch_size": 32},
         criterion=loss_fn,
         optimizer=optim.Adam(classifier_densenet.parameters(), lr=1e-3),
         metrics={
@@ -322,8 +329,7 @@ runner = TorchInferenceMultiGPURunner(
     dataset=ListDataset(test_images),
     callbacks=[ff_test_densenet],
     options=TorchMultiGPURunnerOptions(
-        data_loader_options={'batch_size': 32},
-        tqdm_enabled=True
+        data_loader_options={"batch_size": 32}, tqdm_enabled=True
     ),
 )
 runner.run()
@@ -334,8 +340,7 @@ runner = TorchInferenceMultiGPURunner(
     dataset=ListDataset(ff_test_densenet.features),
     callbacks=[score_test_densenet],
     options=TorchMultiGPURunnerOptions(
-        data_loader_options={'batch_size': 32},
-        tqdm_enabled=True
+        data_loader_options={"batch_size": 32}, tqdm_enabled=True
     ),
 )
 runner.run()
@@ -343,4 +348,4 @@ runner.run()
 print(classification_report(test_labels, score_test_densenet.labels))
 ```
 
-From the classification report we can see that performance with densenet201 are much better than the performance with resnet18. 
+From the classification report we can see that performance with densenet201 are much better than the performance with resnet18.

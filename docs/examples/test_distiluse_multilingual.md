@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.13.7
+      jupytext_version: 1.13.8
   kernelspec:
     display_name: Python 3.9.12 (conda)
     language: python
@@ -25,6 +25,7 @@ from mlmodule.callbacks.memory import CollectFeaturesInMemory
 import torch
 import matplotlib.pyplot as plt
 import seaborn as sns
+
 sns.set(style="white")
 %matplotlib inline
 ```
@@ -40,17 +41,17 @@ sentences1 = [
     "Wij maakten eten klaar.",
     "Nous préparâmes de la nourriture.",
     "たちは食事の準備をした。",
-    "Preparamos comida."
+    "Preparamos comida.",
 ]
 sentences2 = [
     "Anĥizo interpretas la orakolon, kaj konvinkas la Trojanojn, ke temas pri la insulo Kreto, el kiu eliris unu el la unuatempaj fondintoj de Trojo.",
     "Anchise explique l'oracle, et persuade aux Troyens qu'il s'agit de l'île de Crète, d'où est sorti un des anciens fondateurs de Troie.",
-    "Anquises interpreta o oráculo e convence os troianos de que se trata da ilha de Creta, da qual saiu um dos antigos fundadores de Troia."
+    "Anquises interpreta o oráculo e convence os troianos de que se trata da ilha de Creta, da qual saiu um dos antigos fundadores de Troia.",
 ]
 sentences3 = [
     "Mi pensas, ke mi devus foriri, ĉar jam estas malfrue.",
     "Je crois que je devrais partir car il se fait tard.",
-    "I think I must be leaving since it is getting late."
+    "I think I must be leaving since it is getting late.",
 ]
 ```
 
@@ -76,9 +77,7 @@ runner = TorchInferenceRunner(
     model=model,
     callbacks=[sentence_features],
     options=TorchRunnerOptions(
-        data_loader_options={'batch_size': 1},
-        device=model.device,
-        tqdm_enabled=True
+        data_loader_options={"batch_size": 1}, device=model.device, tqdm_enabled=True
     ),
 )
 runner.run()
