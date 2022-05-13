@@ -56,8 +56,8 @@ Extract CLIP image features of FlickR30k dataset
 It might take a few minutes for extracting the features...
 
 ```python
-path_to_flickr30k_images = '/mnt/storage01/datasets/flickr30k/full/images'
-file_names = list_files_in_dir(path_to_flickr30k_images, allowed_extensions=('jpg',))
+path_to_flickr30k_images = "/mnt/storage01/datasets/flickr30k/full/images"
+file_names = list_files_in_dir(path_to_flickr30k_images, allowed_extensions=("jpg",))
 dataset = ImageDataset(LocalBinaryFilesDataset(file_names))
 
 image_features = CollectFeaturesInMemory()
@@ -66,9 +66,9 @@ runner = TorchInferenceRunner(
     model=image_encoder,
     callbacks=[image_features],
     options=TorchRunnerOptions(
-        data_loader_options={'batch_size': 128},
+        data_loader_options={"batch_size": 128},
         device=image_encoder.device,
-        tqdm_enabled=True
+        tqdm_enabled=True,
     ),
 )
 runner.run()
@@ -86,7 +86,7 @@ Extract CLIP text features of a given query
 ```python
 text_queries = [
     "Workers look down from up above on a piece of equipment .",
-    "Ballet dancers in a studio practice jumping with wonderful form ."
+    "Ballet dancers in a studio practice jumping with wonderful form .",
 ]
 dataset = ListDataset(text_queries)
 
@@ -96,9 +96,9 @@ runner = TorchInferenceRunner(
     model=text_encoder,
     callbacks=[text_features],
     options=TorchRunnerOptions(
-        data_loader_options={'batch_size': 1},
+        data_loader_options={"batch_size": 1},
         device=text_encoder.device,
-        tqdm_enabled=True
+        tqdm_enabled=True,
     ),
 )
 runner.run()
@@ -117,22 +117,28 @@ txt_feat = torch.tensor(text_features.features)
 txt_feat /= txt_feat.norm(dim=-1, keepdim=True)
 similarity = (100.0 * txt_feat @ img_feat.T).softmax(dim=-1)
 values, indices = similarity.topk(5)
-
 ```
+
 
 Display the results
 
 ```python
 # Install a pip package in the current Jupyter kernel
 import sys
+
 !{sys.executable} -m pip install ipyplot
 ```
 
 ```python
 import ipyplot
 from PIL import Image
+
 for k, text in enumerate(text_queries):
     print(f"Query: {text}")
     print(f"Top 5 images:")
-    ipyplot.plot_images([Image.open(image_features.indices[i]) for i in indices[k]], [f"{v*100:.1f}%" for v in values[k]], img_width=250)
+    ipyplot.plot_images(
+        [Image.open(image_features.indices[i]) for i in indices[k]],
+        [f"{v*100:.1f}%" for v in values[k]],
+        img_width=250,
+    )
 ```

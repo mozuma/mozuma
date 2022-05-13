@@ -35,8 +35,8 @@ dataset = ImageDataset(
         ]
     )
 )
-
 ```
+
 
 1.  See [Datasets](references/datasets.md) for a list of available datasets.
 
@@ -48,8 +48,8 @@ from mlmodule.models.resnet import torch_resnet_imagenet
 
 # Model definition (1)
 resnet = torch_resnet_imagenet("resnet18")
-
 ```
+
 
 1. List of all [models](models/index.md)
 
@@ -60,9 +60,7 @@ Note that we pass two callbacks to the runner: `CollectFeaturesInMemory` and `Co
 They will be called to save the features and labels in-memory.
 
 ```python
-from mlmodule.callbacks import (
-    CollectFeaturesInMemory, CollectLabelsInMemory
-)
+from mlmodule.callbacks import CollectFeaturesInMemory, CollectLabelsInMemory
 from mlmodule.torch.options import TorchRunnerOptions
 from mlmodule.torch.runners import TorchInferenceRunner
 

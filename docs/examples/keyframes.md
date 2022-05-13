@@ -41,8 +41,8 @@ Load a test video
 dataset = LocalBinaryFilesDataset(
     [os.path.join("../../tests", "fixtures", "video", "test.mp4")]
 )
-
 ```
+
 
 Extract key-frames with `torch_keyframes_resnet_imagenet`
 
@@ -57,9 +57,7 @@ runner = TorchInferenceRunner(
     dataset=dataset,
     callbacks=[features],
     options=TorchRunnerOptions(
-        device=torch_device,
-        data_loader_options={"batch_size": 1},
-        tqdm_enabled=True
+        device=torch_device, data_loader_options={"batch_size": 1}, tqdm_enabled=True
     ),
 )
 runner.run()
@@ -73,13 +71,16 @@ First install `ipyplot`
 ```python
 # Install a pip package in the current Jupyter kernel
 import sys
+
 !{sys.executable} -m pip install ipyplot
 ```
 
 Then extract the selected key-frames from the video
 
 ```python
-with open(os.path.join("../../tests", "fixtures", "video", "test.mp4"), mode='rb') as video_file:
+with open(
+    os.path.join("../../tests", "fixtures", "video", "test.mp4"), mode="rb"
+) as video_file:
     with BinaryVideoCapture(video_file) as capture:
         video_frames = dict(extract_video_frames(capture))
 frame_positions = sorted(kf for kf in features.frames[0].frame_indices)
@@ -92,8 +93,8 @@ Finally, display the frames
 import ipyplot
 
 ipyplot.plot_images(selected_frames, frame_positions, img_width=250)
-
 ```
+
 
 ```python
 
