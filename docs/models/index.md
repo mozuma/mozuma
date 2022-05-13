@@ -26,8 +26,8 @@ However, there are a few conventions to follow:
   [callbacks](../references/callbacks.md) to work properly.
 - If the model's state needs to be saved,
   the model should follow the [`ModelWithState`][mlmodule.models.ModelWithState] protocol.
-- If the model outputs labels,
-  the model should follow the [`ModelWithLabels`][mlmodule.models.ModelWithLabels] protocol.
+- If the model predicts labels,
+  it should follow the [`ModelWithLabels`][mlmodule.models.ModelWithLabels] protocol.
 
 ## Predictions
 

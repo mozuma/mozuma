@@ -7,7 +7,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.13.7
+      jupytext_version: 1.13.8
   kernelspec:
     display_name: Python 3.7.10 ('mlmodule')
     language: python
@@ -21,7 +21,7 @@ jupyter:
 
 This guide runs through the inference of a PyTorch ResNet model pre-trained on imagenet.
 
-First, we need to create a dataset of images, for this we will be using the `OpenFileDataset`.
+First, we need to create a dataset of images, for this we will be using an `ImageDataset`.
 
 ```python
 from mlmodule.torch.datasets import LocalBinaryFilesDataset, ImageDataset
@@ -41,7 +41,7 @@ dataset = ImageDataset(
 1.  See [Datasets](references/datasets.md) for a list of available datasets.
 
 Next, we need to load the ResNet PyTorch module specifying the `resnet18` architecture.
-The model is initialised with weights provided by the `MLModuleModelStore`.
+The model is initialised with weights pre-trained on ImageNet[@deng2009imagenet].
 
 ```python
 from mlmodule.models.resnet import torch_resnet_imagenet
@@ -53,11 +53,11 @@ resnet = torch_resnet_imagenet("resnet18")
 
 1. List of all [models](models/index.md)
 
-Once we have a model initialized, we need to define what we want to do with it.
+Once we have the model initialized, we need to define what we want to do with it.
 In this case, we'll run an inference loop using the `TorchInferenceRunner`.
 
 Note that we pass two callbacks to the runner: `CollectFeaturesInMemory` and `CollectLabelsInMemory`.
-They will be called to collect the resulting features and labels for each batch.
+They will be called to save the features and labels in-memory.
 
 ```python
 from mlmodule.callbacks import (
@@ -82,7 +82,9 @@ runner = TorchInferenceRunner(
 1. List of available [callbacks](references/callbacks.md).
 2. List of available [runners](references/runners.md)
 
-When defined, the runner can be run and the callback objects will contain the features and labels.
+Now that the runner is initialised, we run it with the method `run`.
+
+The callbacks have accumulated the features and labels in memory and we print their content.
 
 ```python
 # Executing inference
