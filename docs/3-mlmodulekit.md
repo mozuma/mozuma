@@ -13,8 +13,11 @@ docker pull lsirepfl/mlmodulekit:<version>
 This example will go through the process to run a python script called `main.py`
 in the MLModuleKit docker image.
 
-As a first step, we need to create a `Dockerfile` that uses mlmodulekit,
-installs the latest version of MLModule and copies the script we want to run.
+As a first step, we need to create a `Dockerfile` that:
+
+1. Imports `mlmodulekit` image
+1. Installs the latest version of MLModule
+1. Copies the script we want to run.
 
 ```Dockerfile
 FROM lsirepfl/mlmodulekit:3

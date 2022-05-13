@@ -65,15 +65,6 @@ pip install pre-commit
 pre-commit install
 ```
 
-## Requirements
-
-Updating requirements should be done in `setup.cfg`.
-To update the `requirement.txt` file run:
-
-```bash
-pip-compile --extra full --upgrade
-```
-
 ## Publish a new version
 
 * Push the new version to the `master` branch
