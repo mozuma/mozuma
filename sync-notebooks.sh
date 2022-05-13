@@ -1,3 +1,3 @@
 
-jupytext --sync docs/examples/*.ipynb
-jupytext --sync docs/1-getting-started.ipynb
+jupytext --sync --pipe black docs/examples/*.ipynb
+jupytext --sync --pipe black docs/1-getting-started.ipynb
