@@ -6,3 +6,7 @@ mkdocs-bibtex
 mkdocs-material
 mkdocs-markdownextradata-plugin
 mkdocstrings-python-legacy
+
+# For notebooks
+black
+jupytext

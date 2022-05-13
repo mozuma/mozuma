@@ -22,8 +22,8 @@ Import MTCNN and ArcFace modules from `mlmodule`
 
 
 ```python
-from mlmodule.models.arcface.modules import TorchArcFaceModule
-from mlmodule.models.mtcnn.modules import TorchMTCNNModule
+from mlmodule.models.arcface.pretrained import torch_arcface_insightface
+from mlmodule.models.mtcnn.pretrained import torch_mtcnn
 from mlmodule.torch.options import TorchRunnerOptions
 from mlmodule.torch.runners import TorchInferenceRunner
 from mlmodule.callbacks.memory import (
@@ -35,10 +35,12 @@ from mlmodule.torch.datasets import (
     ListDataset,
     ListDatasetIndexed,
 )
-from mlmodule.states import StateKey
-from mlmodule.stores import Store
 
+from torchvision.datasets import FER2013
+
+import os
 ```
+
 
 Enable logging inside notebook
 
@@ -46,8 +48,11 @@ Enable logging inside notebook
 import logging
 import sys
 
-logging.basicConfig(format='%(asctime)s | %(levelname)s : %(message)s',
-                     level=logging.INFO, stream=sys.stdout)
+logging.basicConfig(
+    format="%(asctime)s | %(levelname)s : %(message)s",
+    level=logging.INFO,
+    stream=sys.stdout,
+)
 ```
 
 Load a dataset containing images of faces annotated with emotion labels
@@ -56,16 +61,21 @@ We should first download [FER2013](https://www.kaggle.com/competitions/challenge
 
 
 ```python
-import os
-from torchvision.datasets import FER2013
-
-path_to_fer2013 = os.path.join(os.environ["HOME"], 'torchvision-datasets')
+path_to_fer2013 = os.path.join(os.environ["HOME"], "torchvision-datasets")
 train_set = FER2013(root=path_to_fer2013, split="train")
 ```
 
 ```python
 # Training images
-labels_dict = {0:"Angry", 1:"Disgust", 2:"Fear", 3:"Happy", 4:"Sad", 5:"Surprise", 6:"Neutral"}
+labels_dict = {
+    0: "Angry",
+    1: "Disgust",
+    2: "Fear",
+    3: "Happy",
+    4: "Sad",
+    5: "Surprise",
+    6: "Neutral",
+}
 train_samples = [(img.convert("RGB"), labels_dict[label]) for img, label in train_set]
 train_images, train_labels = zip(*train_samples)
 ```
@@ -75,8 +85,7 @@ Run face detection on the images with `TorchMTCNNModule`
 
 ```python
 torch_device = "cuda"
-model = TorchMTCNNModule(device=torch_device)
-Store().load(model, StateKey(model.state_type, training_id="facenet"))
+model = torch_mtcnn(device=torch_device)
 
 # Callbacks
 bb = CollectBoundingBoxesInMemory()
@@ -87,21 +96,18 @@ runner = TorchInferenceRunner(
     dataset=ListDataset(train_images),
     callbacks=[bb],
     options=TorchRunnerOptions(
-        data_loader_options={'batch_size': 32},
-        device=torch_device,
-        tqdm_enabled=True
+        data_loader_options={"batch_size": 32}, device=torch_device, tqdm_enabled=True
     ),
 )
 runner.run()
-
 ```
+
 
 Extract face features with `TorchArcFaceModule`
 
 
 ```python
-arcface = TorchArcFaceModule(device=torch_device)
-Store().load(arcface, StateKey(arcface.state_type, training_id="insightface"))
+arcface = torch_arcface_insightface(device=torch_device)
 
 # Dataset
 dataset = ImageBoundingBoxDataset(
@@ -118,9 +124,7 @@ runner = TorchInferenceRunner(
     dataset=dataset,
     callbacks=[ff],
     options=TorchRunnerOptions(
-        data_loader_options={'batch_size': 32},
-        device=torch_device,
-        tqdm_enabled=True
+        data_loader_options={"batch_size": 32}, device=torch_device, tqdm_enabled=True
     ),
 )
 runner.run()
@@ -137,17 +141,10 @@ from mlmodule.torch.datasets import TorchTrainingDataset
 from mlmodule.torch.runners import TorchTrainingRunner
 from mlmodule.torch.options import TorchTrainingOptions
 from mlmodule.labels.base import LabelSet
-```
 
-```python
 import torch
 import torch.nn.functional as F
-import torch.nn as nn
 import torch.optim as optim
-```
-
-```python
-
 ```
 
 Define the training dataset
@@ -157,25 +154,23 @@ Define the labels
 
 ```python
 labels = list(labels_dict.values())
-labels.sort()
-label_set = LabelSet(
-            label_set_unique_id="emotion",
-            label_list=labels
-        )
+label_set = LabelSet(label_set_unique_id="emotion", label_list=labels)
 ```
 
 ```python
 # split samples into train and valid sets
-train_indices, valid_indices = torch.split(torch.randperm(len(ff.indices)), int(len(ff.indices)*.9))
+train_indices, valid_indices = torch.split(
+    torch.randperm(len(ff.indices)), int(len(ff.indices) * 0.9)
+)
 # define training set
 train_dset = TorchTrainingDataset(
     dataset=ListDatasetIndexed(train_indices, ff.features[train_indices]),
-    targets=label_set.get_label_ids([train_labels[idx] for idx in train_indices])
+    targets=label_set.get_label_ids([train_labels[idx] for idx in train_indices]),
 )
 # define valid set
 valid_dset = TorchTrainingDataset(
     dataset=ListDatasetIndexed(valid_indices, ff.features[valid_indices]),
-    targets=label_set.get_label_ids([train_labels[idx] for idx in valid_indices])
+    targets=label_set.get_label_ids([train_labels[idx] for idx in valid_indices]),
 )
 ```
 
@@ -184,10 +179,7 @@ Define the linear classifier
 ```python
 in_features = len(ff.features[0])
 
-classifier = LinearClassifierTorchModule(
-    in_features=in_features,
-    label_set=label_set
-)
+classifier = LinearClassifierTorchModule(in_features=in_features, label_set=label_set)
 ```
 
 Define the trainer
@@ -199,15 +191,15 @@ precision = Precision(average=False)
 recall = Recall(average=False)
 F1 = (precision * recall * 2 / (precision + recall)).mean()
 
-loss_fn =  F.cross_entropy
+loss_fn = F.cross_entropy
 trainer = TorchTrainingRunner(
     model=classifier,
     dataset=(train_dset, valid_dset),
     callbacks=[],
     options=TorchTrainingOptions(
-        data_loader_options={'batch_size': 32},
+        data_loader_options={"batch_size": 32},
         criterion=loss_fn,
-        optimizer=optim.Adam(classifier.parameters(), lr=1e-3),
+        optimizer=optim.Adam(classifier.parameters(), lr=1e-2),
         metrics={
             "pre": precision,
             "recall": recall,
@@ -217,7 +209,7 @@ trainer = TorchTrainingRunner(
         },
         validate_every=1,
         num_epoch=5,
-        tqdm_enabled=True
+        tqdm_enabled=True,
     ),
 )
 trainer.run()
