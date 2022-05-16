@@ -45,7 +45,11 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torchvision.datasets import CIFAR10
+
 from ignite.metrics import Precision, Recall, Loss, Accuracy
+from ignite.contrib.handlers.tensorboard_logger import *
+from ignite.engine.events import Events
+
 from sklearn.metrics import classification_report
 import os
 ```
@@ -150,22 +154,70 @@ classifier_resnet = LinearClassifierTorchModule(
     in_features=ff_train_resnet.features.shape[1], label_set=label_set
 )
 
+# define a loss function
+loss_fn = F.cross_entropy
+
+# define the optimizer
+optimizer = optim.Adam(classifier_resnet.parameters(), lr=1e-3)
+
 # define the evaluation metrics
 precision = Precision(average=False)
 recall = Recall(average=False)
 F1 = (precision * recall * 2 / (precision + recall)).mean()
 
+eval_metrics = {
+    "pre": precision,
+    "recall": recall,
+    "f1": F1,
+    "acc": Accuracy(),
+    "ce_loss": Loss(loss_fn),
+}
+
 # Callbacks
 exp_dir = os.path.join(os.environ["HOME"], "mlmodule-training")
+log_dir = os.path.join(exp_dir, "tb_logs")
 os.makedirs(exp_dir, exist_ok=True)
 
 resnet_state = SaveModelState(
     store=LocalStateStore(exp_dir),
-    state_key=StateKey(classifier_resnet.state_type, "train-resnet"),
+    state_key=StateKey(classifier_resnet.state_type, "train-resnet-1"),
 )
 
-# define a loss function
-loss_fn = F.cross_entropy
+
+# Create function to setup loggers and attach them to engines
+def loggers_factory(trainer, train_evaluator, evaluator):
+    # Create a logger
+    tb_logger = TensorboardLogger(log_dir=log_dir)
+
+    # Attach the logger to the trainer engine
+    tb_logger.attach_output_handler(
+        trainer,
+        event_name=Events.ITERATION_COMPLETED,
+        tag="training",
+        output_transform=lambda loss: {"loss": loss},
+    )
+
+    tb_logger.attach(
+        trainer,
+        event_name=Events.ITERATION_COMPLETED,
+        log_handler=GradsHistHandler(classifier_resnet),
+    )
+
+    tb_logger.attach_opt_params_handler(
+        trainer, event_name=Events.ITERATION_STARTED, optimizer=optimizer
+    )
+
+    def global_step_transform(*args, **kwargs):
+        return trainer.state.iteration
+
+    tb_logger.attach_output_handler(
+        evaluator,
+        event_name=Events.EPOCH_COMPLETED,
+        tag="validation",
+        metric_names=list(eval_metrics.keys()),
+        global_step_transform=global_step_transform,
+    )
+
 
 # define the trainer
 trainer = TorchTrainingRunner(
@@ -175,24 +227,23 @@ trainer = TorchTrainingRunner(
     options=TorchTrainingOptions(
         data_loader_options={"batch_size": 32},
         criterion=loss_fn,
-        optimizer=optim.Adam(classifier_resnet.parameters(), lr=1e-3),
-        metrics={
-            "pre": precision,
-            "recall": recall,
-            "f1": F1,
-            "acc": Accuracy(),
-            "ce_loss": Loss(loss_fn),
-        },
+        optimizer=optimizer,
+        metrics=eval_metrics,
         validate_every=1,
         checkpoint_every=3,
         num_epoch=3,
         tqdm_enabled=True,
     ),
+    loggers_factory=loggers_factory,
 )
 trainer.run()
 ```
 
 Do evaluation on the test set
+
+```python
+list(eval_metrics.keys())
+```
 
 ```python
 test_cifar10 = CIFAR10(root=root_dir, train=False, download=True, transform=None)
