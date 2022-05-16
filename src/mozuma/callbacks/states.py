@@ -1,33 +1,26 @@
 import dataclasses
 from logging import getLogger
-from typing import Any
+from typing import Any, Optional
 
 import ignite.distributed as idist
-from ignite.engine import Engine
 
 from mozuma.states import StateKey
 from mozuma.stores.abstract import AbstractStateStore
 
-_logger = getLogger()
+_logger = getLogger(__name__)
 
 
 @dataclasses.dataclass
 class SaveModelState:
-    """Simple callback to save model state during training.
-
-    If state are saved during training (every X epochs,
-    see [`TorchTrainingOptions`][mozuma.torch.options.TorchTrainingOptions])
-    the current epoch number is appended to the `state_key.training_id` in the
-    following way: `<state_key.training_id>-e<num_epoch>`.
-    When the training is complete, just the `state_key.training_id` is used.
+    """Simple callback to save model state.
 
     Attributes:
         store (AbstractStateStore): Object to handle model state saving
         state_key (StateKey): State identifier for the training activity.
 
     Warning:
-        This callback only saves the model state, thus does not create a whole
-        training checkpoint (optimizer state, loss, etc..).
+        The use of this callback is limited to runners with distributed
+        capabilities, such as `TorchTrainingRunner`.
     """
 
     store: AbstractStateStore = dataclasses.field()
@@ -38,30 +31,19 @@ class SaveModelState:
             raise ValueError("Model state already exists!")
 
     @idist.one_rank_only()
-    def save_model_state(self, engine: Engine, model: Any) -> None:
+    def save_model_state(
+        self, model: Any, training_id_suffix: Optional[str] = None
+    ) -> None:
         """Save model state by calling the state store
 
         Arguments:
-            model (Any): The model to save
+            model (Any): The MoZuMa model to save
+            training_id_suffix (str | None): Optional string to append to
+                `state_key.training_id`
         """
-        epoch = engine.state.epoch
-        _logger.debug(f"Calling store.save for epoch {epoch}")
+        new_training_id = self.state_key.training_id
+        if training_id_suffix:
+            new_training_id += training_id_suffix
 
-        # Append current epoch number to training_id
-        new_training_id = f"{self.state_key.training_id}-e{epoch}"
-
-        # If the training is done instead, use the pure training_id,
-        # without epoch information
-        is_done_epochs = (
-            engine.state.max_epochs is not None
-            and engine.state.epoch >= engine.state.max_epochs
-        )
-
-        if is_done_epochs:
-            new_training_id = self.state_key.training_id
-
-            if not self.store.exists(self.state_key):
-                self.store.save(model, new_training_id)
-
-        else:
-            self.store.save(model, new_training_id)
+        _logger.debug("Call store save utility")
+        self.store.save(model, new_training_id)
