@@ -3,6 +3,7 @@ from typing import Callable, Dict, Optional, Union
 
 import dill
 import torch
+from ignite.engine import Engine
 from ignite.metrics import Metric
 
 from mlmodule.torch.utils import resolve_default_torch_device
@@ -66,6 +67,10 @@ class TorchTrainingOptions:
         tqdm_enabled (bool): Whether to print a `tqdm` progress bar. Default, False.
         dist_options (dict): Options passed to `ignite.distributed.Parallel`.
         seed (int): random state seed to set. Default, 543.
+        loggers_factory (Callable[[Engine, Engine, Engine], None] | None): Function to attach additional loggers
+            to training runner and its evaluators internal (PyTorch Ignite) engines.
+            The function receives three engines, one for training and two for evaluation, where
+            the first is for the train set and second for the test set.
 
     Note:
         `data_loader_options`'s options `batch_size` and `num_worker`
@@ -88,26 +93,31 @@ class TorchTrainingOptions:
     tqdm_enabled: bool = False
     dist_options: dict = dataclasses.field(default_factory=dict)
     seed: int = 543
+    loggers_factory: Optional[Callable[[Engine, Engine, Engine], None]] = None
 
     def __getstate__(self):
         # This method is called when you are
         # going to pickle the class, to know what to pickle
         state = self.__dict__.copy()
 
-        # Don't pickle the attribute metrics
+        # Don't pickle special fields
         del state["metrics"]
+        del state["loggers_factory"]
 
-        # Instead, pre-pickle the attribute metric with dill
+        # Instead, pickle them manually with dill
         state["pickled-metrics"] = dill.dumps(self.metrics)
+        state["pickled-loggers"] = dill.dumps(self.loggers_factory)
 
         return state
 
     def __setstate__(self, state):
-        # Put pre-pickled parameter aside
+        # Put pre-pickled fields aside
         pickled_metrics = state.pop("pickled-metrics", None)
+        pickled_logger = state.pop("pickled-loggers", None)
 
-        # Restore all other attributes
+        # Restore all other fields
         self.__dict__.update(state)
 
-        # Unpickle the attribute metrics
+        # Unpickle the special fields with dill
         object.__setattr__(self, "metrics", dill.loads(pickled_metrics))
+        object.__setattr__(self, "loggers_factory", dill.loads(pickled_logger))

@@ -17,7 +17,6 @@ jupyter:
 
 In this notebook, we are training CIFAR10 image classification on top of ResNet18 features from ImageNet
 
-
 Import `mlmodule` modules for the task
 
 ```python
@@ -101,7 +100,6 @@ resnet = torch_resnet_imagenet(
     resnet_arch="resnet18", device=torch_device, training_mode="features"
 )
 ```
-
 
 Extract image features from ResNet with a single GPU
 
@@ -233,8 +231,8 @@ trainer = TorchTrainingRunner(
         checkpoint_every=3,
         num_epoch=3,
         tqdm_enabled=True,
+        loggers_factory=loggers_factory,
     ),
-    loggers_factory=loggers_factory,
 )
 trainer.run()
 ```
@@ -284,7 +282,6 @@ print(classification_report(test_labels, score_test_resnet.labels))
 ```
 
 Compare the classification performance with a deeper DenseNet model
-
 
 Load `densenet201` model
 

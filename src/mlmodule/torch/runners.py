@@ -1,6 +1,6 @@
 import dataclasses
 import logging
-from typing import Any, Callable, Dict, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, Tuple, Union, cast
 
 import ignite.distributed as idist
 import torch
@@ -26,7 +26,7 @@ from mlmodule.predictions import BatchModelPrediction
 from mlmodule.runners import BaseRunner
 from mlmodule.torch.callbacks import TorchRunnerCallbackType
 from mlmodule.torch.collate import TorchMlModuleCollateFn
-from mlmodule.torch.datasets import (  # TorchTrainingDatasetTransformsWrapper,
+from mlmodule.torch.datasets import (
     TorchDataset,
     TorchDatasetTransformsWrapper,
     TorchTrainingDataset,
@@ -289,8 +289,6 @@ class TorchTrainingRunner(
         TorchTrainingOptions,
     ]
 ):
-    loggers_factory: Optional[Callable[[Engine, Engine, Engine], None]] = None
-
     """Runner for training tasks on PyTorch models
 
     Supports CPU and multi-GPU training with multiple backends.
@@ -301,10 +299,6 @@ class TorchTrainingRunner(
         callbacks (List[Union[BaseRunnerEndCallback, SaveModelState]]):
             Callback to save model weights plus one or more callbacks for when the runner ends.
         options (TorchTrainingOptions): PyTorch training options
-        loggers_factory (Callable[[Engine, Engine, Engine], None] | None): Function to attach additional loggers
-            to training and evaluators internal (PyTorch Ignite) engines.
-            The function receives three engines, one for training and two for evaluation, where
-            the first is for the train set and second for the test set.
     """
 
     def __post_init__(self) -> None:
@@ -404,8 +398,8 @@ class TorchTrainingRunner(
         )
 
         # Attach additional loggers
-        if self.loggers_factory:
-            self.loggers_factory(trainer, train_evaluator, evaluator)
+        if self.options.loggers_factory is not None:
+            self.options.loggers_factory(trainer, train_evaluator, evaluator)
 
         @trainer.on(
             Events.EPOCH_COMPLETED(every=self.options.validate_every) | Events.COMPLETED
