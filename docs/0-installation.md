@@ -12,11 +12,26 @@ See the official
 for installation instructions.
 We recommend using the [`conda`](https://docs.conda.io/en/latest/) package manager to install PyTorch.
 
+This project also depends on [CLIP](https://github.com/openai/CLIP), which is not available on PyPI.
+You can install it using `pip`:
+
+```bash
+pip install git+https://github.com/openai/CLIP.git
+```
+
+for more information, visit the official website.
+
 ## Installing with `pip`
 
-Once PyTorch and TorchVision are installed,
+Once all pre-requisites are installed,
 MoZuMa can be directly installed from the git repository
 using `pip`.
+
+```bash
+pip install mozuma
+```
+
+From source:
 
 ```bash
 # To install the latest developments
