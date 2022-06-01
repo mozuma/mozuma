@@ -44,16 +44,17 @@ def apply_mode_to_image(image: Image, mode: str) -> Image:
 
 
 def prepare_batch_for_training(
-    payload: Tuple,
+    batch_wrapper: Tuple,
     device: torch.device,
     non_blocking: bool = False,
 ) -> Tuple[Union[torch.Tensor, Sequence, Mapping, str, bytes], ...]:
+    _, payload = batch_wrapper
     batch, target = payload
 
     # Sending data on device
     return (
         send_batch_to_device(batch, device=device, non_blocking=non_blocking),
-        target.to(device, non_blocking=non_blocking),
+        send_batch_to_device(target, device=device, non_blocking=non_blocking),
     )
 
 
