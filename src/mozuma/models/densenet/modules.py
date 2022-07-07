@@ -14,13 +14,11 @@ from mozuma.labels.imagenet import IMAGENET_LABELS
 from mozuma.labels.places import PLACES_LABELS
 from mozuma.predictions import BatchModelPrediction
 from mozuma.states import StateType
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 from mozuma.torch.transforms import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 
 
-class TorchDenseNetModule(
-    TorchMlModule[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]
-):
+class TorchDenseNetModule(TorchModel[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]):
     """PyTorch implementation of DenseNet
 
     See [TorchVision source code](https://github.com/pytorch/vision/blob/main/torchvision/models/densenet.py).

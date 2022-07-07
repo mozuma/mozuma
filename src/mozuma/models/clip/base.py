@@ -8,10 +8,10 @@ from typing_extensions import Literal
 from mozuma.models.clip.utils import sanitize_clip_model_name
 from mozuma.predictions import BatchModelPrediction
 from mozuma.states import StateType
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 
 
-class BaseCLIPModule(TorchMlModule[torch.Tensor, torch.Tensor]):
+class BaseCLIPModule(TorchModel[torch.Tensor, torch.Tensor]):
     """Base class for CLIP modules
 
     Attributes:

@@ -13,21 +13,21 @@ _BatchType = TypeVar("_BatchType")
 _ForwardOutputType = TypeVar("_ForwardOutputType")
 
 
-class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
+class TorchModel(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
     """
     Base `torch.nn.Module` for PyTorch models.
 
-    A valid subclass of [`TorchMlModule`][mozuma.torch.modules.TorchMlModule]
+    A valid subclass of [`TorchModel`][mozuma.torch.modules.TorchModel]
     **must** implement the following method:
 
-    - [`forward`][mozuma.torch.modules.TorchMlModule.forward]
-    - [`to_predictions`][mozuma.torch.modules.TorchMlModule.to_predictions]
-    - [`state_type`][mozuma.torch.modules.TorchMlModule.state_type]
+    - [`forward`][mozuma.torch.modules.TorchModel.forward]
+    - [`to_predictions`][mozuma.torch.modules.TorchModel.to_predictions]
+    - [`state_type`][mozuma.torch.modules.TorchModel.state_type]
 
     And can optionally implement:
 
-    - [`get_dataset_transforms`][mozuma.torch.modules.TorchMlModule.get_dataset_transforms]
-    - [`get_dataloader_collate_fn`][mozuma.torch.modules.TorchMlModule.get_dataloader_collate_fn]
+    - [`get_dataset_transforms`][mozuma.torch.modules.TorchModel.get_dataset_transforms]
+    - [`get_dataloader_collate_fn`][mozuma.torch.modules.TorchModel.get_dataloader_collate_fn]
 
     Attributes:
         device (torch.device): Mandatory PyTorch device attribute to initialise model.
@@ -38,11 +38,11 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
 
         ```python
         from mozuma.states import StateType
-        from mozuma.torch.modules import TorchMlModule
+        from mozuma.torch.modules import TorchModel
         from torchvision import transforms
 
 
-        class FC(TorchMlModule[torch.Tensor, torch.Tensor]):
+        class FC(TorchModel[torch.Tensor, torch.Tensor]):
 
             def __init__(self, device: torch.device = torch.device("cpu")):
                 super().__init__(device=device)
@@ -72,7 +72,7 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
     Note:
         This is a generic class taking a `_BatchType` and `_ForwardOutputType` type argument.
         This corresponds respectively to the type of data the
-        [`forward`][mozuma.torch.modules.TorchMlModule.forward]
+        [`forward`][mozuma.torch.modules.TorchModel.forward]
         will take as argument and return. It is most likely `torch.Tensor`
 
     Note:
@@ -183,11 +183,11 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
         """Optionally returns a collate function to be passed to the data loader
 
         Note:
-            This collate function will be wrapped in `mozuma.torch.collate.TorchMlModuleCollateFn`.
+            This collate function will be wrapped in `mozuma.torch.collate.TorchModelCollateFn`.
             This means that the first argument `batch` will not contain
             the indices of the dataset but only the data element.
 
         Returns:
-            Callable[[Any], Any] | None: The collate function to be passed to `TorchMlModuleCollateFn`.
+            Callable[[Any], Any] | None: The collate function to be passed to `TorchModelCollateFn`.
         """
         return None

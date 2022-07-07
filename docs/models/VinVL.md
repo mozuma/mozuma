@@ -16,7 +16,7 @@ See the [code](https://github.com/pzzhang/VinVL) and the [paper](https://arxiv.o
 
 ## Base model
 
-The VinVL model is an implementation of a [`TorchMlModule`][mozuma.torch.modules.TorchMlModule].
+The VinVL model is an implementation of a [`TorchModel`][mozuma.torch.modules.TorchModel].
 
 ::: mozuma.models.vinvl.modules.TorchVinVLDetectorModule
     selection:

@@ -12,7 +12,7 @@ from mozuma.models.vinvl.models.structures.bounding_box import BoxList
 from mozuma.models.vinvl.transforms import Normalize, Resize, ToTensor
 from mozuma.predictions import BatchBoundingBoxesPrediction, BatchModelPrediction
 from mozuma.states import StateType
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 
 _ForwardOutput = Tuple[
     Sequence[torch.Tensor],  # boxes
@@ -27,7 +27,7 @@ STATE_DICT_URL = "https://penzhanwu2.blob.core.windows.net/sgg/sgg_benchmark/vin
 
 
 class TorchVinVLDetectorModule(
-    TorchMlModule[Tuple[torch.Tensor, Sequence[Tuple[int, int]]], _ForwardOutput]
+    TorchModel[Tuple[torch.Tensor, Sequence[Tuple[int, int]]], _ForwardOutput]
 ):
     """[VinVL](https://github.com/pzzhang/VinVL) object detection model
 

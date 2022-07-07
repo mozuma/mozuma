@@ -6,7 +6,7 @@ import torch
 from mozuma.models.mtcnn._mtcnn import MLModuleMTCNN
 from mozuma.predictions import BatchBoundingBoxesPrediction, BatchModelPrediction
 from mozuma.states import StateType
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 
 _SingleBoundingBoxTupleForm = Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
 _MultiBoundingBoxTupleForm = Tuple[
@@ -25,9 +25,7 @@ def _array_or(arr: Union[np.ndarray, None], other: np.ndarray) -> np.ndarray:
     return arr
 
 
-class TorchMTCNNModule(
-    TorchMlModule[Sequence[torch.Tensor], _MultiBoundingBoxTupleForm]
-):
+class TorchMTCNNModule(TorchModel[Sequence[torch.Tensor], _MultiBoundingBoxTupleForm]):
     """MTCNN face detection module
 
     Attributes:

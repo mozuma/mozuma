@@ -13,7 +13,7 @@ We are using `facenet-pytorch` to load pre-trained MTCNN model[@mtcnn], see <htt
 
 ## Base model
 
-The MTCNN model is an implementation of a [`TorchMlModule`][mozuma.torch.modules.TorchMlModule].
+The MTCNN model is an implementation of a [`TorchModel`][mozuma.torch.modules.TorchModel].
 
 ::: mozuma.models.mtcnn.modules.TorchMTCNNModule
     selection:

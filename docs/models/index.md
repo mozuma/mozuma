@@ -17,7 +17,7 @@ In MoZuMa, a model is usually implemented as a class.
 The model implementation details primarily depend on the type
 of [runner](../references/runners.md) used.
 For instance, the [`TorchInferenceRunner`][mozuma.torch.runners.TorchInferenceRunner]
-expects to receive a subclass of [`TorchMlModule`][mozuma.torch.modules.TorchMlModule].
+expects to receive a subclass of [`TorchModel`][mozuma.torch.modules.TorchModel].
 
 However, there are a few conventions to follow:
 
@@ -59,14 +59,14 @@ protocol.
 
 ## PyTorch models
 
-PyTorch models should be a subclass of `TorchMlModule`.
+PyTorch models should be a subclass of `TorchModel`.
 
 !!! note
     PyTorch models already implement the
     [`ModelWithState`][mozuma.models.ModelWithState] protocol
     by default.
 
-::: mozuma.torch.modules.TorchMlModule
+::: mozuma.torch.modules.TorchModel
     selection:
         members:
             - state_type

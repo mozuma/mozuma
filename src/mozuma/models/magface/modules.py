@@ -8,10 +8,10 @@ from mozuma.models.arcface.transforms import ArcFaceAlignment
 from mozuma.predictions import BatchModelPrediction
 from mozuma.states import StateType
 from mozuma.torch.layers import IBasicBlock, conv1x1
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 
 
-class TorchMagFaceModule(TorchMlModule[torch.Tensor, torch.Tensor]):
+class TorchMagFaceModule(TorchModel[torch.Tensor, torch.Tensor]):
     """MagFace face embeddings from MTCNN detected faces
 
     The input dataset should return a tuple of image data and bounding box information

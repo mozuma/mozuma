@@ -19,18 +19,14 @@ from mozuma.cli.helpers import (
     parser_add_model_argument,
     parser_add_store_argument,
 )
-from mozuma.cli.types import (
-    ArgMoZuMaOptions,
-    CLICommandDefinition,
-    CLIObjectFactory,
-)
+from mozuma.cli.types import ArgMoZuMaOptions, CLICommandDefinition, CLIObjectFactory
 from mozuma.predictions import BatchModelPrediction
 from mozuma.predictions.serializers import batch_model_prediction_to_dict
 from mozuma.states import StateKey
 from mozuma.stores import Store
 from mozuma.stores.abstract import AbstractStateStore
 from mozuma.torch.datasets import ImageDataset, LocalBinaryFilesDataset, TorchDataset
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 from mozuma.torch.options import TorchRunnerOptions
 from mozuma.torch.runners import TorchInferenceRunner
 from mozuma.torch.utils import resolve_default_torch_device
@@ -40,7 +36,7 @@ _FileType = Literal["im", "vi"]
 
 @dataclasses.dataclass
 class ArgMlModuleTorchRunOptions(ArgMoZuMaOptions):
-    model: CLIObjectFactory[TorchMlModule]
+    model: CLIObjectFactory[TorchModel]
     file_names: Sequence[pathlib.Path]
     device: torch.device
     training_id: Optional[str] = None
@@ -50,7 +46,7 @@ class ArgMlModuleTorchRunOptions(ArgMoZuMaOptions):
     file_type: _FileType = "im"
     formatter: Callable[[Union[dict, Sequence]], str] = json.dumps
 
-    def instantiate_model(self) -> TorchMlModule:
+    def instantiate_model(self) -> TorchModel:
         return self.model()
 
 
@@ -82,7 +78,7 @@ def parse_run_arguments(parser: argparse.ArgumentParser):
     parser_add_formatter_argument(parser, json.dumps)
 
 
-def _unique_training_id(store: AbstractStateStore, model: TorchMlModule) -> str:
+def _unique_training_id(store: AbstractStateStore, model: TorchModel) -> str:
     training_ids = [s.training_id for s in store.get_state_keys(model.state_type)]
     if len(training_ids) > 1:
         raise ValueError(
@@ -149,7 +145,7 @@ def _merge_predictions(
 
 
 def torch_run(options: ArgMlModuleTorchRunOptions) -> None:
-    """Runs a TorchMLModule from CLI"""
+    """Runs a TorchModel from CLI"""
     # Building the model
     model = options.instantiate_model()
 

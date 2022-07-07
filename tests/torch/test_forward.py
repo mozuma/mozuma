@@ -1,10 +1,10 @@
 import torch
 
 from mozuma.testing import ModuleTestConfiguration
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 
 
-def test_forward_random_tensor(torch_ml_module: ModuleTestConfiguration[TorchMlModule]):
+def test_forward_random_tensor(torch_ml_module: ModuleTestConfiguration[TorchModel]):
     """Sends a random tensor to forward and makes sure it run without error"""
     model = torch_ml_module.get_module()
     model.eval()
@@ -14,7 +14,7 @@ def test_forward_random_tensor(torch_ml_module: ModuleTestConfiguration[TorchMlM
 
 
 def test_forward_predictions_random_tensor(
-    torch_ml_module: ModuleTestConfiguration[TorchMlModule],
+    torch_ml_module: ModuleTestConfiguration[TorchModel],
 ):
     """Sends a random tensor to forward and makes sure it run without error"""
     model = torch_ml_module.get_module()

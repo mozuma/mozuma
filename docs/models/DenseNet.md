@@ -13,7 +13,7 @@ PyTorch implementation of DenseNet architecture[@Huang_2017_CVPR] as defined in 
 
 ## Base model
 
-The DenseNet model is an implementation of a [`TorchMlModule`][mozuma.torch.modules.TorchMlModule].
+The DenseNet model is an implementation of a [`TorchModel`][mozuma.torch.modules.TorchModel].
 
 ::: mozuma.models.densenet.TorchDenseNetModule
     selection:

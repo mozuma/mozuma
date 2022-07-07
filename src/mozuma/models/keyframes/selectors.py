@@ -10,11 +10,11 @@ from mozuma.models.keyframes.keyframes import KeyFramesExtractor
 from mozuma.models.resnet.modules import TorchResNetModule
 from mozuma.predictions import BatchModelPrediction, BatchVideoFramesPrediction
 from mozuma.states import StateType
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 
 
 class KeyFrameSelector(
-    TorchMlModule[
+    TorchModel[
         Tuple[Sequence[torch.LongTensor], Sequence[torch.Tensor]],
         Tuple[List[torch.LongTensor], List[torch.Tensor]],
     ]
@@ -22,7 +22,7 @@ class KeyFrameSelector(
     """Video key-frames selector
 
     Attributes:
-        image_encoder (TorchMlModule[torch.Tensor, torch.Tensor]): The PyTorch module to encode frames.
+        image_encoder (TorchModel[torch.Tensor, torch.Tensor]): The PyTorch module to encode frames.
         fps (float, optional): The number of frames per seconds to extract from the video.
             Defaults to 1.
         device (torch.device, optional): The PyTorch device to initialise the model weights.
@@ -31,7 +31,7 @@ class KeyFrameSelector(
 
     def __init__(
         self,
-        image_encoder: TorchMlModule[torch.Tensor, Any],
+        image_encoder: TorchModel[torch.Tensor, Any],
         fps: float = 1,
         device: torch.device = torch.device("cpu"),
     ):

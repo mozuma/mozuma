@@ -11,7 +11,7 @@ from mozuma.models.arcface.transforms import ArcFaceAlignment
 from mozuma.predictions import BatchModelPrediction
 from mozuma.states import StateType
 from mozuma.torch.layers import Bottleneck_IR_SE, get_block
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 from mozuma.torch.utils import l2_norm
 
 # See https://quip.com/blC4A0YmfhbQ/Approach-to-remove-face-embeddings-leading-to-false-positive
@@ -59,7 +59,7 @@ def bad_quality_faces_index(
 
 
 class TorchArcFaceModule(
-    TorchMlModule[torch.Tensor, torch.Tensor],
+    TorchModel[torch.Tensor, torch.Tensor],
 ):
     """Creates face embeddings from MTCNN output
 

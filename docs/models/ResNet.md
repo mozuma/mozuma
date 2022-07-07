@@ -12,7 +12,7 @@ PyTorch implementation of ResNet[@resnet] as defined in [Torchvision](https://py
 
 ## Base model
 
-The ResNet model is an implementation of a [`TorchMlModule`][mozuma.torch.modules.TorchMlModule].
+The ResNet model is an implementation of a [`TorchModel`][mozuma.torch.modules.TorchModel].
 
 ::: mozuma.models.resnet.TorchResNetModule
     selection:

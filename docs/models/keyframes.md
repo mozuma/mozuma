@@ -1,7 +1,7 @@
 # Video key-frames extractor
 
 This model implements two types of modules: a video frames encoder and the key-frames module.
-These models are an implementation of a [`TorchMlModule`][mozuma.torch.modules.TorchMlModule].
+These models are an implementation of a [`TorchModel`][mozuma.torch.modules.TorchModel].
 
 ## Pre-trained models
 

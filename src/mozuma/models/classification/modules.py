@@ -6,7 +6,7 @@ from torch import nn
 from mozuma.labels.base import LabelSet
 from mozuma.predictions import BatchModelPrediction
 from mozuma.states import StateType
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 
 
 @overload
@@ -76,7 +76,7 @@ class LinearModuleWithActivation(nn.Module):
         return self.module(x)
 
 
-class LinearClassifierTorchModule(TorchMlModule[torch.Tensor, torch.Tensor]):
+class LinearClassifierTorchModule(TorchModel[torch.Tensor, torch.Tensor]):
     """Linear classifier
 
 
@@ -127,7 +127,7 @@ class LinearClassifierTorchModule(TorchMlModule[torch.Tensor, torch.Tensor]):
         return self.label_set
 
 
-class MLPClassifierTorchModule(TorchMlModule[torch.Tensor, torch.Tensor]):
+class MLPClassifierTorchModule(TorchModel[torch.Tensor, torch.Tensor]):
     """Multi-layer perceptron classifier
 
     Attributes:

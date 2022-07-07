@@ -14,7 +14,7 @@ We are using the official implementation of MagFace[@Meng_2021_CVPR] in Pytorch.
 
 ## Base models
 
-The MagFace model is an implementation of a [`TorchMlModule`][mozuma.torch.modules.TorchMlModule].
+The MagFace model is an implementation of a [`TorchModel`][mozuma.torch.modules.TorchModel].
 
 ::: mozuma.models.magface.modules.TorchMagFaceModule
     selection:

@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, Sequence
 import pytest
 import torch
 
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 
 _CPU = torch.device("cpu")
 
@@ -21,4 +21,4 @@ _CPU = torch.device("cpu")
 def test_extract_device_from_args(
     args: Sequence, kwargs: Dict[str, Any], expected: Optional[torch.device]
 ):
-    assert TorchMlModule._extract_device_from_args(*args, **kwargs) == expected
+    assert TorchModel._extract_device_from_args(*args, **kwargs) == expected

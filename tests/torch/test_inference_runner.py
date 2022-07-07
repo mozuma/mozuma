@@ -6,12 +6,12 @@ import torch
 from mozuma.predictions import BatchModelPrediction
 from mozuma.states import StateType
 from mozuma.torch.datasets import ListDataset
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 from mozuma.torch.options import TorchRunnerOptions
 from mozuma.torch.runners import TorchInferenceRunner
 
 
-class TorchTestFeaturesModule(TorchMlModule[torch.Tensor, torch.Tensor]):
+class TorchTestFeaturesModule(TorchModel[torch.Tensor, torch.Tensor]):
     @property
     def state_type(self) -> StateType:
         return StateType(backend="pytorch", architecture="test-module")

@@ -13,7 +13,7 @@ Text model for computing sentence embeddings in multiple languages based on [Sen
 
 ## Base model
 
-This model is an implementation of a [`TorchMlModule`][mozuma.torch.modules.TorchMlModule].
+This model is an implementation of a [`TorchModel`][mozuma.torch.modules.TorchModel].
 
 ::: mozuma.models.sentences.distilbert.modules.DistilUseBaseMultilingualCasedV2Module
     selection:

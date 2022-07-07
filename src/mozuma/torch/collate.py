@@ -7,7 +7,7 @@ _IndicesType = TypeVar("_IndicesType")
 
 
 @dataclasses.dataclass
-class TorchMlModuleCollateFn:
+class TorchModelCollateFn:
     collate_fn: Callable = default_collate
 
     def __call__(self, data):

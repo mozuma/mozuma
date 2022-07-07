@@ -17,7 +17,7 @@ See [OpenAI/CLIP](https://github.com/openai/CLIP) for the source code and origin
 
 CLIP comes with image ([`CLIPImageModule`][mozuma.models.clip.image.CLIPImageModule])
 and a text ([`CLIPTextModule`][mozuma.models.clip.text.CLIPTextModule]) encoders.
-These modules are an implementation of [`TorchMlModule`][mozuma.torch.modules.TorchMlModule].
+These modules are an implementation of [`TorchModel`][mozuma.torch.modules.TorchModel].
 
 ::: mozuma.models.clip.image.CLIPImageModule
     selection:

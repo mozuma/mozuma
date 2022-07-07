@@ -10,11 +10,11 @@ from mozuma.models.keyframes.transforms import (
 )
 from mozuma.predictions import BatchModelPrediction, BatchVideoFramesPrediction
 from mozuma.states import StateType
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 
 
 class VideoFramesEncoder(
-    TorchMlModule[
+    TorchModel[
         Tuple[Sequence[torch.LongTensor], Sequence[torch.Tensor]],
         Tuple[List[torch.LongTensor], List[torch.Tensor]],
     ]
@@ -24,7 +24,7 @@ class VideoFramesEncoder(
     This module will extract and encode frames of a video using an `image_encoder`.
 
     Attributes:
-        image_encoder (TorchMlModule[torch.Tensor]): The PyTorch module to encode frames
+        image_encoder (TorchModel[torch.Tensor]): The PyTorch module to encode frames
         fps (float, optional): The number of frames per seconds to extract from the video.
             Defaults to 1.
         device (torch.device, optional): The PyTorch device to initialise the model weights.
@@ -33,7 +33,7 @@ class VideoFramesEncoder(
 
     def __init__(
         self,
-        image_encoder: TorchMlModule[torch.Tensor, Any],
+        image_encoder: TorchModel[torch.Tensor, Any],
         fps: float = 1,
         device: torch.device = torch.device("cpu"),
     ):

@@ -25,13 +25,13 @@ from mozuma.helpers.ignite import ResultsCollector, register_multi_gpu_runner_lo
 from mozuma.predictions import BatchModelPrediction
 from mozuma.runners import BaseRunner
 from mozuma.torch.callbacks import TorchRunnerCallbackType
-from mozuma.torch.collate import TorchMlModuleCollateFn
+from mozuma.torch.collate import TorchModelCollateFn
 from mozuma.torch.datasets import (
     TorchDataset,
     TorchDatasetTransformsWrapper,
     TorchTrainingDataset,
 )
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 from mozuma.torch.options import (
     TorchMultiGPURunnerOptions,
     TorchRunnerOptions,
@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 
 
 def validate_data_loader_options(
-    model: TorchMlModule, data_loader_options: Dict[str, Any]
+    model: TorchModel, data_loader_options: Dict[str, Any]
 ) -> Dict[str, Any]:
     """Makes sure the collate function is properly defined"""
     # Making a copy of options
@@ -57,16 +57,16 @@ def validate_data_loader_options(
     # Default collate function
     model_collate_fn = model.get_dataloader_collate_fn()
     if model_collate_fn:
-        default_collate = TorchMlModuleCollateFn(model_collate_fn)
+        default_collate = TorchModelCollateFn(model_collate_fn)
     else:
-        default_collate = TorchMlModuleCollateFn()
+        default_collate = TorchModelCollateFn()
     # Sets the collate_fn if not defined
     data_loader_options.setdefault("collate_fn", default_collate)
 
-    # Checking that if set the collate_fn is an instance of TorchMlModuleCollateFn
-    if not isinstance(data_loader_options["collate_fn"], TorchMlModuleCollateFn):
+    # Checking that if set the collate_fn is an instance of TorchModelCollateFn
+    if not isinstance(data_loader_options["collate_fn"], TorchModelCollateFn):
         logger.warning(
-            "The given collate_fn is not an instance of TorchMlModuleCollateFn "
+            "The given collate_fn is not an instance of TorchModelCollateFn "
             "which could lead to type errors on callbacks"
         )
 
@@ -74,14 +74,14 @@ def validate_data_loader_options(
 
 
 class TorchInferenceRunner(
-    BaseRunner[TorchMlModule, TorchDataset, TorchRunnerCallbackType, TorchRunnerOptions]
+    BaseRunner[TorchModel, TorchDataset, TorchRunnerCallbackType, TorchRunnerOptions]
 ):
     """Runner for inference tasks on PyTorch models
 
     Supports CPU or single GPU inference.
 
     Attributes:
-        model (TorchMlModule): The PyTorch model to run inference
+        model (TorchModel): The PyTorch model to run inference
         dataset (TorchDataset): Input dataset for the runner
         callbacks (List[TorchRunnerCallbackType]): Callbacks to save features, labels or bounding boxes
         options (TorchRunnerOptions): PyTorch options
@@ -144,7 +144,7 @@ class TorchInferenceRunner(
 
 class TorchInferenceMultiGPURunner(
     BaseRunner[
-        TorchMlModule, TorchDataset, TorchRunnerCallbackType, TorchMultiGPURunnerOptions
+        TorchModel, TorchDataset, TorchRunnerCallbackType, TorchMultiGPURunnerOptions
     ]
 ):
     """Runner for inference tasks on PyTorch models
@@ -152,7 +152,7 @@ class TorchInferenceMultiGPURunner(
     Supports CPU and multi-GPU inference with native torch backends.
 
     Attributes:
-        model (TorchMlModule): The PyTorch model to run inference
+        model (TorchModel): The PyTorch model to run inference
         dataset (TorchDataset): Input dataset for the runner
         callbacks (List[TorchRunnerCallbackType]): Callbacks to save features, labels or bounding boxes
         options (TorchMultiGPURunnerOptions): PyTorch multi-gpu options
@@ -283,7 +283,7 @@ class TorchInferenceMultiGPURunner(
 @dataclasses.dataclass(frozen=True)
 class TorchTrainingRunner(
     BaseRunner[
-        TorchMlModule,
+        TorchModel,
         Tuple[TorchTrainingDataset, TorchTrainingDataset],
         Union[BaseRunnerEndCallback, SaveModelState],
         TorchTrainingOptions,
@@ -294,7 +294,7 @@ class TorchTrainingRunner(
     Supports CPU and multi-GPU training with multiple backends.
 
     Attributes:
-        model (TorchMlModule): The PyTorch model to run inference
+        model (TorchModel): The PyTorch model to run inference
         dataset (Tuple[TorchTrainingDataset, TorchTrainingDataset]): Train and test datasets for the runner
         callbacks (List[Union[BaseRunnerEndCallback, SaveModelState]]):
             Callback to save model weights plus one or more callbacks for when the runner ends.

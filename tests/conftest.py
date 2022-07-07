@@ -16,10 +16,7 @@ from mozuma.models.classification.modules import (
 from mozuma.models.clip.image import CLIPImageModule
 from mozuma.models.clip.stores import CLIPStore
 from mozuma.models.clip.text import CLIPTextModule
-from mozuma.models.densenet.modules import (
-    TorchDenseNetModule,
-    torch_densenet_places365,
-)
+from mozuma.models.densenet.modules import TorchDenseNetModule, torch_densenet_places365
 from mozuma.models.densenet.stores import (
     DenseNetPlaces365Store,
     DenseNetTorchVisionStore,
@@ -41,7 +38,7 @@ from mozuma.models.sentences.distilbert.stores import (
 from mozuma.models.vinvl.modules import TorchVinVLDetectorModule
 from mozuma.models.vinvl.stores import VinVLStore
 from mozuma.testing import ModuleTestConfiguration
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 
 MODULE_TO_TEST: List[ModuleTestConfiguration] = [
     # ResNet
@@ -193,7 +190,7 @@ def ml_module(request: SubRequest) -> ModuleTestConfiguration:
 @pytest.fixture
 def torch_ml_module(
     ml_module: ModuleTestConfiguration,
-) -> ModuleTestConfiguration[TorchMlModule]:
+) -> ModuleTestConfiguration[TorchModel]:
     """All modules implemented in Torch"""
     if not ml_module.is_pytorch:
         pytest.skip(f"Skipping {ml_module} as it is not a PyTorch module")

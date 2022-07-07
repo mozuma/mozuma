@@ -15,7 +15,7 @@ in PyTorch by [InsightFace](https://github.com/TreB1eN/InsightFace_Pytorch).
 
 ## Base models
 
-The MagFace model is an implementation of a [`TorchMlModule`][mozuma.torch.modules.TorchMlModule].
+The MagFace model is an implementation of a [`TorchModel`][mozuma.torch.modules.TorchModel].
 
 ::: mozuma.models.arcface.modules.TorchArcFaceModule
     selection:

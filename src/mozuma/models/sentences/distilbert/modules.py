@@ -7,7 +7,7 @@ from tokenizers import Tokenizer
 from mozuma.models.sentences.distilbert.transforms import TokenizerTransform
 from mozuma.predictions import BatchModelPrediction
 from mozuma.states import StateType
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 from mozuma.torch.utils import save_state_dict_to_bytes
 
 from .blocks.dense import Dense
@@ -18,7 +18,7 @@ from .config import DistilBertConfig
 
 
 class TorchDistilBertModule(
-    TorchMlModule[Tuple[torch.LongTensor, torch.FloatTensor], torch.Tensor]
+    TorchModel[Tuple[torch.LongTensor, torch.FloatTensor], torch.Tensor]
 ):
     def __init__(
         self,

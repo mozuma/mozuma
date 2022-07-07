@@ -13,7 +13,7 @@ from mozuma.labels.base import LabelSet
 from mozuma.labels.imagenet import IMAGENET_LABELS
 from mozuma.predictions import BatchModelPrediction
 from mozuma.states import StateType
-from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.modules import TorchModel
 from mozuma.torch.transforms import TORCHVISION_STANDARD_IMAGE_TRANSFORMS
 
 TorchResNetForwardOutputType = Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]
@@ -26,7 +26,7 @@ class TorchResNetTrainingMode(Enum):
     labels: str = "labels"
 
 
-class TorchResNetModule(TorchMlModule[torch.Tensor, TorchResNetForwardOutputType]):
+class TorchResNetModule(TorchModel[torch.Tensor, TorchResNetForwardOutputType]):
     """PyTorch ResNet architecture.
 
     See [PyTorch's documentation](https://pytorch.org/vision/stable/_modules/torchvision/models/resnet.html).
