@@ -3,7 +3,7 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 # Install requirements
-ADD requirements.txt /app/build/requirements.txt
+ADD tests/requirements.txt /app/build/requirements.txt
 RUN pip install -r /app/build/requirements.txt
 
 # Install MoZuMa and test dependencies
