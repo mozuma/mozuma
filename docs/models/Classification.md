@@ -1,16 +1,16 @@
 # Classification
 
-Path: `mlmodule.models.classification`
+Path: `mozuma.models.classification`
 
 This module contains torch modules that can be used as classification heads on top
 of features.
 
 ## Models
 
-::: mlmodule.models.classification.LinearClassifierTorchModule
+::: mozuma.models.classification.LinearClassifierTorchModule
     selection:
         members: none
 
-::: mlmodule.models.classification.MLPClassifierTorchModule
+::: mozuma.models.classification.MLPClassifierTorchModule
     selection:
         members: none

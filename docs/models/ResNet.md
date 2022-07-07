@@ -5,16 +5,16 @@ PyTorch implementation of ResNet[@resnet] as defined in [Torchvision](https://py
 ## Pre-trained models
 
 {% for model in models.resnet -%}
-::: mlmodule.models.resnet.{{ model.factory }}
+::: mozuma.models.resnet.{{ model.factory }}
     rendering:
         show_signature: False
 {% endfor %}
 
 ## Base model
 
-The ResNet model is an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
+The ResNet model is an implementation of a [`TorchModel`][mozuma.torch.modules.TorchModel].
 
-::: mlmodule.models.resnet.TorchResNetModule
+::: mozuma.models.resnet.TorchResNetModule
     selection:
         members: none
 
@@ -22,6 +22,6 @@ The ResNet model is an implementation of a [`TorchMlModule`][mlmodule.torch.modu
 
 See the [stores documentation](../references/stores.md) for usage.
 
-::: mlmodule.models.resnet.stores.ResNetTorchVisionStore
+::: mozuma.models.resnet.stores.ResNetTorchVisionStore
     selection:
         members: none

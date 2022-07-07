@@ -3,17 +3,17 @@ from io import BytesIO
 import pytest
 import torch
 
-from mlmodule.callbacks.memory import CollectVideoFramesInMemory
-from mlmodule.models.keyframes.datasets import (
+from mozuma.callbacks.memory import CollectVideoFramesInMemory
+from mozuma.models.keyframes.datasets import (
     FPSVideoFrameExtractorTransform,
     compute_every_param_from_target_fps,
 )
-from mlmodule.models.keyframes.encoders import VideoFramesEncoder
-from mlmodule.models.keyframes.pretrained import torch_keyframes_resnet_imagenet
-from mlmodule.models.resnet.modules import TorchResNetModule
-from mlmodule.torch.datasets import ListDataset
-from mlmodule.torch.options import TorchRunnerOptions
-from mlmodule.torch.runners import TorchInferenceRunner
+from mozuma.models.keyframes.encoders import VideoFramesEncoder
+from mozuma.models.keyframes.pretrained import torch_keyframes_resnet_imagenet
+from mozuma.models.resnet.modules import TorchResNetModule
+from mozuma.torch.datasets import ListDataset
+from mozuma.torch.options import TorchRunnerOptions
+from mozuma.torch.runners import TorchInferenceRunner
 
 
 @pytest.mark.parametrize(

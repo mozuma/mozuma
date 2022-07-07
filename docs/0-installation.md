@@ -1,7 +1,7 @@
 # Installation
 
 We support `Python >= {{develop.python_version}}` and `PyTorch >= {{develop.pytorch_version}}`.
-However, it is likely that MLModule can be run on previous versions of PyTorch, we are simply not testing it
+However, it is likely that MoZuMa can be run on previous versions of PyTorch, we are simply not testing it
 for versions before `{{develop.pytorch_version}}`.
 
 ## Pre-requisites
@@ -15,14 +15,14 @@ We recommend using the [`conda`](https://docs.conda.io/en/latest/) package manag
 ## Installing with `pip`
 
 Once PyTorch and TorchVision are installed,
-MLModule can be directly installed from the git repository
+MoZuMa can be directly installed from the git repository
 using `pip`.
 
 ```bash
 # To install the latest developments
-pip install git+https://github.com/LSIR/mlmodule
+pip install git+https://github.com/mozuma/mozuma
 # Or to install a specific version X.Y.Z
-pip install git+https://github.com/LSIR/mlmodule@vX.Y.Z
+pip install git+https://github.com/mozuma/mozuma@vX.Y.Z
 ```
 
 ## Using Docker

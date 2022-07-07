@@ -5,7 +5,7 @@ We are using `facenet-pytorch` to load pre-trained MTCNN model[@mtcnn], see <htt
 ## Pre-trained models
 
 {% for model in models.mtcnn -%}
-::: mlmodule.models.mtcnn.{{ model.factory }}
+::: mozuma.models.mtcnn.{{ model.factory }}
     rendering:
         show_signature: False
 {% endfor %}
@@ -13,9 +13,9 @@ We are using `facenet-pytorch` to load pre-trained MTCNN model[@mtcnn], see <htt
 
 ## Base model
 
-The MTCNN model is an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
+The MTCNN model is an implementation of a [`TorchModel`][mozuma.torch.modules.TorchModel].
 
-::: mlmodule.models.mtcnn.modules.TorchMTCNNModule
+::: mozuma.models.mtcnn.modules.TorchMTCNNModule
     selection:
         members: none
 
@@ -23,6 +23,6 @@ The MTCNN model is an implementation of a [`TorchMlModule`][mlmodule.torch.modul
 
 See the [stores documentation](../references/stores.md) for usage.
 
-::: mlmodule.models.mtcnn.stores.FaceNetMTCNNStore
+::: mozuma.models.mtcnn.stores.FaceNetMTCNNStore
     selection:
         members: none

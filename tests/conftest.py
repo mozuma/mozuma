@@ -5,43 +5,40 @@ import pytest
 import torch
 from _pytest.fixtures import SubRequest
 
-from mlmodule.helpers.files import list_files_in_dir
-from mlmodule.labels.imagenet import IMAGENET_LABELS
-from mlmodule.models.arcface.modules import TorchArcFaceModule
-from mlmodule.models.arcface.stores import ArcFaceStore
-from mlmodule.models.classification.modules import (
+from mozuma.helpers.files import list_files_in_dir
+from mozuma.labels.imagenet import IMAGENET_LABELS
+from mozuma.models.arcface.modules import TorchArcFaceModule
+from mozuma.models.arcface.stores import ArcFaceStore
+from mozuma.models.classification.modules import (
     LinearClassifierTorchModule,
     MLPClassifierTorchModule,
 )
-from mlmodule.models.clip.image import CLIPImageModule
-from mlmodule.models.clip.stores import CLIPStore
-from mlmodule.models.clip.text import CLIPTextModule
-from mlmodule.models.densenet.modules import (
-    TorchDenseNetModule,
-    torch_densenet_places365,
-)
-from mlmodule.models.densenet.stores import (
+from mozuma.models.clip.image import CLIPImageModule
+from mozuma.models.clip.stores import CLIPStore
+from mozuma.models.clip.text import CLIPTextModule
+from mozuma.models.densenet.modules import TorchDenseNetModule, torch_densenet_places365
+from mozuma.models.densenet.stores import (
     DenseNetPlaces365Store,
     DenseNetTorchVisionStore,
 )
-from mlmodule.models.keyframes.encoders import VideoFramesEncoder
-from mlmodule.models.keyframes.selectors import KeyFrameSelector
-from mlmodule.models.magface.modules import TorchMagFaceModule
-from mlmodule.models.magface.stores import MagFaceStore
-from mlmodule.models.mtcnn.modules import TorchMTCNNModule
-from mlmodule.models.mtcnn.stores import FaceNetMTCNNStore
-from mlmodule.models.resnet.modules import TorchResNetModule
-from mlmodule.models.resnet.stores import ResNetTorchVisionStore
-from mlmodule.models.sentences.distilbert.modules import (
+from mozuma.models.keyframes.encoders import VideoFramesEncoder
+from mozuma.models.keyframes.selectors import KeyFrameSelector
+from mozuma.models.magface.modules import TorchMagFaceModule
+from mozuma.models.magface.stores import MagFaceStore
+from mozuma.models.mtcnn.modules import TorchMTCNNModule
+from mozuma.models.mtcnn.stores import FaceNetMTCNNStore
+from mozuma.models.resnet.modules import TorchResNetModule
+from mozuma.models.resnet.stores import ResNetTorchVisionStore
+from mozuma.models.sentences.distilbert.modules import (
     DistilUseBaseMultilingualCasedV2Module,
 )
-from mlmodule.models.sentences.distilbert.stores import (
+from mozuma.models.sentences.distilbert.stores import (
     SBERTDistiluseBaseMultilingualCasedV2Store,
 )
-from mlmodule.models.vinvl.modules import TorchVinVLDetectorModule
-from mlmodule.models.vinvl.stores import VinVLStore
-from mlmodule.testing import ModuleTestConfiguration
-from mlmodule.torch.modules import TorchMlModule
+from mozuma.models.vinvl.modules import TorchVinVLDetectorModule
+from mozuma.models.vinvl.stores import VinVLStore
+from mozuma.testing import ModuleTestConfiguration
+from mozuma.torch.modules import TorchModel
 
 MODULE_TO_TEST: List[ModuleTestConfiguration] = [
     # ResNet
@@ -186,14 +183,14 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
 
 @pytest.fixture(params=MODULE_TO_TEST, ids=[str(m) for m in MODULE_TO_TEST])
 def ml_module(request: SubRequest) -> ModuleTestConfiguration:
-    """All modules that are part of the MLModule library"""
+    """All modules that are part of the MoZuMa library"""
     return request.param
 
 
 @pytest.fixture
 def torch_ml_module(
     ml_module: ModuleTestConfiguration,
-) -> ModuleTestConfiguration[TorchMlModule]:
+) -> ModuleTestConfiguration[TorchModel]:
     """All modules implemented in Torch"""
     if not ml_module.is_pytorch:
         pytest.skip(f"Skipping {ml_module} as it is not a PyTorch module")

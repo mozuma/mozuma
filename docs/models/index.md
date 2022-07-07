@@ -6,67 +6,67 @@
 |---------------|---------------|-----------|
 {% for module in models -%}
 {% for model in models[module] -%}
-| [`{{ model.factory }}`][mlmodule.models.{{ module }}.{{ model.factory }}] | {{ model.name }} | [{{ licenses[model.license].name }} :octicons-link-external-16:]({{ licenses[model.license].link }}){:target="_blank"} |
+| [`{{ model.factory }}`][mozuma.models.{{ module }}.{{ model.factory }}] | {{ model.name }} | [{{ licenses[model.license].name }} :octicons-link-external-16:]({{ licenses[model.license].link }}){:target="_blank"} |
 {% endfor -%}
 {% endfor %}
 
 
 ## Add a new model
 
-In MLModule, a model is usually implemented as a class.
+In MoZuMa, a model is usually implemented as a class.
 The model implementation details primarily depend on the type
 of [runner](../references/runners.md) used.
-For instance, the [`TorchInferenceRunner`][mlmodule.torch.runners.TorchInferenceRunner]
-expects to receive a subclass of [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
+For instance, the [`TorchInferenceRunner`][mozuma.torch.runners.TorchInferenceRunner]
+expects to receive a subclass of [`TorchModel`][mozuma.torch.modules.TorchModel].
 
 However, there are a few conventions to follow:
 
 - Model predictions should implement the
-  [BatchModelPrediction][mlmodule.predictions.BatchModelPrediction] class, this is required for
+  [BatchModelPrediction][mozuma.predictions.BatchModelPrediction] class, this is required for
   [callbacks](../references/callbacks.md) to work properly.
 - If the model's state needs to be saved,
-  the model should follow the [`ModelWithState`][mlmodule.models.ModelWithState] protocol.
+  the model should follow the [`ModelWithState`][mozuma.models.ModelWithState] protocol.
 - If the model predicts labels,
-  it should follow the [`ModelWithLabels`][mlmodule.models.ModelWithLabels] protocol.
+  it should follow the [`ModelWithLabels`][mozuma.models.ModelWithLabels] protocol.
 
 ## Predictions
 
 !!! note
     The `ArrayLike` type is expected to be a `np.ndarray` or a `torch.Tensor`.
 
-::: mlmodule.predictions.BatchModelPrediction
-::: mlmodule.predictions.BatchBoundingBoxesPrediction
-::: mlmodule.predictions.BatchVideoFramesPrediction
+::: mozuma.predictions.BatchModelPrediction
+::: mozuma.predictions.BatchBoundingBoxesPrediction
+::: mozuma.predictions.BatchVideoFramesPrediction
 
 
 ## State management
 
 A model with internal state (weights) should implement the
-[`ModelWithState`][mlmodule.models.ModelWithState] protocol
+[`ModelWithState`][mozuma.models.ModelWithState] protocol
 to be compatible with [state stores](../references/stores.md).
 
-::: mlmodule.models.ModelWithState
+::: mozuma.models.ModelWithState
 
 ## Labels
 
 When a model returns label scores, it must define a
-[`LabelSet`][mlmodule.labels.base.LabelSet].
+[`LabelSet`][mozuma.labels.base.LabelSet].
 This should be defined by implementing the
-[`ModelWithLabels`][mlmodule.models.ModelWithLabels]
+[`ModelWithLabels`][mozuma.models.ModelWithLabels]
 protocol.
 
-::: mlmodule.models.ModelWithLabels
+::: mozuma.models.ModelWithLabels
 
 ## PyTorch models
 
-PyTorch models should be a subclass of `TorchMlModule`.
+PyTorch models should be a subclass of `TorchModel`.
 
 !!! note
     PyTorch models already implement the
-    [`ModelWithState`][mlmodule.models.ModelWithState] protocol
+    [`ModelWithState`][mozuma.models.ModelWithState] protocol
     by default.
 
-::: mlmodule.torch.modules.TorchMlModule
+::: mozuma.torch.modules.TorchModel
     selection:
         members:
             - state_type

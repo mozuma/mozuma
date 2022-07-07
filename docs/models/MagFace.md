@@ -6,7 +6,7 @@ We are using the official implementation of MagFace[@Meng_2021_CVPR] in Pytorch.
 ## Pre-trained models
 
 {% for model in models.magface -%}
-::: mlmodule.models.magface.{{ model.factory }}
+::: mozuma.models.magface.{{ model.factory }}
     rendering:
         show_signature: False
 {% endfor %}
@@ -14,9 +14,9 @@ We are using the official implementation of MagFace[@Meng_2021_CVPR] in Pytorch.
 
 ## Base models
 
-The MagFace model is an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
+The MagFace model is an implementation of a [`TorchModel`][mozuma.torch.modules.TorchModel].
 
-::: mlmodule.models.magface.modules.TorchMagFaceModule
+::: mozuma.models.magface.modules.TorchMagFaceModule
     selection:
         members: none
 
@@ -24,6 +24,6 @@ The MagFace model is an implementation of a [`TorchMlModule`][mlmodule.torch.mod
 
 See the [stores documentation](../references/stores.md) for usage.
 
-::: mlmodule.models.magface.stores.MagFaceStore
+::: mozuma.models.magface.stores.MagFaceStore
     selection:
         members: none

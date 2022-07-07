@@ -1,11 +1,11 @@
 import os
 
-from mlmodule.callbacks.memory import CollectBoundingBoxesInMemory
-from mlmodule.helpers.files import list_files_in_dir
-from mlmodule.models.vinvl.pretrained import torch_vinvl_detector
-from mlmodule.torch.datasets import ImageDataset, LocalBinaryFilesDataset
-from mlmodule.torch.options import TorchRunnerOptions
-from mlmodule.torch.runners import TorchInferenceRunner
+from mozuma.callbacks.memory import CollectBoundingBoxesInMemory
+from mozuma.helpers.files import list_files_in_dir
+from mozuma.models.vinvl.pretrained import torch_vinvl_detector
+from mozuma.torch.datasets import ImageDataset, LocalBinaryFilesDataset
+from mozuma.torch.options import TorchRunnerOptions
+from mozuma.torch.runners import TorchInferenceRunner
 
 
 def test_vinvl_object_detection(torch_device):

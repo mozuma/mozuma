@@ -7,7 +7,7 @@ See [OpenAI/CLIP](https://github.com/openai/CLIP) for the source code and origin
 ## Pre-trained models
 
 {% for model in models.clip -%}
-::: mlmodule.models.clip.{{ model.factory }}
+::: mozuma.models.clip.{{ model.factory }}
     rendering:
         show_signature: False
 {% endfor %}
@@ -15,15 +15,15 @@ See [OpenAI/CLIP](https://github.com/openai/CLIP) for the source code and origin
 
 ## Models
 
-CLIP comes with image ([`CLIPImageModule`][mlmodule.models.clip.image.CLIPImageModule])
-and a text ([`CLIPTextModule`][mlmodule.models.clip.text.CLIPTextModule]) encoders.
-These modules are an implementation of [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
+CLIP comes with image ([`CLIPImageModule`][mozuma.models.clip.image.CLIPImageModule])
+and a text ([`CLIPTextModule`][mozuma.models.clip.text.CLIPTextModule]) encoders.
+These modules are an implementation of [`TorchModel`][mozuma.torch.modules.TorchModel].
 
-::: mlmodule.models.clip.image.CLIPImageModule
+::: mozuma.models.clip.image.CLIPImageModule
     selection:
         members: none
 
-::: mlmodule.models.clip.text.CLIPTextModule
+::: mozuma.models.clip.text.CLIPTextModule
     selection:
         members: none
 
@@ -31,7 +31,7 @@ These modules are an implementation of [`TorchMlModule`][mlmodule.torch.modules.
 
 See the [stores documentation](../references/stores.md) for usage.
 
-::: mlmodule.models.clip.stores.CLIPStore
+::: mozuma.models.clip.stores.CLIPStore
     selection:
         members: none
 
@@ -40,7 +40,7 @@ See the [stores documentation](../references/stores.md) for usage.
 There is a command line utility to list all available models from CLIP with their associated parameters in JSON format:
 
 ```bash
-python -m mlmodule.models.clip.list
+python -m mozuma.models.clip.list
 ```
 
-The output is used to fill the mlmodule.models.clip.parameters file.
+The output is used to fill the mozuma.models.clip.parameters file.

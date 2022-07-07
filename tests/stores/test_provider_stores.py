@@ -2,10 +2,10 @@ import dataclasses
 
 import pytest
 
-from mlmodule.models.types import ModelWithState
-from mlmodule.states import StateKey
-from mlmodule.stores import Store
-from mlmodule.testing import ModuleTestConfiguration
+from mozuma.models.types import ModelWithState
+from mozuma.states import StateKey
+from mozuma.stores import Store
+from mozuma.testing import ModuleTestConfiguration
 
 
 @pytest.mark.slow
@@ -32,15 +32,15 @@ def test_provider_stores_load(ml_module: ModuleTestConfiguration[ModelWithState]
         random_state != new_state
     ), f"Binary state of model hasn't changed after loading from provider store: {store}"
 
-    # Loading the state from MLModule
+    # Loading the state from MoZuMa
     new_model = ml_module.get_module()
     Store().load(new_model, state_key)
-    mlmodule_state = new_model.get_state()
+    mozuma_state = new_model.get_state()
 
     # It should be the same
     assert (
-        mlmodule_state == new_state
-    ), f"Binary state of model from MLModule and provider store are different for {store}"
+        mozuma_state == new_state
+    ), f"Binary state of model from MoZuMa and provider store are different for {store}"
 
 
 def test_provider_store_get_state_keys(

@@ -5,7 +5,7 @@ PyTorch implementation of DenseNet architecture[@Huang_2017_CVPR] as defined in 
 ## Pre-trained models
 
 {% for model in models.densenet -%}
-::: mlmodule.models.densenet.{{ model.factory }}
+::: mozuma.models.densenet.{{ model.factory }}
     rendering:
         show_signature: False
 {% endfor %}
@@ -13,9 +13,9 @@ PyTorch implementation of DenseNet architecture[@Huang_2017_CVPR] as defined in 
 
 ## Base model
 
-The DenseNet model is an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
+The DenseNet model is an implementation of a [`TorchModel`][mozuma.torch.modules.TorchModel].
 
-::: mlmodule.models.densenet.TorchDenseNetModule
+::: mozuma.models.densenet.TorchDenseNetModule
     selection:
         members: none
 
@@ -23,10 +23,10 @@ The DenseNet model is an implementation of a [`TorchMlModule`][mlmodule.torch.mo
 
 See the [stores documentation](../references/stores.md) for usage.
 
-::: mlmodule.models.densenet.stores.DenseNetTorchVisionStore
+::: mozuma.models.densenet.stores.DenseNetTorchVisionStore
     selection:
         members: none
 
-::: mlmodule.models.densenet.stores.DenseNetPlaces365Store
+::: mozuma.models.densenet.stores.DenseNetPlaces365Store
     selection:
         members: none

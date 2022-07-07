@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 from torchvision.transforms import ToTensor
 
-from mlmodule.predictions import BatchBoundingBoxesPrediction
-from mlmodule.torch.datasets import (
+from mozuma.predictions import BatchBoundingBoxesPrediction
+from mozuma.torch.datasets import (
     ImageBoundingBoxDataset,
     ImageDataset,
     LocalBinaryFilesDataset,

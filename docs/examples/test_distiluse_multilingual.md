@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.13.8
+      jupytext_version: 1.14.0
   kernelspec:
     display_name: Python 3.9.12 (conda)
     language: python
@@ -16,11 +16,11 @@ jupyter:
 # Testing multilingual semantic text similarity
 
 ```python
-from mlmodule.torch.runners import TorchInferenceRunner
-from mlmodule.torch.options import TorchRunnerOptions
-from mlmodule.models.sentences import torch_distiluse_base_multilingual_v2
-from mlmodule.torch.datasets import ListDataset
-from mlmodule.callbacks.memory import CollectFeaturesInMemory
+from mozuma.torch.runners import TorchInferenceRunner
+from mozuma.torch.options import TorchRunnerOptions
+from mozuma.models.sentences import torch_distiluse_base_multilingual_v2
+from mozuma.torch.datasets import ListDataset
+from mozuma.callbacks.memory import CollectFeaturesInMemory
 
 import torch
 import matplotlib.pyplot as plt

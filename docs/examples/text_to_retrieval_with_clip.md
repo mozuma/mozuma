@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.13.8
+      jupytext_version: 1.14.0
   kernelspec:
     display_name: Python 3.9.12
     language: python
@@ -18,26 +18,26 @@ jupyter:
 This is an example of a text-to-Image retrieval engine based on OpenAI CLIP model
 
 
-Import `mlmodule` modules for the task
+Import `mozuma` modules for the task
 
 ```python
-from mlmodule.torch.runners import TorchInferenceRunner
-from mlmodule.torch.options import TorchRunnerOptions
-from mlmodule.callbacks.memory import (
+from mozuma.torch.runners import TorchInferenceRunner
+from mozuma.torch.options import TorchRunnerOptions
+from mozuma.callbacks.memory import (
     CollectFeaturesInMemory,
 )
-from mlmodule.torch.datasets import (
+from mozuma.torch.datasets import (
     ImageDataset,
     ListDataset,
     LocalBinaryFilesDataset,
 )
-from mlmodule.helpers.files import list_files_in_dir
+from mozuma.helpers.files import list_files_in_dir
 
-from mlmodule.models.clip.text import CLIPTextModule
-from mlmodule.models.clip.image import CLIPImageModule
+from mozuma.models.clip.text import CLIPTextModule
+from mozuma.models.clip.image import CLIPImageModule
 
-from mlmodule.states import StateKey
-from mlmodule.stores import Store
+from mozuma.states import StateKey
+from mozuma.stores import Store
 
 import torch
 ```

@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from sklearn.datasets import make_blobs
 
-from mlmodule.models.keyframes.keyframes import KeyFramesExtractor
+from mozuma.models.keyframes.keyframes import KeyFramesExtractor
 
 
 def test_find_number_of_clusters():

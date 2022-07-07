@@ -1,15 +1,15 @@
 import pytest
 
-from mlmodule.models.types import ModelWithState
-from mlmodule.states import StateKey
-from mlmodule.stores import Store
-from mlmodule.testing import ModuleTestConfiguration
+from mozuma.models.types import ModelWithState
+from mozuma.states import StateKey
+from mozuma.stores import Store
+from mozuma.testing import ModuleTestConfiguration
 
 
-def test_mlmodule_store(ml_module: ModuleTestConfiguration):
-    """Test that a state can be loaded from MLModule"""
+def test_mozuma_store(ml_module: ModuleTestConfiguration):
+    """Test that a state can be loaded from MoZuMa"""
     if ml_module.training_id is None:
-        pytest.skip("Module not available in MlModule store")
+        pytest.skip("Module not available in MoZuMa store")
 
     store = Store()
     model: ModelWithState = ml_module.get_module()

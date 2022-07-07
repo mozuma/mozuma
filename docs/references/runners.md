@@ -7,23 +7,23 @@ They are executed with the `run` function which takes no arguments.
 
 ## Inference
 
-::: mlmodule.torch.runners.TorchInferenceRunner
+::: mozuma.torch.runners.TorchInferenceRunner
     selection:
       members:
         - run
 
-::: mlmodule.torch.runners.TorchInferenceMultiGPURunner
+::: mozuma.torch.runners.TorchInferenceMultiGPURunner
     selection:
       members:
         - run
 
 ## Training
 
-::: mlmodule.torch.runners.TorchTrainingRunner
+::: mozuma.torch.runners.TorchTrainingRunner
     selection:
       members:
         - run
 
 ## Write your own runner
 
-::: mlmodule.runners.BaseRunner
+::: mozuma.runners.BaseRunner

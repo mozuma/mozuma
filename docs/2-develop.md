@@ -2,8 +2,8 @@
 
 ## Installation
 
-This section covers the installation of a development environment for contributing to MLModule.
-If you want to use MLModule in your project, see [installation instructions](0-installation.md) instead.
+This section covers the installation of a development environment for contributing to MoZuMa.
+If you want to use MoZuMa in your project, see [installation instructions](0-installation.md) instead.
 
 We are developing on Python {{develop.python_version}} and PyTorch {{develop.pytorch_version}}.
 
@@ -35,7 +35,7 @@ This method requires you to install PyTorch and TorchVision
 
 ```bash
 pip install -r requirements.txt
-# To install MLModule in development mode with all dependencies
+# To install MoZuMa in development mode with all dependencies
 pip install -e .
 ```
 

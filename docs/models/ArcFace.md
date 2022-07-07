@@ -7,7 +7,7 @@ in PyTorch by [InsightFace](https://github.com/TreB1eN/InsightFace_Pytorch).
 ## Pre-trained models
 
 {% for model in models.arcface -%}
-::: mlmodule.models.arcface.{{ model.factory }}
+::: mozuma.models.arcface.{{ model.factory }}
     rendering:
         show_signature: False
 {% endfor %}
@@ -15,9 +15,9 @@ in PyTorch by [InsightFace](https://github.com/TreB1eN/InsightFace_Pytorch).
 
 ## Base models
 
-The MagFace model is an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
+The MagFace model is an implementation of a [`TorchModel`][mozuma.torch.modules.TorchModel].
 
-::: mlmodule.models.arcface.modules.TorchArcFaceModule
+::: mozuma.models.arcface.modules.TorchArcFaceModule
     selection:
         members: none
 
@@ -25,6 +25,6 @@ The MagFace model is an implementation of a [`TorchMlModule`][mlmodule.torch.mod
 
 See the [stores documentation](../references/stores.md) for usage.
 
-::: mlmodule.models.arcface.stores.ArcFaceStore
+::: mozuma.models.arcface.stores.ArcFaceStore
     selection:
         members: none

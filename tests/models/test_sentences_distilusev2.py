@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 import torch
 
-from mlmodule.models.sentences import torch_distiluse_base_multilingual_v2
-from mlmodule.models.sentences.distilbert.transforms import TokenizerTransform
+from mozuma.models.sentences import torch_distiluse_base_multilingual_v2
+from mozuma.models.sentences.distilbert.transforms import TokenizerTransform
 
 
 def test_embeddings(torch_device: torch.device):
@@ -30,7 +30,7 @@ def test_embeddings(torch_device: torch.device):
         tokenizer = TokenizerTransform(distilbert.get_tokenizer())
         tokens = tokenizer(sentence)
 
-        embedding_mlmodule = (
+        embedding_mozuma = (
             distilbert.forward(
                 (
                     torch.LongTensor(torch.unsqueeze(tokens[0], 0)),
@@ -41,4 +41,4 @@ def test_embeddings(torch_device: torch.device):
             .numpy()
         )
 
-    np.testing.assert_array_equal(embeddings_provider, embedding_mlmodule)
+    np.testing.assert_array_equal(embeddings_provider, embedding_mozuma)

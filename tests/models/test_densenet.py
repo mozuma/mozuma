@@ -4,14 +4,14 @@ from typing import List, cast
 
 import torch
 
-from mlmodule.callbacks.memory import CollectLabelsInMemory
-from mlmodule.models.densenet.pretrained import (
+from mozuma.callbacks.memory import CollectLabelsInMemory
+from mozuma.models.densenet.pretrained import (
     torch_densenet_imagenet,
     torch_densenet_places365,
 )
-from mlmodule.torch.datasets import ImageDataset, LocalBinaryFilesDataset
-from mlmodule.torch.options import TorchRunnerOptions
-from mlmodule.torch.runners import TorchInferenceRunner
+from mozuma.torch.datasets import ImageDataset, LocalBinaryFilesDataset
+from mozuma.torch.options import TorchRunnerOptions
+from mozuma.torch.runners import TorchInferenceRunner
 
 
 def test_densenet_cats_dogs(

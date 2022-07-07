@@ -41,14 +41,14 @@ A model can be saved by specifying a `training_id` which should uniquely identif
 store.save(model, training_id="2022-01-01-finetuned-imagenet")
 ```
 
-See [AbstractStateStore][mlmodule.stores.abstract.AbstractStateStore] for more details on these methods.
+See [AbstractStateStore][mozuma.stores.abstract.AbstractStateStore] for more details on these methods.
 
-## MLModule pre-trained models
+## MoZuMa pre-trained models
 
-MLModule provides model weights for all defined [models](../models/index.md)
-through the MlModule [`Store`][mlmodule.stores.Store].
+MoZuMa provides model weights for all defined [models](../models/index.md)
+through the MoZuMa [`Store`][mozuma.stores.Store].
 
-::: mlmodule.stores.Store
+::: mozuma.stores.Store
     selection:
         members: none
 
@@ -56,32 +56,32 @@ through the MlModule [`Store`][mlmodule.stores.Store].
 
 These stores can be used if you want to store model states locally or on S3 storage.
 
-::: mlmodule.stores.local.LocalStateStore
+::: mozuma.stores.local.LocalStateStore
     selection:
         members: none
 
 
-::: mlmodule.stores.s3.S3StateStore
+::: mozuma.stores.s3.S3StateStore
     selection:
         members: none
 
-::: mlmodule.stores.github.GitHUBReleaseStore
+::: mozuma.stores.github.GitHUBReleaseStore
     selection:
         members: none
 
 
 ## Write your own store
 
-A store should inherit [`AbstractStateStore`][mlmodule.stores.abstract.AbstractStateStore]
+A store should inherit [`AbstractStateStore`][mozuma.stores.abstract.AbstractStateStore]
 and implement the `save`, `load` and `get_state_keys` methods.
 
-::: mlmodule.stores.abstract.AbstractStateStore
+::: mozuma.stores.abstract.AbstractStateStore
 
 For stores used to download states of a single model, it can be useful to subclass the
-[`AbstractListStateStore`][mlmodule.stores.list.AbstractListStateStore] directly.
+[`AbstractListStateStore`][mozuma.stores.list.AbstractListStateStore] directly.
 This makes it easier to define a store from a fix set of states as it is often the case when
 integrating the weights from external sources (pre-trained states for a paper, hugging face...).
-See [`SBERTDistiluseBaseMultilingualCasedV2Store`][mlmodule.models.sentences.distilbert.stores.SBERTDistiluseBaseMultilingualCasedV2Store]
+See [`SBERTDistiluseBaseMultilingualCasedV2Store`][mozuma.models.sentences.distilbert.stores.SBERTDistiluseBaseMultilingualCasedV2Store]
 for an example.
 
-::: mlmodule.stores.list.AbstractListStateStore
+::: mozuma.stores.list.AbstractListStateStore

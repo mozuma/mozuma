@@ -7,9 +7,9 @@ import pytest
 import requests_mock
 from requests.auth import _basic_auth_str
 
-from mlmodule.models.types import ModelWithState
-from mlmodule.states import StateKey, StateType
-from mlmodule.stores.github import (
+from mozuma.models.types import ModelWithState
+from mozuma.states import StateKey, StateType
+from mozuma.stores.github import (
     GitHUBReleaseStore,
     call_github_with_auth,
     get_github_basic_auth,
@@ -24,8 +24,8 @@ def basic_github_auth():
     username = "test"
     password = "test"
 
-    with mock.patch("mlmodule.stores.github.get_github_basic_auth") as basic:
-        with mock.patch("mlmodule.stores.github.get_github_token") as token:
+    with mock.patch("mozuma.stores.github.get_github_basic_auth") as basic:
+        with mock.patch("mozuma.stores.github.get_github_token") as token:
             basic.return_value = (username, password)
             token.return_value = None
             yield _basic_auth_str(username, password)
@@ -35,8 +35,8 @@ def basic_github_auth():
 def token_github_auth():
     gh_token = "abc_aaaaaaaaaa"
 
-    with mock.patch("mlmodule.stores.github.get_github_basic_auth") as basic:
-        with mock.patch("mlmodule.stores.github.get_github_token") as token:
+    with mock.patch("mozuma.stores.github.get_github_basic_auth") as basic:
+        with mock.patch("mozuma.stores.github.get_github_token") as token:
             basic.return_value = None
             token.return_value = gh_token
             yield f"Bearer {gh_token}"

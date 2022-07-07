@@ -1,4 +1,4 @@
-# Install mlmodule
+# Install MoZuMa
 -e .
 
 # Install mkdocs

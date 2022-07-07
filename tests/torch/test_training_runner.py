@@ -3,13 +3,13 @@ import logging
 import pytest
 import torch
 
-from mlmodule.torch.modules import TorchMlModule
-from mlmodule.torch.runners import TorchTrainingRunner
+from mozuma.torch.modules import TorchModel
+from mozuma.torch.runners import TorchTrainingRunner
 
 LOGGER = logging.getLogger(__name__)
 
 
-class TorchTestModule(TorchMlModule[torch.Tensor, torch.Tensor]):
+class TorchTestModule(TorchModel[torch.Tensor, torch.Tensor]):
     def __init__(self, is_trainable: bool = True):
         super().__init__(is_trainable=is_trainable)
 

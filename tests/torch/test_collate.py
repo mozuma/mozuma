@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from mlmodule.torch.collate import TorchMlModuleCollateFn
+from mozuma.torch.collate import TorchModelCollateFn
 
 
 def test_custom_collate():
@@ -9,7 +9,7 @@ def test_custom_collate():
 
     This function does not converts the indices of a dataset to a torch.Tensor
     """
-    collate_fn = TorchMlModuleCollateFn()
+    collate_fn = TorchModelCollateFn()
 
     data = [(1, np.array([1, 2])), (2, np.array([2, 3]))]
 

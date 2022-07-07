@@ -1,42 +1,42 @@
-"""This script will take model states from mlmodule.models and publish them to the MLModule store"""
+"""This script will take model states from mozuma.models and publish them to the MoZuMa store"""
 import argparse
 import dataclasses
 import itertools
 import logging
 from typing import Iterable, List, Optional, Tuple, Union
 
-from mlmodule.helpers.torchvision import DenseNetArch, ResNetArch
-from mlmodule.labels.places import PLACES_LABELS
-from mlmodule.models import ModelWithState
-from mlmodule.models.arcface.modules import TorchArcFaceModule
-from mlmodule.models.arcface.stores import ArcFaceStore
-from mlmodule.models.clip.base import BaseCLIPModule
-from mlmodule.models.clip.image import CLIPImageModule
-from mlmodule.models.clip.parameters import PARAMETERS
-from mlmodule.models.clip.stores import CLIPStore
-from mlmodule.models.clip.text import CLIPTextModule
-from mlmodule.models.densenet.modules import TorchDenseNetModule
-from mlmodule.models.densenet.stores import (
+from mozuma.helpers.torchvision import DenseNetArch, ResNetArch
+from mozuma.labels.places import PLACES_LABELS
+from mozuma.models import ModelWithState
+from mozuma.models.arcface.modules import TorchArcFaceModule
+from mozuma.models.arcface.stores import ArcFaceStore
+from mozuma.models.clip.base import BaseCLIPModule
+from mozuma.models.clip.image import CLIPImageModule
+from mozuma.models.clip.parameters import PARAMETERS
+from mozuma.models.clip.stores import CLIPStore
+from mozuma.models.clip.text import CLIPTextModule
+from mozuma.models.densenet.modules import TorchDenseNetModule
+from mozuma.models.densenet.stores import (
     DenseNetPlaces365Store,
     DenseNetTorchVisionStore,
 )
-from mlmodule.models.magface.modules import TorchMagFaceModule
-from mlmodule.models.magface.stores import MagFaceStore
-from mlmodule.models.mtcnn.modules import TorchMTCNNModule
-from mlmodule.models.mtcnn.stores import FaceNetMTCNNStore
-from mlmodule.models.resnet.modules import TorchResNetModule
-from mlmodule.models.resnet.stores import ResNetTorchVisionStore
-from mlmodule.models.sentences.distilbert.modules import (
+from mozuma.models.magface.modules import TorchMagFaceModule
+from mozuma.models.magface.stores import MagFaceStore
+from mozuma.models.mtcnn.modules import TorchMTCNNModule
+from mozuma.models.mtcnn.stores import FaceNetMTCNNStore
+from mozuma.models.resnet.modules import TorchResNetModule
+from mozuma.models.resnet.stores import ResNetTorchVisionStore
+from mozuma.models.sentences.distilbert.modules import (
     DistilUseBaseMultilingualCasedV2Module,
 )
-from mlmodule.models.sentences.distilbert.stores import (
+from mozuma.models.sentences.distilbert.stores import (
     SBERTDistiluseBaseMultilingualCasedV2Store,
 )
-from mlmodule.models.vinvl.modules import TorchVinVLDetectorModule
-from mlmodule.models.vinvl.stores import VinVLStore
-from mlmodule.states import StateKey, StateType
-from mlmodule.stores.abstract import AbstractStateStore
-from mlmodule.stores.github import GitHUBReleaseStore
+from mozuma.models.vinvl.modules import TorchVinVLDetectorModule
+from mozuma.models.vinvl.stores import VinVLStore
+from mozuma.states import StateKey, StateType
+from mozuma.stores.abstract import AbstractStateStore
+from mozuma.stores.github import GitHUBReleaseStore
 
 logger = logging.getLogger(__name__)
 
@@ -48,8 +48,8 @@ class UpdatePublicStoreOptions:
     dry_run: bool = False
 
 
-def get_mlmodule_store() -> GitHUBReleaseStore:
-    return GitHUBReleaseStore("LSIR", "mlmodule")
+def get_mozuma_store() -> GitHUBReleaseStore:
+    return GitHUBReleaseStore("mozuma", "mozuma")
 
 
 def get_resnet_stores() -> List[Tuple[TorchResNetModule, ResNetTorchVisionStore]]:
@@ -163,11 +163,11 @@ def state_type_match(
 
 
 def iterate_state_keys_to_upload(
-    mlmodule_store: AbstractStateStore,
+    mozuma_store: AbstractStateStore,
     backend: Optional[str] = None,
     architecture: Optional[str] = None,
 ) -> Iterable[Tuple[ModelWithState, AbstractStateStore, StateKey]]:
-    """Iterates over the missing model states in MLModule store"""
+    """Iterates over the missing model states in MoZuMa store"""
     ret: List[Tuple[ModelWithState, AbstractStateStore, StateKey]] = []
     for model, provider_store in get_all_models_stores():
         # If the state type does not match the backend and architecture filters
@@ -177,14 +177,14 @@ def iterate_state_keys_to_upload(
         ):
             continue
 
-        # Getting available state keys in the provider store and not available in mlmodule
+        # Getting available state keys in the provider store and not available in mozuma
         already_uploaded_state_keys = set(
-            mlmodule_store.get_state_keys(model.state_type)
+            mozuma_store.get_state_keys(model.state_type)
         )
 
         for sk in provider_store.get_state_keys(model.state_type):
             if sk in already_uploaded_state_keys:
-                logger.info(f"Already in MLModule store, skipping {sk}")
+                logger.info(f"Already in MoZuMa store, skipping {sk}")
                 continue
             ret.append((model, provider_store, sk))
 
@@ -192,19 +192,19 @@ def iterate_state_keys_to_upload(
 
 
 def main(options: UpdatePublicStoreOptions):
-    mlmodule_store = get_mlmodule_store()
+    mozuma_store = get_mozuma_store()
     for item in iterate_state_keys_to_upload(
-        mlmodule_store, backend=options.backend, architecture=options.architecture
+        mozuma_store, backend=options.backend, architecture=options.architecture
     ):
         model, provider_store, state_key = item
-        logger.info(f"Saving {state_key} to MLModule store")
+        logger.info(f"Saving {state_key} to MoZuMa store")
 
         # If dry run skipping loading and saving the model
         if options.dry_run:
             continue
 
         provider_store.load(model, state_key)
-        mlmodule_store.save(model, training_id=state_key.training_id)
+        mozuma_store.save(model, training_id=state_key.training_id)
 
 
 def parse_arguments() -> UpdatePublicStoreOptions:
