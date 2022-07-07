@@ -1,8 +1,8 @@
 
 ## Options
 
-::: mlmodule.torch.options.TorchRunnerOptions
+::: mozuma.torch.options.TorchRunnerOptions
 
-::: mlmodule.torch.options.TorchMultiGPURunnerOptions
+::: mozuma.torch.options.TorchMultiGPURunnerOptions
 
-::: mlmodule.torch.options.TorchTrainingOptions
+::: mozuma.torch.options.TorchTrainingOptions

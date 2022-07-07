@@ -9,27 +9,27 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.13.8
   kernelspec:
-    display_name: 'Python 3.7.10 64-bit (''mlmodule'': conda)'
+    display_name: 'Python 3.7.10 64-bit (''mozuma'': conda)'
     name: python3
 ---
 
 # Video Key-frames Extraction Model
 
 
-Import `mlmodule` modules
+Import `mozuma` modules
 
 ```python
-from mlmodule.torch.datasets import (
+from mozuma.torch.datasets import (
     LocalBinaryFilesDataset,
 )
-from mlmodule.models.keyframes.pretrained import torch_keyframes_resnet_imagenet
-from mlmodule.models.keyframes.datasets import (
+from mozuma.models.keyframes.pretrained import torch_keyframes_resnet_imagenet
+from mozuma.models.keyframes.datasets import (
     BinaryVideoCapture,
     extract_video_frames,
 )
-from mlmodule.callbacks.memory import CollectVideoFramesInMemory
-from mlmodule.torch.options import TorchRunnerOptions
-from mlmodule.torch.runners import TorchInferenceRunner
+from mozuma.callbacks.memory import CollectVideoFramesInMemory
+from mozuma.torch.options import TorchRunnerOptions
+from mozuma.torch.runners import TorchInferenceRunner
 
 import torch
 import os

@@ -8,7 +8,7 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.13.8
   kernelspec:
-    display_name: Python 3.7.10 ('mlmodule')
+    display_name: Python 3.7.10 ('mozuma')
     language: python
     name: python3
 ---
@@ -17,28 +17,28 @@ jupyter:
 
 In this notebook, we are training CIFAR10 image classification on top of ResNet18 features from ImageNet
 
-Import `mlmodule` modules for the task
+Import `mozuma` modules for the task
 
 ```python
-from mlmodule.models.classification import LinearClassifierTorchModule
-from mlmodule.models.resnet.pretrained import torch_resnet_imagenet
-from mlmodule.models.densenet.pretrained import torch_densenet_imagenet
-from mlmodule.torch.runners import TorchTrainingRunner
-from mlmodule.torch.runners import TorchInferenceRunner
-from mlmodule.torch.runners import TorchInferenceMultiGPURunner
-from mlmodule.torch.options import TorchTrainingOptions
-from mlmodule.torch.options import TorchRunnerOptions
-from mlmodule.torch.options import TorchMultiGPURunnerOptions
-from mlmodule.labels.base import LabelSet
-from mlmodule.torch.datasets import (
+from mozuma.models.classification import LinearClassifierTorchModule
+from mozuma.models.resnet.pretrained import torch_resnet_imagenet
+from mozuma.models.densenet.pretrained import torch_densenet_imagenet
+from mozuma.torch.runners import TorchTrainingRunner
+from mozuma.torch.runners import TorchInferenceRunner
+from mozuma.torch.runners import TorchInferenceMultiGPURunner
+from mozuma.torch.options import TorchTrainingOptions
+from mozuma.torch.options import TorchRunnerOptions
+from mozuma.torch.options import TorchMultiGPURunnerOptions
+from mozuma.labels.base import LabelSet
+from mozuma.torch.datasets import (
     ListDataset,
     ListDatasetIndexed,
     TorchTrainingDataset,
 )
-from mlmodule.callbacks.memory import CollectFeaturesInMemory, CollectLabelsInMemory
-from mlmodule.callbacks.states import SaveModelState
-from mlmodule.stores.local import LocalStateStore
-from mlmodule.states import StateKey
+from mozuma.callbacks.memory import CollectFeaturesInMemory, CollectLabelsInMemory
+from mozuma.callbacks.states import SaveModelState
+from mozuma.stores.local import LocalStateStore
+from mozuma.states import StateKey
 
 import torch
 import torch.nn.functional as F
@@ -73,7 +73,7 @@ root_dir = os.path.join(os.environ["HOME"], "torchvision-datasets")
 train_cifar10 = CIFAR10(root=root_dir, train=True, download=True, transform=None)
 ```
 
-Format inputs and labels for `mlmodule`
+Format inputs and labels for `mozuma`
 
 ```python
 labels_dict = {
@@ -172,7 +172,7 @@ eval_metrics = {
 }
 
 # Callbacks
-exp_dir = os.path.join(os.environ["HOME"], "mlmodule-training")
+exp_dir = os.path.join(os.environ["HOME"], "mozuma-training")
 log_dir = os.path.join(exp_dir, "tb_logs")
 os.makedirs(exp_dir, exist_ok=True)
 

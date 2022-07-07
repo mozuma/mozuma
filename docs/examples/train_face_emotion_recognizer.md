@@ -8,7 +8,7 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.13.8
   kernelspec:
-    display_name: Python 3.7.10 ('mlmodule')
+    display_name: Python 3.7.10 ('mozuma')
     language: python
     name: python3
 ---
@@ -18,19 +18,19 @@ jupyter:
 This notebooks shows how to train a face emotion recognition model on top of ArcFace face features
 
 
-Import MTCNN and ArcFace modules from `mlmodule`
+Import MTCNN and ArcFace modules from `mozuma`
 
 
 ```python
-from mlmodule.models.arcface.pretrained import torch_arcface_insightface
-from mlmodule.models.mtcnn.pretrained import torch_mtcnn
-from mlmodule.torch.options import TorchRunnerOptions
-from mlmodule.torch.runners import TorchInferenceRunner
-from mlmodule.callbacks.memory import (
+from mozuma.models.arcface.pretrained import torch_arcface_insightface
+from mozuma.models.mtcnn.pretrained import torch_mtcnn
+from mozuma.torch.options import TorchRunnerOptions
+from mozuma.torch.runners import TorchInferenceRunner
+from mozuma.callbacks.memory import (
     CollectBoundingBoxesInMemory,
     CollectFeaturesInMemory,
 )
-from mlmodule.torch.datasets import (
+from mozuma.torch.datasets import (
     ImageBoundingBoxDataset,
     ListDataset,
     ListDatasetIndexed,
@@ -136,11 +136,11 @@ Training of a linear classifier on top of the face features
 Import the module for training
 
 ```python
-from mlmodule.models.classification import LinearClassifierTorchModule
-from mlmodule.torch.datasets import TorchTrainingDataset
-from mlmodule.torch.runners import TorchTrainingRunner
-from mlmodule.torch.options import TorchTrainingOptions
-from mlmodule.labels.base import LabelSet
+from mozuma.models.classification import LinearClassifierTorchModule
+from mozuma.torch.datasets import TorchTrainingDataset
+from mozuma.torch.runners import TorchTrainingRunner
+from mozuma.torch.options import TorchTrainingOptions
+from mozuma.labels.base import LabelSet
 
 import torch
 import torch.nn.functional as F

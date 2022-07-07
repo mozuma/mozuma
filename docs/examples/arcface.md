@@ -16,24 +16,24 @@ jupyter:
 # Face Similarity Search
 
 
-Import `mlmodule` modules
+Import `mozuma` modules
 
 ```python
-from mlmodule.torch.options import TorchRunnerOptions
-from mlmodule.torch.runners import TorchInferenceRunner
-from mlmodule.callbacks.memory import (
+from mozuma.torch.options import TorchRunnerOptions
+from mozuma.torch.runners import TorchInferenceRunner
+from mozuma.callbacks.memory import (
     CollectBoundingBoxesInMemory,
     CollectFeaturesInMemory,
 )
-from mlmodule.torch.datasets import (
+from mozuma.torch.datasets import (
     LocalBinaryFilesDataset,
     ImageDataset,
     ImageBoundingBoxDataset,
 )
-from mlmodule.helpers.files import list_files_in_dir
+from mozuma.helpers.files import list_files_in_dir
 
-from mlmodule.models.mtcnn.pretrained import torch_mtcnn
-from mlmodule.models.arcface.pretrained import torch_arcface_insightface
+from mozuma.models.mtcnn.pretrained import torch_mtcnn
+from mozuma.models.arcface.pretrained import torch_arcface_insightface
 
 import torch
 import matplotlib.pyplot as plt

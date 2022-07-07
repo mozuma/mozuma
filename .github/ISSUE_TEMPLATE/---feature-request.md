@@ -1,6 +1,6 @@
 ---
 name: "\U0001F680 Feature request"
-about: Suggest an idea for improving MLModule
+about: Suggest an idea for improving MoZuMa
 title: ''
 labels: enhancement
 assignees: ''

@@ -8,7 +8,7 @@ See the [code](https://github.com/pzzhang/VinVL) and the [paper](https://arxiv.o
 ## Pre-trained models
 
 {% for model in models.vinvl -%}
-::: mlmodule.models.vinvl.{{ model.factory }}
+::: mozuma.models.vinvl.{{ model.factory }}
     rendering:
         show_signature: False
 {% endfor %}
@@ -16,9 +16,9 @@ See the [code](https://github.com/pzzhang/VinVL) and the [paper](https://arxiv.o
 
 ## Base model
 
-The VinVL model is an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
+The VinVL model is an implementation of a [`TorchMlModule`][mozuma.torch.modules.TorchMlModule].
 
-::: mlmodule.models.vinvl.modules.TorchVinVLDetectorModule
+::: mozuma.models.vinvl.modules.TorchVinVLDetectorModule
     selection:
         members: none
 
@@ -27,6 +27,6 @@ The VinVL model is an implementation of a [`TorchMlModule`][mlmodule.torch.modul
 
 See the [stores documentation](../references/stores.md) for usage.
 
-::: mlmodule.models.vinvl.stores.VinVLStore
+::: mozuma.models.vinvl.stores.VinVLStore
     selection:
         members: none

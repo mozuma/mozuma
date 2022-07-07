@@ -5,7 +5,7 @@ Text model for computing sentence embeddings in multiple languages based on [Sen
 ## Pre-trained models
 
 {% for model in models.sentences -%}
-::: mlmodule.models.sentences.{{ model.factory }}
+::: mozuma.models.sentences.{{ model.factory }}
     rendering:
         show_signature: False
 {% endfor %}
@@ -13,9 +13,9 @@ Text model for computing sentence embeddings in multiple languages based on [Sen
 
 ## Base model
 
-This model is an implementation of a [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule].
+This model is an implementation of a [`TorchMlModule`][mozuma.torch.modules.TorchMlModule].
 
-::: mlmodule.models.sentences.distilbert.modules.DistilUseBaseMultilingualCasedV2Module
+::: mozuma.models.sentences.distilbert.modules.DistilUseBaseMultilingualCasedV2Module
     selection:
         members: none
 
@@ -24,6 +24,6 @@ This model is an implementation of a [`TorchMlModule`][mlmodule.torch.modules.To
 
 See the [stores documentation](../references/stores.md) for usage.
 
-::: mlmodule.models.sentences.distilbert.stores.SBERTDistiluseBaseMultilingualCasedV2Store
+::: mozuma.models.sentences.distilbert.stores.SBERTDistiluseBaseMultilingualCasedV2Store
     selection:
         members: none

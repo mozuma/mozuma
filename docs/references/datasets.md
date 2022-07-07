@@ -9,13 +9,13 @@ These datasets are compatible with `torch.utils.data.DataLoader`.
 
 ### In-memory list datasets
 
-::: mlmodule.torch.datasets.ListDataset
+::: mozuma.torch.datasets.ListDataset
     rendering:
         heading_level: 4
     selection:
         members: none
 
-::: mlmodule.torch.datasets.ListDatasetIndexed
+::: mozuma.torch.datasets.ListDatasetIndexed
     rendering:
         heading_level: 4
     selection:
@@ -23,7 +23,7 @@ These datasets are compatible with `torch.utils.data.DataLoader`.
 
 ### Local files datasets
 
-::: mlmodule.torch.datasets.LocalBinaryFilesDataset
+::: mozuma.torch.datasets.LocalBinaryFilesDataset
     rendering:
         heading_level: 4
     selection:
@@ -31,7 +31,7 @@ These datasets are compatible with `torch.utils.data.DataLoader`.
 
 ### Image datasets
 
-::: mlmodule.torch.datasets.ImageDataset
+::: mozuma.torch.datasets.ImageDataset
     rendering:
         heading_level: 4
     selection:
@@ -39,7 +39,7 @@ These datasets are compatible with `torch.utils.data.DataLoader`.
 
 ### Bounding box datasets
 
-::: mlmodule.torch.datasets.ImageBoundingBoxDataset
+::: mozuma.torch.datasets.ImageBoundingBoxDataset
     rendering:
         heading_level: 4
     selection:
@@ -47,7 +47,7 @@ These datasets are compatible with `torch.utils.data.DataLoader`.
 
 ### Training datasets
 
-::: mlmodule.torch.datasets.TorchTrainingDataset
+::: mozuma.torch.datasets.TorchTrainingDataset
     rendering:
         heading_level: 4
     selection:
@@ -58,6 +58,6 @@ These datasets are compatible with `torch.utils.data.DataLoader`.
 Dataset types depends on the runner used,
 refer to the [runner list](runners.md) to know which type to implement.
 
-Below is the list of dataset protocols that are specified by `mlmodule`
+Below is the list of dataset protocols that are specified by `mozuma`
 
-::: mlmodule.torch.datasets.TorchDataset
+::: mozuma.torch.datasets.TorchDataset

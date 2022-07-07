@@ -5,36 +5,36 @@ handles the results (features, labels or model weights).
 
 They are classes implementing a pre-defined set of functions:
 
-- [`save_features`][mlmodule.callbacks.base.BaseSaveFeaturesCallback.save_features]
-- [`save_label_scores`][mlmodule.callbacks.base.BaseSaveLabelsCallback.save_label_scores]
-- [`save_bounding_boxes`][mlmodule.callbacks.base.BaseSaveBoundingBoxCallback.save_bounding_boxes]
-- [`save_frames`][mlmodule.callbacks.base.BaseSaveVideoFramesCallback.save_frames]
+- [`save_features`][mozuma.callbacks.base.BaseSaveFeaturesCallback.save_features]
+- [`save_label_scores`][mozuma.callbacks.base.BaseSaveLabelsCallback.save_label_scores]
+- [`save_bounding_boxes`][mozuma.callbacks.base.BaseSaveBoundingBoxCallback.save_bounding_boxes]
+- [`save_frames`][mozuma.callbacks.base.BaseSaveVideoFramesCallback.save_frames]
 
 ## In memory callbacks
 
 These callbacks accumulate results in-memory.
 They expose their results via object attributes.
 
-::: mlmodule.callbacks.CollectFeaturesInMemory
+::: mozuma.callbacks.CollectFeaturesInMemory
 
-::: mlmodule.callbacks.CollectLabelsInMemory
+::: mozuma.callbacks.CollectLabelsInMemory
 
-::: mlmodule.callbacks.CollectBoundingBoxesInMemory
+::: mozuma.callbacks.CollectBoundingBoxesInMemory
 
-::: mlmodule.callbacks.CollectVideoFramesInMemory
+::: mozuma.callbacks.CollectVideoFramesInMemory
 
 ## Callbacks for training
 
-::: mlmodule.callbacks.states.SaveModelState
+::: mozuma.callbacks.states.SaveModelState
 
 ## Write your own callbacks
 
-::: mlmodule.callbacks.base.BaseSaveFeaturesCallback
+::: mozuma.callbacks.base.BaseSaveFeaturesCallback
 
-::: mlmodule.callbacks.base.BaseSaveLabelsCallback
+::: mozuma.callbacks.base.BaseSaveLabelsCallback
 
-::: mlmodule.callbacks.base.BaseSaveBoundingBoxCallback
+::: mozuma.callbacks.base.BaseSaveBoundingBoxCallback
 
-::: mlmodule.callbacks.base.BaseSaveVideoFramesCallback
+::: mozuma.callbacks.base.BaseSaveVideoFramesCallback
 
-::: mlmodule.callbacks.base.BaseRunnerEndCallback
+::: mozuma.callbacks.base.BaseRunnerEndCallback

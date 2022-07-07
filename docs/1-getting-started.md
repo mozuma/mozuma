@@ -9,7 +9,7 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.13.8
   kernelspec:
-    display_name: Python 3.7.10 ('mlmodule')
+    display_name: Python 3.7.10 ('mozuma')
     language: python
     name: python3
 ---
@@ -24,7 +24,7 @@ This guide runs through the inference of a PyTorch ResNet model pre-trained on i
 First, we need to create a dataset of images, for this we will be using an `ImageDataset`.
 
 ```python
-from mlmodule.torch.datasets import LocalBinaryFilesDataset, ImageDataset
+from mozuma.torch.datasets import LocalBinaryFilesDataset, ImageDataset
 
 # Getting a dataset of images (1)
 dataset = ImageDataset(
@@ -44,7 +44,7 @@ Next, we need to load the ResNet PyTorch module specifying the `resnet18` archit
 The model is initialised with weights pre-trained on ImageNet[@deng2009imagenet].
 
 ```python
-from mlmodule.models.resnet import torch_resnet_imagenet
+from mozuma.models.resnet import torch_resnet_imagenet
 
 # Model definition (1)
 resnet = torch_resnet_imagenet("resnet18")
@@ -60,9 +60,9 @@ Note that we pass two callbacks to the runner: `CollectFeaturesInMemory` and `Co
 They will be called to save the features and labels in-memory.
 
 ```python
-from mlmodule.callbacks import CollectFeaturesInMemory, CollectLabelsInMemory
-from mlmodule.torch.options import TorchRunnerOptions
-from mlmodule.torch.runners import TorchInferenceRunner
+from mozuma.callbacks import CollectFeaturesInMemory, CollectLabelsInMemory
+from mozuma.torch.options import TorchRunnerOptions
+from mozuma.torch.runners import TorchInferenceRunner
 
 # Creating the callback to collect data (1)
 features = CollectFeaturesInMemory()
@@ -97,12 +97,12 @@ print(labels.indices, labels.labels)
 
 ## Command-line interface
 
-MLModule exposes a command-line interface. See `python -m mlmodule -h` for a list of available commands.
+MoZuMa exposes a command-line interface. See `python -m mozuma -h` for a list of available commands.
 
 For instance, one can run a ResNet model against a list of local images with the following command:
 
 ```shell
-python -m mlmodule run ".resnet.modules.TorchResNetModule(resnet18)" *.jpg
+python -m mozuma run ".resnet.modules.TorchResNetModule(resnet18)" *.jpg
 ```
 
 It prints the results (features and labels) in JSON format.
@@ -110,5 +110,5 @@ It prints the results (features and labels) in JSON format.
 Similarly, we can extract the key-frames from videos:
 
 ```shell
-python -m mlmodule run ".keyframes.selectors.resnet_key_frame_selector(resnet18, 10)" *.mp4 --file-type vi --batch-size 1
+python -m mozuma run ".keyframes.selectors.resnet_key_frame_selector(resnet18, 10)" *.mp4 --file-type vi --batch-size 1
 ```

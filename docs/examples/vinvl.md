@@ -16,17 +16,17 @@ jupyter:
 # Object Detection with VinVL
 
 
-Import `mlmodule` modules
+Import `mozuma` modules
 
 ```python
-from mlmodule.torch.options import TorchRunnerOptions
-from mlmodule.torch.runners import TorchInferenceRunner
-from mlmodule.callbacks.memory import (
+from mozuma.torch.options import TorchRunnerOptions
+from mozuma.torch.runners import TorchInferenceRunner
+from mozuma.callbacks.memory import (
     CollectBoundingBoxesInMemory,
 )
-from mlmodule.helpers.files import list_files_in_dir
-from mlmodule.torch.datasets import LocalBinaryFilesDataset, ImageDataset
-from mlmodule.models.vinvl.pretrained import torch_vinvl_detector
+from mozuma.helpers.files import list_files_in_dir
+from mozuma.torch.datasets import LocalBinaryFilesDataset, ImageDataset
+from mozuma.models.vinvl.pretrained import torch_vinvl_detector
 
 import torch
 import matplotlib.pyplot as plt

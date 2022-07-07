@@ -1,4 +1,4 @@
-site_name: MLModule
+site_name: MoZuMa
 theme:
   name: material
   features:
@@ -17,8 +17,8 @@ theme:
       toggle:
         icon: material/toggle-switch-off-outline
         name: Switch to light mode
-repo_url: https://github.com/LSIR/mlmodule
-repo_name: LSIR/mlmodule
+repo_url: https://github.com/mozuma/mozuma
+repo_name: mozuma/mozuma
 
 markdown_extensions:
   - admonition
@@ -56,7 +56,7 @@ plugins:
             show_bases: false
             show_source: false
       watch:
-        - src/mlmodule
+        - src/mozuma
 
 extra:
   develop:
