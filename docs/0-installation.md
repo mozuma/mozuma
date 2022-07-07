@@ -27,7 +27,7 @@ pip install git+https://github.com/mozuma/mozuma@vX.Y.Z
 
 ## Using Docker
 
-For convenience, we also ship a base [Docker image](https://hub.docker.com/repository/docker/lsirepfl/mlmodulekit)
+For convenience, we also ship a base [Docker image](https://github.com/mozuma/mozumakit/pkgs/container/mozumakit)
 which contains dependencies that can be hard to install (for instance PyTorch).
 
-See [MLModuleKit](3-mlmodulekit.md) for usage documentation.
+See [MoZuMaKit](3-mozumakit.md) for usage documentation.
