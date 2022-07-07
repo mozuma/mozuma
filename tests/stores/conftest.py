@@ -2,8 +2,8 @@ import dataclasses
 
 import pytest
 
-from mlmodule.models.types import ModelWithState
-from mlmodule.states import StateType
+from mozuma.models.types import ModelWithState
+from mozuma.states import StateType
 
 
 @dataclasses.dataclass

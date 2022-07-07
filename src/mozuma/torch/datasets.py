@@ -157,7 +157,7 @@ class ImageDataset(TorchDataset[_IndicesType, Image]):
 
     Attributes:
         binary_files_dataset (TorchDataset[_IndicesType, bytes]): Dataset to load images.
-            Usually a [`LocalBinaryFilesDataset`][mlmodule.torch.datasets.LocalBinaryFilesDataset].
+            Usually a [`LocalBinaryFilesDataset`][mozuma.torch.datasets.LocalBinaryFilesDataset].
         resize_image_size (tuple[int, int] | None): Optionally reduce the image size on load
         mode (str | None): Optional mode to apply when loading the image. See PIL `Image.draft` parameters.
     """

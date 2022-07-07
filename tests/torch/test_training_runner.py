@@ -3,8 +3,8 @@ import logging
 import pytest
 import torch
 
-from mlmodule.torch.modules import TorchMlModule
-from mlmodule.torch.runners import TorchTrainingRunner
+from mozuma.torch.modules import TorchMlModule
+from mozuma.torch.runners import TorchTrainingRunner
 
 LOGGER = logging.getLogger(__name__)
 

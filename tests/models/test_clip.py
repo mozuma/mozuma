@@ -7,16 +7,16 @@ import pytest
 import torch
 from PIL import Image
 
-from mlmodule.callbacks.memory import CollectFeaturesInMemory
-from mlmodule.models.clip.image import CLIPImageModule
-from mlmodule.models.clip.pretrained import (
+from mozuma.callbacks.memory import CollectFeaturesInMemory
+from mozuma.models.clip.image import CLIPImageModule
+from mozuma.models.clip.pretrained import (
     torch_clip_image_encoder,
     torch_clip_text_encoder,
 )
-from mlmodule.models.clip.text import CLIPTextModule
-from mlmodule.torch.datasets import ImageDataset, ListDataset, LocalBinaryFilesDataset
-from mlmodule.torch.options import TorchRunnerOptions
-from mlmodule.torch.runners import TorchInferenceRunner
+from mozuma.models.clip.text import CLIPTextModule
+from mozuma.torch.datasets import ImageDataset, ListDataset, LocalBinaryFilesDataset
+from mozuma.torch.options import TorchRunnerOptions
+from mozuma.torch.runners import TorchInferenceRunner
 
 
 @pytest.fixture(params=["RN50", "ViT-B/32"])
@@ -40,7 +40,7 @@ def test_text_encoding(clip_test_models: Tuple[CLIPImageModule, CLIPTextModule])
     with torch.no_grad():
         clip_output = model.encode_text(text).cpu().numpy()
 
-    # Getting encoded data from MLModule CLIP
+    # Getting encoded data from MoZuMa CLIP
     dataset = ListDataset(data)
     features = CollectFeaturesInMemory()
     runner = TorchInferenceRunner(
@@ -66,7 +66,7 @@ def test_image_encoding(clip_test_models: Tuple[CLIPImageModule, CLIPTextModule]
     with torch.no_grad():
         clip_output = model.encode_image(image).cpu().numpy()
 
-    # Getting the encoded data from MLModule CLIP
+    # Getting the encoded data from MoZuMa CLIP
     dataset = ImageDataset(LocalBinaryFilesDataset(file_names))
     features = CollectFeaturesInMemory()
     runner = TorchInferenceRunner(

@@ -13,8 +13,8 @@ class AbstractListStateStore(AbstractStateStore[_ModelType]):
 
     The subclasses should implement the following:
 
-    * [`available_state_keys`][mlmodule.stores.list.AbstractListStateStore.available_state_keys]
-    * [`state_downloader`][mlmodule.stores.list.AbstractListStateStore.state_downloader]
+    * [`available_state_keys`][mozuma.stores.list.AbstractListStateStore.available_state_keys]
+    * [`state_downloader`][mozuma.stores.list.AbstractListStateStore.state_downloader]
     """
 
     @abc.abstractproperty

@@ -13,7 +13,7 @@ def torch_resnet_imagenet(
     device: torch.device = torch.device("cpu"),
     training_mode: Optional[TorchResNetTrainingMode] = None,
 ) -> TorchResNetModule:
-    """[TorchResNetModule][mlmodule.models.resnet.TorchResNetModule] model pre-trained on ImageNet
+    """[TorchResNetModule][mozuma.models.resnet.TorchResNetModule] model pre-trained on ImageNet
 
     Args:
         resnet_arch (ResNetArchs): Identifier for the ResNet architecture to load.

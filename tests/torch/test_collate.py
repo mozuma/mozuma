@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from mlmodule.torch.collate import TorchMlModuleCollateFn
+from mozuma.torch.collate import TorchMlModuleCollateFn
 
 
 def test_custom_collate():

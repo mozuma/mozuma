@@ -70,13 +70,13 @@ class BatchModelPrediction(Generic[_ArrayType]):
 
         frames (Sequence[BatchVideoFramesPrediction[ArrayLike]] | None):
             Prediction for each frame and video.
-            See [BatchVideoFramesPrediction][mlmodule.predictions.BatchVideoFramesPrediction].
+            See [BatchVideoFramesPrediction][mozuma.predictions.BatchVideoFramesPrediction].
 
             Sequence length=`dataset_size`
 
         bounding_boxes (Sequence[BatchBoundingBoxesPrediction[ArrayLike]] | None):
             Prediction for each bounding_box and image.
-            See [BatchBoundingBoxesPrediction][mlmodule.predictions.BatchBoundingBoxesPrediction].
+            See [BatchBoundingBoxesPrediction][mozuma.predictions.BatchBoundingBoxesPrediction].
 
             Sequence length=`dataset_size`
     """

@@ -122,7 +122,7 @@ class _BaseDenseNetTorchVisionStore(AbstractStateStore[TorchDenseNetModule]):
         Attributes:
             state_type (StateType): Filter state keys by type,
                 valid state types are given by the
-                [`TorchDenseNetModule.state_type`][mlmodule.models.densenet.TorchDenseNetModule.state_type]
+                [`TorchDenseNetModule.state_type`][mozuma.models.densenet.TorchDenseNetModule.state_type]
         """
         try:
             self._validate_state_type(state_type)

@@ -15,19 +15,19 @@ _ForwardOutputType = TypeVar("_ForwardOutputType")
 
 class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
     """
-    Base `torch.nn.Module` for PyTorch models implemented in MLModule.
+    Base `torch.nn.Module` for PyTorch models.
 
-    A valid subclass of [`TorchMlModule`][mlmodule.torch.modules.TorchMlModule]
+    A valid subclass of [`TorchMlModule`][mozuma.torch.modules.TorchMlModule]
     **must** implement the following method:
 
-    - [`forward`][mlmodule.torch.modules.TorchMlModule.forward]
-    - [`to_predictions`][mlmodule.torch.modules.TorchMlModule.to_predictions]
-    - [`state_type`][mlmodule.torch.modules.TorchMlModule.state_type]
+    - [`forward`][mozuma.torch.modules.TorchMlModule.forward]
+    - [`to_predictions`][mozuma.torch.modules.TorchMlModule.to_predictions]
+    - [`state_type`][mozuma.torch.modules.TorchMlModule.state_type]
 
     And can optionally implement:
 
-    - [`get_dataset_transforms`][mlmodule.torch.modules.TorchMlModule.get_dataset_transforms]
-    - [`get_dataloader_collate_fn`][mlmodule.torch.modules.TorchMlModule.get_dataloader_collate_fn]
+    - [`get_dataset_transforms`][mozuma.torch.modules.TorchMlModule.get_dataset_transforms]
+    - [`get_dataloader_collate_fn`][mozuma.torch.modules.TorchMlModule.get_dataloader_collate_fn]
 
     Attributes:
         device (torch.device): Mandatory PyTorch device attribute to initialise model.
@@ -72,11 +72,11 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
     Note:
         This is a generic class taking a `_BatchType` and `_ForwardOutputType` type argument.
         This corresponds respectively to the type of data the
-        [`forward`][mlmodule.torch.modules.TorchMlModule.forward]
+        [`forward`][mozuma.torch.modules.TorchMlModule.forward]
         will take as argument and return. It is most likely `torch.Tensor`
 
     Note:
-        By default, MLModule models are trainable. Set the `is_trainable`
+        By default, MoZuMa models are trainable. Set the `is_trainable`
         parameter to `False` when creating a subclass if it shouldn't be trained.
     """  # noqa: E501
 
@@ -168,7 +168,7 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
         return save_state_dict_to_bytes(self.state_dict())
 
     def get_dataset_transforms(self) -> List[Callable]:
-        """Transforms to apply to the input [dataset][mlmodule.torch.datasets.TorchDataset].
+        """Transforms to apply to the input [dataset][mozuma.torch.datasets.TorchDataset].
 
         Note:
             By default, this method returns an empty list (meaning no transformation)
@@ -183,7 +183,7 @@ class TorchMlModule(torch.nn.Module, Generic[_BatchType, _ForwardOutputType]):
         """Optionally returns a collate function to be passed to the data loader
 
         Note:
-            This collate function will be wrapped in `mlmodule.torch.collate.TorchMlModuleCollateFn`.
+            This collate function will be wrapped in `mozuma.torch.collate.TorchMlModuleCollateFn`.
             This means that the first argument `batch` will not contain
             the indices of the dataset but only the data element.
 

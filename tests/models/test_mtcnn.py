@@ -7,12 +7,12 @@ import torch
 from facenet_pytorch.models.mtcnn import MTCNN
 from PIL.Image import Image
 
-from mlmodule.callbacks.memory import CollectBoundingBoxesInMemory
-from mlmodule.helpers.files import list_files_in_dir
-from mlmodule.models.mtcnn.pretrained import torch_mtcnn
-from mlmodule.torch.datasets import ImageDataset, ListDataset, LocalBinaryFilesDataset
-from mlmodule.torch.options import TorchRunnerOptions
-from mlmodule.torch.runners import TorchInferenceRunner
+from mozuma.callbacks.memory import CollectBoundingBoxesInMemory
+from mozuma.helpers.files import list_files_in_dir
+from mozuma.models.mtcnn.pretrained import torch_mtcnn
+from mozuma.torch.datasets import ImageDataset, ListDataset, LocalBinaryFilesDataset
+from mozuma.torch.options import TorchRunnerOptions
+from mozuma.torch.runners import TorchInferenceRunner
 
 
 @pytest.fixture(scope="session")
@@ -83,7 +83,7 @@ def test_mtcnn_detector_inference_no_faces(torch_device: torch.device):
 def test_mtcnn_detector_correctness(
     torch_device: torch.device, resized_images: Tuple[List[str], List[Image]]
 ):
-    # MlModule implementation
+    # MoZuma implementation
     base_path = os.path.join("tests", "fixtures", "berset")
     file_names = list_files_in_dir(base_path, allowed_extensions=("jpg",))
     results = _run_mtcnn_inference(file_names, torch_device)

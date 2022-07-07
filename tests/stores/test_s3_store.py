@@ -3,8 +3,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from mlmodule.states import StateKey, StateType
-from mlmodule.stores.s3 import S3StateStore
+from mozuma.states import StateKey, StateType
+from mozuma.stores.s3 import S3StateStore
 
 
 @pytest.fixture

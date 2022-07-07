@@ -6,11 +6,11 @@ FROM ${BASE_IMAGE}
 ADD requirements.txt /app/build/requirements.txt
 RUN pip install -r /app/build/requirements.txt
 
-# Install MLModule and test dependencies
-ARG MLMODULE_BUILD_VERSION
+# Install MoZuMa and test dependencies
+ARG MOZUMA_BUILD_VERSION
 ARG DISTDIR
 ADD ${DISTDIR} /app/dist/
-RUN pip install -f /app/dist/ mlmodule[test]==${MLMODULE_BUILD_VERSION:-0.0.dev0}
+RUN pip install -f /app/dist/ mozuma[test]==${MOZUMA_BUILD_VERSION:-0.0.dev0}
 
 # Re-build Pillow-SIMD since the previous dependancies may have reverted it back to Pillow
 RUN bash /opt/scripts/install-pillow-simd-w-libjpeg-turbo.sh "rebuild-pillow-simd"

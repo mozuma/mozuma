@@ -1,6 +1,6 @@
 import numpy as np
 
-from mlmodule.callbacks.memory import CollectFeaturesInMemory
+from mozuma.callbacks.memory import CollectFeaturesInMemory
 
 
 def test_collect_features():

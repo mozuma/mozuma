@@ -83,7 +83,7 @@ class S3StateStore(AbstractStateStore[_ModelType]):
 
     def save(self, model: _ModelType, training_id: str) -> NoReturn:
         """Not implemented"""
-        raise NotImplementedError("MLModuleStore states are read-only")
+        raise NotImplementedError("Store states are read-only")
 
     def load(self, model: _ModelType, state_key: StateKey) -> None:
         """Loads the models weights from the store

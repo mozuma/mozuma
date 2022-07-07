@@ -77,7 +77,7 @@ class ResNetTorchVisionStore(AbstractStateStore[TorchResNetModule]):
         Attributes:
             state_type (StateType): Filter state keys by type,
                 valid state types are given by the
-                [`TorchResNetModule.state_type`][mlmodule.models.resnet.TorchResNetModule.state_type]
+                [`TorchResNetModule.state_type`][mozuma.models.resnet.TorchResNetModule.state_type]
         """
         try:
             _validate_resnet_state_type(state_type)

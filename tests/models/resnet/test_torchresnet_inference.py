@@ -5,12 +5,12 @@ from unittest import mock
 import pytest
 import torch
 
-from mlmodule.callbacks.memory import CollectLabelsInMemory
-from mlmodule.models.resnet.modules import TorchResNetModule, TorchResNetTrainingMode
-from mlmodule.models.resnet.pretrained import torch_resnet_imagenet
-from mlmodule.torch.datasets import ImageDataset, LocalBinaryFilesDataset
-from mlmodule.torch.options import TorchRunnerOptions
-from mlmodule.torch.runners import TorchInferenceRunner
+from mozuma.callbacks.memory import CollectLabelsInMemory
+from mozuma.models.resnet.modules import TorchResNetModule, TorchResNetTrainingMode
+from mozuma.models.resnet.pretrained import torch_resnet_imagenet
+from mozuma.torch.datasets import ImageDataset, LocalBinaryFilesDataset
+from mozuma.torch.options import TorchRunnerOptions
+from mozuma.torch.runners import TorchInferenceRunner
 
 
 def test_resnet_cats_dogs(cats_and_dogs_images: List[str], torch_device: torch.device):

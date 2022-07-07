@@ -1,7 +1,7 @@
 import torch
 
-from mlmodule.testing import ModuleTestConfiguration
-from mlmodule.torch.modules import TorchMlModule
+from mozuma.testing import ModuleTestConfiguration
+from mozuma.torch.modules import TorchMlModule
 
 
 def test_forward_random_tensor(torch_ml_module: ModuleTestConfiguration[TorchMlModule]):
