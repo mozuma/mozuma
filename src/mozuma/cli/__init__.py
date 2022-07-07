@@ -12,9 +12,7 @@ COMMAND_DEFINITIONS: List[CLICommandDefinition] = [
 
 
 def cli():
-    parser = argparse.ArgumentParser(
-        "mozuma", description="CLI to list and run models"
-    )
+    parser = argparse.ArgumentParser("mozuma", description="CLI to list and run models")
 
     subparsers = parser.add_subparsers(dest="cmd", required=True)
 

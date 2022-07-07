@@ -3,10 +3,7 @@ from typing import TYPE_CHECKING, Union, cast, overload
 import numpy as np
 from typing_extensions import TypeAlias
 
-from mozuma.predictions import (
-    BatchBoundingBoxesPrediction,
-    BatchVideoFramesPrediction,
-)
+from mozuma.predictions import BatchBoundingBoxesPrediction, BatchVideoFramesPrediction
 
 if TYPE_CHECKING:
     import torch

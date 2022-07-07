@@ -5,10 +5,7 @@ import numpy as np
 import torch
 
 from mozuma.models.types import ModelWithLabels
-from mozuma.predictions import (
-    BatchBoundingBoxesPrediction,
-    BatchVideoFramesPrediction,
-)
+from mozuma.predictions import BatchBoundingBoxesPrediction, BatchVideoFramesPrediction
 
 _ContraArrayType = TypeVar(
     "_ContraArrayType", bound=Union[torch.Tensor, np.ndarray], contravariant=True

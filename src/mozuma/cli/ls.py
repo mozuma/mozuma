@@ -9,11 +9,7 @@ from mozuma.cli.helpers import (
     parser_add_model_argument,
     parser_add_store_argument,
 )
-from mozuma.cli.types import (
-    ArgMoZuMaOptions,
-    CLICommandDefinition,
-    CLIObjectFactory,
-)
+from mozuma.cli.types import ArgMoZuMaOptions, CLICommandDefinition, CLIObjectFactory
 from mozuma.models.types import ModelWithState
 from mozuma.stores import Store
 from mozuma.stores.abstract import AbstractStateStore

@@ -3,10 +3,7 @@ from typing import Tuple
 import numpy as np
 from PIL.Image import Image
 
-from mozuma.models.arcface.utils import (
-    get_reference_facial_points,
-    warp_and_crop_face,
-)
+from mozuma.models.arcface.utils import get_reference_facial_points, warp_and_crop_face
 from mozuma.predictions import BatchBoundingBoxesPrediction
 
 

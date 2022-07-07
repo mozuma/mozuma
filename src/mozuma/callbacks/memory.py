@@ -16,10 +16,7 @@ from mozuma.helpers.numpy import (
     convert_numeric_array_like_to_numpy,
 )
 from mozuma.models.types import ModelWithLabels
-from mozuma.predictions import (
-    BatchBoundingBoxesPrediction,
-    BatchVideoFramesPrediction,
-)
+from mozuma.predictions import BatchBoundingBoxesPrediction, BatchVideoFramesPrediction
 
 if TYPE_CHECKING:
     import torch
