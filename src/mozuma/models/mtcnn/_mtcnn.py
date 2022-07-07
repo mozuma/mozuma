@@ -6,7 +6,7 @@ from facenet_pytorch.models.mtcnn import ONet, PNet, RNet, fixed_image_standardi
 from facenet_pytorch.models.utils.detect_face import detect_face, extract_face
 
 
-class MLModuleMTCNN(torch.nn.Module):
+class MoZuMaMTCNN(torch.nn.Module):
     """MTCNN face detection module.
 
     Note:

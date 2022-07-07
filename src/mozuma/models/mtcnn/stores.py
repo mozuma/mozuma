@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from typing import List, NoReturn
 
-from mozuma.models.mtcnn._mtcnn import MLModuleMTCNN
+from mozuma.models.mtcnn._mtcnn import MoZuMaMTCNN
 from mozuma.models.mtcnn.modules import TorchMTCNNModule
 from mozuma.states import StateKey, StateType
 from mozuma.stores.abstract import AbstractStateStore
@@ -30,7 +30,7 @@ class FaceNetMTCNNStore(AbstractStateStore[TorchMTCNNModule]):
             )
 
         # Getting a pretrained MTCNN from facenet
-        pretrained_mtcnn = MLModuleMTCNN(pretrained=True)
+        pretrained_mtcnn = MoZuMaMTCNN(pretrained=True)
         # Adding the mtcnn prefix to all keys
         pretrained_dict = OrderedDict(
             [

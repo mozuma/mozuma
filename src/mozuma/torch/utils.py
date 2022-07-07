@@ -58,11 +58,11 @@ def prepare_batch_for_training(
     )
 
 
-def disable_ignite_logger(logger_name: str, mlmodule_logger: logging.Logger) -> None:
+def disable_ignite_logger(logger_name: str, mozuma_logger: logging.Logger) -> None:
     # Some of Ignite's loggers logs a bunch of infos which we don't want,
     # such as those from auto_dataloader and auto_model.
     # Thus, keep them only if the current's logger level drops below INFO
-    if mlmodule_logger.getEffectiveLevel() >= logging.INFO:
+    if mozuma_logger.getEffectiveLevel() >= logging.INFO:
         logging.getLogger(logger_name).setLevel(logging.WARNING)
 
 

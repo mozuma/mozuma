@@ -1,4 +1,4 @@
-__all__ = ["MLModuleMTCNN", "torch_mtcnn"]
+__all__ = ["MoZuMaMTCNN", "torch_mtcnn"]
 
-from .modules import MLModuleMTCNN
+from .modules import MoZuMaMTCNN
 from .pretrained import torch_mtcnn

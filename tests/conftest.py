@@ -183,7 +183,7 @@ MODULE_TO_TEST: List[ModuleTestConfiguration] = [
 
 @pytest.fixture(params=MODULE_TO_TEST, ids=[str(m) for m in MODULE_TO_TEST])
 def ml_module(request: SubRequest) -> ModuleTestConfiguration:
-    """All modules that are part of the MLModule library"""
+    """All modules that are part of the MoZuMa library"""
     return request.param
 
 

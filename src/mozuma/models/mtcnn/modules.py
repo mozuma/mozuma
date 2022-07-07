@@ -3,7 +3,7 @@ from typing import List, Sequence, Tuple, Union
 import numpy as np
 import torch
 
-from mozuma.models.mtcnn._mtcnn import MLModuleMTCNN
+from mozuma.models.mtcnn._mtcnn import MoZuMaMTCNN
 from mozuma.predictions import BatchBoundingBoxesPrediction, BatchModelPrediction
 from mozuma.states import StateType
 from mozuma.torch.modules import TorchModel
@@ -44,7 +44,7 @@ class TorchMTCNNModule(TorchModel[Sequence[torch.Tensor], _MultiBoundingBoxTuple
     ):
         super().__init__(device=device, is_trainable=False)
         self.image_size = image_size
-        self.mtcnn = MLModuleMTCNN(
+        self.mtcnn = MoZuMaMTCNN(
             thresholds=thresholds,
             device=self.device,
             min_face_size=min_face_size,

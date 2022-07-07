@@ -35,7 +35,7 @@ _FileType = Literal["im", "vi"]
 
 
 @dataclasses.dataclass
-class ArgMlModuleTorchRunOptions(ArgMoZuMaOptions):
+class ArgMoZuMaTorchRunOptions(ArgMoZuMaOptions):
     model: CLIObjectFactory[TorchModel]
     file_names: Sequence[pathlib.Path]
     device: torch.device
@@ -144,7 +144,7 @@ def _merge_predictions(
     return c_indices, c_batch_predictions
 
 
-def torch_run(options: ArgMlModuleTorchRunOptions) -> None:
+def torch_run(options: ArgMoZuMaTorchRunOptions) -> None:
     """Runs a TorchModel from CLI"""
     # Building the model
     model = options.instantiate_model()
@@ -194,5 +194,5 @@ COMMAND = CLICommandDefinition(
     help_text="Run a model against a list of files",
     args_parser=parse_run_arguments,
     command_fun=torch_run,
-    options_class=ArgMlModuleTorchRunOptions,
+    options_class=ArgMoZuMaTorchRunOptions,
 )

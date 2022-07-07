@@ -16,7 +16,7 @@ from mozuma.stores.abstract import AbstractStateStore
 
 
 @dataclasses.dataclass
-class ArgMlModuleListStatesOptions(ArgMoZuMaOptions):
+class ArgMoZuMaListStatesOptions(ArgMoZuMaOptions):
     model: CLIObjectFactory[ModelWithState]
     model_args: Sequence[str] = dataclasses.field(default_factory=tuple)
     store: Callable[[], AbstractStateStore] = dataclasses.field(default=Store)
@@ -34,7 +34,7 @@ def parse_ls_arguments(
     parser_add_formatter_argument(parser, yaml.safe_dump)
 
 
-def ls_fun(options: ArgMlModuleListStatesOptions) -> None:
+def ls_fun(options: ArgMoZuMaListStatesOptions) -> None:
     model = options.instantiate_model()
     state_keys = options.store().get_state_keys(model.state_type)
     dict_state_keys = [dataclasses.asdict(sk) for sk in state_keys]
@@ -46,5 +46,5 @@ COMMAND = CLICommandDefinition(
     help_text="List available states for a model",
     args_parser=parse_ls_arguments,
     command_fun=ls_fun,
-    options_class=ArgMlModuleListStatesOptions,
+    options_class=ArgMoZuMaListStatesOptions,
 )
