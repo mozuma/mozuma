@@ -8,16 +8,24 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.14.1
   kernelspec:
-    display_name: Python 3.7.12 (conda)
+    display_name: Python 3.7.12 64-bit
     language: python
     name: python3
 ---
 
 # MoZuMa overview
 
+This notebook contains sample code that helps getting started with building queries with MoZuMa.
+It discusses how to extract embeddings of images using MoZuMa as well as how to filter or rank images with these embeddings.
 
+```python
+# Install additional requirements
+!pip install ipyplot
+```
 
-# Downloading images
+## Downloading images
+
+We create a small collection of images that can be run on CPU.
 
 
 ```python
@@ -56,11 +64,12 @@ KAYAK_IMAGE = "https://images.pexels.com/photos/1497582/pexels-photo-1497582.jpe
 SEA_CAVE_IMAGE = "https://images.pexels.com/photos/163872/italy-cala-gonone-air-sky-163872.jpeg?cs=srgb&dl=pexels-pixabay-163872.jpg&fm=jpg&w=1280&h=960"
 
 images_objects = [Image.open(requests.get(url, stream=True).raw) for url in IMAGE_URLS]
-
 ```
+
 
 ## Helper functions
 
+Definition of a few functions to display images or highlight objects in an image
 
 ```python
 from typing import Iterable
@@ -77,30 +86,44 @@ def display_images(indices: "Iterable[int] | None" = None, **kwargs):
     ipyplot.plot_images([IMAGE_URLS[i] for i in indices], **kwargs)
 
 
-def draw_bounding_box(image: Image.Image, bounding_box: npt.NDArray[np.float_]) -> Image.Image:
+def draw_bounding_box(
+    image: Image.Image, bounding_box: npt.NDArray[np.float_]
+) -> Image.Image:
     draw = ImageDraw.Draw(image)
-    draw.rectangle(bounding_box.tolist(), outline ="red", width=10)
+    draw.rectangle(bounding_box.tolist(), outline="red", width=10)
     return image
 
 
-def display_crops(image_indices: Iterable[int], bounding_boxes: npt.NDArray[np.float_], **kwargs):
-    cropped_images = [draw_bounding_box(images_objects[image_index].copy(), bb) for image_index, bb in zip(image_indices, bounding_boxes)]
+def display_crops(
+    image_indices: Iterable[int], bounding_boxes: npt.NDArray[np.float_], **kwargs
+):
+    cropped_images = [
+        draw_bounding_box(images_objects[image_index].copy(), bb)
+        for image_index, bb in zip(image_indices, bounding_boxes)
+    ]
     ipyplot.plot_images(cropped_images, **kwargs)
 
 
-def cosine_similarity(query: npt.NDArray[np.float_], features: npt.NDArray[np.float_]) -> npt.NDArray[np.float_]:
+def cosine_similarity(
+    query: npt.NDArray[np.float_], features: npt.NDArray[np.float_]
+) -> npt.NDArray[np.float_]:
     if len(query.shape) == 1:
         query = query[np.newaxis]
     return _cosine_similarity(query, features)[0]
 
 
-def arg_rank_by_cosine_similarity(query: npt.NDArray[np.float_], features: npt.NDArray[np.float_], take: "int | None" = None) -> npt.NDArray[np.int_]:
+def arg_rank_by_cosine_similarity(
+    query: npt.NDArray[np.float_],
+    features: npt.NDArray[np.float_],
+    take: "int | None" = None,
+) -> npt.NDArray[np.int_]:
     result = np.argsort(cosine_similarity(query, features))[::-1]
     if take is not None:
         return result[:take]
     return result
-
 ```
+
+## The image collection
 
 ```python
 display_images()
@@ -138,7 +161,6 @@ def run_torch_model_inference(
         ),
     )
     runner.run()
-
 ```
 
 ## Generic function to compute features
@@ -156,16 +178,14 @@ def collect_features(
     if dataset is None:
         assert features.indices == IMAGE_URLS, features.indices
     return features.features
-
 ```
 
 ## Find an image from a text query
 
-<p style="text-align: center;">A dog at the beach</p>
+We are looking at images matching the text query: `A dog at the beach`
 
 
 ```python
-# TODO: add noise with dog images
 from mozuma.models.clip.pretrained import (
     torch_clip_image_encoder,
     torch_clip_text_encoder,
@@ -179,10 +199,11 @@ clip_text_features = collect_features(
     dataset=ListDataset(["a dog at the beach"]),
 )
 display_images(
-    arg_rank_by_cosine_similarity(clip_text_features, clip_image_features, take=1), img_width=500
+    arg_rank_by_cosine_similarity(clip_text_features, clip_image_features, take=1),
+    img_width=500,
 )
-
 ```
+
 
 # Generic function to compute bounding boxes
 
@@ -208,46 +229,61 @@ def collect_bbox(
             raise ValueError("This model does not returned features")
         features.append(box_list.features)
     return np.array(indices, dtype=str), np.vstack(boxes), np.vstack(features)
-
 ```
 
 ## Find images with similar objects
+
+We are looking for image with a paddle.
+
+First, we need to run object detection on all images. This can take 10-15 minutes
 
 
 ```python
 from mozuma.models.vinvl.pretrained import torch_vinvl_detector
 
 bbox_indices, bbox_boxes, bbox_features = collect_bbox(model=torch_vinvl_detector())
-
 ```
+
+
+Then, we retrieve the features of a detected paddle object
 
 ```python
 from scipy.spatial.distance import cdist
 
 # Find an image of a paddle
-paddle_coordinates = np.array([ 899.95416,  581.6102 , 1105.5442 ,  640.5274 ])
-paddle_box_index = np.argmin(cdist(paddle_coordinates[np.newaxis], bbox_boxes[bbox_indices == KAYAK_IMAGE]))
+paddle_coordinates = np.array([899.95416, 581.6102, 1105.5442, 640.5274])
+paddle_box_index = np.argmin(
+    cdist(paddle_coordinates[np.newaxis], bbox_boxes[bbox_indices == KAYAK_IMAGE])
+)
 paddle_bounding_box = bbox_boxes[bbox_indices == KAYAK_IMAGE][paddle_box_index]
 paddle_features = bbox_features[bbox_indices == KAYAK_IMAGE][paddle_box_index]
 
-display_crops([IMAGE_URLS.index(KAYAK_IMAGE)], paddle_bounding_box[np.newaxis], img_width=500)
-
+display_crops(
+    [IMAGE_URLS.index(KAYAK_IMAGE)], paddle_bounding_box[np.newaxis], img_width=500
+)
 ```
+
+
+Finally, we rank object by similarity to the paddle object passed as query.
 
 ```python
 # Finding similar objects
-top_matching_objects = arg_rank_by_cosine_similarity(paddle_features, bbox_features, take=12)[1:]
+top_matching_objects = arg_rank_by_cosine_similarity(
+    paddle_features, bbox_features, take=12
+)[1:]
 top_matching_objects_image_urls = bbox_indices[top_matching_objects]
 
-display_crops([IMAGE_URLS.index(img_url) for img_url in top_matching_objects_image_urls], bbox_boxes[top_matching_objects, :], img_width=500)
-
+display_crops(
+    [IMAGE_URLS.index(img_url) for img_url in top_matching_objects_image_urls],
+    bbox_boxes[top_matching_objects, :],
+    img_width=500,
+)
 ```
 
-```python
-np.sort(cosine_similarity(paddle_features, bbox_features))[-12:]
-```
 
-# places + kayak
+# Combining objects and scene similarity queries
+
+First we get the scene recognition features for all images
 
 ```python
 from mozuma.models.densenet.pretrained import torch_densenet_places365
@@ -255,10 +291,18 @@ from mozuma.models.densenet.pretrained import torch_densenet_places365
 densenet_places_features = collect_features(model=torch_densenet_places365())
 ```
 
+Display the query image for scene similarity
+
 ```python
 display_images([IMAGE_URLS.index(SEA_CAVE_IMAGE)], img_width=500)
-# TODO add more cave images
 ```
+
+Finally, we construct the query logic:
+
+1. Filter all images with a paddle (threshold of 0.5 on cosine similarity).
+1. Rank image by similarity to the query scene
+1. Take the first image that matches the paddle object in the list of ranked images by similarity to the scene
+
 
 ```python
 # Find images with an object that looks like a paddle with threshold 0.5 on cosine similarity
@@ -266,17 +310,15 @@ paddle_objects = cosine_similarity(paddle_features, bbox_features) > 0.5
 image_urls_with_paddles = set(bbox_indices[paddle_objects])
 
 # Ranking image with paddles with the places365 similarity
-display_images([
-    img_idx
-    for img_idx in arg_rank_by_cosine_similarity(
-        densenet_places_features[IMAGE_URLS.index(SEA_CAVE_IMAGE)],
-        densenet_places_features,
-    )
-    if IMAGE_URLS[img_idx] in image_urls_with_paddles
-][:1], img_width=500)
-
-```
-
-```python
-
+display_images(
+    [
+        img_idx
+        for img_idx in arg_rank_by_cosine_similarity(
+            densenet_places_features[IMAGE_URLS.index(SEA_CAVE_IMAGE)],
+            densenet_places_features,
+        )
+        if IMAGE_URLS[img_idx] in image_urls_with_paddles
+    ][:1],
+    img_width=500,
+)
 ```
