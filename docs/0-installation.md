@@ -15,8 +15,13 @@ We recommend using the [`conda`](https://docs.conda.io/en/latest/) package manag
 ## Installing with `pip`
 
 Once PyTorch and TorchVision are installed,
-MoZuMa can be directly installed from the git repository
-using `pip`.
+MoZuMa can be directly installed using `pip`.
+
+```bash
+pip install mozuma
+```
+
+From source:
 
 ```bash
 # To install the latest developments
