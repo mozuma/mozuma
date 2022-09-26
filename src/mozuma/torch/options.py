@@ -95,7 +95,7 @@ class TorchTrainingOptions:
     tqdm_enabled: bool = False
     dist_options: dict = dataclasses.field(default_factory=dict)
     seed: int = 543
-    loggers_factory: Optional[Callable[[Engine, Engine, Engine], None]] = None
+    loggers_factory: Optional[Callable[[Engine, Optional[Engine], Engine], None]] = None
 
     def __getstate__(self):
         # This method is called when you are

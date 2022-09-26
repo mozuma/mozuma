@@ -388,6 +388,7 @@ class TorchTrainingRunner(
         if self.options.train_set_evaluation:
             train_evaluator = self.create_evaluator(
                 model=ddp_model,
+                metrics=self.options.metrics,
                 device=device,
                 non_blocking=True,
             )
