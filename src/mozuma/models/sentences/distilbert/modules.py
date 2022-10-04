@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import Any, Callable, Dict, List, Optional, OrderedDict, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, OrderedDict, Tuple, Union, cast
 
 import torch
 from tokenizers import Tokenizer
@@ -26,6 +26,7 @@ class TorchDistilBertModule(
         config: DistilBertConfig,
         pooling_config: Dict[str, Any],
         dense_config: Dict[str, Any],
+        enable_tokenizer_truncation: bool = False,
     ):
         self.device = device
         super().__init__(is_trainable=False)
@@ -36,6 +37,7 @@ class TorchDistilBertModule(
         self.pool = Pooling(**pooling_config)
         self.dense = Dense(**dense_config)
         self._tokenizer: Optional[Tokenizer] = None
+        self.enable_tokenizer_truncation = enable_tokenizer_truncation
 
     def get_tokenizer(self) -> Tokenizer:
         """Return a tokenizer loaded once and cached on the instance"""
@@ -52,7 +54,11 @@ class TorchDistilBertModule(
         tokenizer_config, state_dict = state_payload
 
         # Extracting tokeniser
-        self._tokenizer = Tokenizer.from_str(tokenizer_config)
+        self._tokenizer = cast(Tokenizer, Tokenizer.from_str(tokenizer_config))
+        if self.enable_tokenizer_truncation:
+            self._tokenizer.enable_truncation(
+                self.config.max_position_embeddings, strategy="only_first"
+            )
 
         # Loading model weights
         self.load_state_dict(state_dict)
@@ -237,9 +243,15 @@ class DistilUseBaseMultilingualCasedV2Module(TorchDistilBertModule):
     Args:
         device (torch.device, optional): The PyTorch device to initialise the model weights.
             Defaults to `torch.device("cpu")`.
+        enable_tokenizer_truncation (bool, optional): Enable positional embeddings
+            truncation with strategy `only_first`. Defaults to `False`.
     """
 
-    def __init__(self, device: torch.device = torch.device("cpu")):
+    def __init__(
+        self,
+        device: torch.device = torch.device("cpu"),
+        enable_tokenizer_truncation: bool = False,
+    ):
         config = DistilBertConfig(
             vocab_size=119547,
             activation="gelu",
@@ -270,7 +282,13 @@ class DistilUseBaseMultilingualCasedV2Module(TorchDistilBertModule):
             "bias": True,
             "activation_function": torch.nn.Tanh(),
         }
-        super().__init__(device, config, pooling_config, dense_config)
+        super().__init__(
+            device,
+            config,
+            pooling_config,
+            dense_config,
+            enable_tokenizer_truncation=enable_tokenizer_truncation,
+        )
 
     @property
     def state_type(self) -> StateType:

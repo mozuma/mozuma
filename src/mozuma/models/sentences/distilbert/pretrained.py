@@ -16,8 +16,10 @@ def torch_distiluse_base_multilingual_v2(
     for more information.
 
     Args:
-        device (torch.device, optional): The PyTorch device to initialise the model weights.
+        device (torch.device, Optional): The PyTorch device to initialise the model weights.
             Defaults to `torch.device("cpu")`.
+        enable_tokenizer_truncation (bool, Optional): Enable positional embeddings
+            truncation with strategy `only_first`. Defaults to `False`.
     """
     return load_pretrained_model(
         DistilUseBaseMultilingualCasedV2Module(*args, **kwargs), training_id="cased-v2"
