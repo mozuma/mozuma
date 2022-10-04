@@ -1089,9 +1089,16 @@ for more information.</p>
   <tbody>
       <tr>
         <td><code>device</code></td>
-        <td><code>torch.device</code></td>
+        <td><code>torch.device, Optional</code></td>
         <td><p>The PyTorch device to initialise the model weights.
 Defaults to <code>torch.device("cpu")</code>.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>enable_tokenizer_truncation</code></td>
+        <td><code>bool, Optional</code></td>
+        <td><p>Enable positional embeddings
+truncation with strategy <code>only_first</code>. Defaults to <code>False</code>.</p></td>
         <td><em>required</em></td>
       </tr>
   </tbody>
@@ -1142,6 +1149,13 @@ for more information.</p>
         <td><p>The PyTorch device to initialise the model weights.
 Defaults to <code>torch.device("cpu")</code>.</p></td>
         <td><code>device(type=&#39;cpu&#39;)</code></td>
+      </tr>
+      <tr>
+        <td><code>enable_tokenizer_truncation</code></td>
+        <td><code>bool</code></td>
+        <td><p>Enable positional embeddings
+truncation with strategy <code>only_first</code>. Defaults to <code>False</code>.</p></td>
+        <td><code>False</code></td>
       </tr>
   </tbody>
 </table>
