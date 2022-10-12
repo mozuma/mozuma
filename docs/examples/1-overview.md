@@ -13,14 +13,14 @@ jupyter:
     name: python3
 ---
 
-# MoZuMa Overview
+# Overview of search capabilities
 
 <!-- #region -->
 
-<a target="_blank" href="https://github.com/mozuma/mozuma/blob/master/docs/examples/00-overview.ipynb">
+<a target="_blank" href="https://github.com/mozuma/mozuma/blob/master/docs/examples/1-overview.ipynb">
   <img src="https://img.shields.io/static/v1?label=&message=See%20the%20source%20code&color=blue&logo=github&labelColor=black" alt="See the source code"/>
 </a>
-<a target="_blank" href="https://colab.research.google.com/github/mozuma/mozuma/blob/master/docs/examples/00-overview.ipynb">
+<a target="_blank" href="https://colab.research.google.com/github/mozuma/mozuma/blob/master/docs/examples/1-overview.ipynb">
   <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
 </a>
 

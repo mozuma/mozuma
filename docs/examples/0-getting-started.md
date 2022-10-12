@@ -17,10 +17,10 @@ jupyter:
 # Getting started
 
 
-<a target="_blank" href="https://github.com/mozuma/mozuma/blob/master/docs/1-getting-started.ipynb">
+<a target="_blank" href="https://github.com/mozuma/mozuma/blob/master/docs/examples/0-getting-started.ipynb">
   <img src="https://img.shields.io/static/v1?label=&message=See%20the%20source%20code&color=blue&logo=github&labelColor=black" alt="See the source code"/>
 </a>
-<a target="_blank" href="https://colab.research.google.com/github/mozuma/mozuma/blob/master/docs/1-getting-started.ipynb">
+<a target="_blank" href="https://colab.research.google.com/github/mozuma/mozuma/blob/master/docs/examples/0-getting-started.ipynb">
   <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
 </a>
 
@@ -45,7 +45,7 @@ dataset = ImageDataset(
 ```
 
 
-1.  See [Datasets](references/datasets.md) for a list of available datasets.
+1.  See [Datasets](../references/datasets.md) for a list of available datasets.
 
 Next, we need to load the ResNet PyTorch module specifying the `resnet18` architecture.
 The model is initialised with weights pre-trained on ImageNet[@deng2009imagenet].
@@ -58,7 +58,7 @@ resnet = torch_resnet_imagenet("resnet18")
 ```
 
 
-1. List of all [models](models/index.md)
+1. List of all [models](../models/index.md)
 
 Once we have the model initialized, we need to define what we want to do with it.
 In this case, we'll run an inference loop using the `TorchInferenceRunner`.
@@ -84,8 +84,8 @@ runner = TorchInferenceRunner(
 )
 ```
 
-1. List of available [callbacks](references/callbacks.md).
-2. List of available [runners](references/runners.md)
+1. List of available [callbacks](../references/callbacks.md).
+2. List of available [runners](../references/runners.md)
 
 Now that the runner is initialised, we run it with the method `run`.
 

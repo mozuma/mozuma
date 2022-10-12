@@ -1,6 +1,6 @@
-# MoZuMa Kit
+# Run with Docker
 
-MoZuMaKit is a collection of docker images with a pre-configured environment to use MoZuMa.
+[MoZuMaKit](https://github.com/mozuma/mozumakit/pkgs/container/mozumakit) is a collection of docker images with a pre-configured environment to use MoZuMa.
 
 You can pull the image for a specific [`<version>`](#available-versions) with:
 
