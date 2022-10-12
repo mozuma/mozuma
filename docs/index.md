@@ -89,7 +89,7 @@ for a list of label sets. The models supporting labels are:
   [Multilingual text search](examples/test_distiluse_multilingual.md)
 
 Sometimes what we are looking for is not included in the labels.
-In this case, we can use similarity search to find images from a query images.
+In this case, we can use similarity search to find images from a query image.
 This can be done by comparing embeddings (or features) of images.
 
 ??? question "What are embeddings?"
