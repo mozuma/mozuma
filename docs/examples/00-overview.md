@@ -13,10 +13,22 @@ jupyter:
     name: python3
 ---
 
-# MoZuMa overview
+# MoZuMa Overview
+
+<!-- #region -->
+
+<a target="_blank" href="https://github.com/mozuma/mozuma/blob/master/docs/examples/00-overview.ipynb">
+  <img src="https://img.shields.io/static/v1?label=&message=See%20the%20source%20code&color=blue&logo=github&labelColor=black" alt="See the source code"/>
+</a>
+<a target="_blank" href="https://colab.research.google.com/github/mozuma/mozuma/blob/master/docs/examples/00-overview.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
+
 
 This notebook contains sample code that helps getting started with building queries with MoZuMa.
-It discusses how to extract embeddings of images using MoZuMa as well as how to filter or rank images with these embeddings.
+It shows how to extract embeddings of images with MoZuMa as well as how to filter or rank images using these embeddings.
+
+<!-- #endregion -->
 
 ```python
 # Install additional requirements
