@@ -7,7 +7,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.14.0
+      jupytext_version: 1.14.1
   kernelspec:
     display_name: 'Python 3.7.10 64-bit (''mozuma'': conda)'
     name: python3
@@ -15,6 +15,14 @@ jupyter:
 
 # Video Key-frames Extraction Model
 
+
+
+<a target="_blank" href="https://github.com/mozuma/mozuma/blob/master/docs/examples/keyframes.ipynb">
+  <img src="https://img.shields.io/static/v1?label=&message=See%20the%20source%20code&color=blue&logo=github&labelColor=black" alt="See the source code"/>
+</a>
+<a target="_blank" href="https://colab.research.google.com/github/mozuma/mozuma/blob/master/docs/examples/keyframes.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
 
 Import `mozuma` modules
 

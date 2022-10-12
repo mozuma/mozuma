@@ -6,17 +6,24 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.14.0
+      jupytext_version: 1.14.1
   kernelspec:
-    display_name: Python 3.9.12
+    display_name: Python 3.7.12
     language: python
     name: python3
 ---
 
 # Text-to-image retrieval with CLIP
 
-This is an example of a text-to-Image retrieval engine based on OpenAI CLIP model
 
+<a target="_blank" href="https://github.com/mozuma/mozuma/blob/master/docs/examples/text_to_retrieval_with_clip.ipynb">
+  <img src="https://img.shields.io/static/v1?label=&message=See%20the%20source%20code&color=blue&logo=github&labelColor=black" alt="See the source code"/>
+</a>
+<a target="_blank" href="https://colab.research.google.com/github/mozuma/mozuma/blob/master/docs/examples/text_to_retrieval_with_clip.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
+
+This is an example of a text-to-Image retrieval engine based on OpenAI CLIP model.
 
 Import `mozuma` modules for the task
 
