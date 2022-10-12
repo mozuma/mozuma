@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.14.0
+      jupytext_version: 1.14.1
   kernelspec:
     display_name: Python 3.7.10 ('mozuma')
     language: python
@@ -14,6 +14,14 @@ jupyter:
 ---
 
 # CIFAR10 Image Classification training
+
+
+<a target="_blank" href="https://github.com/mozuma/mozuma/blob/master/docs/examples/train_cifar10.ipynb">
+  <img src="https://img.shields.io/static/v1?label=&message=See%20the%20source%20code&color=blue&logo=github&labelColor=black" alt="See the source code"/>
+</a>
+<a target="_blank" href="https://colab.research.google.com/github/mozuma/mozuma/blob/master/docs/examples/train_cifar10.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
 
 In this notebook, we are training CIFAR10 image classification on top of ResNet18 features from ImageNet
 
