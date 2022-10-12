@@ -1,27 +1,21 @@
 # MoZuMa
 
-MoZuMa is a library containing a collection of machine learning models
-with standardised interface to run inference, train and manage model state files.
+MoZuMa is a model zoo for multimedia search application. It provides an easy to use interface to run models for:
 
-It aims at providing high-level abstractions called [runners](references/runners.md)
-on top of inference and training loops
-while allowing extensions via [callbacks](references/callbacks.md).
-These callbacks control the way the output of a runner is handled
-(i.e. features, labels, model weights...).
-
-We also try to keep as few dependencies as possible.
-Meaning models will be mostly implemented from
-modules available in deep learning frameworks (such as `PyTorch` or `torchvision`).
-
-See the  for more information.
+- **Text to image retrieval**: Rank images by their similarity to a text query.
+- **Image similarity search**: Rank images by their similarity to query image.
+- **Image classification**: Add labels to images.
+- **Face detection**: Detect and retrieve images with similar faces.
+- **Object detection**: Detect and retrieve images with similar objects.
+- **Video keyframes extraction**: Retrieve the important frames of a video.
+  Key-frames are used to apply all the other queries on videos.
+- **Multilingual text search**: Rank similar sentences from a text query in multiple languages.
 
 ## Quick links
 
 - [Documentation](https://mozuma.github.io/mozuma/)
-- [Installation](https://mozuma.github.io/mozuma/0-installation)
-- [Getting started](https://mozuma.github.io/mozuma/1-getting-starteg)
 - [Models](https://mozuma.github.io/mozuma/models/)
-
+- [For developers](https://mozuma.github.io/mozuma/contributing/0-setup.md)
 
 ## Example gallery
 
