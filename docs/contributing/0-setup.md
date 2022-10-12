@@ -1,9 +1,9 @@
-# Developer guide
+# Developer setup
 
 ## Installation
 
 This section covers the installation of a development environment for contributing to MoZuMa.
-If you want to use MoZuMa in your project, see [installation instructions](0-installation.md) instead.
+If you want to use MoZuMa in your project, see [installation instructions](../index.md#installation) instead.
 
 We are developing on Python {{develop.python_version}} and PyTorch {{develop.pytorch_version}}.
 

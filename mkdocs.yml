@@ -9,11 +9,15 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
+      primary: indigo
+      accent: indigo
       toggle:
         icon: material/toggle-switch
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
+      primary: indigo
+      accent: indigo
       toggle:
         icon: material/toggle-switch-off-outline
         name: Switch to light mode
@@ -98,47 +102,77 @@ extra:
       - name: ArcFace pre-trained by InsightFace
         factory: torch_arcface_insightface
         license: insightface
+        purposes:
+          - Face recognition
     clip:
       - name: CLIP pre-trained image encoder
         factory: torch_clip_image_encoder
         license: clip
+        purposes:
+          - Text-to-image retrieval
       - name: CLIP pre-trained text encoder
         factory: torch_clip_text_encoder
         license: clip
+        purposes:
+          - Text-to-image retrieval
     densenet:
       - name: PyTorch DenseNet pre-trained on ImageNet
         factory: torch_densenet_imagenet
         license: torchvision
+        purposes:
+          - Image similarity (main subject)
+          - Labelling (ImageNet)
       - name: PyTorch DenseNet pre-trained on Places365
         factory: torch_densenet_places365
         license: places365
+        purposes:
+          - Image similarity (context)
+          - Labelling (Places365)
     keyframes:
       - name: Keyframes with ResNet pre-trained on ImageNet
         factory: torch_keyframes_resnet_imagenet
         license: torchvision
+        purposes:
+          - Key-frames (main subject)
       - name: Keyframes with DenseNet pre-trained on ImageNet
         factory: torch_keyframes_densenet_imagenet
         license: torchvision
+        purposes:
+          - Key-frames (focused on the main subject)
       - name: Keyframes with DenseNet pre-trained on Places365
         factory: torch_keyframes_densenet_places365
         license: places365
+        purposes:
+          - Key-frames (focused on the context)
     magface:
       - name: Pre-trained MagFace
         factory: torch_magface
         license: magface
+        purposes:
+          - Face recognition
     mtcnn:
       - name: Pre-trained face detection MTCNN from FaceNet
         factory: torch_mtcnn
         license: facenet
+        purposes:
+          - Face detection
     resnet:
       - name: PyTorch ResNet pre-trained on ImageNet
         factory: torch_resnet_imagenet
         license: torchvision
+        purposes:
+          - Image similarity (main subject)
+          - Labelling (ImageNet)
     sentences:
       - name: SBERT's pre-trained DistilUse Multilingual Cased V2
         factory: torch_distiluse_base_multilingual_v2
         license: sbert
+        purposes:
+          - Sentence similarity
     vinvl:
       - name: VinVL's pre-trained object detector
         factory: torch_vinvl_detector
         license: vinvl
+        purposes:
+          - Object similarity
+          - Object detection
