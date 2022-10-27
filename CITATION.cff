@@ -22,12 +22,12 @@ preferred-citation:
   type: conference-paper
   authors:
     - family-names: "Massonnet"
-      given-names: "St\'{e}phane"
+      given-names: "St\\'{e}phane"
       orcid: "https://orcid.org/0000-0002-6585-4109"
     - family-names: "Romanelli"
       given-names: "Marco"
     - family-names: "Lebret"
-      given-names: "R\'{e}mi"
+      given-names: "R\\'{e}mi"
       orcid: "https://orcid.org/0000-0001-5439-7574"
     - family-names: "Poulsen"
       given-names: "Niels"
