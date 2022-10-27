@@ -22,12 +22,12 @@ preferred-citation:
   type: conference-paper
   authors:
     - family-names: "Massonnet"
-      given-names: "Stéphane"
+      given-names: "St\'{e}phane"
       orcid: "https://orcid.org/0000-0002-6585-4109"
     - family-names: "Romanelli"
       given-names: "Marco"
     - family-names: "Lebret"
-      given-names: "Rémi"
+      given-names: "R\'{e}mi"
       orcid: "https://orcid.org/0000-0001-5439-7574"
     - family-names: "Poulsen"
       given-names: "Niels"
@@ -36,15 +36,12 @@ preferred-citation:
       given-names: "Karl"
       orcid: "https://orcid.org/0000-0003-3005-7342"
   title: "MoZuMa: A Model Zoo for Multimedia Applications"
-  conference:
-    - name: "30th ACM International Conference on Multimedia"
-      date-start: 2022-10-10
-      date-end: 2022-10-14
-      city: Lisboa
-      country: Portugal
+  conference: 
+    name: "MM '22"
   collection-title: "Proceedings of the 30th ACM International Conference on Multimedia"
   collection-doi: "10.1145/3503161.3548542"
-  publisher: "Association for Computing Machinery"
+  publisher: 
+    name: "Association for Computing Machinery"
   start: 7335 # First page number
   end: 7338 # Last page number
   month: 10
