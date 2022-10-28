@@ -20,3 +20,27 @@ MoZuMa is a model zoo for multimedia search application. It provides an easy to 
 ## Example gallery
 
 See `docs/examples/` for a collection of ready to use notebooks.
+
+## Citation
+
+Please cite as:
+
+```bibtex
+@inproceedings{mozuma,
+  author = {Massonnet, St\'{e}phane and Romanelli, Marco and Lebret, R\'{e}mi and Poulsen, Niels and Aberer, Karl},
+  title = {MoZuMa: A Model Zoo for Multimedia Applications},
+  year = {2022},
+  isbn = {9781450392037},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/3503161.3548542},
+  doi = {10.1145/3503161.3548542},
+  abstract = {Lots of machine learning models with applications in Multimedia Search are released as Open Source Software. However, integrating these models into an application is not always an easy task due to the lack of a consistent interface to run, train or distribute models. With MoZuMa, we aim at reducing this effort by providing a model zoo for image similarity, text-to-image retrieval, face recognition, object similarity search, video key-frames detection and multilingual text search implemented in a generic interface with a modular architecture. The code is released as Open Source Software at https://github.com/mozuma/mozuma.},
+  booktitle = {Proceedings of the 30th ACM International Conference on Multimedia},
+  pages = {7335–7338},
+  numpages = {4},
+  keywords = {multimedia search, vision and language, open source software},
+  location = {Lisboa, Portugal},
+  series = {MM '22}
+}
+```
