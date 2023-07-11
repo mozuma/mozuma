@@ -1,10 +1,10 @@
 import functools
+
 import numpy as np
 import torch
 import torch.testing
 
 from mozuma.torch.collate import TorchModelCollateFn
-
 
 assert_equal = functools.partial(torch.testing.assert_close, rtol=0, atol=0)
 
