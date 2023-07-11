@@ -100,7 +100,6 @@ def test_get_filename(local_store: LocalStateStore):
 
 
 def test_get_state_keys(local_store: LocalStateStore):
-
     with mock.patch("mozuma.stores.local.os.listdir") as m:
         m.return_value = [
             "pytorch.resnet18.cls1000.imagenet.pt",
