@@ -66,7 +66,6 @@ class MoZuMaMTCNN(torch.nn.Module):
         device=None,
         pretrained=False,
     ):
-
         super().__init__()
 
         self.image_size = image_size
@@ -284,7 +283,6 @@ class MoZuMaMTCNN(torch.nn.Module):
 
         selected_boxes, selected_probs, selected_points = [], [], []
         for boxes, points, probs, img in zip(all_boxes, all_points, all_probs, imgs):
-
             if boxes is None:
                 selected_boxes.append(None)
                 selected_probs.append([None])

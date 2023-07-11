@@ -96,7 +96,11 @@ class TorchMTCNNModule(TorchModel[Sequence[torch.Tensor], _MultiBoundingBoxTuple
         landmarks = _array_or(raw_landmarks, np.empty(0, dtype=np.float64))
         probabilities = _array_or(raw_probabilities, np.empty(0, dtype=np.float64))
 
-        return torch.Tensor(boxes), torch.Tensor(probabilities), torch.Tensor(landmarks)
+        return (
+            torch.Tensor(boxes.astype(np.float64)),
+            torch.Tensor(probabilities.astype(np.float64)),
+            torch.Tensor(landmarks.astype(np.float64)),
+        )
 
     def forward(self, batch: Sequence[torch.Tensor]) -> _MultiBoundingBoxTupleForm:
         """Runs MTCNN face detection

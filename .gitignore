@@ -16,6 +16,7 @@ build
 site
 
 venv
+.venv
 
 # For the tutorial on creating modules
 src/mozuma/contrib/example.py

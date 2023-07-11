@@ -64,12 +64,12 @@ plugins:
 
 extra:
   develop:
-    python_version: 3.7
-    pytorch_version: 1.9
-    tox_env_version: py37-pt19
-    tox_env_version_cuda: py37-pt19-cuda111
+    python_version: 3.8
+    pytorch_version: 1.13
+    tox_env_version: py38
+    tox_env_version_cuda: py38-cuda
   release:
-    tox_env_version: "{py37,py38,py39}{-pt19,-pt110}{-cuda111,}"
+    tox_env_version: "py38{-cuda,}"
 
   licenses:
     clip:

@@ -208,7 +208,8 @@ class GitHUBReleaseStore(AbstractStateStore[_ModelType]):
         """Download the state key from GitHUB
 
         Returns:
-            BinaryIO | None: The binary stream of the weights or None if the weights doesn't exist"""
+            BinaryIO | None: The binary stream of the weights or None if the weights doesn't exist
+        """
         response = call_github_with_auth(
             "get", self.gh_download_state_key_url(state_key)
         )
