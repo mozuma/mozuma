@@ -64,7 +64,7 @@ plugins:
 
 extra:
   develop:
-    python_version: 3.9
+    python_version: 3.8
     pytorch_version: 1.13
     tox_env_version: py38
     tox_env_version_cuda: py38-cuda
