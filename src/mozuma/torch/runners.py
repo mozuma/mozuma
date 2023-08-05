@@ -384,12 +384,14 @@ class TorchTrainingRunner(
         )
 
         # Setup evaluator engine to perform model's validation and compute metrics
-        train_evaluator = self.create_evaluator(
-            model=ddp_model,
-            metrics=self.options.metrics,
-            device=device,
-            non_blocking=True,
-        )
+        train_evaluator = None
+        if self.options.train_set_evaluation:
+            train_evaluator = self.create_evaluator(
+                model=ddp_model,
+                metrics=self.options.metrics,
+                device=device,
+                non_blocking=True,
+            )
         evaluator = self.create_evaluator(
             model=ddp_model,
             metrics=self.options.metrics,
@@ -407,15 +409,16 @@ class TorchTrainingRunner(
         def run_validation(engine: Engine) -> None:
             epoch = trainer.state.epoch
 
-            state = train_evaluator.run(train_loader)
-            if idist.get_rank() == 0:
-                log_evaluation_metrics(
-                    logger,
-                    epoch,
-                    state.times["COMPLETED"] or -1,
-                    "Train",
-                    state.metrics,
-                )
+            if train_evaluator:
+                state = train_evaluator.run(train_loader)
+                if idist.get_rank() == 0:
+                    log_evaluation_metrics(
+                        logger,
+                        epoch,
+                        state.times["COMPLETED"],
+                        "Train",
+                        state.metrics,
+                    )
 
             state = evaluator.run(test_loader)
             if idist.get_rank() == 0:

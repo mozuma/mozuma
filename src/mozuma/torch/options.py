@@ -61,8 +61,9 @@ class TorchTrainingOptions:
         optimizer (torch.optim.Optimizer): Optimization strategy to use during training.
         num_epochs (int): number of epochs to train the model.
         validate_every (int): run model's validation every ``validate_every`` epochs.
-        checkpoint_every (Optional[int]): store training checkpoint every ``checkpoint_every`` epochs.
+        checkpoint_every (int | None): store training checkpoint every ``checkpoint_every`` epochs.
         metrics (Dict[str, Metric]): Dictionary where values are Ignite's metrics to compute during evaluation.
+        train_set_evaluation (bool): Run evaluation on train dataset. Default, True.
         data_loader_options (dict): Options passed to `torch.utils.dataloader.DataLoader`.
         tqdm_enabled (bool): Whether to print a `tqdm` progress bar. Default, False.
         dist_options (dict): Options passed to `ignite.distributed.Parallel`.
@@ -88,12 +89,13 @@ class TorchTrainingOptions:
     validate_every: int
     metrics: Dict[str, Metric] = dataclasses.field(default_factory=dict)
     checkpoint_every: Optional[int] = None
+    train_set_evaluation: bool = True
 
     data_loader_options: dict = dataclasses.field(default_factory=dict)
     tqdm_enabled: bool = False
     dist_options: dict = dataclasses.field(default_factory=dict)
     seed: int = 543
-    loggers_factory: Optional[Callable[[Engine, Engine, Engine], None]] = None
+    loggers_factory: Optional[Callable[[Engine, Optional[Engine], Engine], None]] = None
 
     def __getstate__(self):
         # This method is called when you are
