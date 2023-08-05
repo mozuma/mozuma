@@ -1,6 +1,6 @@
 import dataclasses
 import logging
-from typing import Any, Callable, Dict, Tuple, Union, cast
+from typing import Any, Callable, Dict, Optional, Tuple, Union, cast
 
 import ignite.distributed as idist
 import torch
@@ -458,9 +458,7 @@ class TorchTrainingRunner(
             )
         trainer.add_event_handler(
             checkpoint_events,
-            lambda engine: callbacks_caller(
-                self.callbacks, "save_model_state", engine, self.model
-            ),
+            self.call_save_model_callbacks,
         )
 
         # Register handler to notify the end of the runner
@@ -504,3 +502,25 @@ class TorchTrainingRunner(
             pbar.attach(evaluator)
 
         return evaluator
+
+    def call_save_model_callbacks(self, engine: Engine) -> None:
+        training_id = self._create_checkpoint_training_id(engine)
+
+        # Call model saver callback
+        callbacks_caller(self.callbacks, "save_model_state", self.model, training_id)
+
+    @classmethod
+    def _create_checkpoint_training_id(cls, engine: Engine) -> Optional[str]:
+        """Construct a suffix string to append to `state_key.training_id`
+        during training.
+        New training id will be: `<state_key.training_id>-e<num_epoch>`.
+        """
+        is_done_epochs = (
+            engine.state.max_epochs is not None
+            and engine.state.epoch >= engine.state.max_epochs
+        )
+
+        if is_done_epochs:
+            return None
+        else:
+            return f"-e{engine.state.epoch}"
